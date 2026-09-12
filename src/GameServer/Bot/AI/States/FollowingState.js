@@ -1779,6 +1779,11 @@ module.exports = {
                 });
             }
 
+            if (!holdSupportLine) {
+                invoke('GameServer/Bot/AI/PartyArcherCombatPolicy').reviewAutoAttack(session, bot, target, {
+                    pvp: partyThreat.type === 'player'
+                });
+            }
             if (!holdSupportLine && !isBusy(bot)) {
                 const basicAttackOnly = role === 'healer' || role === 'buffer';
                 if (partyThreat.type === 'player') {
@@ -1826,6 +1831,7 @@ module.exports = {
                             bot.select({ id: playerTargetId });
                             recordRoleDecision(session, bot, assistActionForRole(role), 'pvp_target', { targetId: playerTargetId });
                         }
+                        invoke('GameServer/Bot/AI/PartyArcherCombatPolicy').reviewAutoAttack(session, bot, user, { pvp: true });
                         if (isBusy(bot) || !supportCanMeleeAssist(bot, role)) {
                             return;
                         }
@@ -1857,6 +1863,7 @@ module.exports = {
                                 bot.select({ id: playerTargetId });
                                 recordRoleDecision(session, bot, assistActionForRole(role), assistReasonForRole(role), { targetId: playerTargetId });
                             }
+                            invoke('GameServer/Bot/AI/PartyArcherCombatPolicy').reviewAutoAttack(session, bot, npc);
                             if (isBusy(bot) || !supportCanMeleeAssist(bot, role)) {
                                 return;
                             }

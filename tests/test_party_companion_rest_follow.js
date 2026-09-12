@@ -339,6 +339,40 @@ try {
         BotManager.sessions = originalBotSessions;
     }
 
+    {
+        const tank = fakeSession('player_archer_policy', fakeActor(2000810, { classId: 5 }));
+        const archer = fakeSession('bot_archer_policy', fakeActor(2000811, { classId: 9, locX: 100 }));
+        archer.followPlayerSession = tank;
+        archer.partyCompanion = true;
+        archer.plan = 'following';
+        archer.actor.backpack.fetchTotalWeaponKind = () => 'Weapon.Bow';
+        learnSkill(archer.actor, { selfId: 56, name: 'Power Shot', distance: 700, mp: 5 });
+        const mob = fakeActor(1000810, { locX: 450, destId: tank.actor.fetchId() });
+        mob.fetchAttackable = () => true;
+        World.user = { sessions: [tank, archer] };
+        World.npc = { spawns: [mob] };
+        World.fetchNpcsInRadius = () => [mob];
+        const calls = { attacks: [], skills: [],
+            attackExec(_session, actor, data) { this.attacks.push(data); actor.state.setHits(true); },
+            skillExec(_session, _actor, data) { this.skills.push(data); }
+        };
+        const ai = invoke('GameServer/Bot/BotAI');
+        FollowingState.tick(archer, archer.actor, calls, ai);
+        assert.strictEqual(calls.attacks.length, 1, 'the party tick must start a bow autoattack in safe PvE');
+        assert.strictEqual(calls.skills.length, 0);
+        FollowingState.tick(archer, archer.actor, calls, ai);
+        assert.strictEqual(calls.attacks.length, 1, 'a repeating safe autoattack must not be restarted');
+        tank.actor.setHp(tank.actor.fetchMaxHp() * 0.49);
+        delete archer.partyArcherSkillReviewAt;
+        FollowingState.tick(archer, archer.actor, calls, ai);
+        assert.strictEqual(calls.skills.length, 1, 'the party tick must switch a busy archer to a skill when the tank is wounded');
+        assert.strictEqual(calls.skills[0].selfId, 56);
+        tank.actor.setHp(tank.actor.fetchMaxHp());
+        FollowingState.tick(archer, archer.actor, calls, ai);
+        assert.strictEqual(calls.attacks.length, 2, 'after danger ends the party tick must return to autoattack');
+        World.npc = originalNpcs;
+    }
+
     const leader = fakeActor(2000001, { locX: 0, locY: 0 });
     const leaderSession = fakeSession('player_test', leader);
     const bot = fakeActor(2000002, { locX: 1200, locY: 0 });

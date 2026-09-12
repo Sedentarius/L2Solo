@@ -2,6 +2,7 @@ const Speech = invoke('GameServer/Bot/AI/BotSpeechTemplates');
 const BotStatus      = invoke('GameServer/Bot/AI/BotStatus');
 const BotRoles       = invoke('GameServer/Bot/AI/BotRoles');
 const BotCombatUtility = invoke('GameServer/Bot/AI/BotCombatUtility');
+const PartyArcherCombatPolicy = invoke('GameServer/Bot/AI/PartyArcherCombatPolicy');
 const PopulationService = invoke('GameServer/Bot/Population/PopulationService');
 const BotEquipmentUpgrade = invoke('GameServer/Bot/AI/BotEquipmentUpgrade');
 const PartyCompanionService = invoke('GameServer/Bot/AI/PartyCompanionService');
@@ -680,13 +681,15 @@ const BotAI = {
             return true;
         }
         const role = BotRoles.combatRoleFor(bot);
+        const conserveArcherSkills = PartyArcherCombatPolicy.conserveSkills(session, bot, npc, { ...options, role });
+        const basicAttackOnly = options.basicAttackOnly || conserveArcherSkills;
         // A potion is a survival action for a fight already in progress, not
         // routine topping-off. The policy also blocks repeats for the same
         // target and while a previous potion HoT remains active.
         if (HealingPotionStock.tryUseInCombat(session, bot, npc, { role, pvp: options.pvp === true })) {
             return true;
         }
-        if (!options.basicAttackOnly && trySpoil(session, bot, npc, Generics)) {
+        if (!basicAttackOnly && trySpoil(session, bot, npc, Generics)) {
             return true;
         }
         if (BotRangedCombatPositioning.reposition(session, bot, npc, { role })) {
@@ -727,7 +730,7 @@ const BotAI = {
         };
         // Bot casts use the internal SkillExec path and therefore do not pass
         // through the packet-level SkillRequest control-effect gate.
-        const summonAction = options.basicAttackOnly || !canCast
+        const summonAction = basicAttackOnly || !canCast
             ? null
             : SummonerTactics.combatAction(session, bot, npc, Generics);
         if (summonAction?.handled) {
@@ -740,7 +743,7 @@ const BotAI = {
             };
             return true;
         }
-        const chargeSkill = options.basicAttackOnly || !canCast ? null : BotCombatUtility.selectChargeSkill(bot, role, combatPolicy);
+        const chargeSkill = basicAttackOnly || !canCast ? null : BotCombatUtility.selectChargeSkill(bot, role, combatPolicy);
         if (chargeSkill) {
             session.lastCombatDecision = {
                 action: 'charge_skill',
@@ -757,7 +760,7 @@ const BotAI = {
             });
             return true;
         }
-        const decision = options.basicAttackOnly || !canCast
+        const decision = basicAttackOnly || !canCast
             ? null
             : BotCombatUtility.select(bot, npc, role, combatPolicy);
         if (decision) {
@@ -809,7 +812,7 @@ const BotAI = {
         session.lastCombatDecision = {
             action: 'basic_attack',
             role,
-            reason: 'no_usable_offensive_skill',
+            reason: conserveArcherSkills ? 'party_archer_conserve_skills' : 'no_usable_offensive_skill',
             at: Date.now()
         };
         Generics.attackExec(session, bot, {
