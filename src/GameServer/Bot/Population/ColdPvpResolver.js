@@ -4,6 +4,8 @@ const { combat } = invoke('GameServer/Bot/Population/BackgroundResolver');
 const Formulas = invoke('GameServer/Formulas');
 const Rules = invoke('GameServer/Skills/C4SkillRules');
 const Aid = require('../../Social/OpponentAidPolicy');
+const Config = require('./PopulationConfig');
+const Aggression = require('../../Social/PvpAggression');
 const { MAX_ACTIONS, INITIAL_MS: MAX_DURATION_MS } = require('./PvpEncounterBudget');
 const FLAG_MS = 15000;
 const RECOVERY_MS = 90000;
@@ -21,6 +23,7 @@ function allowed(sides) {
 
 function resolve({ sides, roles, timestamp, rng, personaFor, step = null, openingSide = 1 }) {
     if (!allowed(sides)) return { started: false, reason: 'pvp_protected_context' };
+    if (!step?.resuming && Aggression.normalize(Config.pvpAggression) === 0) return { started: false, reason: 'pvp_passive' };
     const fighters = sides.flatMap((side, index) => side.members
         .filter(state => state.characterId === side.principal.characterId || roles.get(state.characterId) === 'support')
         .map(state => {
@@ -42,7 +45,8 @@ function resolve({ sides, roles, timestamp, rng, personaFor, step = null, openin
         + (f.vitals.hp + f.cp) * Math.sqrt(Math.max(f.profile.pAtk, f.profile.mAtk)
             * (f.profile.pDef + f.profile.mDef)), 0);
     // Resource retaliation opens on side 1; an independent grievance opens on side 0.
-    if (!step?.resuming && power(openingSide) < power(1 - openingSide) * 0.6) return { started: false, reason: 'pvp_outmatched' };
+    if (!step?.resuming && power(openingSide) < power(1 - openingSide) * 0.6
+        * Aggression.retreatMultiplier(Config.pvpAggression)) return { started: false, reason: 'pvp_outmatched' };
     const windowMs = step ? Math.max(0, Math.min(1000, Math.min(step.until, step.expiresAt) - timestamp)) : MAX_DURATION_MS;
     let time = 0, actions = 0, losingSide = null, outcome = 'disengaged';
     const incidents = new Map();
@@ -63,7 +67,8 @@ function resolve({ sides, roles, timestamp, rng, personaFor, step = null, openin
         const target = opponents.find(f => f.id === sides[1 - next.side].principal.characterId) || opponents[0];
         if (!target) { losingSide = 1 - next.side; outcome = 'defeated'; break; }
         const caution = clamp(Number(personaFor(next.state)?.traits?.caution ?? 0.5), 0, 1);
-        if ((actions > 0 || step?.resuming) && next.vitals.hp / next.vitals.maxHp < 0.15 + caution * 0.2) {
+        if ((actions > 0 || step?.resuming) && next.vitals.hp / next.vitals.maxHp
+            < Aggression.retreatHp(0.15 + caution * 0.2, Config.pvpAggression)) {
             losingSide = next.side; outcome = 'retreated'; break;
         }
         actions++;

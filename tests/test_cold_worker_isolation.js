@@ -23,11 +23,13 @@ function message(type, msgId, payload = {}) {
     }
     const loaded = messages.find((entry) => entry.payload.phase === 'loaded');
     assert.strictEqual(loaded.payload.forbiddenDependencies, 0, 'worker must not load Database, World, BotManager, or network modules');
-    worker.postMessage(message('init', 'init', { config: { heartbeatMs: 100, loopIntervalMs: 10 } }));
+    worker.postMessage(message('init', 'init', { config: { heartbeatMs: 100, loopIntervalMs: 10, pvpAggression: 0 } }));
     while (!messages.some((entry) => entry.type === 'ready' && entry.payload.phase === 'running')) {
         if (Date.now() > deadline) throw new Error('worker_init_timeout');
         await new Promise((resolve) => setTimeout(resolve, 25));
     }
+    assert.strictEqual(messages.find(entry => entry.type === 'ready' && entry.payload.phase === 'running').payload.pvpAggression,
+        0, 'the main process override must reach the real worker, including zero');
     worker.postMessage(message('shutdown', 'shutdown'));
     while (!messages.some((entry) => entry.type === 'drained')) {
         if (Date.now() > deadline) throw new Error('worker_shutdown_timeout');

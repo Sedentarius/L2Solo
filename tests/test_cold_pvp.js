@@ -121,6 +121,25 @@ async function main() {
     assert.strictEqual(partySupportAction.mp, supportMode.fighter.vitals.mp);
     supportMode.fighter.vitals.mp = supportMode.profile.maxMp * 0.35 + supportMode.cost;
     assert.strictEqual(firstModeAction(supportMode.fighter, true).skills, 1, 'party PvP uses a 30%, not a 45% PvE reserve');
+    const aggressionConfig = require('../src/GameServer/Bot/Population/PopulationConfig');
+    const savedAggression = aggressionConfig.pvpAggression;
+    try {
+        aggressionConfig.pvpAggression = 0;
+        assert.strictEqual(run(sides).reason, 'pvp_passive', 'zero aggression rejects even a stale cold initiation forecast');
+        const injuredSides = JSON.parse(original);
+        injuredSides[0].members[0].vitals.hp = Profile.profileFor(left, at).maxHp * 0.2;
+        const resume = () => Pvp.resolve({ sides: injuredSides, roles: new Map(), timestamp: at,
+            rng: seeded('aggression-retreat'), personaFor: () => ({ traits: { caution: 0.5 } }),
+            step: { resuming: true, until: at + 1000, expiresAt: at + 30000 } });
+        const passive = resume();
+        assert(passive.started && passive.outcome === 'retreated', 'passive bots still resolve existing combat and retreat');
+        aggressionConfig.pvpAggression = 0.25;
+        assert.strictEqual(resume().outcome, 'retreated', 'calm bots withdraw earlier at low HP');
+        aggressionConfig.pvpAggression = 1;
+        assert(resume().actions > 0, 'aggressive bots accept another combat action at the same HP');
+    } finally {
+        aggressionConfig.pvpAggression = savedAggression;
+    }
     assert(duel.actions <= Pvp.MAX_ACTIONS && duel.durationMs <= Pvp.MAX_DURATION_MS);
     assert(duel.fighters.some(f => f.cp < Profile.profileFor(f.id === left.characterId ? left : right, at).cp));
     assert(duel.fighters.find(f => f.id === right.characterId).mp < right.vitals.mp, 'magic spends real MP');

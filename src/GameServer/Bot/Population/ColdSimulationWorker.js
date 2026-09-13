@@ -123,6 +123,8 @@ function stopTimers() {
 
 function startKernel(config = {}) {
     if (kernel) return;
+    // Use the main process's resolved setting, including programmatic overrides.
+    Config.pvpAggression = require('../../Social/PvpAggression').normalize(config.pvpAggression ?? Config.pvpAggression);
     kernel = new ColdSimulationKernel({
         resolveSolo: (options) => BackgroundResolver.resolveSolo(options),
         resolveParty: (options) => BackgroundPartyResolver.resolve(options),
@@ -349,6 +351,7 @@ async function handle(message) {
         startKernel(payload.config || {});
         send('ready', {
             phase: 'running',
+            pvpAggression: Config.pvpAggression,
             protocolVersion: Protocol.PROTOCOL_VERSION,
             data: {
                 items: DataCache.items?.length || 0,

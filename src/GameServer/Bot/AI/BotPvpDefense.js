@@ -5,6 +5,8 @@ const Potions = invoke('GameServer/Bot/AI/HealingPotionStock');
 const Restrictions = invoke('GameServer/Effects/EffectRestrictions');
 const Retreat = invoke('GameServer/Bot/AI/BotRetreatPlanner');
 const Voice = invoke('GameServer/Bot/AI/BotChatVoice');
+const Config = require('../Population/PopulationConfig');
+const Aggression = require('../../Social/PvpAggression');
 
 const CRITICAL_HP = 0.15;
 const ESCAPE_DISTANCE = 1800;
@@ -90,7 +92,8 @@ function tick(session, bot, Generics, BotAI, { now = Date.now(), rng = Math.rand
     const hpRatio = bot.fetchHp() / Math.max(1, bot.fetchMaxHp());
     // One roll per encounter, never per tick: staying means fighting on even
     // at critical HP, rather than eventually fleeing with probability 1.
-    if (encounter.action === 'fight' && hpRatio <= CRITICAL_HP && !encounter.criticalChecked) {
+    const retreatHp = Aggression.retreatHp(CRITICAL_HP, Config.pvpAggression);
+    if (encounter.action === 'fight' && hpRatio <= retreatHp && !encounter.criticalChecked) {
         encounter.criticalChecked = true;
         if (rng() < encounter.criticalFleeChance) {
             encounter.action = 'flee';

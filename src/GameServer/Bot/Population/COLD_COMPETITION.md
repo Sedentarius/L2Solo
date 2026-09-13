@@ -1,5 +1,32 @@
 # Resource competition in cold and hot simulation
 
+## Configurable PvP aggression
+
+Set `[BotPopulation] pvpAggression` in `config/local.ini` and restart the server.
+The accepted range is 0..1; `BOT_PVP_AGGRESSION` overrides the INI value.
+Missing or invalid numeric values use 0.5; finite out-of-range values are clamped.
+0.5 preserves the existing balance. Below the midpoint, escalation/revenge
+chances scale toward zero (0.25 halves them). Above it, nonzero chances interpolate
+toward 100% (0.75 closes half the remaining gap; 1 guarantees eligible escalation).
+Zero chances remain zero, including fully restrained responses to friends.
+0 prevents autonomous PvP initiation, including revenge and unprovoked PK pursuit.
+Resource disputes and their memory still occur. This level is not a probability
+of attacking every encountered bot: cooperation, dispute selection and combat
+admission still apply before a fight can start.
+
+The setting also influences retreat: low aggression increases the required
+strength advantage, avoidance probability and HP withdrawal threshold; high
+aggression accepts more risk. Personality, fear, friendship, clan discipline,
+combat legality and cooldowns remain in force. Self-defense and aid to attacked
+party members remain available, but bots can decide to flee. Existing fights
+are not erased when the setting changes. Hot and cold combat use the same
+modifiers with their respective existing risk heuristics.
+
+This is not a target number of fights per hour: pressure, opponents, parties,
+relationships and retreat still determine actual outcomes. The main process
+sends its resolved value to the cold worker; decisions add no database queries,
+timers or additional population scans.
+
 ## Hot decisions before a competing attack
 
 `HotResourceCompetition` runs at the autonomous bot combat entrypoint, before

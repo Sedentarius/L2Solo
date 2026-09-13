@@ -1,3 +1,6 @@
+const Config = require('../Population/PopulationConfig');
+const Aggression = require('../../Social/PvpAggression');
+
 function actorId(actor) {
     return Number(actor?.fetchId?.()) || 0;
 }
@@ -60,9 +63,13 @@ function evaluate(context = {}) {
     }
     if (allies > 0) reasons.push(`allies:${allies}`);
     reasons.push(`level_delta:${botLevel - threatLevel}`);
+    const aggression = Aggression.normalize(Config.pvpAggression);
+    score += (aggression - 0.5) * 1.5;
+    const noInitiation = aggression === 0 && !context.targetedByThreat;
+    if (noInitiation) reasons.push('passive_pvp');
 
     return {
-        action: score >= 0 ? 'fight' : 'flee',
+        action: !noInitiation && score >= 0 ? 'fight' : 'flee',
         score: Math.round(score * 100) / 100,
         reasons
     };
@@ -125,7 +132,8 @@ function defenseDecision(session, threats, { allyAllowed = () => true } = {}) {
     const assertiveness = voice.trait(session, 'assertiveness');
     const empathy = voice.trait(session, 'empathy');
     const avoidsPvp = caution >= 0.7 && assertiveness <= 0.4 && empathy >= 0.6;
-    const requiredRatio = avoidsPvp ? Infinity : 0.9 + 0.55 * caution - 0.35 * assertiveness;
+    const requiredRatio = avoidsPvp ? Infinity : (0.9 + 0.55 * caution - 0.35 * assertiveness)
+        * Aggression.retreatMultiplier(Config.pvpAggression);
     return {
         action: strengthRatio >= requiredRatio ? 'fight' : 'flee',
         score: Math.round(strengthRatio * 100) / 100,
@@ -136,7 +144,8 @@ function defenseDecision(session, threats, { allyAllowed = () => true } = {}) {
         enemies,
         requiredRatio: Number.isFinite(requiredRatio) ? requiredRatio : null,
         reasons: [avoidsPvp ? 'avoids_pvp' : strengthRatio >= requiredRatio ? 'can_win' : 'outmatched', 'self_defense'],
-        criticalFleeChance: 0.15 + 0.45 * caution + 0.25 * (1 - voice.trait(session, 'resilience'))
+        criticalFleeChance: Aggression.retreatChance(0.15 + 0.45 * caution
+            + 0.25 * (1 - voice.trait(session, 'resilience')), Config.pvpAggression)
     };
 }
 
