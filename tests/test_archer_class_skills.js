@@ -144,13 +144,13 @@ const toggleSession = session(toggleActor);
 for (const [id, name, initialMp, drain, stat, value] of [
     [256, 'Accuracy', 1, 0.2, 'pAccuracyCombatAdd', 3],
     [312, 'Vicious Stance', 4, 0.4, 'pCritDamageAdd', 35],
-    [334, 'Focus Skill Mastery', 36, 1, 'skillMastery', 2]
+    [334, 'Focus Skill Mastery', 36, 1, 'skillMasteryMul', 2]
 ]) {
     const toggle = skill(id, name);
     const beforeMp = toggleActor.fetchMp();
     assert.strictEqual(ToggleSkills.handleRequest(toggleSession, toggleActor, toggle), true, `${name} should activate through the toggle lifecycle`);
     assert.strictEqual(toggleActor.fetchMp(), beforeMp - initialMp, `${name} should consume sourced activation MP`);
-    assert.strictEqual(EffectStats.add(toggleActor, stat), value, `${name} should apply its active stat`);
+    assert.strictEqual(stat.endsWith('Mul') ? EffectStats.multiplier(toggleActor, stat) : EffectStats.add(toggleActor, stat), value, `${name} should apply its active stat`);
     assert.strictEqual(toggle.fetchSemantic().toggleMpConsume, drain, `${name} should retain sourced periodic MP drain`);
     ToggleSkills.handleRequest(toggleSession, toggleActor, toggle);
     assert.strictEqual(ToggleSkills.isActive(toggleActor, toggle), false, `${name} should turn off on a second request`);

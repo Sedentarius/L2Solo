@@ -1,0 +1,30 @@
+{
+  "source": "L2J Lisvus datapack/data/stats/skills and core skills/effects",
+  "revision": "fdc7e33af5d69067b41a6ee7cc7c07fe7aa35975",
+  "skills": [
+    {"id":60,"name":"Fake Death","levels":1,"initialMp":200,"periodSeconds":5,"effect":"FakeDeath","consume":35,"stats":[]},
+    {"id":196,"name":"Holy Blade","levels":1,"initialMp":8,"periodSeconds":5,"effect":"ManaDamOverTime","consume":0,"stats":[{"op":"mul","stat":"pAtk-undead","value":1.3}]},
+    {"id":197,"name":"Holy Armor","levels":2,"initialMp":[7,9],"periodSeconds":5,"effect":"ManaDamOverTime","consume":0,"stats":[{"op":"mul","stat":"darkVuln","value":[0.93,0.9]}]},
+    {"id":221,"name":"Silent Move","levels":1,"initialMp":7,"periodSeconds":5,"effect":"SilentMove","consume":7,"stats":[{"op":"mul","stat":"runSpd","value":0.6}]},
+    {"id":222,"name":"Fist Fury","levels":1,"initialMp":8,"periodSeconds":1,"effect":"DamOverTime","consume":13,"stats":[{"op":"mul","stat":"pAtkSpd","value":1.25}]},
+    {"id":226,"name":"Relax","levels":1,"initialMp":2,"periodSeconds":2,"effect":"Relax","consume":2,"stats":[{"op":"add","stat":"regHp","value":5}]},
+    {"id":256,"name":"Accuracy","levels":1,"initialMp":1,"periodSeconds":3,"effect":"MpConsumePerLevel","consume":0.2,"stats":[{"op":"add","stat":"accCombat","value":3}]},
+    {"id":288,"name":"Guard Stance","levels":4,"initialMp":[8,10,12,13],"periodSeconds":3,"effect":"MpConsumePerLevel","consume":1,"stats":[{"op":"add","stat":"pDef","value":[121.8,161.1,212.1,256.5]},{"op":"mul","stat":"rShld","value":1.5}]},
+    {"id":296,"name":"Rest of Chameleon","levels":1,"initialMp":9,"periodSeconds":3,"effect":"ChameleonRest","consume":6,"stats":[]},
+    {"id":312,"name":"Vicious Stance","levels":20,"initialMp":[4,5,5,6,7,7,8,9,9,10,10,11,11,12,12,13,13,13,14,14],"periodSeconds":3,"effect":"MpConsumePerLevel","consume":0.4,"stats":[{"op":"add","stat":"cAtkAdd","value":[35,48,64,84,109,139,166,196,229,266,306,349,379,410,443,475,509,542,576,609]}]},
+    {"id":317,"name":"Focus Attack","levels":1,"initialMp":7,"periodSeconds":2,"effect":"HitMainTarget","consume":7,"stats":[{"op":"add","stat":"accCombat","value":5}]},
+    {"id":318,"name":"Aegis Stance","levels":1,"initialMp":9,"periodSeconds":2,"effect":"ManaDamOverTime","consume":9,"stats":[{"op":"mul","stat":"sDef","value":0.6}]},
+    {"id":322,"name":"Shield Fortress","levels":6,"initialMp":[12,13,13,13,14,14],"periodSeconds":3,"effect":"MpConsumePerLevel","consume":0.4,"stats":[{"op":"add","stat":"sDef","value":[446,468,491,514,537,560]}]},
+    {"id":334,"name":"Focus Skill Mastery","levels":1,"initialMp":36,"periodSeconds":3,"effect":"MpConsumePerLevel","consume":1,"stats":[{"op":"mul","stat":"skillMastery","value":2}]},
+    {"id":335,"name":"Fortitude","levels":1,"initialMp":35,"periodSeconds":3,"effect":"MpConsumePerLevel","consume":0.5,"stats":[{"op":"mul","stat":"paralyzeVuln","value":0.7},{"op":"mul","stat":"stunVuln","value":0.7}]},
+    {"id":336,"name":"Arcane Wisdom","levels":1,"initialMp":36,"periodSeconds":3,"effect":"DamOverTime","consume":50,"stats":[{"op":"mul","stat":"mAtkSpd","value":0.9},{"op":"mul","stat":"MagicalMpConsumeRate","value":0.7}]},
+    {"id":337,"name":"Arcane Power","levels":1,"initialMp":36,"periodSeconds":3,"effect":"DamOverTime","consume":50,"stats":[{"op":"mul","stat":"mAtk","value":1.3},{"op":"mul","stat":"MagicalMpConsumeRate","value":1.1}]},
+    {"id":338,"name":"Arcane Agility","levels":1,"initialMp":36,"periodSeconds":3,"effect":"DamOverTime","consume":50,"stats":[{"op":"mul","stat":"mAtkSpd","value":1.2},{"op":"mul","stat":"mReuse","value":0.9},{"op":"mul","stat":"MagicalMpConsumeRate","value":1.1}]},
+    {"id":339,"name":"Parry Stance","levels":1,"initialMp":36,"periodSeconds":3,"effect":"MpConsumePerLevel","consume":0.5,"stats":[{"op":"mul","stat":"pDef","value":1.25},{"op":"mul","stat":"mDef","value":1.25},{"op":"mul","stat":"pAtkSpd","value":0.8},{"op":"mul","stat":"runSpd","value":0.9},{"op":"sub","stat":"accCombat","value":4}]},
+    {"id":340,"name":"Riposte Stance","levels":1,"initialMp":35,"periodSeconds":3,"effect":"MpConsumePerLevel","consume":0.5,"stats":[{"op":"add","stat":"reflectDam","value":30},{"op":"add","stat":"reflectSkillPhysic","value":30},{"op":"add","stat":"reflectSkillMagic","value":30},{"op":"mul","stat":"pAtkSpd","value":0.8},{"op":"mul","stat":"runSpd","value":0.9},{"op":"sub","stat":"accCombat","value":4}]},
+    {"id":1001,"name":"Soul Cry","levels":10,"initialMp":[2,3,5,6,7,9,11,11,13,14],"periodSeconds":3,"effect":"ManaDamOverTime","consume":[3,6,9,12,15,18,21,24,27,30],"stats":[{"op":"add","stat":"pAtk","value":[4.5,14,33.5,66.5,90.5,141.5,208.5,247,310,375.5]}]},
+    {"id":1262,"name":"Transfer Pain","levels":5,"initialMp":[7,9,11,12,13],"periodSeconds":3,"effect":"MpConsumePerLevel","consume":0.2,"stats":[{"op":"add","stat":"transDam","value":[10,20,30,40,50]}]},
+    {"id":1283,"name":"Soul Guard","levels":13,"initialMp":[8,9,10,11,11,11,12,12,13,13,13,14,14],"periodSeconds":1,"effect":"ManaDamOverTime","consume":[5,6,6,7,8,8,8,8,9,9,9,10,10],"stats":[{"op":"add","stat":"pDef","value":[293.3,333.2,375.9,421.4,445.5,469.7,494.9,520.1,546,571.9,598.5,625.8,653.1]}]},
+    {"id":7029,"name":"Super Haste","levels":4,"initialMp":0,"periodSeconds":0,"effect":"Continuous","consume":0,"stats":[{"op":"mul","stat":"runSpd","value":[1.5,2,3,4]},{"op":"div","stat":"pReuse","value":[1,2,4,30]},{"op":"div","stat":"mReuse","value":[1,2,4,30]},{"op":"mul","stat":"mAtkSpd","value":[1.5,1.8,3,4]},{"op":"mul","stat":"pAtkSpd","value":[1.2,1.5,2,3]}]}
+  ]
+}

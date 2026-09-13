@@ -217,7 +217,12 @@ function applyManaDot(session, source, target, effect) {
             return;
         }
 
-        if (manaDot.toggle && damage > (Number(target.fetchMp?.()) || 0)) {
+        // Lisvus EffectMpConsumePerLevel: the XML value is a coefficient,
+        // scaled by the character's current level and the period in seconds.
+        const consume = manaDot.perLevel
+            ? Math.max(0, (Number(target.fetchLevel?.()) || 1) - 1) / 7.5 * damage * (intervalMs / 1000)
+            : damage;
+        if (manaDot.toggle && consume > (Number(target.fetchMp?.()) || 0)) {
             clearRuntime(target, effect.key);
             const EffectStore = invoke('GameServer/Effects/EffectStore');
             EffectStore.remove(target, effect.key);
@@ -227,7 +232,7 @@ function applyManaDot(session, source, target, effect) {
             return;
         }
 
-        applyManaDamage(target, damage);
+        applyManaDamage(target, consume);
         if (manaDot.toggle) {
             refreshStats(target.session || session, target);
             return;

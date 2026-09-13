@@ -81,6 +81,7 @@ function activate(session, actor, skill, key) {
         manaDot: toggleMpConsume > 0 ? {
             toggle: true,
             damage: toggleMpConsume,
+            perLevel: semantic.toggleMpPerLevel === true,
             intervalMs: Math.max(1, Number(semantic.toggleIntervalMs) || 3000),
             requiresSeated: semantic.stats?.relaxing === true,
             stopAtFullHp: semantic.stopAtFullHp === true
