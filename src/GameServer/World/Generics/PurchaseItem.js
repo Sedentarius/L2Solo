@@ -3,8 +3,14 @@ const DataCache      = invoke('GameServer/DataCache');
 const Database       = invoke('Database');
 
 function purchaseItem(session, selfId, amount, metadata = {}) {
-    const actor = session.actor;
+    const actor = session?.actor;
+    if (!actor?.backpack) return false;
     const backpack = actor.backpack;
+    const refreshInventory = () => {
+        if (session.actor !== actor) return;
+        session.dataSendToMe(ServerResponse.userInfo(actor));
+        session.dataSendToMe(ServerResponse.itemsList(backpack.fetchItems()));
+    };
 
     backpack.stackableExists(selfId).then((item) => { // Stackable item exists
         const itemId = item.fetchId();
@@ -12,8 +18,7 @@ function purchaseItem(session, selfId, amount, metadata = {}) {
 
         Database.updateItemAmount(actor.fetchId(), itemId, total).then(() => {
             backpack.updateAmount(itemId, total);
-            session.dataSendToMe(ServerResponse.userInfo(session.actor));
-            session.dataSendToMe(ServerResponse.itemsList(backpack.fetchItems()));
+            refreshInventory();
         });
     }).catch(() => { // New item
         DataCache.fetchItemFromSelfId(selfId, (item) => {
@@ -26,8 +31,7 @@ function purchaseItem(session, selfId, amount, metadata = {}) {
                     ...(metadata.petData ? { petData: metadata.petData } : {})
             }).then((packet) => {
                 backpack.insertItem(Number(packet.insertId), selfId, { amount: amount, ...metadata });
-                session.dataSendToMe(ServerResponse.userInfo(session.actor));
-                session.dataSendToMe(ServerResponse.itemsList(backpack.fetchItems()));
+                refreshInventory();
             });
         });
     });

@@ -22,7 +22,7 @@ function bot(id, x) {
     const session = { accountId: `bot_${id}`, botSession: true, plan: 'hunting', packets: [],
         dataSendToMe() {}, dataSendToMeAndOthers(packet) { this.packets.push(packet); } };
     session.actor = {
-        session, x, z: 0, automation: new Automation(),
+        session, x, z: 0, backpack: {}, automation: new Automation(),
         fetchId: () => id, fetchLevel: () => 40, fetchHead: () => 0,
         fetchLocX() { return this.x; }, fetchLocY: () => 0, fetchLocZ() { return this.z; },
         setLocXYZ(loc) { this.x = loc.locX; this.z = loc.locZ; },
