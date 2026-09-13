@@ -287,6 +287,98 @@ try {
     DataCache.experience = Array.from({ length: 82 }, (_, index) => index * 1000000);
 
     {
+        const Retreat = invoke('GameServer/Bot/AI/BotRetreatPlanner');
+        const originalRetreat = Retreat.retreat;
+        let escapes = 0;
+        Retreat.retreat = (session, actor, threat, options) => {
+            escapes++;
+            actor.state.setTowards(true);
+            assert.strictEqual(options.preferredPoint, session.followPlayerSession.actor);
+            return { to: {locX: -400, locY: 0, locZ: 0} };
+        };
+        try {
+            for (const [classId, controlId] of [[17,1201],[30,1201],[43,1201],[52,1097]]) {
+                const leader = fakeSession('player_defense', fakeActor(2100000 + classId, {classId:5}));
+                const member = fakeSession('bot_defense', fakeActor(2200000 + classId, {classId,locX:100}));
+                Object.assign(member,{partyCompanion:true,plan:'following',followPlayerSession:leader});
+                if (classId===17) member.actor.backpack.fetchEquippedWeapon = () => ({
+                    fetchKind:()=> 'Weapon.Sword', fetchName:()=> 'Stormbringer', fetchPAtk:()=>107, fetchMAtk:()=>43
+                });
+                const attacker = fakeActor(1100000 + classId,{locX:130,destId:member.actor.fetchId()});
+                attacker.fetchAttackable = () => true;
+                const tankMob = fakeActor(1200000 + classId,{locX:50,destId:leader.actor.fetchId()});
+                tankMob.fetchAttackable = () => true;
+                World.user = {sessions:[leader,member]};
+                BotManager.sessions = [member];
+                World.npc = {spawns:[tankMob,attacker]};
+                World.fetchNpcsInRadius = () => [tankMob,attacker];
+                const control = learnSkill(member.actor,{selfId:controlId,mp:10,semantic:{effect:controlId===1201?'root':'sleep',effectType:'debuff'}});
+                const calls = [];
+                const generics = {skillExec(_session,_actor,data) {calls.push(data);}};
+                const ai = {say(){},executeCombat(){assert.fail('caster support must not enter blocked melee assist');},executePvPCombat(){}};
+                FollowingState.tick(member,member.actor,generics,ai);
+                assert.strictEqual(calls.at(-1)?.id,attacker.fetchId(),`class ${classId} controls its own attacker even with a tank target`);
+                assert.strictEqual(calls.at(-1)?.selfId,controlId);
+                assert.strictEqual(member.roleDecision.reason,'control_personal_attacker');
+                assert(PartyClassTactics.supportCrowdControl(member.actor,[attacker],{selfDefense:true}), 'one attacker permits control');
+                assert.strictEqual(PartyClassTactics.supportCrowdControl(member.actor,[attacker]),null,'routine single-target assist does not become crowd control');
+
+                // A just-landed hit remains evidence when destId is absent,
+                // and does not require a second mob or a leader-selected target.
+                attacker.destId = undefined;
+                World.fetchNpcsInRadius = () => [attacker];
+                member.incomingThreatId = attacker.fetchId();
+                member.incomingThreatAt = Date.now();
+                FollowingState.tick(member,member.actor,generics,ai);
+                assert.strictEqual(calls.at(-1)?.id,attacker.fetchId());
+                assert.strictEqual(member.roleDecision.reason,'control_personal_attacker');
+                member.actor.canUseSkill = () => false;
+                assert.strictEqual(PartyClassTactics.supportCrowdControl(member.actor,[attacker],{selfDefense:true}),null,'skill reuse cannot be bypassed for defense');
+                member.actor.canUseSkill = () => true;
+
+                member.actor.mp = 5;
+                const before = escapes;
+                FollowingState.tick(member,member.actor,generics,ai);
+                assert.strictEqual(escapes,before+1,`class ${classId} retreats above critical HP when control is unaffordable`);
+                FollowingState.tick(member,member.actor,generics,ai);
+                assert.strictEqual(escapes,before+1,'incoming hit wakeups preserve the escape route');
+                member.actor.state.setTowards(false);
+                member.actor.mp = 20;
+                assert.strictEqual(PartyClassTactics.supportCrowdControl(member.actor,[attacker],{selfDefense:true})?.skill,control,'survival control can use the last affordable MP');
+                EffectStore.apply(attacker,{key:'root',id:controlId,level:1,type:'debuff',durationMs:60000});
+                assert.strictEqual(PartyClassTactics.supportCrowdControl(member.actor,[attacker],{selfDefense:true}),null,'do not repeat an already active control');
+                EffectStore.remove(attacker,'root');
+                EffectStore.apply(member.actor,{key:'silence',id:1064,type:'debuff',durationMs:60000});
+                FollowingState.tick(member,member.actor,generics,ai);
+                assert.strictEqual(member.roleDecision.reason,'personal_attack_no_control','silenced support still escapes');
+                EffectStore.remove(member.actor,'silence');
+                member.actor.state.setTowards(false);
+                member.actor.mp = 100;
+                if (classId===52) {
+                    member.actor.skillset.skills = [];
+                    member.actor.backpack.fetchEquippedWeapon = () => ({
+                        fetchKind:()=> 'Weapon.Blunt', fetchName:()=> 'War Hammer', fetchPAtk:()=>100, fetchMAtk:()=>30
+                    });
+                    let melee = 0;
+                    FollowingState.tick(member,member.actor,generics,{...ai,executeCombat(){melee++;}});
+                    assert.strictEqual(melee,1,'Warcryer with a physical weapon retains its melee defense');
+                }
+                if (classId===30 || classId===43) {
+                    member.actor.hp = 30;
+                    learnSkill(member.actor,{selfId:1011,name:'Heal',mp:10,power:100});
+                    FollowingState.tick(member,member.actor,generics,ai);
+                    assert.strictEqual(calls.at(-1)?.selfId,1011,'urgent healing retains priority over personal control');
+                }
+            }
+        } finally {
+            Retreat.retreat = originalRetreat;
+            World.fetchNpcsInRadius = originalFetchNpcsInRadius;
+            World.npc = originalNpcs;
+            BotManager.sessions = originalBotSessions;
+        }
+    }
+
+    {
         const campLeader = fakeSession('player_camp', fakeActor(2000800));
         const returned = fakeSession('bot_returned', fakeActor(2000801, { locX: 100, classId: 48 }));
         const courier = fakeSession('bot_courier', fakeActor(2000802, { locX: 40000, classId: 33 }));

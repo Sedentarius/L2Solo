@@ -119,22 +119,22 @@ function tankControlAction(actor, threats, options = {}) {
     return tankMassAggroAction(actor, threats) || tankStunAction(actor, threats, options);
 }
 
-function supportCrowdControl(actor, threats, { primaryTargetId = null } = {}) {
+function supportCrowdControl(actor, threats, { primaryTargetId = null, selfDefense = false } = {}) {
     const role = BotRoles.inferRole(actor);
-    if (!['mage', 'healer', 'buffer'].includes(role) || threats.length < 2) return null;
-    if (ratio(actor.fetchMp?.(), actor.fetchMaxMp?.()) < 0.45) return null;
+    if (!['mage', 'healer', 'buffer'].includes(role) || threats.length < (selfDefense ? 1 : 2)) return null;
+    if (!selfDefense && ratio(actor.fetchMp?.(), actor.fetchMaxMp?.()) < 0.45) return null;
     const add = nearest(actor, threats.filter((target) => (
-        Intent.alive(target) && Number(target.fetchId?.()) !== Number(primaryTargetId || 0) &&
+        Intent.alive(target) && (selfDefense || Number(target.fetchId?.()) !== Number(primaryTargetId || 0)) &&
         !crowdControlled(target)
     )));
     if (!add) return null;
 
     const preference = role === 'mage'
         ? [1069]
-        : (role === 'healer' ? [1201, 1069] : [1097, 1208]);
-    const skill = preference.map((id) => learned(actor, id)).find((candidate) => usable(actor, candidate, 0.35)
-        && Intent.debuffUseful(actor,add,candidate));
-    return skill ? { skill, target: add, reason: 'control_party_add' } : null;
+        : (role === 'healer' ? [1201, 1069] : [1201, 1069, 1097, 1208]);
+    const skill = preference.map((id) => learned(actor, id)).find((candidate) => usable(actor, candidate, selfDefense ? 0 : 0.35)
+        && Intent.debuffUseful(actor,add,candidate, { fleeing:selfDefense }));
+    return skill ? { skill, target: add, reason: selfDefense ? 'control_personal_attacker' : 'control_party_add' } : null;
 }
 
 module.exports = {

@@ -1020,6 +1020,19 @@ module.exports = {
             pulling = { enabled: false, target: null, puller: null, engageable: false, phase: null };
         }
         let rawPartyThreat = PartyAwareness.findThreatTargetingPartyProjected(playerSession);
+        // The party projection may prefer the puller's mob. Personal incoming
+        // hits or an NPC actively targeting this support still require defense.
+        // Hate alone is insufficient: the tank may already own that attacker.
+        const personalSupportThreat = ['healer', 'buffer'].includes(role)
+            ? PartyAwareness.recentIncomingNpc(session, 1500)
+                || World.fetchNpcsInRadius(bot.fetchLocX(), bot.fetchLocY(), 1500).find(npc =>
+                    npc.fetchAttackable?.() && !npc.isDead?.()
+                    && Number(npc.fetchDestId?.()) === Number(bot.fetchId()))
+            : null;
+        if (personalSupportThreat) rawPartyThreat = {
+            type: BotRaidSafety.isProtectedRaidEntity(personalSupportThreat) ? 'raid' : 'npc',
+            actor: personalSupportThreat, targetId: bot.fetchId(), source: 'personal_attack'
+        };
         if (rawPartyThreat?.type === 'raid' && !BotRaidSafety.canEngagePlayerPartyRaid(
             session,
             rawPartyThreat.actor,
@@ -1051,7 +1064,7 @@ module.exports = {
         const rawThreatOnlyTargetsTravellingPuller = pullerAwayFromCamp &&
             Number(rawPartyThreat?.targetId || 0) === Number(pulling.puller?.actor?.fetchId?.() || 0) &&
             ratio(pulling.puller.actor.fetchHp(), pulling.puller.actor.fetchMaxHp()) >= CRITICAL_COMBAT_HP_RATIO;
-        let partyThreat = pulling.engageable && pulling.target
+        let partyThreat = personalSupportThreat ? rawPartyThreat : pulling.engageable && pulling.target
             ? {
                 type: 'npc',
                 actor: pulling.target,
@@ -1539,6 +1552,29 @@ module.exports = {
             } else if (!routineHealSkill && !emergencyHealSkill && !groupHealSkill && woundedPartyMember?.hpRatio < 0.70) {
                 recordRoleDecision(session, bot, 'cannot_heal', 'no_learned_heal');
                 keepRoleDecision = true;
+            }
+        }
+
+        // Defense is distinct from routine assist and does not wait for 25% HP.
+        // Priority heals above keep their action; an in-flight cast must finish
+        // before control/escape, and repeated hit wakeups keep the escape route.
+        if (!acted && personalSupportThreat && !bot.state.fetchCasts()) {
+            const control = !isBusy(bot) ? PartyClassTactics.supportCrowdControl(bot, [personalSupportThreat], {
+                selfDefense: true
+            }) : null;
+            if (control) {
+                recordRoleDecision(session, bot, 'defend_self', control.reason, {
+                    targetId: personalSupportThreat.fetchId(), skillId: control.skill.fetchSelfId()
+                });
+                castSkillOn(session, bot, Generics, control.target, control.skill, true);
+                return;
+            }
+            if (BotRoles.usesCasterWeaponCombat(bot) || !supportCanMeleeAssist(bot, role)) {
+                const moved = retreatFromThreat(session, bot, personalSupportThreat, player, impairments.rooted);
+                recordRoleDecision(session, bot, 'retreat', impairments.rooted ? 'personal_attack_rooted' : 'personal_attack_no_control', {
+                    targetId: personalSupportThreat.fetchId(), moved
+                });
+                return;
             }
         }
 
