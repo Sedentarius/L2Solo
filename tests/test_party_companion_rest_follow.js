@@ -370,6 +370,15 @@ try {
                     learnSkill(member.actor,{selfId:1011,name:'Heal',mp:10,power:100});
                     FollowingState.tick(member,member.actor,generics,ai);
                     assert.strictEqual(calls.at(-1)?.selfId,1011,'urgent healing retains priority over personal control');
+                    assert.strictEqual(member.partyCombatLootReadyAt,0,'healing does not grant a combat loot opportunity');
+                    member.actor.hp=100;
+                    member.incomingThreatAt=0;
+                    member.incomingThreatId=undefined;
+                    attacker.destId=leader.actor.fetchId();
+                    attacker.locX=800;
+                    PartyAwareness.invalidateThreatProjection(leader);
+                    FollowingState.tick(member,member.actor,generics,ai);
+                    assert(member.partyCombatLootReadyAt>0,'a support holding the line after its priorities gets a loot opportunity');
                 }
             }
         } finally {

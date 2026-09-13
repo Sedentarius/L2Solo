@@ -1,18 +1,22 @@
 const ServerResponse = invoke('GameServer/Network/Response');
 const World          = invoke('GameServer/World/World');
 
-function pickupExec(session, actor, data, onComplete) {
+function pickupExec(session, actor, data, onComplete, canContinue = () => true) {
     World.fetchItem(data.id).then((item) => {
+        if (!canContinue()) { onComplete?.(); return; }
         actor.automation.schedulePickup(session, actor, item, () => {
+            if (!canContinue()) { onComplete?.(); return; }
             actor.state.setPickinUp(true);
             session.dataSendToMeAndOthers(ServerResponse.pickupItem(actor.fetchId(), item), actor);
 
             setTimeout(() => {
-                World.pickupItem(session, actor, item);
+                if (canContinue()) World.pickupItem(session, actor, item);
             }, 250);
 
             setTimeout(() => {
-                actor.state.setPickinUp(false);
+                // A cancelled party attempt must not clear a newer native
+                // action's state. Its owner already reset the pickup flag.
+                if (canContinue()) actor.state.setPickinUp(false);
                 onComplete?.();
             }, 500);
         });

@@ -1029,6 +1029,7 @@ module.exports = {
             pulling = { enabled: false, target: null, puller: null, engageable: false, phase: null };
         }
         let rawPartyThreat = PartyAwareness.findThreatTargetingPartyProjected(playerSession);
+        session.partyCombatLootReadyAt = 0;
         // The party projection may prefer the puller's mob. Personal incoming
         // hits or an NPC actively targeting this support still require defense.
         // Hate alone is insufficient: the tank may already own that attacker.
@@ -1791,6 +1792,10 @@ module.exports = {
                 });
                 castSkillOn(session, bot, Generics, crowdControl.target, crowdControl.skill, true);
             }
+        }
+
+        if (!acted && !isBusy(bot) && invoke('GameServer/Bot/AI/PartyCombatLootPolicy').idleSupport(bot)) {
+            session.partyCombatLootReadyAt = Date.now();
         }
 
         if (!acted && partyThreat?.actor) {
