@@ -169,6 +169,7 @@ function apply(actor, effect) {
 
 function includedInBuffCount(effect) {
     return effect.type !== 'debuff'
+        && effect.type !== 'item_passive'
         && effect.toggle !== true
         && !['hp_recover', 'life_force_orc'].includes(effect.stackFamily);
 }
@@ -246,6 +247,7 @@ function packetEffects(actor, options = {}) {
     const includeBuffs = options.includeBuffs !== false;
     const includeDebuffs = options.includeDebuffs !== false;
     const effects = orderedEffects(actor)
+        .filter((effect) => effect.type !== 'item_passive')
         .filter((effect) => (
             (effect.type === 'debuff' && includeDebuffs) ||
             (effect.type !== 'debuff' && includeBuffs)
@@ -316,6 +318,7 @@ function abnormalMask(actor) {
 
 module.exports = {
     BUFF_LIMIT,
+    includedInBuffCount,
     DEBUFF_RESERVED_SLOTS,
     SELF_PACKET_LIMIT,
     PARTY_PACKET_LIMIT,

@@ -6,6 +6,8 @@ const World = invoke('GameServer/World/World');
 const BotRaidSafety = invoke('GameServer/Bot/AI/BotRaidSafety');
 const Intent = invoke('GameServer/Bot/AI/BotSkillIntent');
 const Attack = invoke('GameServer/Actor/Attack');
+const WeaponMask = invoke('GameServer/Skills/WeaponMask');
+const BuffLoadout = invoke('GameServer/Bot/AI/PartyBuffLoadout');
 
 const REFRESH_THRESHOLD_MS = 2 * 60 * 1000;
 const REFRESH_FRACTION = 0.25;
@@ -27,6 +29,7 @@ const SITUATIONAL_BUFF_EFFECTS = new Set([
     'resist_poison'
 ]);
 const ENCOUNTER_CONTEXT_CACHE_MS = 500;
+const ENCOUNTER_CONTEXT_HOLD_MS = 60000;
 const encounterContextCache = new WeakMap();
 const PARTY_ACTION_CACHE_MS = 250;
 const partyActionCache = new WeakMap();
@@ -160,13 +163,18 @@ function encounterContext(members) {
         });
     });
     const names = nearby.map((npc) => String(npc.fetchName?.() || '')).join(' ').toLowerCase();
-    const skills = nearby.flatMap((npc) => npc.skillset?.fetchSkills?.() || npc.skillset?.skills || []);
+    const skills = nearby.flatMap((npc) => npc.fetchCombatSkills?.() || npc.skillset?.fetchSkills?.() || npc.skillset?.skills || []);
     const tokens = skills.map(skillTokens).join(' ');
     return {
         undead: nearby.some((npc) => npc.fetchUndead?.() === true) ||
             /\b(zombie|skeleton|ghoul|ghost|corpse|bone|undead|doom|shade|specter|spirit|vampire)\b/.test(names),
         poison: /\b(poison|venom|toxin)\b/.test(`${names} ${tokens}`),
-        mental: /\b(fear|sleep|derangement|mental|madness)\b/.test(`${names} ${tokens}`)
+        mental: actors.some(actor=>!!actor.session?.pvpDefense) || /\b(fear|sleep|derangement|mental|madness)\b/.test(`${names} ${tokens}`),
+        bleed: /\b(bleed|bleeding)\b/.test(tokens),
+        stun: /\b(stun|shock)\b/.test(tokens),
+        fire: /\bfire\b/.test(tokens), water: /\bwater\b/.test(tokens),
+        wind: /\bwind\b/.test(tokens), earth: /\bearth\b/.test(tokens),
+        elemental: /\b(fire|water|wind|earth)\b/.test(tokens)
     };
 }
 
@@ -182,7 +190,14 @@ function cachedEncounterContext(members) {
         return cached.context;
     }
     const context = encounterContext(members);
-    encounterContextCache.set(cacheOwner, { memberKey, at: now, context });
+    // Brief gaps between pulls must not strip resistance buffs and buy them
+    // again on the next spawn. Keep recently observed threats for one minute.
+    const seenAt = cached?.memberKey === memberKey ? { ...cached.seenAt } : {};
+    for (const key of Object.keys(context)) {
+        if (context[key]) seenAt[key] = now;
+        else if (seenAt[key] !== undefined && now - seenAt[key] < ENCOUNTER_CONTEXT_HOLD_MS) context[key] = true;
+    }
+    encounterContextCache.set(cacheOwner, { memberKey, at: now, context, seenAt });
     return context;
 }
 
@@ -258,6 +273,7 @@ function isUsefulForTarget(target, skill, provider = null, context = {}, plannin
     if (!Intent.alive(target)) return false;
     if (skill?.fetchTargetKind?.() === 'ally' && !partyAuraRecipients([], provider, skill, planning).includes(target)) return false;
     if (!situationalBuffUseful(semantic.effect, context)) return false;
+    if (!BuffLoadout.useful(target,skill,context)) return false;
     // Party skills retain their native all-members behaviour. The role policy
     // only prevents wasting individual casts on roles that cannot use them.
     if (semantic.target === 'party' || skill?.fetchTargetKind?.() === 'party') {
@@ -307,7 +323,8 @@ function matchesSkillEffect(effect, skill, keys) {
     // happens to expose the same stat (for example Chant of Rage and Dance
     // of Fire both use pCritDamageMul). Stat overlap remains a compatibility
     // fallback for ordinary legacy buffs, but must not suppress party music.
-    return exactIdentity || (!isPartyMusic(skill) && overlaps(effect, keys));
+    const effectMusic = /^(song|dance)_/.test(normalizedEffect(effect?.key));
+    return exactIdentity || (!isPartyMusic(skill) && !effectMusic && effect?.type !== 'item_passive' && overlaps(effect, keys));
 }
 
 function refreshThresholdMs(skill) {
@@ -321,9 +338,7 @@ function refreshThresholdMs(skill) {
 }
 
 function isCountedBuff(effect) {
-    return effect?.type !== 'debuff' &&
-        effect?.toggle !== true &&
-        !['hp_recover', 'life_force_orc'].includes(effect?.stackFamily);
+    return EffectStore.includedInBuffCount(effect);
 }
 
 function buffCapacity(target, planning = null) {
@@ -544,6 +559,7 @@ function actionCompare(a, b) {
 
 function allActions(members, providers, respectReservations = true, planning = createPlanningContext()) {
     const context = cachedEncounterContext(members);
+    const loadout = desiredLoadout(members,providers,context,planning);
     providers.forEach((provider) => {
         if (!planning.providerSkills.has(provider)) {
             // Availability is shared by every recipient during this synchronous
@@ -554,7 +570,11 @@ function allActions(members, providers, respectReservations = true, planning = c
     return members
         .filter((member) => Intent.alive(member?.actor))
         .flatMap((member) => providers.flatMap((provider) => planning.providerSkills.get(provider)
-            .filter((skill) => isUsefulForTarget(member.actor, skill, provider, context, planning) && needsSkill(member.actor, skill, planning) && canPlanSupportAction(member.actor, provider, skill, members, planning) && (!respectReservations || !isReserved(member.actor, skill)))
+            .filter((skill) => loadout.chosen.some(c=>c.key===BuffLoadout.normalize(skill.fetchSemantic().effect)
+                && Number(c.skill.fetchLevel?.()||1)===Number(skill.fetchLevel?.()||1) && c.beneficiaries.includes(member.actor))
+                && partyAuraRecipients(members,provider,skill,planning).every(actor=>
+                    loadout.selected.get(actor)?.has(BuffLoadout.normalize(skill.fetchSemantic().effect)))
+                && isUsefulForTarget(member.actor, skill, provider, context, planning) && needsSkill(member.actor, skill, planning) && canPlanSupportAction(member.actor, provider, skill, members, planning) && (!respectReservations || !isReserved(member.actor, skill)))
             .map((skill) => ({
                 provider,
                 target: member.actor,
@@ -563,6 +583,37 @@ function allActions(members, providers, respectReservations = true, planning = c
                 skill,
                 effect: skill.fetchSemantic().effect
             }))));
+}
+
+function desiredLoadout(members,providers,context=cachedEncounterContext(members),planning=createPlanningContext()) {
+    return BuffLoadout.build(members,providers,context,{
+        skills:actor=>supportSkills(actor).filter(skill=>{
+            const semantic=skill.fetchSemantic(),required=Number(semantic.requires?.weaponsAllowed)||0;
+            return !semantic.notUsedInC4 && (!required || (required & WeaponMask.weaponMaskFor(actor))!==0);
+        }),
+        effects:actor=>planningEffects(actor,planning),
+        isAura:skill=>partyAuraRadius(skill)!==null || skill.fetchTargetKind?.()==='ally',
+        recipients:(rows,provider,skill)=>partyAuraRecipients(rows,provider,skill,planning),
+        useful:(actor,skill,provider,encounter)=>isUsefulForTarget(actor,skill,provider,encounter,planning)
+    });
+}
+
+const loadoutMaintenance = new WeakMap();
+function reconcileLoadout(members,providers) {
+    const owner=partyActionCacheOwner(members),now=Date.now();
+    if(!owner || now-Number(loadoutMaintenance.get(owner)||0)<1000) return [];
+    if(members.some(({actor})=>actor?.state?.fetchCasts?.()
+        || Number(actor?.session?.pendingSupportCast?.expiresAt||0)>now)) return [];
+    loadoutMaintenance.set(owner,now);
+    const loadout=desiredLoadout(members,providers),removed=[];
+    for(const [actor,wanted] of loadout.selected) {
+        const discarded=EffectStore.list(actor).filter(e=>e.type==='buff' && e.dispellable!==false && !e.toggle
+            && loadout.managedByActor.get(actor).has(BuffLoadout.family(e.key)) && !wanted.has(BuffLoadout.normalize(e.key)));
+        for(const effect of discarded) if(EffectStore.remove(actor,effect.key)) removed.push({actorId:actor.fetchId(),effect:effect.key});
+        if(discarded.length) invoke('GameServer/Effects/EffectTicker').refreshEffects(actor.session,actor);
+    }
+    if(removed.length) invalidatePartyActionCache();
+    return removed;
 }
 
 function queueSupportCast(session, action) {
@@ -795,6 +846,8 @@ module.exports = {
     PENDING_SUPPORT_CAST_TIMEOUT_MS,
     MIN_SUPPORT_MP_RATIO,
     supportSkills,
+    desiredLoadout,
+    reconcileLoadout,
     isUsefulForTarget,
     situationalBuffUseful,
     partyAuraCanReach,

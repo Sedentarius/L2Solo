@@ -293,6 +293,7 @@ const tests = [
     'tests/test_social_graph_repository.js',
     'tests/test_bot_simulation_kernel.js',
     'tests/test_bot_support_planner.js',
+    'tests/test_party_buff_loadout.js',
     'tests/test_bot_loot_etiquette.js',
     'tests/test_bot_mana_regeneration.js',
     'tests/test_bot_skill_capabilities.js',

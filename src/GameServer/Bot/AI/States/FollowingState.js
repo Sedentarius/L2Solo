@@ -1401,6 +1401,10 @@ module.exports = {
             return;
         }
 
+        if (!partyThreat && !leaderTargetId && !isBusy(bot)) {
+            BotSupportPlanner.reconcileLoadout(partySupportMembers(playerSession,pulling.puller),
+                PartyPulling.supportProviders(playerSession));
+        }
         const supportBuffTarget = timedFollowingStage('supportPlan', () => (
             BotSupportPlanner.nextAction(
                 bot,
