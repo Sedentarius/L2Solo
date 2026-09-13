@@ -720,8 +720,7 @@ function npcAdequacyLevel(state = {}) {
     return Number(state.level || 1) < 20 ? Number(state.level || 1) : 20;
 }
 
-function desiredNpcSlots(state = {}) {
-    const plan = BotGear.planFor({ classId: classIdFor(state), level: npcAdequacyLevel(state) });
+function desiredNpcSlots(state = {}, plan = BotGear.planFor({ classId: classIdFor(state), level: npcAdequacyLevel(state) })) {
     const order = [7, 14, 10, 15, 11, 8, 6, 9, 12, 3, 1, 2, 4, 5];
     return (plan.items || []).map((item) => Number(item.slot || 0)).filter(Boolean)
         // A class may support both a one-handed blunt and a polearm.  Its
@@ -783,53 +782,68 @@ function staticNpcUpgradePlan(state = {}, options = {}) {
     const reserve = operationalAdenaReserve(state);
     const spendable = Math.max(0, Number(state.adena || state.inventory?.[57]?.amount || 0) - reserve);
     const excludedSlots = new Set((options.excludedSlots || []).map(Number));
-    const slots = desiredNpcSlots(state).filter((slot) => !excludedSlots.has(Number(slot)));
-
-    if (missingRequiredDualSword(state)) {
-        const dualCandidate = npcCandidatesForSlot(state, 14, targetRank, options)[0];
-        if (dualCandidate) {
-            return marketPlan(state, dualCandidate.item, dualCandidate.offer, {
-                targetSlot: 14,
-                reason: 'required_dual_sword',
-                reserve
-            });
-        }
-    }
+    const classId = classIdFor(state);
+    const baseline = BotGear.planFor({ classId, level: npcAdequacyLevel(state) });
+    const slots = desiredNpcSlots(state, baseline).filter((slot) => !excludedSlots.has(Number(slot)));
+    const requiredDual = missingRequiredDualSword(state);
+    const planForCandidate = (candidate) => marketPlan(state, candidate.item, candidate.offer, {
+        targetSlot: candidate.slot,
+        reason: requiredDual && candidate.slot === 14 ? 'required_dual_sword' : 'npc_progression',
+        reserve
+    });
 
     // First establish an adequate kit. Missing/under-grade slots select the
-    // cheapest compatible item at the highest ordinary NPC grade, even when
-    // the bot still needs to earn the Adena. This replaces exact-item farming
-    // with a stable, shop-backed progression target.
+    // cheapest compatible item at the highest ordinary NPC grade. An unfunded
+    // weapon must not block affordable armour; retain the first target for
+    // saving only when none of these basic purchases fits the budget.
+    let savingTarget = null;
     for (const slot of slots) {
         const current = equippedItemAtSlot(state, slot);
-        if (current && rankIndex(current.etc?.rank) >= rankIndex(targetRank)) continue;
+        if (current && rankIndex(current.etc?.rank) >= rankIndex(targetRank)
+            && !(requiredDual && slot === 14)) continue;
         const candidate = npcCandidatesForSlot(state, slot, targetRank, options)[0];
-        if (candidate) return marketPlan(state, candidate.item, candidate.offer, {
-            targetSlot: slot,
-            reason: 'npc_progression',
-            reserve
-        });
+        if (!candidate) continue;
+        const purchase = { ...candidate, slot };
+        savingTarget = savingTarget || purchase;
+        if (Number(candidate.offer.price) <= spendable) return planForCandidate(purchase);
     }
+    if (savingTarget) return planForCandidate(savingTarget);
 
     // Within no-grade/D, spare money can improve an already complete kit.
     // At C+ an adequate D kit is only a bridge; crafting/drop/exchange
     // progression must take over instead of polishing D indefinitely.
     if (rankIndex(gradeForLevel(state.level)) > rankIndex('d')) return null;
     const role = roleFor(state);
-    const classId = classIdFor(state);
+    const starterWeapon = BotGear.planFor({ classId, level: 1 }).items
+        .find((item) => WEAPON_SLOTS.has(Number(item.slot)));
+    const starterTemplate = catalogItem(starterWeapon?.selfId);
+    const currentWeapon = equippedItemAtSlot(state, 7);
+    const hasUpgradedWeapon = currentWeapon && (rankIndex(currentWeapon.etc?.rank) > rankIndex('none')
+        || starterTemplate && itemScore(currentWeapon, role, classId) > itemScore(starterTemplate, role, classId));
+    const baselineArmor = new Map(baseline.items
+        .filter((item) => ARMOR_SLOTS.has(Number(item.slot)))
+        .map((item) => [Number(item.slot), catalogItem(item.selfId)]));
     const improvements = slots.flatMap((slot) => {
         const current = equippedItemAtSlot(state, slot);
         const currentScore = current ? itemScore(current, role, classId) : 0;
+        const armor = baselineArmor.get(slot);
+        // Once the weapon is beyond the starter tier, bring protection up to
+        // the class/level baseline before buying another same-grade weapon.
+        // Derive this from equipped items so it also works after a restart,
+        // a loot upgrade, or a trade, without purchase-history flags.
+        const basicArmor = !!(hasUpgradedWeapon && armor && currentScore < itemScore(armor, role, classId));
         return npcCandidatesForSlot(state, slot, targetRank, options)
             .filter(({ offer }) => Number(offer.price) <= spendable)
             .map((candidate) => ({
                 ...candidate,
                 slot,
+                basicArmor,
                 gain: itemScore(candidate.item, role, classId) - currentScore
             }));
     })
         .sort((left, right) => {
-            return slotPriority(right.item) - slotPriority(left.item)
+            return Number(right.basicArmor) - Number(left.basicArmor)
+                || slotPriority(right.item) - slotPriority(left.item)
                 || (right.gain / Math.max(1, Number(right.offer.price))) - (left.gain / Math.max(1, Number(left.offer.price)))
                 || Number(left.offer.price) - Number(right.offer.price);
         });
