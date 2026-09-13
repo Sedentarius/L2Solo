@@ -150,6 +150,7 @@ const DataCache = {
 
         DataCache.items = [
             ...validateModel(path + 'Items/Armors/armors'),
+            ...validateModel(path + 'Items/Armors/c4_b_grade'),
             ...validateModel(path + 'Items/Armors/c4_a_grade'),
             ...validateModel(path + 'Items/Armors/c4_sealed_a_grade'),
             ...validateModel(path + 'Items/Armors/c4_s_grade'),
