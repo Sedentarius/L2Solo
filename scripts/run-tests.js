@@ -1,6 +1,16 @@
 const { spawnSync } = require('child_process');
 
 const tests = [
+    'tests/test_bot_action_feedback.js',
+    'tests/test_bot_armor_policy.js',
+    'tests/test_bot_hunt_efficiency.js',
+    'tests/test_bot_pvp_focus_policy.js',
+    'tests/test_bot_pvp_positioning.js',
+    'tests/test_cold_pvp_class_sequences.js',
+    'tests/test_bot_class_policy.js',
+    'tests/test_bot_charge_sequences.js',
+    'tests/test_bot_class_intents.js',
+    'tests/test_bot_class_cold_parity.js',
     'tests/test_database_statements.js',
     'tests/test_world_observer_relationships.js',
     'tests/test_interaction_memory.js',

@@ -687,9 +687,14 @@ try {
 
     const reserveHealer = bot(15, [skill(1300, { mp: 20, power: 100, spell: true })], 50);
     const reserveGenerics = generics();
-    BotAI.executeCombat({}, reserveHealer, npc(1105), reserveGenerics);
+    BotAI.executeCombat({ hotBackgroundPartyId: 'support-party' }, reserveHealer, npc(1105), reserveGenerics);
     assert.strictEqual(reserveGenerics.skills.length, 0, 'healer should preserve support MP instead of casting an expensive nuke');
     assert.strictEqual(reserveGenerics.attacks.length, 0, 'a healer preserving support MP must not melee a healthy target');
+
+    const soloHealerGenerics = generics();
+    BotAI.executeCombat({}, reserveHealer, npc(1105), soloHealerGenerics);
+    assert.strictEqual(soloHealerGenerics.skills[0]?.selfId, 1300,
+        'solo healer can spend offensive MP while retaining the smaller self-support reserve');
 
     const supportingHealer = bot(15, [skill(1301, { mp: 5, power: 20, spell: true })], 100);
     const supportingGenerics = generics();
@@ -798,6 +803,11 @@ try {
     assert.strictEqual(BotAI.executeCombat({}, dagger, protectedMinion, protectedMinionGenerics), false,
         'the final combat boundary must reject raid minion templates even without a live boss link');
     assert.strictEqual(protectedMinionGenerics.attacks.length, 0, 'a bot must not basic-attack a raid minion');
+
+    const groupCaster = bot(15, [skill(1177, { spell:true, mp:5 })], 100, 'Weapon.Blunt');
+    const groupSession = {};
+    BotAI.executePvPCombat(groupSession, groupCaster, npc(11125), generics(), {party:true});
+    assert(groupSession.lastCombatDecision.reasons.includes('class_mode:party_pvp'), 'resolved party context reaches native offensive scoring for the leader');
 
     console.log('Bot combat skill selection checks passed');
 } finally {

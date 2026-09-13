@@ -638,6 +638,10 @@ const BotAI = {
     },
 
     executeCombat(session, bot, npc, Generics, options = {}) {
+        if (!npc) {
+            if (session) session.lastCombatDecision = { action: 'blocked', reason: 'target_dead_or_missing', at: Date.now() };
+            return false;
+        }
         const allowedPlayerPartyRaid = BotRaidSafety.isProtectedRaidEntity(npc) &&
             BotRaidSafety.canEngagePlayerPartyRaid(session, npc, options.playerPartyRaidLeaderSession);
         if (BotRaidSafety.isProtectedRaidEntity(npc) && !allowedPlayerPartyRaid) {
@@ -723,6 +727,7 @@ const BotAI = {
         // melee support classes retain their normal weapon fallback.
         const combatPolicy = {
             ...HotBotPolicyOverlay.combatPolicy(session),
+            ...(typeof options.party === 'boolean' ? { party: options.party } : {}),
             pvp: options.pvp === true,
             avoidAreaDamage: options.avoidAreaDamage === true || (
                 allowedPlayerPartyRaid && BotRaidSafety.hasControlledRaidMinion(npc)
@@ -743,13 +748,34 @@ const BotAI = {
             };
             return true;
         }
-        const chargeSkill = basicAttackOnly || !canCast ? null : BotCombatUtility.selectChargeSkill(bot, role, combatPolicy);
+        // Necromancers may still use the corpse through SummonerTactics above.
+        // Damage and charge preparation must not restart against that corpse.
+        if (npc.isDead?.() === true || npc.state?.fetchDead?.() === true || npc.fetchHp?.() <= 0) {
+            session.lastCombatDecision = { action: 'blocked', reason: 'target_dead_or_missing', at: Date.now() };
+            return false;
+        }
+        const selfTactic = basicAttackOnly || !canCast ? null
+            : invoke('GameServer/Bot/AI/PartyClassTactics').selfAction(bot, {
+                role, activeMobs: Number(options.activeMobs ?? 1)
+            });
+        if (selfTactic) {
+            session.lastCombatDecision = { action:'self_support', role, reason:selfTactic.reason,
+                skillId:selfTactic.skill.fetchSelfId(), targetId:bot.fetchId(), at:Date.now() };
+            Generics.skillExec(session,bot,{id:bot.fetchId(),selfId:selfTactic.skill.fetchSelfId(),ctrl:true});
+            return true;
+        }
+        const chargePlan = basicAttackOnly || !canCast ? null : BotCombatUtility.selectChargePlan(bot, role, combatPolicy, npc);
+        const chargeSkill = chargePlan?.skill;
         if (chargeSkill) {
             session.lastCombatDecision = {
                 action: 'charge_skill',
                 role,
                 skillId: chargeSkill.fetchSelfId(),
                 skillName: chargeSkill.fetchName?.() || null,
+                plannedSkillId: chargePlan.spender.fetchSelfId(),
+                requiredCharges: chargePlan.requiredCharges,
+                castsRemaining: chargePlan.castsRemaining,
+                reason: chargePlan.reason,
                 charges: Number(bot.fetchCharges?.() ?? bot.charges ?? 0) || 0,
                 at: Date.now()
             };
@@ -760,6 +786,7 @@ const BotAI = {
             });
             return true;
         }
+        combatPolicy.rejectedAlternatives = [];
         const decision = basicAttackOnly || !canCast
             ? null
             : BotCombatUtility.select(bot, npc, role, combatPolicy);
@@ -771,6 +798,10 @@ const BotAI = {
                 skillName: decision.skill.fetchName?.() || null,
                 score: decision.score,
                 reasons: decision.reasons,
+                intent: decision.intent,
+                targetId: npc.fetchId(),
+                resourceCost: { mp: decision.cost, hp: Number(decision.skill.fetchConsumedHp?.() || 0) },
+                rejectedAlternatives: combatPolicy.rejectedAlternatives,
                 at: Date.now()
             };
             Generics.skillExec(session, bot, {
@@ -813,6 +844,7 @@ const BotAI = {
             action: 'basic_attack',
             role,
             reason: conserveArcherSkills ? 'party_archer_conserve_skills' : 'no_usable_offensive_skill',
+            rejectedAlternatives: combatPolicy.rejectedAlternatives || [],
             at: Date.now()
         };
         Generics.attackExec(session, bot, {

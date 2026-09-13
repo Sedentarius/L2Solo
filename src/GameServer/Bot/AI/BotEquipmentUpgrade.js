@@ -3,6 +3,7 @@ const BotRoles = invoke('GameServer/Bot/AI/BotRoles');
 const BotEquipmentCompatibility = invoke('GameServer/Bot/AI/BotEquipmentCompatibility');
 const BotWeaponCompatibility = invoke('GameServer/Bot/AI/BotWeaponCompatibility');
 const ShotStock = invoke('GameServer/Inventory/ShotStock');
+const ArmorPolicy = invoke('GameServer/Bot/AI/BotArmorPolicy');
 
 const ARMOR_SLOTS = {
     earringRight: 1,
@@ -285,7 +286,24 @@ function findBestUpgrades(session) {
             return upgrades;
         }, []);
 
-    return [...torsoUpgrades, ...otherUpgrades];
+    const ordinary = [...torsoUpgrades, ...otherUpgrades];
+    const availableArmor = items.filter(item => isSuitableItem(actor,item,true) && ArmorPolicy.ARMOR_SLOTS.has(Number(item.fetchSlot())));
+    const currentArmor = availableArmor.filter(item => item.fetchEquipped());
+    const proposed = new Map(currentArmor.map(item => [Number(item.fetchSlot()),item]));
+    for (const {item,slot} of ordinary) {
+        if (!ArmorPolicy.ARMOR_SLOTS.has(slot)) continue;
+        if (slot === 15) { proposed.delete(10); proposed.delete(11); }
+        else if (slot === 10 || slot === 11) proposed.delete(15);
+        proposed.set(slot,item);
+    }
+    // Preserve ordinary per-slot behavior when no complete set is available.
+    if (!ArmorPolicy.completeSets(availableArmor).length) return ordinary;
+    const role = BotRoles.inferRole(actor);
+    const classId = BotRoles.classIdOf(actor);
+    let chosen = ArmorPolicy.optimize([...proposed.values()],availableArmor,{role,classId});
+    if (ArmorPolicy.score(currentArmor,role,classId) >= ArmorPolicy.score(chosen,role,classId)) chosen = currentArmor;
+    return [...ordinary.filter(({slot}) => !ArmorPolicy.ARMOR_SLOTS.has(slot)),
+        ...chosen.filter(item => !item.fetchEquipped()).map(item => ({item,slot:Number(item.fetchSlot()),score:scoreItem(actor,item)}))];
 }
 
 function canApplyNow(session, options = {}) {
@@ -303,6 +321,14 @@ function safeCandidate(session, itemId) {
     const item = items.find((candidate) => Number(candidate.fetchId?.()) === Number(itemId || 0));
     if (!item) return { item: null, slot: null, reason: 'item_not_found' };
     if (!isSuitableItem(actor, item)) return { item, slot: null, reason: 'incompatible_item' };
+    if (ArmorPolicy.ARMOR_SLOTS.has(Number(item.fetchSlot()))
+        && ArmorPolicy.completeSets(items.filter(candidate => isSuitableItem(actor,candidate,true))).length) {
+        const planned = findBestUpgrades(session).filter(entry => ArmorPolicy.ARMOR_SLOTS.has(entry.slot));
+        const selected = planned.find(entry => Number(entry.item.fetchId()) === Number(itemId));
+        if (!selected) return { item, slot: null, reason: 'not_an_upgrade' };
+        if (planned.length > 1) return { item, slot: null, reason: 'requires_equipment_optimization' };
+        return { ...selected, reason: null };
+    }
 
     if (isTorsoSlot(item.fetchSlot())) {
         const torsoUpgrades = findTorsoUpgrades(actor, items.filter((candidate) => isSuitableItem(actor, candidate)));

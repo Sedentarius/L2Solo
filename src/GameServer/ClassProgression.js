@@ -84,4 +84,20 @@ function expandTemplates(templates) {
     });
 }
 
-module.exports = { thirdClasses, firstProfMap, secondProfMap, getThirdClass, expandTemplates };
+const parents = new Map();
+for (const map of [firstProfMap, secondProfMap]) {
+    for (const [parent, children] of Object.entries(map)) for (const child of children) parents.set(child, Number(parent));
+}
+for (const [id, entry] of Object.entries(thirdClasses)) parents.set(Number(id), entry.parentClassId);
+const knownClasses = new Set([...Object.keys(firstProfMap).map(Number), ...parents.keys()]);
+
+function lineage(classId) {
+    if (classId === null || classId === undefined || classId === '') return [];
+    let current = Number(classId);
+    if (!knownClasses.has(current)) return [];
+    const result = [];
+    while (current !== undefined) { result.unshift(current); current = parents.get(current); }
+    return result;
+}
+
+module.exports = { thirdClasses, firstProfMap, secondProfMap, getThirdClass, expandTemplates, lineage };

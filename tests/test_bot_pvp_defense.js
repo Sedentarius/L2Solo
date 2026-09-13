@@ -73,7 +73,7 @@ function setup(options = {}, mode = 'hunting') {
 
 const attacks = [];
 const casts = [];
-const ai = { executePvPCombat(_s, _b, target) { attacks.push(target.fetchId()); } };
+const ai = { executePvPCombat(s, _b, target, _generics, options) { attacks.push(target.fetchId()); s.testCombatOptions = options; } };
 const generics = { skillExec(_s, _b, data) { casts.push(data); } };
 function tick(own, rng = () => 0.99) {
     return Defense.tick(own, own.actor, generics, ai, { now, rng });
@@ -198,6 +198,7 @@ for (const hp of [100, 20]) {
     assert.strictEqual(companion.pvpDefense.action, 'fight', 'party loyalty overrides solo aversion');
     assert.strictEqual(companion.currentTargetId, weak.id);
     assert.strictEqual(own.currentTargetId, weak.id);
+    assert.strictEqual(own.testCombatOptions.party, true, 'party leader uses the resolved group combat context');
     assert(!own.lastPvpDecision.targets.includes(bystander.id));
     assert.strictEqual(Threats.record(bot, companion.actor, now), false);
     weak.dead = true; tick(companion);

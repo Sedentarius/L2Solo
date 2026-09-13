@@ -58,7 +58,9 @@ async function reconcile({ characterId, classId, level, seed = characterId } = {
     // The bot may have accumulated levels while cold.  Award its current tree
     // first, then walk every profession threshold it has already passed.
     const skillset = new Skillset();
-    await skillset.awardSkills(id, resolvedClassId, level);
+    for (const ancestor of ClassProgression.lineage(resolvedClassId)) {
+        await skillset.awardSkills(id, ancestor, level);
+    }
     for (let target = nextClass(resolvedClassId, level, seed); target; target = nextClass(resolvedClassId, level, seed)) {
         await Database.updateCharacterClassId(id, target);
         resolvedClassId = target;

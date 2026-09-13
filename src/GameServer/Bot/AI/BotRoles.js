@@ -185,6 +185,7 @@ function partyRoleStance(role) {
 }
 
 module.exports = {
+    classIdOf,
     ROLE_CLASSES,
     SUMMONER_CLASSES,
     NECROMANCER_CLASSES,

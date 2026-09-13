@@ -4,6 +4,7 @@ const DataCache = invoke('GameServer/DataCache');
 const Formulas = invoke('GameServer/Formulas');
 const C4SkillRules = invoke('GameServer/Skills/C4SkillRules');
 const ColdCombatProfile = invoke('GameServer/Bot/Population/ColdCombatProfile');
+const ColdClassPolicy = invoke('GameServer/Bot/Population/ColdClassPolicy');
 const BotRoles = invoke('GameServer/Bot/AI/BotRoles');
 const ChargeLifecycle = invoke('GameServer/Skills/ChargeLifecycle');
 const HealingPotionStock = invoke('GameServer/Bot/AI/HealingPotionStock');
@@ -363,42 +364,13 @@ function effectiveSkillPower(profile, skill, hp) {
         : basePower;
 }
 
-function chooseSkill(profile, hp, mp, cooldowns, time, charges = 0, rng) {
-    return ColdCombatProfile.offensiveSkills(profile)
-        .filter((skill) => {
-            const requiredCharges = Math.max(0, Number(C4SkillRules.resolve(skill).requires?.charges) || 0);
-            return Number(skill.mp || 0) <= mp
-                && Number(cooldowns[skill.selfId] || 0) <= time
-                && requiredCharges <= charges;
-        })
-        .map((skill) => {
-            const semantic = C4SkillRules.resolve(skill);
-            const magic = skill.spell === true;
-            const power = effectiveSkillPower(profile, skill, hp);
-            let rawDamage = magic
-                ? Formulas.calcMagicDamage(profile.mAtk, Math.max(1, power), 1)
-                : Formulas.calcPhysicalDamage(profile.pAtk, profile.equipment.pAtkRnd, 1, power, { rng });
-            const requiredCharges = Math.max(0, Number(semantic.requires?.charges) || 0);
-            if (requiredCharges > 0) rawDamage *= 0.8 + (0.201 * charges);
-            return { skill, magic, power, score: rawDamage / actionDelayMs(profile, skill) };
-        })
-        .sort((a, b) => b.score - a.score)[0] || null;
+function chooseSkill(profile, hp, mp, cooldowns, time, charges = 0, rng, context = {}) {
+    const selected=ColdClassPolicy.select(profile,{hp,mp,cooldowns,time,charges,...context});
+    return selected?{...selected,power:effectiveSkillPower(profile,selected.skill,hp)}:null;
 }
 
-function chooseChargeSkill(profile, mp, cooldowns, time, charges = 0) {
-    const needed = ColdCombatProfile.offensiveSkills(profile).reduce((maximum, skill) => (
-        Math.max(maximum, Number(C4SkillRules.resolve(skill).requires?.charges) || 0)
-    ), 0);
-    if (needed <= charges) return null;
-    return (profile.skills || []).filter((skill) => {
-        const semantic = C4SkillRules.resolve(skill);
-        const requiredWeapon = Number(semantic.requires?.weaponsAllowed) || 0;
-        return !skill.passive
-            && semantic.skillType === C4SkillRules.CHARGE
-            && Number(skill.mp || 0) <= mp
-            && Number(cooldowns[skill.selfId] || 0) <= time
-            && (!requiredWeapon || (requiredWeapon & profile.weaponMask) !== 0);
-    }).sort((a, b) => Number(b.level || 0) - Number(a.level || 0))[0] || null;
+function chooseChargeSkill(profile, mp, cooldowns, time, charges = 0, context = {}) {
+    return ColdClassPolicy.select(profile,{hp:profile.maxHp,mp,cooldowns,time,charges,...context,prepare:true});
 }
 
 function activeMusicEffectForSkill(profile, skill, timestamp) {
@@ -779,7 +751,7 @@ function resolveFight({ state, spot, pressure, targetNpcId = 0, rng, timestamp =
                 botReadyAt += actionDelayMs(bot, music.skill);
                 continue;
             }
-            const chargeSkill = chooseChargeSkill(bot, vitals.mp, cooldowns, timestamp + time, charges);
+            const chargeSkill = chooseChargeSkill(bot, vitals.mp, cooldowns, timestamp + time, charges, {hp:vitals.hp,mob,summon:soloFighter.summon});
             if (chargeSkill) {
                 const semantic = C4SkillRules.resolve(chargeSkill);
                 const nextCharges = { charges, chargeExpiresAt };
@@ -792,7 +764,7 @@ function resolveFight({ state, spot, pressure, targetNpcId = 0, rng, timestamp =
                 botReadyAt += actionDelayMs(bot, chargeSkill);
                 continue;
             }
-            const selected = chooseSkill(bot, vitals.hp, vitals.mp, cooldowns, timestamp + time, charges);
+            const selected = chooseSkill(bot, vitals.hp, vitals.mp, cooldowns, timestamp + time, charges, rng, {mob,summon:soloFighter.summon});
             const skill = selected?.skill || null;
             const magic = selected?.magic === true;
             let damage = 0;
@@ -865,7 +837,7 @@ function resolveFight({ state, spot, pressure, targetNpcId = 0, rng, timestamp =
             effects: soloFighter.profile.effects,
             inventory: fightState.inventory,
             summon: soloFighter.summon || null,
-            debug: { actions, skillUses, heals, musicUses, summonUses, summonActions, potionsUsed: soloFighter.potionsUsed, mobSelfId: mob.selfId || null, timedOut: !died }
+            debug: { actions, durationMs: time, skillUses, heals, musicUses, summonUses, summonActions, potionsUsed: soloFighter.potionsUsed, mobSelfId: mob.selfId || null, timedOut: !died }
         };
     }
 
@@ -909,7 +881,7 @@ function resolveFight({ state, spot, pressure, targetNpcId = 0, rng, timestamp =
         effects: soloFighter.profile.effects,
         inventory: fightState.inventory,
         summon: soloFighter.summon || null,
-        debug: { actions, skillUses, heals, musicUses, summonUses, summonActions, potionsUsed: soloFighter.potionsUsed, mobSelfId: mob.selfId || null, timedOut: false }
+        debug: { actions, durationMs: time, skillUses, heals, musicUses, summonUses, summonActions, potionsUsed: soloFighter.potionsUsed, mobSelfId: mob.selfId || null, timedOut: false }
     };
 }
 
@@ -1055,7 +1027,7 @@ function resolvePartyFight({ members, spot, targetNpcId = 0, rng = Math.random, 
                 continue;
             }
 
-            const chargeSkill = chooseChargeSkill(next.profile, next.vitals.mp, next.cooldowns, timestamp + time, next.charges);
+            const chargeSkill = chooseChargeSkill(next.profile, next.vitals.mp, next.cooldowns, timestamp + time, next.charges, {hp:next.vitals.hp,mob,party:true,summon:next.summon});
             if (chargeSkill) {
                 const semantic = C4SkillRules.resolve(chargeSkill);
                 addCharges(next, 1, semantic.maxCharges, timestamp + time);
@@ -1065,7 +1037,7 @@ function resolvePartyFight({ members, spot, targetNpcId = 0, rng = Math.random, 
                 next.readyAt += actionDelayMs(next.profile, chargeSkill);
                 continue;
             }
-            const selected = chooseSkill(next.profile, next.vitals.hp, next.vitals.mp, next.cooldowns, timestamp + time, next.charges);
+            const selected = chooseSkill(next.profile, next.vitals.hp, next.vitals.mp, next.cooldowns, timestamp + time, next.charges, rng, {mob,party:true,summon:next.summon});
             const skill = selected?.skill || null;
             let damage = 0;
             if (selected?.magic) {
@@ -1142,7 +1114,8 @@ function resolvePartyFight({ members, spot, targetNpcId = 0, rng = Math.random, 
 }
 
 const BackgroundResolver = {
-    combat: { chooseSkill, chooseHeal, applyAllyHeal, actionDelayMs, hitSucceeds },
+    combat: { chooseSkill, chooseChargeSkill, coldChargeState, expireCharges, addCharges, consumeCharges,
+        chooseHeal, applyAllyHeal, actionDelayMs, hitSucceeds },
     resolveDeathRecovery,
     resolveRest,
     resolvePartyFight,
@@ -1324,6 +1297,7 @@ const BackgroundResolver = {
         let summonUses = 0;
         let summonActions = 0;
         let potionsUsed = 0;
+        let combatMs = 0;
         const foughtNpcIds = [];
 
         for (let i = 0; i < fights; i++) {
@@ -1356,6 +1330,7 @@ const BackgroundResolver = {
             materialize.adena += result.adena;
             materialize.items.push(...result.loot);
             combatActions += Number(result.debug?.actions || 0);
+            combatMs += Number(result.debug?.durationMs || 0);
             skillUses += Number(result.debug?.skillUses || 0);
             heals += Number(result.debug?.heals || 0);
             musicUses += Number(result.debug?.musicUses || 0);
@@ -1398,6 +1373,10 @@ const BackgroundResolver = {
             }
         }
 
+        patch.stats.huntEfficiency = invoke('GameServer/Bot/AI/BotHuntEfficiency').record(state, {
+            spotId:spot.id,combatMs,exp:materialize.exp,timestamp,
+            recoveryMs:Math.max(0,Number(patch.stats.restUntil || timestamp)-timestamp)
+        });
         if (wins > 0 && !died) {
             events.push({
                 type: 'hunt',

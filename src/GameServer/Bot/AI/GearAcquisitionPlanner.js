@@ -207,9 +207,12 @@ function rankIndex(rank) {
 
 function combatReadiness(state = {}) {
     const role = roleFor(state);
+    const classId = classIdFor(state);
     const equipped = equippedInventoryItems(state.inventory);
-    const weapon = equipped.find((item) => WEAPON_SLOTS.has(Number(item.etc?.slot || 0)));
-    const armor = equipped.filter((item) => ARMOR_SLOTS.has(Number(item.etc?.slot || 0)));
+    const weapon = equipped.find((item) => WEAPON_SLOTS.has(Number(item.etc?.slot || 0))
+        && BotWeaponCompatibility.isCompatibleWeapon(item.template?.kind,role,classId));
+    const armor = equipped.filter((item) => ARMOR_SLOTS.has(Number(item.etc?.slot || 0))
+        && suitable(item,state,role,item.etc?.rank));
     const weaponRank = rankIndex(weapon?.etc?.rank);
     const armorRank = armor.length
         ? armor.reduce((sum, item) => sum + rankIndex(item.etc?.rank), 0) / armor.length
@@ -426,6 +429,15 @@ function equipInventoryUpgrades(state = {}, inventory = {}) {
             best.delete('10');
             best.delete('11');
         }
+    }
+    const ArmorPolicy = invoke('GameServer/Bot/AI/BotArmorPolicy');
+    const availableArmor = ordinaryCandidates.filter(({item}) => ArmorPolicy.ARMOR_SLOTS.has(Number(item.etc?.slot)));
+    if (ArmorPolicy.completeSets(availableArmor.map(({item}) => item)).length) {
+        const current = availableArmor.filter(({entry,item}) => equippedSlotsFor(entry,item.etc?.slot).length).map(({item}) => item);
+        let chosen = ArmorPolicy.optimize([...best.values()].map(({item}) => item),availableArmor.map(({item}) => item),{role,classId});
+        if (ArmorPolicy.score(current,role,classId) >= ArmorPolicy.score(chosen,role,classId)) chosen = current;
+        for (const slot of ArmorPolicy.ARMOR_SLOTS) best.delete(String(slot));
+        for (const item of chosen) best.set(String(item.etc.slot),availableArmor.find(candidate => candidate.item === item));
     }
     const next = Object.fromEntries(Object.entries(inventory || {}).map(([key, value]) => [key, {
         ...value,

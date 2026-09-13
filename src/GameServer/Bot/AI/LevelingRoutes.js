@@ -1,5 +1,7 @@
 const BotRoles = invoke('GameServer/Bot/AI/BotRoles');
+const ClassPolicy = invoke('GameServer/Bot/AI/BotClassPolicy');
 const BotHuntingGroundPolicy = invoke('GameServer/Bot/AI/BotHuntingGroundPolicy');
+const HuntEfficiency = invoke('GameServer/Bot/AI/BotHuntEfficiency');
 
 const ECONOMIC_ROLES = {
     54: 'spoiler',
@@ -85,6 +87,7 @@ const ROUTES = [
     },
     {
         id: 'cleric_undead_40_74',
+        requiredSkill: 1028,
         name: 'cleric undead route',
         minLevel: 40,
         maxLevel: 74,
@@ -179,7 +182,7 @@ function uniq(values) {
 }
 
 function classIdOf(state = {}) {
-    return Number(state.classId || state.stats?.classId || state.template?.classId || 0) || null;
+    return ClassPolicy.classIdOf(state) ?? state.template?.classId ?? null;
 }
 
 function roleForState(state = {}) {
@@ -202,7 +205,8 @@ function modeForState(state = {}, options = {}) {
 }
 
 function targetLevelForState(state = {}) {
-    if (Number(state.level || 0) > 0) return Number(state.level);
+    const actual = Number(state.fetchLevel?.() || state.level || state.stats?.level || 0);
+    if (actual > 0) return actual;
 
     const parts = String(state.levelBand || '').split('-').map((part) => Number(part));
     if (parts.length >= 2 && Number.isFinite(parts[0]) && Number.isFinite(parts[1])) {
@@ -308,6 +312,7 @@ function routeApplies(route, context, tags) {
     if (level < route.minLevel - 3 || level > route.maxLevel + 3) return false;
     if (route.modes && !route.modes.includes(mode)) return false;
     if (route.roles && !route.roles.includes(role)) return false;
+    if (route.requiredSkill && !ClassPolicy.hasSkill(context.state, route.requiredSkill, level)) return false;
     if (route.requiredTags && !hasAll(tags, route.requiredTags)) return false;
     if (route.avoidTags && overlapCount(tags, route.avoidTags) > 0) return false;
     return true;
@@ -336,6 +341,7 @@ function baseScore(spot, context) {
 function scoreSpot(spot, state = {}, options = {}) {
     const tags = tagsForSpot(spot);
     const context = {
+        state,
         level: Number(options.level || targetLevelForState(state)),
         role: options.role || roleForState(state),
         mode: modeForState(state, options)
@@ -356,8 +362,9 @@ function scoreSpot(spot, state = {}, options = {}) {
     const huntingGround = BotHuntingGroundPolicy.evaluate(spot, state, { ...options, ...context, tags });
     const huntingGroundPenalty = huntingGround.allowed ? 0 : 10000;
     const variation = stableVariation(spot, state);
+    const efficiencyAdjustment = (options.efficiencyScores || HuntEfficiency.scores(state,options.timestamp,context.mode)).get(spot.id) || 0;
     const score = baseScore(spot, context) + (routeMatch ? routeMatch.score : 0)
-        + variation - crowdPenalty - localityPenalty - huntingGroundPenalty;
+        + variation + efficiencyAdjustment - crowdPenalty - localityPenalty - huntingGroundPenalty;
 
     return {
         score,
@@ -374,6 +381,7 @@ function scoreSpot(spot, state = {}, options = {}) {
         localityPenalty,
         huntingGroundPenalty,
         huntingGround,
+        efficiencyAdjustment,
         variation
     };
 }
@@ -400,6 +408,7 @@ function decorateSpot(spot, match) {
 }
 
 function rankedSpots(spots, state = {}, options = {}) {
+    options = { ...options, efficiencyScores: HuntEfficiency.scores(state,options.timestamp,modeForState(state,options)) };
     return (spots || [])
         .map((spot) => {
             const match = scoreSpot(spot, state, options);
@@ -415,6 +424,7 @@ function rankedSpots(spots, state = {}, options = {}) {
                 crowdPenalty: match.crowdPenalty,
                 localityPenalty: match.localityPenalty,
                 huntingGroundPenalty: match.huntingGroundPenalty,
+                efficiencyAdjustment: match.efficiencyAdjustment,
                 huntingGround: match.huntingGround
             };
         })

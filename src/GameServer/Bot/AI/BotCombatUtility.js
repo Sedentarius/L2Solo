@@ -1,6 +1,8 @@
 const C4SkillRules = invoke('GameServer/Skills/C4SkillRules');
-const Attack = invoke('GameServer/Actor/Attack');
+const Attack = invoke('GameServer/Skills/WeaponMask');
 const Formulas = invoke('GameServer/Formulas');
+const ClassPolicy = invoke('GameServer/Bot/AI/BotClassPolicy');
+const Feedback = invoke('GameServer/Bot/AI/BotActionFeedback');
 
 const OFFENSIVE_TYPES = new Set([
     C4SkillRules.DAMAGE,
@@ -80,24 +82,40 @@ function policyAdjustment(skill, role, range, cost, maxMp, policy = {}) {
     return Math.round(clamp(adjustment, -68, 68));
 }
 
-function evaluate(bot, target, skill, role, policy = {}) {
+function evaluateCandidate(bot, target, skill, role, policy = {}, plannedCharges = null) {
+    const reject = reason => {
+        if (policy.rejectedAlternatives && policy.rejectedAlternatives.length < 8 && skill?.fetchPassive?.() !== true) {
+            policy.rejectedAlternatives.push({ skillId: skill?.fetchSelfId?.(), reason });
+        }
+        return null;
+    };
     if (!skill || skill.fetchPassive?.()) return null;
+    if (target?.isDead?.() === true || target?.state?.fetchDead?.() === true || target?.fetchHp?.() <= 0) return reject('target_dead');
+    if (Feedback.blocked(bot,target,skill)) return reject('native_rejection_backoff');
     // SkillRequest rejects a skill still on reuse after the combat planner has
     // already committed to it. Treat that as unavailable here so a melee bot
     // falls back to its normal attack instead of idling until cooldown ends.
-    if (bot.canUseSkill?.(skill) === false) return null;
+    if (bot.canUseSkill?.(skill) === false) return reject('reuse');
     const semantic = skill.fetchSemantic?.() || {};
     if (semantic.notUsedInC4) return null;
+    const hpLimit = semantic.condition?.actorHpPercentAtMost;
+    if (hpLimit !== undefined && Number(bot.fetchHp?.()) / Math.max(1, Number(bot.fetchMaxHp?.())) * 100 > hpLimit) return null;
+    const hpCost = Math.max(0, Number(skill.fetchConsumedHp?.() || 0));
+    if (hpCost > 0 && hpCost >= Number(bot.fetchHp?.() || 0)) return null;
     // Internal bot casts bypass the packet-level target restriction checks.
     // Remove undead-only skills before scoring so a living mob cannot make a
     // holy nuke look like the best combat action and waste a cast window.
     if (semantic.undeadOnly && target?.fetchUndead?.() !== true) return null;
     if (policy.avoidAreaDamage === true && AREA_SOURCE_TARGETS.has(String(semantic.sourceTarget || '').toLowerCase())) return null;
     const allowedWeapons = Number(semantic.requires?.weaponsAllowed) || 0;
-    if (allowedWeapons && (allowedWeapons & Attack.weaponMaskFor(bot)) === 0) return null;
+    if (allowedWeapons && (allowedWeapons & Attack.weaponMaskFor(bot)) === 0) return reject('weapon');
+    // Match native rollBlow's mandatory rear gate before spending a cast.
+    // Cold combat has no heading evidence, so it uses another valid blow.
+    if ((Number(semantic.requires?.condition) & 0x0008) !== 0
+        && bot.attack?.isBehindTarget?.(bot,target) !== true) return reject('rear_position_required');
     const requiredCharges = Math.max(0, Number(semantic.requires?.charges) || 0);
-    const currentCharges = Math.max(0, Number(bot.fetchCharges?.() ?? bot.charges ?? 0) || 0);
-    if (requiredCharges > currentCharges) return null;
+    const currentCharges = Math.max(0, Number(plannedCharges ?? bot.fetchCharges?.() ?? bot.charges ?? 0) || 0);
+    if (requiredCharges > currentCharges) return reject('charges');
     if (!OFFENSIVE_TYPES.has(skill.fetchSkillType?.())) return null;
     if (skill.fetchTargetKind?.() !== 'enemy') return null;
 
@@ -118,7 +136,9 @@ function evaluate(bot, target, skill, role, policy = {}) {
     const cost = Math.max(0, Number(skill.fetchConsumedMp?.() || 0));
     // A mage's staff is the primary weapon. Keeping a generic MP reserve made
     // a mage walk into melee even though it could still afford a nuke.
-    if (cost > mp || (!policy.pvp && role !== 'mage' && (mp - cost) / maxMp < reserveRatio(role))) return null;
+    const classProfile = policy.classProfile || ClassPolicy.profileFor(bot, policy);
+    const reserve = classProfile.supported ? classProfile.manaReserve : (policy.pvp ? 0 : reserveRatio(role));
+    if (cost > mp || (role !== 'mage' && (mp - cost) / maxMp < reserve)) return reject('mp_budget');
 
     const type = skill.fetchSkillType();
     const basePower = Math.max(0, Number(skill.fetchPower?.() || 0));
@@ -160,10 +180,21 @@ function evaluate(bot, target, skill, role, policy = {}) {
         score += adjustment;
         reasons.push(`policy_${adjustment > 0 ? 'up' : 'down'}:${adjustment}`);
     }
-    return { skill, score: Math.round(score), reasons, cost, range, power, policyAdjustment: adjustment };
+    const preference = ClassPolicy.offensivePreference(bot, target, skill, { ...policy, classProfile });
+    score += preference.score;
+    reasons.push(...preference.reasons);
+    return { skill, score: Math.round(score), reasons, cost, range, power,
+        intent: type === C4SkillRules.DRAIN && bot.fetchHp?.() < bot.fetchMaxHp?.() ? 'damage_and_sustain' : 'damage',
+        policyAdjustment: adjustment,
+        classAdjustment: preference.score, classMode: classProfile.mode };
+}
+
+function evaluate(bot, target, skill, role, policy = {}) {
+    return evaluateCandidate(bot, target, skill, role, policy);
 }
 
 function select(bot, target, role, policy = {}) {
+    policy = { ...policy, classProfile: policy.classProfile || ClassPolicy.profileFor(bot, policy) };
     const skills = bot?.skillset?.skills || [];
     const candidates = role === 'mage'
         ? skills.filter((skill) => skill.fetchSpell?.() === true)
@@ -175,32 +206,55 @@ function select(bot, target, role, policy = {}) {
         .sort((a, b) => b.score - a.score)[0] || null;
 }
 
-function selectChargeSkill(bot, role, policy = {}) {
+function selectChargePlan(bot, role, policy = {}, target = null) {
     const skills = bot?.skillset?.skills || [];
     const current = Math.max(0, Number(bot.fetchCharges?.() ?? bot.charges ?? 0) || 0);
     const weaponMask = Attack.weaponMaskFor(bot);
-    const needed = skills.reduce((maximum, skill) => {
-        const semantic = skill?.fetchSemantic?.() || {};
-        const allowed = Number(semantic.requires?.weaponsAllowed) || 0;
-        if (allowed && (allowed & weaponMask) === 0) return maximum;
-        return Math.max(maximum, Number(semantic.requires?.charges) || 0);
-    }, 0);
-    if (needed <= current) return null;
-
     const mp = Math.max(0, Number(bot.fetchMp?.()) || 0);
     const maxMp = Math.max(1, Number(bot.fetchMaxMp?.()) || mp || 1);
-    return skills
+    const profile = policy.classProfile || ClassPolicy.profileFor(bot, policy);
+    const reserve = profile.supported ? profile.manaReserve : (policy.pvp ? 0 : reserveRatio(role));
+    const preparation = skills
         .filter((skill) => {
-            if (!skill || skill.fetchPassive?.() || bot.canUseSkill?.(skill) === false) return false;
+            if (!skill || skill.fetchPassive?.() || bot.canUseSkill?.(skill) === false || Feedback.blocked(bot,bot,skill)) return false;
             const semantic = skill.fetchSemantic?.() || {};
             const allowed = Number(semantic.requires?.weaponsAllowed) || 0;
-            const cost = Math.max(0, Number(skill.fetchConsumedMp?.()) || 0);
             return semantic.skillType === C4SkillRules.CHARGE
-                && (!allowed || (allowed & weaponMask) !== 0)
-                && cost <= mp
-                && (policy.pvp || role === 'mage' || (mp - cost) / maxMp >= reserveRatio(role));
-        })
-        .sort((a, b) => Number(b.fetchLevel?.()) - Number(a.fetchLevel?.()))[0] || null;
+                && !semantic.notUsedInC4
+                && (!allowed || (allowed & weaponMask) !== 0);
+        });
+    if (!preparation.length) return null;
+    const ready = select(bot, target, role, policy);
+    let best = null;
+    for (const spender of skills) {
+        const needed = Math.max(0, Number(spender?.fetchSemantic?.()?.requires?.charges) || 0);
+        if (needed <= current) continue;
+        // Reuse the offensive gates against this target, substituting only
+        // the charges the plan intends to build. Never mutate the actor.
+        const decision = evaluateCandidate(bot, target, spender, role, { ...policy, classProfile: profile }, needed);
+        if (!decision) continue;
+        const casts = needed - current; // C4 Focus Force/Sonic Focus add one.
+        for (const skill of preparation) {
+            const cap = Math.max(0, Number(skill.fetchSemantic?.()?.maxCharges ?? skill.fetchPower?.()) || 0);
+            if (cap < needed || cap <= current) continue;
+            const cost = Math.max(0, Number(skill.fetchConsumedMp?.()) || 0) * casts;
+            const totalMp = cost + decision.cost;
+            if (totalMp > mp || (mp - totalMp) / maxMp < reserve) continue;
+            // Preparation competes with an immediately useful attack. This
+            // bounded per-cast preference is policy, not a C4 damage formula.
+            const score = decision.score - casts * 25 - cost * 1.5;
+            if (ready && ready.score >= score) continue;
+            if (!best || score > best.score) best = {
+                skill, spender, requiredCharges: needed, castsRemaining: casts,
+                totalMp, score, reason: 'prepare_available_attack'
+            };
+        }
+    }
+    return best;
+}
+
+function selectChargeSkill(bot, role, policy = {}, target = null) {
+    return selectChargePlan(bot, role, policy, target)?.skill || null;
 }
 
 module.exports = {
@@ -209,6 +263,7 @@ module.exports = {
     evaluate,
     select,
     selectChargeSkill,
+    selectChargePlan,
     policyAdjustment,
     basicAttackDamageEstimate,
     mageMeleeFinishOpportunity

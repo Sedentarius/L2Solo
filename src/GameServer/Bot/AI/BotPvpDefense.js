@@ -147,6 +147,7 @@ function tick(session, bot, Generics, BotAI, { now = Date.now(), rng = Math.rand
     }
     if (Tactics.support(session, bot, context, Generics, now)) return true;
     if (Tactics.control(session, bot, context, target, Generics, now)) return true;
+    if (invoke('GameServer/Bot/AI/BotPvpPositioning').reposition(session,bot,context,now)) return true;
     // Native auto-attacks repeat without yielding an idle AI tick. Revisit
     // skills that came off reuse instead of being stuck on basic attacks for
     // the rest of a long duel.
@@ -154,12 +155,14 @@ function tick(session, bot, Generics, BotAI, { now = Date.now(), rng = Math.rand
         now - Number(encounter.lastSkillReviewAt || 0) >= 2000) {
         encounter.lastSkillReviewAt = now;
         const role = invoke('GameServer/Bot/AI/BotRoles').combatRoleFor(bot);
-        if (invoke('GameServer/Bot/AI/BotCombatUtility').select(bot, target, role, { pvp: true, avoidAreaDamage: true })) {
+        if (invoke('GameServer/Bot/AI/BotCombatUtility').select(bot, target, role, { session, party: context.members.length > 1, pvp: true, avoidAreaDamage: true })) {
             Tactics.stop(session, bot);
         }
     }
     if (bot.state?.fetchTowards?.() || bot.state?.fetchHits?.() || bot.state?.fetchCasts?.()) return true;
-    BotAI.executePvPCombat(session, bot, target, Generics, { avoidAreaDamage: true });
+    BotAI.executePvPCombat(session, bot, target, Generics, {
+        party: context.members.length > 1, avoidAreaDamage: true, activeMobs: threats.length
+    });
     return true;
 }
 

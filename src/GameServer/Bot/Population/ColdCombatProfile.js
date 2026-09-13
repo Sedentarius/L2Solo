@@ -10,7 +10,8 @@ const BotRoles = invoke('GameServer/Bot/AI/BotRoles');
 const BotHuntingTargetPolicy = invoke('GameServer/Bot/AI/BotHuntingTargetPolicy');
 const NpcSkills = invoke('GameServer/Npc/NpcSkills');
 
-const PROFILE_VERSION = 4;
+// Rebuild database-derived snapshots that omitted template magic/cast/reuse metadata.
+const PROFILE_VERSION = 5;
 const npcCombatCache = new WeakMap();
 
 const WEAPON_MASK_BY_KIND = Object.freeze({
@@ -223,9 +224,10 @@ function effectiveBase(profile, stat, timestamp, sources) {
 function skillDefinition(selfId, level) {
     const skill = (DataCache.skills || []).find((candidate) => Number(candidate.selfId) === Number(selfId));
     if (!skill) return null;
-    return (skill.levels || []).find((row) => number(row.level) === number(level))
+    const definition = (skill.levels || []).find((row) => number(row.level) === number(level))
         || (skill.levels || []).filter((row) => number(row.level) <= number(level)).at(-1)
         || null;
+    return definition ? { ...skill.template, ...skill.time, ...definition } : null;
 }
 
 const FIRST_CLASS_TO_BASE = new Map(

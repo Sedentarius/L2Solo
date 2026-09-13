@@ -1,8 +1,11 @@
 const EffectStore = invoke('GameServer/Effects/EffectStore');
 const BotRoles = invoke('GameServer/Bot/AI/BotRoles');
+const ClassPolicy = invoke('GameServer/Bot/AI/BotClassPolicy');
 const HotBotPolicyOverlay = invoke('GameServer/Bot/AI/HotBotPolicyOverlay');
 const World = invoke('GameServer/World/World');
 const BotRaidSafety = invoke('GameServer/Bot/AI/BotRaidSafety');
+const Intent = invoke('GameServer/Bot/AI/BotSkillIntent');
+const Attack = invoke('GameServer/Actor/Attack');
 
 const REFRESH_THRESHOLD_MS = 2 * 60 * 1000;
 const REFRESH_FRACTION = 0.25;
@@ -250,8 +253,10 @@ function planningEffects(target, planning = null) {
     return planning.effects.get(target);
 }
 
-function isUsefulForTarget(target, skill, provider = null, context = {}) {
+function isUsefulForTarget(target, skill, provider = null, context = {}, planning = null) {
     const semantic = skill?.fetchSemantic?.() || {};
+    if (!Intent.alive(target)) return false;
+    if (skill?.fetchTargetKind?.() === 'ally' && !partyAuraRecipients([], provider, skill, planning).includes(target)) return false;
     if (!situationalBuffUseful(semantic.effect, context)) return false;
     // Party skills retain their native all-members behaviour. The role policy
     // only prevents wasting individual casts on roles that cannot use them.
@@ -259,7 +264,10 @@ function isUsefulForTarget(target, skill, provider = null, context = {}) {
         return partyAuraCanReach(provider, target, skill);
     }
 
-    const allowedRoles = INDIVIDUAL_BUFF_TARGET_ROLES[normalizedEffect(semantic.effect)];
+    const effect = normalizedEffect(semantic.effect);
+    const classUseful = ClassPolicy.buffUseful(target, effect);
+    if (classUseful !== null) return classUseful;
+    const allowedRoles = INDIVIDUAL_BUFF_TARGET_ROLES[effect];
     return !allowedRoles || allowedRoles.has(BotRoles.inferRole(target));
 }
 
@@ -359,14 +367,25 @@ function hasSupportBuffCapacity(target, skill, planning = null) {
     return capacity.used < capacity.allowed;
 }
 
+function allyRecipients(provider, skill) {
+    if (!provider) return [];
+    return Attack.prototype.resolveSkillTargets.call(Attack.prototype, provider.session, provider, provider, skill).filter(Intent.alive);
+}
+
 function partyAuraRecipients(members, provider, skill, planning = null) {
-    if (partyAuraRadius(skill) === null) return [];
+    const ally = skill?.fetchTargetKind?.() === 'ally';
+    if (!ally && partyAuraRadius(skill) === null) return [];
 
     let providerCache = planning?.auraRecipients.get(provider);
     if (providerCache?.has(skill)) return providerCache.get(skill);
     if (planning && !providerCache) {
         providerCache = new Map();
         planning.auraRecipients.set(provider, providerCache);
+    }
+    if (ally) {
+        const recipients = allyRecipients(provider, skill);
+        providerCache?.set(skill, recipients);
+        return recipients;
     }
 
     const actors = [];
@@ -410,6 +429,7 @@ function partyAuraRecipients(members, provider, skill, planning = null) {
 
 function canPlanSupportAction(target, provider, skill, members, planning = null) {
     const recipients = partyAuraRecipients(members, provider, skill, planning);
+    if (skill?.fetchTargetKind?.() === 'ally' && !recipients.includes(target)) return false;
     if (recipients.length === 0) return hasSupportBuffCapacity(target, skill, planning);
 
     let providerCache = planning?.auraCapacity.get(provider);
@@ -453,7 +473,7 @@ function needsSkill(target, skill, planning = null) {
 }
 
 function canCast(actor, skill) {
-    return Number(actor?.fetchMp?.() || 0) >= Number(skill?.fetchConsumedMp?.() || 0);
+    return Intent.usable(actor, skill);
 }
 
 function isBusy(actor) {
@@ -526,13 +546,15 @@ function allActions(members, providers, respectReservations = true, planning = c
     const context = cachedEncounterContext(members);
     providers.forEach((provider) => {
         if (!planning.providerSkills.has(provider)) {
-            planning.providerSkills.set(provider, supportSkills(provider));
+            // Availability is shared by every recipient during this synchronous
+            // planning pass. Recheck it again immediately before dispatch.
+            planning.providerSkills.set(provider, supportSkills(provider).filter(skill => canCast(provider, skill)));
         }
     });
     return members
-        .filter((member) => member?.actor && !member.actor.state?.fetchDead?.())
+        .filter((member) => Intent.alive(member?.actor))
         .flatMap((member) => providers.flatMap((provider) => planning.providerSkills.get(provider)
-            .filter((skill) => isUsefulForTarget(member.actor, skill, provider, context) && canCast(provider, skill) && needsSkill(member.actor, skill, planning) && canPlanSupportAction(member.actor, provider, skill, members, planning) && (!respectReservations || !isReserved(member.actor, skill)))
+            .filter((skill) => isUsefulForTarget(member.actor, skill, provider, context, planning) && needsSkill(member.actor, skill, planning) && canPlanSupportAction(member.actor, provider, skill, members, planning) && (!respectReservations || !isReserved(member.actor, skill)))
             .map((skill) => ({
                 provider,
                 target: member.actor,
