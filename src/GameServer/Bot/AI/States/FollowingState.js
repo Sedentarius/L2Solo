@@ -47,6 +47,7 @@ const TOWN_CENTER_FALLBACK_RADIUS = 1500;
 const STARTER_GUIDE_TOWN_RADIUS = 1500;
 const CRITICAL_COMBAT_HP_RATIO = 0.25;
 const PARTY_RETREAT_DISTANCE = 500;
+const PARTY_RETREAT_RADIUS = 450;
 const PARTY_RETREAT_REPATH_MS = 1500;
 const SUPPORT_APPROACH_TIMEOUT_MS = 10000;
 const SUPPORT_APPROACH_REPATH_MS = 1500;
@@ -652,8 +653,10 @@ function moveToFollowTarget(session, bot, player) {
 }
 
 function retreatFromThreat(session, bot, threat, player, rooted) {
+    const retreatGoal = session.lastRetreatPlan?.to;
+    const goalNearParty = !retreatGoal || Math.hypot(retreatGoal.locX - player.fetchLocX(), retreatGoal.locY - player.fetchLocY()) <= PARTY_RETREAT_RADIUS + 1;
     const retreatInProgress = Date.now() < Number(session.partyRetreatUntil || 0) &&
-        (!!session.moveTimer || bot.state?.fetchTowards?.());
+        (!!session.moveTimer || bot.state?.fetchTowards?.()) && goalNearParty;
     session.currentTargetId = undefined;
     bot.unselect();
     bot.attack?.abortCast?.(session, bot);
@@ -664,17 +667,23 @@ function retreatFromThreat(session, bot, threat, player, rooted) {
     // completes. Keep the existing escape movement instead of cancelling it
     // and returning without a replacement route on every cooldown tick.
     if (retreatInProgress) return true;
+    const previous = session.lastRetreatPlan;
+    if (Date.now() < Number(session.partyRetreatUntil || 0) && previous?.partyMovementAllowed === false
+        && previous.threatId === threat.fetchId()
+        && Math.hypot(previous.partyAnchor.locX - player.fetchLocX(), previous.partyAnchor.locY - player.fetchLocY()) < 64) return false;
 
     bot.automation?.abortAll?.(bot);
     if (rooted) return false;
 
     const retreat = BotRetreatPlanner.retreat(session, bot, threat, {
         distance: PARTY_RETREAT_DISTANCE,
-        preferredPoint: player
+        preferredPoint: player,
+        partyAnchor: player,
+        partyRadius: PARTY_RETREAT_RADIUS
     });
     session.partyRetreatUntil = Date.now() + PARTY_RETREAT_REPATH_MS;
     session.lastFollowMoveTarget = retreat.to;
-    return true;
+    return retreat.partyMovementAllowed !== false;
 }
 
 function manaPriority(entry, pullerActor) {

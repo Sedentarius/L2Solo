@@ -298,4 +298,44 @@ try {
 assert.strictEqual(replannedFrom, incomingAdd.fetchId(), 'a fresh add should trigger a new escape direction');
 assert.strictEqual(replanningSession.plan, 'fleeing', 'replanning should keep the bot in the escape state');
 
+// Party defense must remain attached to the leader even when the geometrical
+// away vector points out of camp. Solo escape behavior above stays unchanged.
+const partyLeader = actor(3000000, 0, 0);
+const partyOptions = {
+    partyAnchor: partyLeader, preferredPoint: partyLeader, partyRadius:450, distance:500,
+    world:{fetchNpcsInRadius:()=>[]}, geodata:openGeodata
+};
+for (const [x,y,enemyX,enemyY] of [[400,0,300,0],[1200,0,1100,0],[0,0,100,0],[0,-400,0,-300]]) {
+    const companion = actor(3000001,x,y);
+    const attacker = hostile(3000002,enemyX,enemyY);
+    const escape = BotRetreatPlanner.plan(companion,attacker,partyOptions);
+    assert.strictEqual(escape.partyMovementAllowed,true);
+    assert(Math.hypot(escape.to.locX,escape.to.locY)<=451,'party escape endpoint must stay around the leader');
+    if(Math.hypot(x,y)>450) assert(Math.hypot(escape.to.locX,escape.to.locY)<Math.hypot(x,y),'separated companion must move back toward the party');
+}
+let circling = actor(3000003,400,0);
+for(let step=0;step<12;step++) {
+    const pursuer=hostile(3000004,circling.fetchLocX()-40,circling.fetchLocY());
+    const escape=BotRetreatPlanner.plan(circling,pursuer,partyOptions);
+    assert(Math.hypot(escape.to.locX,escape.to.locY)<=451,'repeated damage must not walk the companion away from camp');
+    circling=actor(3000003,escape.to.locX,escape.to.locY);
+}
+const detouredPartyPlan = BotRetreatPlanner.plan(actor(3000005,300,0),hostile(3000006,250,0),{
+    ...partyOptions,
+    previewRoute(_from,to){return {routedTo:to,routeUsable:true,route:[{locX:1500,locY:0,locZ:0},to]};}
+});
+assert.strictEqual(detouredPartyPlan.partyMovementAllowed,false,'nearby destination must not hide a path that leaves the party');
+const blockedCompanion=actor(3000007,200,0);
+let blockedMoves=0;
+blockedCompanion.moveTo=()=>{blockedMoves++;};
+const blockedPartyPlan=BotRetreatPlanner.retreat({},blockedCompanion,hostile(3000008,150,0),{
+    ...partyOptions,geodata:{...openGeodata,hasLineOfSight:()=>false}
+});
+assert.strictEqual(blockedPartyPlan.partyMovementAllowed,false);
+assert.strictEqual(blockedMoves,0,'blocked party routes must not fall back to an unbounded escape command');
+const movingLeaderPlan=BotRetreatPlanner.plan(actor(3000009,400,0),hostile(3000010,350,0),{
+    ...partyOptions,partyAnchor:actor(3000011,1100,0)
+});
+assert(Math.hypot(movingLeaderPlan.to.locX-1100,movingLeaderPlan.to.locY)<=451,'next route must use the current leader position');
+
 console.log('Bot safe-retreat planner checks passed');

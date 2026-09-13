@@ -294,6 +294,8 @@ try {
             escapes++;
             actor.state.setTowards(true);
             assert.strictEqual(options.preferredPoint, session.followPlayerSession.actor);
+            assert.strictEqual(options.partyAnchor, session.followPlayerSession.actor,'companion defense must be constrained to its party');
+            assert.strictEqual(options.partyRadius,450);
             return { to: {locX: -400, locY: 0, locZ: 0} };
         };
         try {
