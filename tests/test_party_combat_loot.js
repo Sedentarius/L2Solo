@@ -28,8 +28,11 @@ function session(id,x,classId,player=false) {
 const leader=session(2400001,0,5,true),support=session(2400002,-300,30),fighter=session(2400003,-380,5);
 for(const s of [support,fighter]) Object.assign(s,{partyCompanion:true,followPlayerSession:leader,partyCombatLootReadyAt:Date.now()});
 World.user={sessions};Bots.sessions=[support,fighter];World.items={spawns:[]};
-const enemy={x:800,y:0,z:0,hostile:true,fetchId:()=>3400001,fetchAttackable:()=>true,isDead:()=>false,
-    fetchHostile(){return this.hostile;},fetchDestId:()=>leader.actor.fetchId(),
+const enemy={x:800,y:0,z:0,hostile:true,targetId:leader.actor.fetchId(),attacking:true,range:40,skills:[],
+    fetchId:()=>3400001,fetchAttackable:()=>true,isDead:()=>false,
+    fetchHostile(){return this.hostile;},fetchDestId(){return this.targetId;},fetchStateAttack(){return this.attacking;},
+    fetchCombatAttackRange(){return this.range;},fetchCombatSkills(){return this.skills;},
+    fetchSkillCastRange:skill=>skill.fetchDistance(),
     fetchLocX(){return this.x;},fetchLocY(){return this.y;},fetchLocZ(){return this.z;}};
 World.npc={spawns:[enemy]};
 World.fetchNpcsInRadius=(x,y,r)=>(World.npc.spawns || []).filter(n=>Math.hypot(n.fetchLocX()-x,n.fetchLocY()-y)<=r);
@@ -61,10 +64,30 @@ function allowed(item=drop()){return Policy.allowed(support,leader,item,sessions
         support.actor.hp=60;assert.strictEqual(allowed(),false,'hurt support cannot start looting');support.actor.hp=100;
         assert.strictEqual(allowed(drop(-650)),false,'combat loot stays near the party');
         Geo.hasLineOfSight=()=>false;assert.strictEqual(allowed(),false,'native straight pickup must not cross a wall');Geo.hasLineOfSight=()=>true;
-        const hazard={...enemy,fetchId:()=>3400002,x:-350,y:599,fetchDestId:()=>undefined};
+        const hazard={...enemy,fetchId:()=>3400002,x:-350,y:599,attacking:false,fetchDestId:()=>undefined};
         World.npc.spawns.push(hazard);assert.strictEqual(allowed(),false,'path clearance catches aggro even when both endpoints clear 600 units');
         hazard.hostile=false;assert(allowed(),'a peaceful idle NPC is not an aggro hazard');
         World.npc.spawns.pop();
+
+        enemy.x=0;ready();
+        assert(allowed(),'a mob fighting the nearby party tank does not reserve the full aggro radius');
+        enemy.attacking=false;assert.strictEqual(allowed(),false,'a stale tank target is not active protection');enemy.attacking=true;
+        enemy.targetId=support.actor.fetchId();assert.strictEqual(allowed(),false,'a mob attacking support keeps full clearance');
+        enemy.targetId=999999;assert.strictEqual(allowed(),false,'an unrelated tank does not protect this party');
+        enemy.targetId=leader.actor.fetchId();leader.actor.classId=2;
+        assert.strictEqual(allowed(),false,'a non-tank leader does not qualify');leader.actor.classId=5;
+        enemy.targetId=fighter.actor.fetchId();fighter.actor.x=0;
+        assert(allowed(),'a companion tank provides the same protection as a player tank');
+        fighter.actor.x=-380;enemy.targetId=leader.actor.fetchId();
+        enemy.x=200;assert.strictEqual(allowed(),false,'a mob still approaching the tank is not held in place');enemy.x=0;
+        assert.strictEqual(allowed(drop(-100)),false,'the pickup endpoint must stay outside melee reach plus margin');
+        support.actor.x=-200;assert.strictEqual(allowed(drop(200)),false,'the whole route must avoid the mob, even with safe endpoints');support.actor.x=-300;
+        enemy.range=400;assert.strictEqual(allowed(),false,'ranged attacks retain their actual reach');enemy.range=40;
+        enemy.skills=[{fetchTargetKind:()=> 'enemy',fetchDistance:()=>0,fetchSemantic:()=>({sourceTarget:'aura',radius:250})}];
+        assert.strictEqual(allowed(),false,'aura radius is part of the danger zone');
+        enemy.skills=[{fetchTargetKind:()=> 'enemy',fetchDistance:()=>200,fetchSemantic:()=>({sourceTarget:'area',radius:100})}];
+        assert.strictEqual(allowed(),false,'ranged splash includes cast range and effect radius');enemy.skills=[];
+        enemy.model={raidBoss:true};assert.strictEqual(allowed(),false,'raid mobs do not get the tank exception');delete enemy.model;
 
         // A fighter owns an old queue; combat reconciliation transfers it to
         // the idle support and executes actual native movement and awarding.
@@ -82,12 +105,21 @@ function allowed(item=drop()){return Policy.allowed(support,leader,item,sessions
 
         support.actor.x=-300;const unsafe=drop(-500);World.items.spawns.push(unsafe);ready();
         Loot.queueRandomGroundPickup(leader,unsafe);await wait(300);
-        hazard.hostile=true;hazard.y=0;World.npc.spawns.push(hazard);
-        assert.strictEqual(Loot.startQueuedGroundPickup(support),false,'new aggro interrupts the live pickup');
+        enemy.targetId=support.actor.fetchId();ready();
+        assert.strictEqual(Loot.startQueuedGroundPickup(support),false,'losing tank aggro interrupts the live pickup');
         const stoppedAt=support.actor.x;await wait(1100);
         assert.strictEqual(support.actor.x,stoppedAt,'cancelled pickup cannot continue its movement timer');
         assert(World.items.spawns.includes(unsafe),'interruption leaves the item on the ground');
         assert.strictEqual(purchases.length,3);
+        enemy.targetId=leader.actor.fetchId();ready();
+
+        support.actor.x=-300;support.partyGroundPickupQueue=[];World.items.spawns=[];
+        const addedAggro=drop(-500);World.items.spawns.push(addedAggro);ready();
+        Loot.queueRandomGroundPickup(leader,addedAggro);await wait(300);
+        hazard.hostile=true;hazard.y=0;World.npc.spawns.push(hazard);
+        assert.strictEqual(Loot.startQueuedGroundPickup(support),false,'a free aggressive add still interrupts native pickup');
+        await wait(1100);
+        assert(World.items.spawns.includes(addedAggro));assert.strictEqual(purchases.length,3);
         World.npc.spawns.pop();
 
         // Arrival's delayed 250-ms award must also re-check urgent support,
@@ -98,6 +130,6 @@ function allowed(item=drop()){return Policy.allowed(support,leader,item,sessions
         assert(World.items.spawns.includes(late),'new emergency before the award timer prevents pickup');
         assert.strictEqual(purchases.length,3);
         assert.strictEqual(support.actor.state.pickup,false,'aborted award releases pickup state');
-        console.log('Party combat loot: idle support, path/aggro gates, priorities, native movement/distribution, reassignment and interruption passed');
+        console.log('Party combat loot: tank protection, attack/skill clearance, priorities, native movement/distribution, reassignment and interruption passed');
     } finally {sessions.forEach(s=>s.actor.automation.abortAll(s.actor,{notifyClient:false}));}
 })().catch(error=>{console.error(error);process.exitCode=1;});

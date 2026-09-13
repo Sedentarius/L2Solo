@@ -5,6 +5,9 @@ const Geodata = invoke('GameServer/Geodata/GeodataEngine');
 const Aggro = invoke('GameServer/Npc/NpcAggro');
 const Retreat = invoke('GameServer/Bot/AI/BotRetreatPlanner');
 const World = invoke('GameServer/World/World');
+const RaidSafety = invoke('GameServer/Bot/AI/BotRaidSafety');
+
+const ATTACK_MARGIN = 100;
 
 function position(actor) {
     return {locX:actor.fetchLocX(),locY:actor.fetchLocY(),locZ:actor.fetchLocZ()};
@@ -15,6 +18,29 @@ function hp(actor) { return Number(actor.fetchHp?.() || 0) / Math.max(1,Number(a
 function idleSupport(actor) {
     return ['healer','buffer'].includes(Roles.inferRole(actor))
         && (Roles.usesCasterWeaponCombat(actor) || !Roles.hasMeleeWeapon(actor));
+}
+
+function hazardClearance(npc, actor, members, fallback) {
+    if (!npc.fetchStateAttack?.() || RaidSafety.isProtectedRaidEntity(npc)) return fallback;
+    const tank = members.find(member => member?.actor !== actor
+        && Number(member?.actor?.fetchId?.()) === Number(npc.fetchDestId?.())
+        && Roles.inferRole(member.actor) === 'tank')?.actor;
+    if (!tank || tank.isDead?.() || tank.fetchIsOnline?.() === false
+        || !npc.fetchCombatAttackRange || !npc.fetchCombatSkills) return fallback;
+    // A target id alone is not protection: a travelling pull is still unsafe.
+    const tankRange = Number(npc.fetchCombatAttackRange(tank));
+    const attackRange = Number(npc.fetchCombatAttackRange(actor));
+    if (!Number.isFinite(tankRange) || !Number.isFinite(attackRange)
+        || distance(position(npc),position(tank)) > tankRange + ATTACK_MARGIN) return fallback;
+    let reach = Math.max(50,attackRange);
+    for (const skill of npc.fetchCombatSkills()) {
+        if (skill.fetchTargetKind?.() !== 'enemy') continue;
+        const castRange = Number(npc.fetchSkillCastRange?.(skill,actor) ?? skill.fetchDistance?.());
+        if (!Number.isFinite(castRange)) return fallback;
+        // Include aura and target-centred splash, not just the melee swing.
+        reach = Math.max(reach,Math.max(0,castRange) + Math.max(0,Number(skill.fetchSemantic?.()?.radius) || 0));
+    }
+    return Math.max(reach + ATTACK_MARGIN,150);
 }
 
 function allowed(session, leaderSession, item, members) {
@@ -46,7 +72,7 @@ function allowed(session, leaderSession, item, members) {
         if (!npc.fetchHostile?.() && !npc.fetchDestId?.() && !npc.fetchStateAttack?.()) return false;
         const p=position(npc);
         if (Math.abs(p.locZ-from.locZ)>Aggro.MAX_AGGRO_Z_DIFFERENCE) return false;
-        return Retreat.distanceToSegment(p,from,to)<=clearance;
+        return Retreat.distanceToSegment(p,from,to)<=hazardClearance(npc,actor,members,clearance);
     });
 }
 
