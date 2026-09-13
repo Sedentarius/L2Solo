@@ -123,7 +123,8 @@ function continueEquipmentShopping(session, bot, BotAI, errand) {
     };
     const excludedSlots = [...new Set([
         ...(errand.excludedSlots || []).map(Number),
-        Number(errand.slot || 0)
+        ...((session.coldLifeState?.stats?.equipmentPlan?.combine
+            && session.coldLifeState.stats.equipmentPlan.status !== 'complete') ? [] : [Number(errand.slot || 0)])
     ].filter(Boolean))];
     const next = CompanionEquipmentShopping.planErrand(
         session,
@@ -176,7 +177,7 @@ function alternateTownNpcErrand(session, bot, town) {
 }
 
 function deferEquipmentRetry(session) {
-    if (!['npc_equipment_purchase', 'market_purchase'].includes(session.companionShopping?.kind)) return;
+    if (!['npc_equipment_purchase', 'market_purchase', 'dual_component_withdrawal', 'dual_sword_combine'].includes(session.companionShopping?.kind)) return;
     session.companionEquipmentRetryAt = Date.now() + COMPANION_EQUIPMENT_FAILURE_RETRY_MS;
 }
 
@@ -475,6 +476,25 @@ module.exports = {
     async sellAndRestock(session, bot, Generics, BotAI) {
         const NpcTalkResponse = invoke(path.world + 'NpcTalkResponse');
         const companionErrand = session.companionShopping;
+
+        if (['dual_component_withdrawal','dual_sword_combine'].includes(companionErrand?.kind)) {
+            try {
+                const result = await invoke('GameServer/Bot/AI/CompanionDualSwordCrafting').execute(session,bot,companionErrand);
+                session.lastTradeSummary = result.completed ? 'equipped my dual swords'
+                    : result.reason === 'components_withdrawn' ? 'collected my swords from the warehouse' : 'equipment needs another attempt';
+                if (session.actor !== bot || session.companionShopping !== companionErrand || session.plan !== 'shopping') return;
+                if (result.reason === 'components_withdrawn' && continueEquipmentShopping(session,bot,BotAI,companionErrand)) return;
+                if (!result.completed) deferEquipmentRetry(session);
+                else session.companionEquipmentRetryAt = undefined;
+            } catch (error) {
+                deferEquipmentRetry(session);
+                session.lastTradeSummary = `equipment errand failed: ${error.message}`;
+            }
+            if (session.actor === bot && session.companionShopping === companionErrand && session.plan === 'shopping') {
+                this.scheduleRestock(session,bot,Generics,BotAI);
+            }
+            return;
+        }
 
         if (companionErrand?.kind === 'player_resource_purchase') {
             let deliveryReady = false;

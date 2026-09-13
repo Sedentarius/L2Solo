@@ -300,7 +300,11 @@ function beginCompanionTownErrand(session, bot, playerSession, errand) {
     bot.unselect();
     bot.automation.abortAll(bot);
 
-    const detail = ['market_purchase', 'npc_equipment_purchase'].includes(errand.kind)
+    const detail = errand.kind === 'dual_component_withdrawal'
+        ? 'collect my swords from the warehouse'
+        : errand.kind === 'dual_sword_combine'
+            ? `combine my swords at ${errand.target.name}`
+            : ['market_purchase', 'npc_equipment_purchase'].includes(errand.kind)
         ? `${errand.itemName} from ${errand.target.name}`
         : errand.kind === 'sell_resources'
             ? `sell these resources to ${errand.target.name}`

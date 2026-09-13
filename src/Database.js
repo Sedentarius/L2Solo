@@ -4143,8 +4143,9 @@ const Database = {
         }, 'craft:self'));
     },
 
-    combineInventoryItems(characterId, { ingredients, product }) {
+    combineInventoryItems(characterId, { ingredients, product, validate }) {
         return withCharacterFlush(characterId, () => inTransaction(() => {
+            validate?.();
             const required = new Map();
             (ingredients || []).forEach((ingredient) => {
                 const selfId = Number(ingredient.selfId || 0);
