@@ -11,6 +11,7 @@ const ShoppingState = invoke('GameServer/Bot/AI/States/ShoppingState');
 DataCache.init();
 
 const originals = {
+    npcSpawns: DataCache.npcSpawns,
     npc: World.npc,
     plan: TownNpcApproach.plan,
     reset: TownNpcApproach.reset,
@@ -118,10 +119,16 @@ try {
         'reaching the warehouse phase must invoke deposit against that keeper, not the later seller');
 
     const heinePoint = { locX: 111386, locY: 219413, locZ: -3544 };
+    // Model a missing local service explicitly; the real Heine datapack now
+    // includes sellers. Keep a real Giran seller as the fallback destination.
+    DataCache.npcSpawns = [{ spawns: [{
+        selfId: sellerRow.npcSelfId,
+        coords: [sellerRow]
+    }] }];
     assert.strictEqual(
         TownServiceCatalog.rowsForTown('Heine', TownServiceCatalog.ROLES.SELLER).length,
         0,
-        'the test fixture must retain Heine as a real local-service datapack gap'
+        'the isolated fixture must have no local Heine seller'
     );
     const nearestRealSeller = TownServiceCatalog.targetNear(
         TownServiceCatalog.ROLES.SELLER,
@@ -131,9 +138,11 @@ try {
     assert(nearestRealSeller?.npcSelfId,
         'a town without a local seller must resolve another real NPC instead of a fabricated town-center shop');
     assert.notStrictEqual(nearestRealSeller.town, 'Heine');
+    assert.strictEqual(nearestRealSeller.npcSelfId, sellerRow.npcSelfId);
 
     console.log('Physical warehouse errand checks passed');
 } finally {
+    DataCache.npcSpawns = originals.npcSpawns;
     World.npc = originals.npc;
     TownNpcApproach.plan = originals.plan;
     TownNpcApproach.reset = originals.reset;
