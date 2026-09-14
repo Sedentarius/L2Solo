@@ -10,6 +10,17 @@ Old-school Lineage 2 solo play, locally in a live world with over 1700 bot popul
 L2Solo is a local-first Lineage II C4 server emulator, tuned for a solo MMO experiment: one real player, a live world, and bots with AI that makes the server feel alive.
 Nothing is auto-generated. Everything in the world is the result of a player's or a bot's actions.
 
+**Project status:** PUBLIC ALPHA
+
+🏗️ Work in progress. Playable.
+
+💬 [Discord](https://discord.gg/dXsQ8SJA7k)
+Support, updates, and communication. Join the Discord to stay up to date with development.
+
+⚔️ [Game client](https://drive.google.com/file/d/1u0nW3m9c6Hql8sR9POQAcvglxIno23lv/view?usp=sharing)
+Clean C4 client protocol 656
+
+
 💻 Simulation - everything that is happening in the game world besides player actions.
 
 🧊 Cold bots - bots in the background, everywhere on the server where the player cannot see. Works like a less detailed simulation but keeps base bot abilities, stats, and goals, including cold bot parties, clans, etc. Bots become cold when goes out of the player's view range. Can communicate, including with the player (optional LLM integration). Uses much less compute.
@@ -18,15 +29,6 @@ Nothing is auto-generated. Everything in the world is the result of a player's o
 
 🌳 Static bots - mostly static traders in towns and crafting stations in Giran. Needed only for a specific function, no brain, no communication or goals.
 
-**Project status:** public alpha
-
-🏗️ Work in progress. Playable.
-
-💬 [Discord](https://discord.gg/dXsQ8SJA7k)
-Support, updates, and communication. Join the Discord to be up to date with development.
-
-⚔️ [Game client](https://drive.google.com/file/d/1u0nW3m9c6Hql8sR9POQAcvglxIno23lv/view?usp=sharing)
-Clean C4 client protocol 656
 
 ## Latest updates
 
@@ -121,7 +123,7 @@ See full update log on our [Discord](https://discord.gg/dXsQ8SJA7k) server.
 - Bots will argue, then attack if a bot or a player hits the same mob
 - Communication in chat (LFP, LFG, PK alert, etc)
 - Cost parties and friends system
-- Reputation system - bots will reject player party if you treated them badly or become friends and const party members if good
+- Reputation system - bots will reject player party if you treat them badly or become friends and const party members if good
 - Bots ask for loot if you have something they need
 - Bots go for NPC (Nobie guide) buff
 - Bots change their farming location based on lvl, number of mobs around, or a crafting goal
@@ -129,12 +131,12 @@ See full update log on our [Discord](https://discord.gg/dXsQ8SJA7k) server.
 - Bots have a memory about interaction with a player; they act correspondingly 
 - Bot persona traits: Sociability, Commitment, Caution, Ambition, Assertiveness, Empathy, Resilience
 - Bots create clans, level clans up, form clan farm parties
+- Bots will fight over mobs on a farm spot
 
 ### ✴️ Will be added
 
 - Clan halls
 - Clan wars
-- Wars for a farm spot
 - Olympiad, heroes
 - Sieges (bot- or player -driven)
 - World bosses
