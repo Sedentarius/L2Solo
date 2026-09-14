@@ -11,6 +11,7 @@ const NpcSkills      = invoke('GameServer/Npc/NpcSkills');
 const EffectStats    = invoke('GameServer/Effects/EffectStats');
 const EffectStore    = invoke('GameServer/Effects/EffectStore');
 const EffectRestrictions = invoke('GameServer/Effects/EffectRestrictions');
+const TownGuard = invoke('GameServer/Npc/TownGuard');
 const PathfindingWorkerPool = invoke('GameServer/Geodata/PathfindingWorkerPool');
 const AttackHelper   = new Attack();
 
@@ -126,7 +127,14 @@ class Npc extends NpcModel {
         return true;
     }
 
+    canEngageCombat() {
+        // Lisvus gives ordinary L2NpcInstance/L2FolkInstance no retaliatory
+        // AI. Guards inherit L2Attackable; owned summons have their own AI.
+        return this.fetchAttackable() || TownGuard.isTownGuard(this) || this.fetchIsSummon();
+    }
+
     ensureAggroEntry(actor) {
+        if (!this.canEngageCombat()) return null;
         if (!this.isValidAggroTarget(actor)) return null;
 
         const actorId = Number(actor.fetchId());
@@ -263,6 +271,7 @@ class Npc extends NpcModel {
     }
 
     enterCombatState(session, actor, options = {}) {
+        if (!this.canEngageCombat()) return false;
         if (!this.isValidAggroTarget(actor)) return false;
 
         if (!options.skipAggro) {

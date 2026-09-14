@@ -135,6 +135,13 @@ class Skillset {
                     Database.fetchSkill(id, skill.selfId).then((ownedSkill) => {
                         const storedLevel = ownedSkill[0]?.level;
 
+                        // Reconciliation also visits ancestor trees. They may
+                        // contain an older rank of a skill already trained.
+                        if (Number(storedLevel) >= Number(resolved.level)) {
+                            done();
+                            return;
+                        }
+
                         // The skill is present in DB, update its level
                         if (storedLevel) {
                             Database.updateSkillLevel(id, skill.selfId, resolved.level).then(() => {

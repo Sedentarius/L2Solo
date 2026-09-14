@@ -4,6 +4,8 @@ const { combat } = invoke('GameServer/Bot/Population/BackgroundResolver');
 const Formulas = invoke('GameServer/Formulas');
 const Rules = invoke('GameServer/Skills/C4SkillRules');
 const Aid = require('../../Social/OpponentAidPolicy');
+const Config = require('./PopulationConfig');
+const Aggression = require('../../Social/PvpAggression');
 const { MAX_ACTIONS, INITIAL_MS: MAX_DURATION_MS } = require('./PvpEncounterBudget');
 const FLAG_MS = 15000;
 const RECOVERY_MS = 90000;
@@ -21,6 +23,7 @@ function allowed(sides) {
 
 function resolve({ sides, roles, timestamp, rng, personaFor, step = null, openingSide = 1 }) {
     if (!allowed(sides)) return { started: false, reason: 'pvp_protected_context' };
+    if (!step?.resuming && Aggression.normalize(Config.pvpAggression) === 0) return { started: false, reason: 'pvp_passive' };
     const fighters = sides.flatMap((side, index) => side.members
         .filter(state => state.characterId === side.principal.characterId || roles.get(state.characterId) === 'support')
         .map(state => {
@@ -35,13 +38,15 @@ function resolve({ sides, roles, timestamp, rng, personaFor, step = null, openin
                 lastVictimId: Number(state.stats?.coldPvp?.lastVictimId || 0),
                 lastVictimAt: Number(state.stats?.coldPvp?.lastVictimAt || 0),
                 cooldowns: { ...(state.stats?.coldCombat?.cooldowns || {}) },
-                kills: [], attacks: 0, skills: 0, heals: 0 };
+                ...combat.coldChargeState(state, timestamp),
+                kills: [], attacks: 0, skills: 0, heals: 0, preparations: 0 };
         }));
     const power = side => fighters.filter(f => f.side === side).reduce((sum, f) => sum
         + (f.vitals.hp + f.cp) * Math.sqrt(Math.max(f.profile.pAtk, f.profile.mAtk)
             * (f.profile.pDef + f.profile.mDef)), 0);
     // Resource retaliation opens on side 1; an independent grievance opens on side 0.
-    if (!step?.resuming && power(openingSide) < power(1 - openingSide) * 0.6) return { started: false, reason: 'pvp_outmatched' };
+    if (!step?.resuming && power(openingSide) < power(1 - openingSide) * 0.6
+        * Aggression.retreatMultiplier(Config.pvpAggression)) return { started: false, reason: 'pvp_outmatched' };
     const windowMs = step ? Math.max(0, Math.min(1000, Math.min(step.until, step.expiresAt) - timestamp)) : MAX_DURATION_MS;
     let time = 0, actions = 0, losingSide = null, outcome = 'disengaged';
     const incidents = new Map();
@@ -62,15 +67,20 @@ function resolve({ sides, roles, timestamp, rng, personaFor, step = null, openin
         const target = opponents.find(f => f.id === sides[1 - next.side].principal.characterId) || opponents[0];
         if (!target) { losingSide = 1 - next.side; outcome = 'defeated'; break; }
         const caution = clamp(Number(personaFor(next.state)?.traits?.caution ?? 0.5), 0, 1);
-        if ((actions > 0 || step?.resuming) && next.vitals.hp / next.vitals.maxHp < 0.15 + caution * 0.2) {
+        if ((actions > 0 || step?.resuming) && next.vitals.hp / next.vitals.maxHp
+            < Aggression.retreatHp(0.15 + caution * 0.2, Config.pvpAggression)) {
             losingSide = next.side; outcome = 'retreated'; break;
         }
         actions++;
+        combat.expireCharges(next, timestamp + time);
         const allies = fighters.filter(f => f.side === next.side);
         const heal = combat.chooseHeal(next.profile, allies, next.vitals.mp, next.cooldowns, timestamp + time, next);
-        const selected = heal ? null : combat.chooseSkill(next.profile, next.vitals.hp, next.vitals.mp,
-            next.cooldowns, timestamp + time, 0, rng);
-        const skill = heal?.skill || selected?.skill;
+        const policy = { pvp: true, party: sides[next.side].members.length > 1, hp: next.vitals.hp };
+        const preparation = heal ? null : combat.chooseChargeSkill(next.profile, next.vitals.mp,
+            next.cooldowns, timestamp + time, next.charges, policy);
+        const selected = heal || preparation ? null : combat.chooseSkill(next.profile, next.vitals.hp, next.vitals.mp,
+            next.cooldowns, timestamp + time, next.charges, rng, policy);
+        const skill = heal?.skill || preparation || selected?.skill;
         const delay = combat.actionDelayMs(next.profile, skill);
         // Resolve only completed actions within the bounded combat window.
         if (!step && time + delay > MAX_DURATION_MS) { next.readyAt = MAX_DURATION_MS + 1; continue; }
@@ -79,7 +89,10 @@ function resolve({ sides, roles, timestamp, rng, personaFor, step = null, openin
             next.cooldowns[skill.selfId] = timestamp + time + delay + Math.max(0, Number(skill.reuse || 0));
             next.skills++;
         }
-        if (heal) {
+        if (preparation) {
+            combat.addCharges(next, 1, Rules.resolve(preparation).maxCharges, timestamp + time);
+            next.preparations++;
+        } else if (heal) {
             for (const event of combat.applyAllyHeal(next, allies, heal)) {
                 help.set(`${event.sourceId}:${event.targetId}:${event.type}`, event);
                 const recipient = allies.find(f => f.id === event.sourceId);
@@ -100,6 +113,12 @@ function resolve({ sides, roles, timestamp, rng, personaFor, step = null, openin
                 : combat.hitSucceeds(next.profile.accur, target.profile.evasion, rng)
                     ? Formulas.calcPhysicalDamage(next.profile.pAtk, next.profile.equipment.pAtkRnd,
                         target.profile.pDef, selected?.power || 0, { critical: Formulas.rollCritical(next.profile.critical, rng), rng }) : 0;
+            const semantic = skill ? Rules.resolve(skill) : {};
+            if (Number(semantic.requires?.charges) > 0) damage *= 0.8 + (0.201 * next.charges);
+            combat.consumeCharges(next, semantic.requires?.charges);
+            if (Number(semantic.chargeOnUse) > 0) {
+                combat.addCharges(next, semantic.chargeOnUse, semantic.maxCharges, timestamp + time);
+            }
             damage = Math.max(0, Math.round(damage));
             const shield = Math.min(target.cp, damage);
             target.cp -= shield;
@@ -122,7 +141,7 @@ function resolve({ sides, roles, timestamp, rng, personaFor, step = null, openin
         }
         next.readyAt = time + delay;
     }
-    if (!step?.resuming && !fighters.some(f => f.attacks)) return { started: false, reason: 'no_hostile_action' };
+    if (!step?.resuming && !fighters.some(f => f.attacks || f.preparations)) return { started: false, reason: 'no_hostile_action' };
     const ongoing = !!step && losingSide === null && step.until < step.expiresAt && actions < actionBudget;
     const durationMs = Math.min(MAX_DURATION_MS, Math.max(1000, time));
     const until = timestamp + durationMs + FLAG_MS;
@@ -152,11 +171,13 @@ function resolve({ sides, roles, timestamp, rng, personaFor, step = null, openin
                     ...(dead ? { recoverUntil: until + RECOVERY_MS } : {}) },
                 coldCombat: { ...(f.state.stats?.coldCombat || f.profile), cp: dead ? 0 : f.cp, cpAt: step ? step.until : until,
                     cooldowns: dead ? {} : f.cooldowns,
+                    charges: dead ? 0 : f.charges, chargeExpiresAt: dead ? null : f.chargeExpiresAt,
                     ...(dead ? { effects: [], charges: 0, chargeExpiresAt: null, summon: null } : {}) } } }];
     }));
     return { started: true, ongoing, outcome: ongoing ? 'fighting' : outcome, durationMs, until: step ? step.until : until, losingSide, updates,
         incidents: [...incidents.values()], help: [...help.values()], opponentAid: [...opponentAid.values()], fighters: fighters.map(f => ({ id: f.id, side: f.side,
-            hp: f.vitals.hp, mp: f.vitals.mp, cp: f.cp, attacks: f.attacks, skills: f.skills, heals: f.heals, kills: f.kills })), actions };
+            hp: f.vitals.hp, mp: f.vitals.mp, cp: f.cp, attacks: f.attacks, skills: f.skills,
+            preparations: f.preparations, charges: f.charges, heals: f.heals, kills: f.kills })), actions };
 }
 
 module.exports = { resolve, allowed, MAX_ACTIONS, MAX_DURATION_MS, FLAG_MS, RECOVERY_MS };

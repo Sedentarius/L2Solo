@@ -405,6 +405,7 @@ let archerTargetX = 120;
 let archerAttacks = 0;
 const kitingArcher = actor(2000018);
 kitingArcher.fetchClassId = () => 9;
+kitingArcher.backpack = { fetchTotalWeaponKind: () => 'Weapon.Bow' };
 kitingArcher.state.fetchHits = () => archerHits;
 const closeArcherThreat = {
     ...threatNpc,

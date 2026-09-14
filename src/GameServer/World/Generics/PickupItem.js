@@ -13,9 +13,22 @@ function transmitPickup(session, selfId, amount) {
 }
 
 function pickupItem(session, actor, item) {
+    if (!actor || session?.actor !== actor || !actor.backpack ||
+        actor.isDead?.() || actor.fetchIsOnline?.() === false) return false;
     const id     = item.fetchId();
     const spawnIndex = this.items.spawns.findIndex((spawn) => spawn.fetchId() === id);
     if (spawnIndex < 0) return false;
+
+    const canonicalItem = this.items.spawns[spawnIndex];
+    const selfId = canonicalItem.fetchSelfId();
+    const amount = canonicalItem.fetchAmount();
+    const allocations = selfId === 57
+        ? PartyCompanionService.adenaAllocations(session, amount, canonicalItem)
+        : [{ session: PartyCompanionService.resolveLootSession(session, selfId, canonicalItem), amount }];
+    // Validate every recipient before claiming the drop, so a stale session
+    // cannot crash the award or consume loot without receiving it.
+    if (!allocations.length || allocations.some((entry) => !entry.session?.actor?.backpack ||
+        entry.session.actor.isDead?.() || entry.session.actor.fetchIsOnline?.() === false)) return false;
 
     // PickupExec resolves the ground object before the actor finishes moving.
     // A player and a bot can therefore both hold the same stale reference and
@@ -23,13 +36,10 @@ function pickupItem(session, actor, item) {
     // makes the claim atomic in the world event loop: only one caller may award
     // the item, distribute Adena, delete the object, or emit pickup text.
     const [claimedItem] = this.items.spawns.splice(spawnIndex, 1);
-    const selfId = claimedItem.fetchSelfId();
-    const amount = claimedItem.fetchAmount();
 
     session.dataSendToMeAndOthers(ServerResponse.deleteOb(id), claimedItem);
 
     if (selfId === 57) {
-        const allocations = PartyCompanionService.adenaAllocations(session, amount, claimedItem);
         allocations.forEach((entry) => {
             this.purchaseItem(entry.session, selfId, entry.amount);
             transmitPickup(entry.session, selfId, entry.amount);
@@ -37,7 +47,7 @@ function pickupItem(session, actor, item) {
         return true;
     }
 
-    const recipientSession = PartyCompanionService.resolveLootSession(session, selfId, claimedItem);
+    const recipientSession = allocations[0].session;
     this.purchaseItem(recipientSession, selfId, amount, claimedItem.fetchPetData?.() ? { petData: claimedItem.fetchPetData() } : {});
     transmitPickup(recipientSession, selfId, amount);
     return true;

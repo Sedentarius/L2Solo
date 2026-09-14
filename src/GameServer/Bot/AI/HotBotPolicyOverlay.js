@@ -181,6 +181,7 @@ function combatPolicy(session) {
     const overlay = get(session);
     return {
         skillPriorities: { ...(overlay?.skillPriorities || {}) },
+        party: session?.partyCompanion === true || !!session?.hotBackgroundPartyId,
         stance: overlay?.combatStance || 'balanced'
     };
 }

@@ -7,6 +7,7 @@ function canTargetEnemyNpc(npc, data = {}) {
 
 function cancelFailedSupportTarget(session, actor, data, skill) {
     const target = { fetchId: () => Number(data?.id || 0) };
+    invoke('GameServer/Bot/AI/BotActionFeedback').record(session, actor, target, skill, 'rejected', 'missing_target');
     invoke('GameServer/Bot/AI/BotSupportPlanner').cancelPendingSupportCast(session, actor, target, skill, 'missing_target');
     invoke('GameServer/Bot/AI/BotPartyChat').cancelExpectedSkillResult(session, actor, target, skill);
 }

@@ -107,8 +107,12 @@ class Actor extends ActorModel {
         if (!semantic.staticReuse) {
             const magic = skill.fetchSpell?.() === true;
             reuse *= EffectStats.multiplier(this, magic ? 'mReuseMul' : 'pReuseMul');
+            reuse /= EffectStats.multiplier(this, magic ? 'mReuseDiv' : 'pReuseDiv');
             const speed = Number(magic ? this.fetchCollectiveCastSpd?.() : this.fetchCollectiveAtkSpd?.()) || 333;
             reuse *= 333 / speed;
+        }
+        if (reuse > 100 && invoke('GameServer/Skills/SkillMastery').succeeds(this, skill)) {
+            reuse = 100;
         }
         this.skillReuseUntil.set(skill.fetchSelfId(), now + reuse);
     }

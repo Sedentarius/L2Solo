@@ -80,6 +80,66 @@ async function main() {
     assert(duel.started);
     assert.deepStrictEqual(run(JSON.parse(original)), duel);
     assert.strictEqual(JSON.stringify(sides), original);
+    // Exercise mode propagation through the real resolver, including the MP
+    // spent by its first completed action rather than only selector metadata.
+    function modeFighter(classId, skillId, skillLevel) {
+        const fighter = structuredClone(left);
+        fighter.stats.classId = classId;
+        fighter.stats.coldCombat.classId = classId;
+        fighter.stats.coldCombat.skills = Profile.skillSnapshotsFromRecords([{ selfId: skillId, level: skillLevel }]);
+        fighter.stats.coldCombat.equipment.weaponKind = classId === 9 ? 'Weapon.Bow' : 'Weapon.Sword';
+        const profile = Profile.profileFor(fighter, at);
+        fighter.vitals.hp = profile.maxHp;
+        fighter.vitals.maxHp = profile.maxHp;
+        fighter.vitals.maxMp = profile.maxMp;
+        return { fighter, profile, cost: profile.skills[0].mp };
+    }
+    function firstModeAction(fighter, inParty = false) {
+        const opponent = { ...structuredClone(fighter), characterId: 95 };
+        const companion = { ...structuredClone(fighter), characterId: 90 };
+        const result = Pvp.resolve({
+            sides: [{ principal: fighter, members: inParty ? [fighter, companion] : [fighter] },
+                { principal: opponent, members: [opponent] }],
+            roles: new Map([[90, 'support']]), timestamp: at, rng: seeded('class-mode'), personaFor,
+            openingSide: 0, step: { until: at + 1, expiresAt: at + 30000, maxActions: 1 }
+        });
+        assert(result.started && result.actions === 1, 'resolve exactly one hostile action');
+        return result.fighters.find(f => f.id === fighter.characterId);
+    }
+    const archerMode = modeFighter(9, 56, 15);
+    archerMode.fighter.vitals.mp = archerMode.cost;
+    for (const inParty of [false, true]) {
+        const action = firstModeAction(archerMode.fighter, inParty);
+        assert.strictEqual(action.skills, 1, 'PvP archers spend their final affordable shot instead of applying a PvE reserve');
+        assert.strictEqual(action.mp, 0);
+    }
+    const supportMode = modeFighter(15, 1177, 5);
+    supportMode.fighter.vitals.mp = supportMode.profile.maxMp * 0.27 + supportMode.cost;
+    assert.strictEqual(firstModeAction(supportMode.fighter).skills, 1, 'solo support keeps its 25% reserve');
+    const partySupportAction = firstModeAction(supportMode.fighter, true);
+    assert.strictEqual(partySupportAction.skills, 0, 'party PvP support keeps 30% MP for allies');
+    assert.strictEqual(partySupportAction.mp, supportMode.fighter.vitals.mp);
+    supportMode.fighter.vitals.mp = supportMode.profile.maxMp * 0.35 + supportMode.cost;
+    assert.strictEqual(firstModeAction(supportMode.fighter, true).skills, 1, 'party PvP uses a 30%, not a 45% PvE reserve');
+    const aggressionConfig = require('../src/GameServer/Bot/Population/PopulationConfig');
+    const savedAggression = aggressionConfig.pvpAggression;
+    try {
+        aggressionConfig.pvpAggression = 0;
+        assert.strictEqual(run(sides).reason, 'pvp_passive', 'zero aggression rejects even a stale cold initiation forecast');
+        const injuredSides = JSON.parse(original);
+        injuredSides[0].members[0].vitals.hp = Profile.profileFor(left, at).maxHp * 0.2;
+        const resume = () => Pvp.resolve({ sides: injuredSides, roles: new Map(), timestamp: at,
+            rng: seeded('aggression-retreat'), personaFor: () => ({ traits: { caution: 0.5 } }),
+            step: { resuming: true, until: at + 1000, expiresAt: at + 30000 } });
+        const passive = resume();
+        assert(passive.started && passive.outcome === 'retreated', 'passive bots still resolve existing combat and retreat');
+        aggressionConfig.pvpAggression = 0.25;
+        assert.strictEqual(resume().outcome, 'retreated', 'calm bots withdraw earlier at low HP');
+        aggressionConfig.pvpAggression = 1;
+        assert(resume().actions > 0, 'aggressive bots accept another combat action at the same HP');
+    } finally {
+        aggressionConfig.pvpAggression = savedAggression;
+    }
     assert(duel.actions <= Pvp.MAX_ACTIONS && duel.durationMs <= Pvp.MAX_DURATION_MS);
     assert(duel.fighters.some(f => f.cp < Profile.profileFor(f.id === left.characterId ? left : right, at).cp));
     assert(duel.fighters.find(f => f.id === right.characterId).mp < right.vitals.mp, 'magic spends real MP');

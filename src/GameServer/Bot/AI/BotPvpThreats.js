@@ -39,8 +39,21 @@ function protectedTarget(session, target, now = Date.now()) {
 }
 
 function focus(session, context, now = Date.now()) {
-    const target = context.threats.find(entry => !protectedTarget(session, entry.actor, now))?.actor || null;
-    context.owner.pvpFocus = target ? { id: id(target), at: now } : null;
+    const available = context.threats.filter(entry => !protectedTarget(session, entry.actor, now));
+    const Roles = invoke('GameServer/Bot/AI/BotRoles');
+    const endangered = new Set((context.members || []).filter(member => {
+        const actor = member.actor;
+        return alive(actor) && ['healer','buffer'].includes(Roles.inferRole(actor))
+            && Number(actor.fetchHp?.()) / Math.max(1,Number(actor.fetchMaxHp?.())) < 0.5;
+    }).map(member => id(member.actor)));
+    // Use only already-authorized aggressors and their current target. A stale
+    // victimId cannot pull the party away from a useful shared focus.
+    const protectorTarget = available.find(entry => endangered.has(Number(entry.actor.fetchDestId?.())))?.actor;
+    const prior = context.owner.pvpFocus;
+    const previous = prior?.availableCount === available.length && now - Number(prior?.at || 0) < 2000
+        ? available.find(entry => id(entry.actor) === prior?.id)?.actor : null;
+    const target = protectorTarget || previous || available[0]?.actor || null;
+    context.owner.pvpFocus = target ? { id: id(target), at: previous === target ? prior.at : now, availableCount: available.length } : null;
     return target;
 }
 

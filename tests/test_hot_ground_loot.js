@@ -22,7 +22,7 @@ function bot(id, x) {
     const session = { accountId: `bot_${id}`, botSession: true, plan: 'hunting', packets: [],
         dataSendToMe() {}, dataSendToMeAndOthers(packet) { this.packets.push(packet); } };
     session.actor = {
-        session, x, z: 0, automation: new Automation(),
+        session, x, z: 0, backpack: {}, automation: new Automation(),
         fetchId: () => id, fetchLevel: () => 40, fetchHead: () => 0,
         fetchLocX() { return this.x; }, fetchLocY: () => 0, fetchLocZ() { return this.z; },
         setLocXYZ(loc) { this.x = loc.locX; this.z = loc.locZ; },
@@ -98,7 +98,7 @@ function bot(id, x) {
             assert.strictEqual(Loot.startQueuedGroundPickup(leader), true, 'pickup keeps ownership of the AI tick during movement');
             assert.strictEqual(Loot.reconcileGroundLoot(leader), 0, 'reconciliation does not assign the same object twice');
             await wait(2000);
-            assert.strictEqual(leader.actor.x, item.fetchLocX(), 'the collector reaches the ground object');
+            assert.strictEqual(leader.actor.x, item.fetchLocX() - 20, 'the collector stops at the C4 pickup offset');
             assert.strictEqual(World.items.spawns.length, 0, 'native pickup removes the ground item after arrival');
             assert.deepStrictEqual(purchases, grouped ? [[2, 57, 6], [3, 57, 5]] : [[1, 57, 11]],
                 'physical pickup preserves solo ownership and native party Adena distribution');

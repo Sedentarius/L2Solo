@@ -13,26 +13,7 @@ const ChargeLifecycle = invoke('GameServer/Skills/ChargeLifecycle');
 const AttackRange = invoke('GameServer/Actor/AttackRange');
 const HotPartyCastTracker = invoke('GameServer/Bot/AI/HotPartyCastTracker');
 
-// L2WeaponType.mask() values used by the C4 datapack's weaponsAllowed field.
-const WEAPON_MASK_BY_KIND = Object.freeze({
-    'Weapon.Sword': 4,
-    'Weapon.Blunt': 8,
-    'Weapon.Knife': 16,
-    'Weapon.Bow': 32,
-    'Weapon.Pole': 64,
-    'Weapon.Fist': 256,
-    'Weapon.Dual': 512,
-    'Weapon.DualFist': 1024,
-    'Weapon.GreatSword': 2048,
-    'Weapon.BigBlunt': 16384
-});
-
-function weaponMaskFor(actor) {
-    const kind = actor?.backpack?.fetchTotalWeaponKind?.() || '';
-    const hasShield = (actor?.backpack?.fetchEquippedArmors?.() || [])
-        .some((item) => item?.fetchKind?.() === 'Armor.Shield');
-    return (WEAPON_MASK_BY_KIND[kind] || 0) | (hasShield ? 1048576 : 0);
-}
+const { weaponMaskFor } = invoke('GameServer/Skills/WeaponMask');
 
 class Attack {
     constructor() {
@@ -64,16 +45,7 @@ class Attack {
             case 'move'   : Generics.moveTo       (session, actor, queue.data); break;
             case 'attack' : Generics.attackRequest(session, actor, queue.data); break;
             case 'skill'  : Generics.skillRequest (session, actor, queue.data); break;
-            case 'pickup' : {
-                const isBot = session?.constructor?.name === 'BotSession' || String(session?.accountId || '').startsWith('bot_');
-                // Hot bots move entirely on the server and never send the
-                // ValidatePosition that a player's pickupRequest waits for.
-                // A queued pickup commonly follows the killing hit, so it
-                // must use the server-side execution path as well.
-                if (isBot) Generics.pickupExec(session, actor, queue.data);
-                else Generics.pickupRequest(session, actor, queue.data);
-                break;
-            }
+            case 'pickup' : Generics.pickupRequest(session, actor, queue.data); break;
             case 'sit'    : Generics.basicAction  (session, actor, queue.data); break;
         }
         this.resetQueuedEvent();
@@ -250,12 +222,14 @@ class Attack {
             .includes(skill.fetchTargetKind?.());
 
         if (this.blockedPvpDefense(session, actor, creature, skill) || this.checkParticipants(actor, creature, { allowDeadTarget: corpseTarget })) {
+            invoke('GameServer/Bot/AI/BotActionFeedback').record(session, actor, creature, skill, 'rejected', 'invalid_target');
             invoke('GameServer/Bot/AI/BotSupportPlanner').cancelPendingSupportCast(session, actor, creature, skill, 'invalid_target');
             invoke('GameServer/Bot/AI/BotPartyChat').cancelExpectedSkillResult(session, actor, creature, skill);
             return;
         }
 
         if (actor.canUseSkill?.(skill) === false) {
+            invoke('GameServer/Bot/AI/BotActionFeedback').record(session, actor, creature, skill, 'rejected', 'reuse');
             session.dataSendToMe?.(ServerResponse.actionFailed());
             invoke('GameServer/Bot/AI/BotSupportPlanner').cancelPendingSupportCast(session, actor, creature, skill, 'reuse');
             invoke('GameServer/Bot/AI/BotPartyChat').cancelExpectedSkillResult(session, actor, creature, skill);
@@ -264,6 +238,7 @@ class Attack {
 
         const mpCost = this.skillMpCost(actor, skill);
         if (actor.fetchMp() < mpCost) {
+            invoke('GameServer/Bot/AI/BotActionFeedback').record(session, actor, creature, skill, 'rejected', 'depleted_mp');
             ConsoleText.transmit(session, ConsoleText.caption.depletedMp);
             invoke('GameServer/Bot/AI/BotSupportPlanner').cancelPendingSupportCast(session, actor, creature, skill, 'depleted_mp');
             invoke('GameServer/Bot/AI/BotPartyChat').cancelExpectedSkillResult(session, actor, creature, skill);
@@ -272,6 +247,7 @@ class Attack {
 
         const conditionFailure = this.skillUseConditionFailure(session, actor, skill);
         if (conditionFailure) {
+            invoke('GameServer/Bot/AI/BotActionFeedback').record(session, actor, creature, skill, 'rejected', conditionFailure.code || conditionFailure.reason || 'condition');
             this.rejectSkillUseCondition(session, actor, conditionFailure);
             invoke('GameServer/Bot/AI/BotSupportPlanner').cancelPendingSupportCast(session, actor, creature, skill, conditionFailure.code || conditionFailure.reason || 'condition');
             invoke('GameServer/Bot/AI/BotPartyChat').cancelExpectedSkillResult(session, actor, creature, skill);
@@ -292,6 +268,7 @@ class Attack {
         session.dataSendToMeAndOthers(ServerResponse.skillStarted(actor, creature.fetchId(), skill), actor);
         session.dataSendToMe(ServerResponse.skillDurationBar(skill.fetchCalculatedHitTime()));
         actor.state.setCasts(true);
+        invoke('GameServer/Bot/AI/BotActionFeedback').record(session, actor, creature, skill, 'accepted', 'native_cast');
         // Tactical readers need the accepted cast, not skill availability:
         // reuse starts above, before this cast has dealt any damage.
         this.activeCast = { target: creature, skill, landsAt: Date.now() + skill.fetchCalculatedHitTime() };
@@ -396,6 +373,7 @@ class Attack {
                 // skill result exists. A queued, interrupted, resisted, or
                 // stack-rejected cast must never claim success to the party.
                 invoke('GameServer/Bot/AI/BotPartyChat').confirmSkillResult(session, actor, target, skill, outcome);
+                invoke('GameServer/Bot/AI/BotActionFeedback').result(session, actor, target, skill, outcome);
                 if (outcome?.applied && session?.accountId?.startsWith?.('bot_') && target?.session?.accountId && !target.session.accountId.startsWith('bot_')) {
                     Promise.resolve(invoke('GameServer/Bot/AI/BotEventJournal').record({
                         playerId: target.session.actor?.fetchId?.(),

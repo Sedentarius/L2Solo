@@ -47,6 +47,7 @@ const TOWN_CENTER_FALLBACK_RADIUS = 1500;
 const STARTER_GUIDE_TOWN_RADIUS = 1500;
 const CRITICAL_COMBAT_HP_RATIO = 0.25;
 const PARTY_RETREAT_DISTANCE = 500;
+const PARTY_RETREAT_RADIUS = 450;
 const PARTY_RETREAT_REPATH_MS = 1500;
 const SUPPORT_APPROACH_TIMEOUT_MS = 10000;
 const SUPPORT_APPROACH_REPATH_MS = 1500;
@@ -300,7 +301,11 @@ function beginCompanionTownErrand(session, bot, playerSession, errand) {
     bot.unselect();
     bot.automation.abortAll(bot);
 
-    const detail = ['market_purchase', 'npc_equipment_purchase'].includes(errand.kind)
+    const detail = errand.kind === 'dual_component_withdrawal'
+        ? 'collect my swords from the warehouse'
+        : errand.kind === 'dual_sword_combine'
+            ? `combine my swords at ${errand.target.name}`
+            : ['market_purchase', 'npc_equipment_purchase'].includes(errand.kind)
         ? `${errand.itemName} from ${errand.target.name}`
         : errand.kind === 'sell_resources'
             ? `sell these resources to ${errand.target.name}`
@@ -648,8 +653,10 @@ function moveToFollowTarget(session, bot, player) {
 }
 
 function retreatFromThreat(session, bot, threat, player, rooted) {
+    const retreatGoal = session.lastRetreatPlan?.to;
+    const goalNearParty = !retreatGoal || Math.hypot(retreatGoal.locX - player.fetchLocX(), retreatGoal.locY - player.fetchLocY()) <= PARTY_RETREAT_RADIUS + 1;
     const retreatInProgress = Date.now() < Number(session.partyRetreatUntil || 0) &&
-        (!!session.moveTimer || bot.state?.fetchTowards?.());
+        (!!session.moveTimer || bot.state?.fetchTowards?.()) && goalNearParty;
     session.currentTargetId = undefined;
     bot.unselect();
     bot.attack?.abortCast?.(session, bot);
@@ -660,17 +667,23 @@ function retreatFromThreat(session, bot, threat, player, rooted) {
     // completes. Keep the existing escape movement instead of cancelling it
     // and returning without a replacement route on every cooldown tick.
     if (retreatInProgress) return true;
+    const previous = session.lastRetreatPlan;
+    if (Date.now() < Number(session.partyRetreatUntil || 0) && previous?.partyMovementAllowed === false
+        && previous.threatId === threat.fetchId()
+        && Math.hypot(previous.partyAnchor.locX - player.fetchLocX(), previous.partyAnchor.locY - player.fetchLocY()) < 64) return false;
 
     bot.automation?.abortAll?.(bot);
     if (rooted) return false;
 
     const retreat = BotRetreatPlanner.retreat(session, bot, threat, {
         distance: PARTY_RETREAT_DISTANCE,
-        preferredPoint: player
+        preferredPoint: player,
+        partyAnchor: player,
+        partyRadius: PARTY_RETREAT_RADIUS
     });
     session.partyRetreatUntil = Date.now() + PARTY_RETREAT_REPATH_MS;
     session.lastFollowMoveTarget = retreat.to;
-    return true;
+    return retreat.partyMovementAllowed !== false;
 }
 
 function manaPriority(entry, pullerActor) {
@@ -1016,6 +1029,20 @@ module.exports = {
             pulling = { enabled: false, target: null, puller: null, engageable: false, phase: null };
         }
         let rawPartyThreat = PartyAwareness.findThreatTargetingPartyProjected(playerSession);
+        session.partyCombatLootReadyAt = 0;
+        // The party projection may prefer the puller's mob. Personal incoming
+        // hits or an NPC actively targeting this support still require defense.
+        // Hate alone is insufficient: the tank may already own that attacker.
+        const personalSupportThreat = ['healer', 'buffer'].includes(role)
+            ? PartyAwareness.recentIncomingNpc(session, 1500)
+                || World.fetchNpcsInRadius(bot.fetchLocX(), bot.fetchLocY(), 1500).find(npc =>
+                    npc.fetchAttackable?.() && !npc.isDead?.()
+                    && Number(npc.fetchDestId?.()) === Number(bot.fetchId()))
+            : null;
+        if (personalSupportThreat) rawPartyThreat = {
+            type: BotRaidSafety.isProtectedRaidEntity(personalSupportThreat) ? 'raid' : 'npc',
+            actor: personalSupportThreat, targetId: bot.fetchId(), source: 'personal_attack'
+        };
         if (rawPartyThreat?.type === 'raid' && !BotRaidSafety.canEngagePlayerPartyRaid(
             session,
             rawPartyThreat.actor,
@@ -1047,7 +1074,7 @@ module.exports = {
         const rawThreatOnlyTargetsTravellingPuller = pullerAwayFromCamp &&
             Number(rawPartyThreat?.targetId || 0) === Number(pulling.puller?.actor?.fetchId?.() || 0) &&
             ratio(pulling.puller.actor.fetchHp(), pulling.puller.actor.fetchMaxHp()) >= CRITICAL_COMBAT_HP_RATIO;
-        let partyThreat = pulling.engageable && pulling.target
+        let partyThreat = personalSupportThreat ? rawPartyThreat : pulling.engageable && pulling.target
             ? {
                 type: 'npc',
                 actor: pulling.target,
@@ -1374,6 +1401,10 @@ module.exports = {
             return;
         }
 
+        if (!partyThreat && !leaderTargetId && !isBusy(bot)) {
+            BotSupportPlanner.reconcileLoadout(partySupportMembers(playerSession,pulling.puller),
+                PartyPulling.supportProviders(playerSession));
+        }
         const supportBuffTarget = timedFollowingStage('supportPlan', () => (
             BotSupportPlanner.nextAction(
                 bot,
@@ -1535,6 +1566,29 @@ module.exports = {
             } else if (!routineHealSkill && !emergencyHealSkill && !groupHealSkill && woundedPartyMember?.hpRatio < 0.70) {
                 recordRoleDecision(session, bot, 'cannot_heal', 'no_learned_heal');
                 keepRoleDecision = true;
+            }
+        }
+
+        // Defense is distinct from routine assist and does not wait for 25% HP.
+        // Priority heals above keep their action; an in-flight cast must finish
+        // before control/escape, and repeated hit wakeups keep the escape route.
+        if (!acted && personalSupportThreat && !bot.state.fetchCasts()) {
+            const control = !isBusy(bot) ? PartyClassTactics.supportCrowdControl(bot, [personalSupportThreat], {
+                selfDefense: true
+            }) : null;
+            if (control) {
+                recordRoleDecision(session, bot, 'defend_self', control.reason, {
+                    targetId: personalSupportThreat.fetchId(), skillId: control.skill.fetchSelfId()
+                });
+                castSkillOn(session, bot, Generics, control.target, control.skill, true);
+                return;
+            }
+            if (BotRoles.usesCasterWeaponCombat(bot) || !supportCanMeleeAssist(bot, role)) {
+                const moved = retreatFromThreat(session, bot, personalSupportThreat, player, impairments.rooted);
+                recordRoleDecision(session, bot, 'retreat', impairments.rooted ? 'personal_attack_rooted' : 'personal_attack_no_control', {
+                    targetId: personalSupportThreat.fetchId(), moved
+                });
+                return;
             }
         }
 
@@ -1744,6 +1798,10 @@ module.exports = {
             }
         }
 
+        if (!acted && !isBusy(bot) && invoke('GameServer/Bot/AI/PartyCombatLootPolicy').idleSupport(bot)) {
+            session.partyCombatLootReadyAt = Date.now();
+        }
+
         if (!acted && partyThreat?.actor) {
             const target = partyThreat.actor;
             const targetId = target.fetchId();
@@ -1779,6 +1837,11 @@ module.exports = {
                 });
             }
 
+            if (!holdSupportLine) {
+                invoke('GameServer/Bot/AI/PartyArcherCombatPolicy').reviewAutoAttack(session, bot, target, {
+                    pvp: partyThreat.type === 'player'
+                });
+            }
             if (!holdSupportLine && !isBusy(bot)) {
                 const basicAttackOnly = role === 'healer' || role === 'buffer';
                 if (partyThreat.type === 'player') {
@@ -1826,6 +1889,7 @@ module.exports = {
                             bot.select({ id: playerTargetId });
                             recordRoleDecision(session, bot, assistActionForRole(role), 'pvp_target', { targetId: playerTargetId });
                         }
+                        invoke('GameServer/Bot/AI/PartyArcherCombatPolicy').reviewAutoAttack(session, bot, user, { pvp: true });
                         if (isBusy(bot) || !supportCanMeleeAssist(bot, role)) {
                             return;
                         }
@@ -1857,6 +1921,7 @@ module.exports = {
                                 bot.select({ id: playerTargetId });
                                 recordRoleDecision(session, bot, assistActionForRole(role), assistReasonForRole(role), { targetId: playerTargetId });
                             }
+                            invoke('GameServer/Bot/AI/PartyArcherCombatPolicy').reviewAutoAttack(session, bot, npc);
                             if (isBusy(bot) || !supportCanMeleeAssist(bot, role)) {
                                 return;
                             }

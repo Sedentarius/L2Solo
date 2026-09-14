@@ -1,6 +1,7 @@
 const EffectStore = invoke('GameServer/Effects/EffectStore');
 const BotRoles = invoke('GameServer/Bot/AI/BotRoles');
 const ClassProgression = invoke('GameServer/ClassProgression');
+const Intent = invoke('GameServer/Bot/AI/BotSkillIntent');
 
 const DESTROYER_CLASS_ID = 46;
 
@@ -23,15 +24,17 @@ function hasEquippedShield(actor) {
 }
 
 function usable(actor, skill, reserveRatio = 0.10) {
-    if (!skill || actor?.canUseSkill?.(skill) === false) return false;
-    const mp = Number(actor?.fetchMp?.() || 0);
-    const maxMp = Math.max(1, Number(actor?.fetchMaxMp?.() || mp || 1));
-    const cost = Math.max(0, Number(skill.fetchConsumedMp?.() || 0));
-    return cost <= mp && (mp - cost) / maxMp >= reserveRatio;
+    return Intent.usable(actor,skill,reserveRatio)
+        && !invoke('GameServer/Bot/AI/BotActionFeedback').blocked(actor,actor,skill);
 }
 
 function active(actor, skill) {
     if (!skill) return false;
+    if (Intent.equivalentActive(actor,skill)) return true;
+    // Frenzy and Guts replace the same sourced OrcBuff stack. Do not alternate
+    // them merely because the number of nearby targets changes between ticks.
+    if (skill.fetchSemantic?.()?.stackFamily === 'OrcBuff'
+        && EffectStore.list(actor).some(effect=>effect.stackFamily==='OrcBuff')) return true;
     const id = Number(skill.fetchSelfId?.() || 0);
     const effect = String((skill.fetchSemantic?.() || {}).effect || '').toLowerCase();
     return EffectStore.list(actor, { includeDebuffs: false }).some((entry) => (
@@ -53,7 +56,7 @@ function selfAction(actor, { role = BotRoles.inferRole(actor), activeMobs = 0 } 
         }
     }
 
-    if (role === 'dps' && lineageClassId(actor) === DESTROYER_CLASS_ID) {
+    if (role === 'dps' && [45, DESTROYER_CLASS_ID].includes(lineageClassId(actor))) {
         const battleRoar = learned(actor, 121);
         if (hpRatio < 0.55 && usable(actor, battleRoar, 0.05) && !active(actor, battleRoar)) {
             return { skill: battleRoar, target: actor, reason: 'destroyer_battle_roar' };
@@ -116,21 +119,22 @@ function tankControlAction(actor, threats, options = {}) {
     return tankMassAggroAction(actor, threats) || tankStunAction(actor, threats, options);
 }
 
-function supportCrowdControl(actor, threats, { primaryTargetId = null } = {}) {
+function supportCrowdControl(actor, threats, { primaryTargetId = null, selfDefense = false } = {}) {
     const role = BotRoles.inferRole(actor);
-    if (!['mage', 'healer', 'buffer'].includes(role) || threats.length < 2) return null;
-    if (ratio(actor.fetchMp?.(), actor.fetchMaxMp?.()) < 0.45) return null;
+    if (!['mage', 'healer', 'buffer'].includes(role) || threats.length < (selfDefense ? 1 : 2)) return null;
+    if (!selfDefense && ratio(actor.fetchMp?.(), actor.fetchMaxMp?.()) < 0.45) return null;
     const add = nearest(actor, threats.filter((target) => (
-        Number(target.fetchId?.()) !== Number(primaryTargetId || 0) &&
+        Intent.alive(target) && (selfDefense || Number(target.fetchId?.()) !== Number(primaryTargetId || 0)) &&
         !crowdControlled(target)
     )));
     if (!add) return null;
 
     const preference = role === 'mage'
         ? [1069]
-        : (role === 'healer' ? [1201, 1069] : [1097, 1208]);
-    const skill = preference.map((id) => learned(actor, id)).find((candidate) => usable(actor, candidate, 0.35));
-    return skill ? { skill, target: add, reason: 'control_party_add' } : null;
+        : (role === 'healer' ? [1201, 1069] : [1201, 1069, 1097, 1208]);
+    const skill = preference.map((id) => learned(actor, id)).find((candidate) => usable(actor, candidate, selfDefense ? 0 : 0.35)
+        && Intent.debuffUseful(actor,add,candidate, { fleeing:selfDefense }));
+    return skill ? { skill, target: add, reason: selfDefense ? 'control_personal_attacker' : 'control_party_add' } : null;
 }
 
 module.exports = {

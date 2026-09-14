@@ -313,6 +313,23 @@ function partyCombatInProgress(leaderSession) {
     return PartyCombatState.isActive(leaderSession, { ignoreTravellingPuller: true });
 }
 
+function canLootDuringCombat(session, leaderSession, item) {
+    return invoke('GameServer/Bot/AI/PartyCombatLootPolicy').allowed(
+        session, leaderSession, item, [leaderSession, ...membersForLeader(leaderSession)]
+    );
+}
+
+function groundPickupNeedsAttention(session, leaderSession, item) {
+    const pull = leaderSession?.partyPullState || {};
+    return !!session.pvpDefense
+        || session.actor?.isDead?.() || session.actor?.state?.fetchCasts?.()
+        || session.pendingSupportApproach || Number(session.pendingSupportCast?.expiresAt || 0)>Date.now()
+        || [leaderSession, ...membersForLeader(leaderSession)].some(member=>member?.actor?.isDead?.())
+        || ['getting_buffed','shopping','merchant'].includes(session.plan)
+        || ['approach','aggro','return'].includes(pull.phase) && Number(session.actor.fetchId())===Number(pull.pullerId || 0)
+        || ((partyCombatInProgress(leaderSession) || hasCampThreat(leaderSession)) && !canLootDuringCombat(session,leaderSession,item));
+}
+
 function queuedGroundLootIds(leaderSession) {
     return new Set(groundLootPickers(leaderSession)
         .flatMap((memberSession) => memberSession.partyGroundPickupQueue || [])
@@ -355,7 +372,22 @@ function reconcileGroundLoot(looterSession) {
 
     const now = Date.now();
     if (now - Number(leaderSession.lastGroundLootScanAt || 0) < GROUND_LOOT_SCAN_INTERVAL_MS) return 0;
-    if (partyCombatInProgress(leaderSession) || hasCampThreat(leaderSession)) return 0;
+    const combat = partyCombatInProgress(leaderSession) || hasCampThreat(leaderSession);
+    if (combat && !groundLootPickers(leaderSession).some(member=>member.partyCompanion
+        && invoke('GameServer/Bot/AI/PartyCombatLootPolicy').idleSupport(member.actor)
+        && (member.partyGroundPickupInProgress || now-Number(member.partyCombatLootReadyAt || 0)<=1500))) return 0;
+    if (combat) {
+        // Pending orders assigned before combat may belong to a fighter.
+        // Release them for an idle support; never replace an in-flight FIFO.
+        for (const member of groundLootPickers(leaderSession)) {
+            const queue = member.partyGroundPickupQueue || [];
+            for (let index=queue.length-1;index>=0;index--) {
+                if (index===0 && member.partyGroundPickupInProgress) continue;
+                const item = (world().items?.spawns || []).find(item=>Number(item.fetchId())===Number(queue[index].id));
+                if (!canLootDuringCombat(member,leaderSession,item)) queue.splice(index,1);
+            }
+        }
+    }
     const items = availableGroundLoot(leaderSession);
     // This shared timestamp protects the hot party from every companion
     // walking the entire world-item list on every AI tick. Fresh NPC drops do
@@ -373,12 +405,17 @@ function nearestGroundLootPicker(looterSession, item) {
         && !AUTOMATED_LOOT_DISTRIBUTIONS.has(distributionForLeader(leaderSession))) return null;
     if (!isOwnedPartyGroundLoot(leaderSession, item) || !isInsidePartyGroundLootLeash(leaderSession, item)) return null;
 
-    return groundLootPickers(leaderSession)
+    const pickers = groundLootPickers(leaderSession)
         .filter((memberSession) => canPickGroundLoot(memberSession, leaderSession, item))
         .sort((a, b) => (
             distance2d(a.actor, item) - distance2d(b.actor, item) ||
             Number(a.actor.fetchId()) - Number(b.actor.fetchId())
-        ))[0] || null;
+        ));
+    if (partyCombatInProgress(leaderSession) || hasCampThreat(leaderSession)) {
+        const ready = pickers.find(member=>canLootDuringCombat(member,leaderSession,item));
+        if (ready) return ready;
+    }
+    return pickers[0] || null;
 }
 
 function groundPickupTimeoutMs(picker, pickup) {
@@ -405,20 +442,10 @@ function startQueuedGroundPickup(pickerSession) {
     const now = Date.now();
     const leaderSession = partyLeaderSession(pickerSession);
     const pullState = leaderSession?.partyPullState || {};
-    const partyNeedsAttention = (
-        !!pickerSession.pvpDefense ||
-        [leaderSession, ...membersForLeader(leaderSession)].some((memberSession) => memberSession?.actor?.isDead?.()) ||
-        ['getting_buffed', 'shopping', 'merchant'].includes(pickerSession.plan) ||
-        (
-            ['approach', 'aggro', 'return'].includes(pullState.phase) &&
-            Number(picker.fetchId?.()) === Number(pullState.pullerId || 0)
-        ) ||
-        partyCombatInProgress(leaderSession) ||
-        hasCampThreat(leaderSession)
-    );
     const pickup = queue[0];
     const queuedItem = (world().items?.spawns || [])
         .find((item) => Number(item?.fetchId?.()) === Number(pickup?.id));
+    const partyNeedsAttention = groundPickupNeedsAttention(pickerSession,leaderSession,queuedItem);
     const invalidPickup = !queuedItem ||
         !isOwnedPartyGroundLoot(leaderSession, queuedItem) ||
         !isInsidePartyGroundLootLeash(leaderSession, queuedItem) ||
@@ -434,7 +461,8 @@ function startQueuedGroundPickup(pickerSession) {
         // A competing movement order can cancel Automation's pickup timer
         // without invoking PickupExec's completion callback. Do not leave the
         // whole FIFO permanently locked behind that stale action.
-        picker.automation?.abortAll?.(picker);
+        // A support cast may already have taken ownership of automation.
+        if (!picker.state?.fetchCasts?.()) picker.automation?.abortAll?.(picker);
         picker.state?.setPickinUp?.(false);
         pickerSession.partyGroundPickupInProgress = false;
         pickerSession.partyGroundPickupDeadlineAt = 0;
@@ -474,6 +502,12 @@ function startQueuedGroundPickup(pickerSession) {
         return startQueuedGroundPickup(pickerSession);
     }
     pickerSession.partyGroundPickupInProgress = true;
+    if (partyCombatInProgress(leaderSession) || hasCampThreat(leaderSession)) {
+        pickerSession.roleDecision = {
+            role:BotRoles.inferRole(picker),action:'collect_party_loot',reason:'safe_combat_loot',
+            targetId:pickup.id,at:now
+        };
+    }
     pickerSession.partyGroundPickupDeadlineAt = now + groundPickupTimeoutMs(picker, pickup);
     const attempt = Number(pickerSession.partyGroundPickupAttempt || 0) + 1;
     pickerSession.partyGroundPickupAttempt = attempt;
@@ -485,6 +519,7 @@ function startQueuedGroundPickup(pickerSession) {
     Generics.stopAutomation(pickerSession, picker);
     Generics.pickupExec(pickerSession, picker, pickup, () => {
         if (Number(pickerSession.partyGroundPickupAttempt) !== attempt) return;
+        picker.state?.setPickinUp?.(false);
         if (queue[0]?.id === pickup.id) {
             queue.shift();
         } else {
@@ -498,7 +533,12 @@ function startQueuedGroundPickup(pickerSession) {
         // immediately. Do not wait for a later AI cadence just because the
         // original drop was assigned while the party was still fighting.
         reconcileGroundLoot(pickerSession);
-    });
+    }, () => pickerSession.actor === picker
+        && Number(pickerSession.partyGroundPickupAttempt) === attempt
+        && partyLeaderSession(pickerSession) === leaderSession
+        && isOwnedPartyGroundLoot(leaderSession,queuedItem)
+        && isInsidePartyGroundLootLeash(leaderSession,queuedItem)
+        && !groundPickupNeedsAttention(pickerSession,leaderSession,queuedItem));
     return true;
 }
 
@@ -507,9 +547,6 @@ function queueRandomGroundPickup(looterSession, item) {
     if (!pickerSession) return null;
 
     const pickup = { id: item.fetchId() };
-    // Player pickup requests wait for the next client ValidatePosition.
-    // Hot bots update their location server-side, so leaving this in
-    // storedPickup makes the visible drop stay on the ground forever.
     // Keep an independent FIFO because a mob can drop Adena and items in
     // the same reward pass while Automation has only one pickup timer.
     pickerSession.partyGroundPickupQueue ??= [];

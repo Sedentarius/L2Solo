@@ -23,6 +23,7 @@ const DataCache = {
         const C4LateTownGatekeepers = invoke('GameServer/World/C4LateTownGatekeepers');
         const C4SevenSignsDungeonTeleports = invoke('GameServer/World/C4SevenSignsDungeonTeleports');
         DataCache.npcs            = applyNpcAiTypes([
+            ...validateModel(path + 'Npcs/c4_heine'),
             ...require('../../data/Pets/c4-quest-npcs.json').npcs,
             ...validateModel(path + 'Npcs/npcs').filter((npc) => npc.selfId !== 135 && !c4LegacyMonsterIds.has(Number(npc.selfId))),
             ...c4LegacyMonsters,
@@ -63,6 +64,7 @@ const DataCache = {
             ...validateModel(path + 'Npcs/c4_raid_bosses'),
             ...validateModel(path + 'Npcs/c4_raid_boss_minions'),
             ...C4LateTownGatekeepers.npcs,
+            ...require('./World/GiranMammon').npcs,
             ...C4SevenSignsDungeonTeleports.npcs
         ], npcAiTypes);
         DataCache.npcs = RaidBossBalance.weakenTemplates(DataCache.npcs);
@@ -103,8 +105,10 @@ const DataCache = {
             ...validateModel(path + 'Npcs/Spawns/c4_low_level_raid_bosses'),
             ...validateModel(path + 'Npcs/Spawns/c4_raid_bosses'),
             ...C4LateTownGatekeepers.spawns,
+            ...require('./World/GiranMammon').spawns,
             ...C4SevenSignsDungeonTeleports.spawns,
-            ...require('../../data/Pets/c4-quest-npcs.json').spawns
+            ...require('../../data/Pets/c4-quest-npcs.json').spawns,
+            ...validateModel(path + 'Npcs/Spawns/c4_heine')
         ];
         DataCache.npcRewards      = [
             ...require('../../data/Pets/c4-quest-npcs.json').rewards,
@@ -150,9 +154,11 @@ const DataCache = {
 
         DataCache.items = [
             ...validateModel(path + 'Items/Armors/armors'),
+            ...validateModel(path + 'Items/Armors/c4_b_grade'),
             ...validateModel(path + 'Items/Armors/c4_a_grade'),
             ...validateModel(path + 'Items/Armors/c4_sealed_a_grade'),
             ...validateModel(path + 'Items/Armors/c4_s_grade'),
+            ...validateModel(path + 'Items/Armors/c4_unsealed'),
             ...validateModel(path + 'Items/Weapons/weapons'),
             ...validateModel(path + 'Items/Weapons/c4_special_ability_weapons'),
             ...validateModel(path + 'Items/Weapons/c4_s_grade'),

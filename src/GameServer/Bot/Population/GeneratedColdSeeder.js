@@ -593,7 +593,7 @@ const GeneratedColdSeeder = {
             .then(() => {
             const plan = SeedPlanner.plan(
                 SpotProfiles.ensure(),
-                LifeState.allStates(limit + 100),
+                LifeState.populationSeedStates(),
                 limit,
                 Config.starterBotsPerRace
             );

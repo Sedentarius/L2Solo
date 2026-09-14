@@ -257,6 +257,9 @@ function lifecycleKind(state = {}, context = {}) {
     if (!SIMPLE_ACTIVITIES.has(String(state.activity || ''))) return 'command';
     if (stats.warehouseWorkflow || stats.warehouseErrand || stats.marketStore || stats.marketReturn
         || stats.craftShop || stats.craftStationId || stats.craftReturn || stats.supplyErrand) return 'command';
+    if (stats.mammonReturn || (Number(stats.mammonRetryAt || 0) <= Date.now()
+        && Object.values(state.inventory || {}).some(item => Number(item.amount)>0
+            && invoke('GameServer/Items/C4Unseal').options(item.selfId).length))) return 'command';
     const plan = stats.equipmentPlan || {};
     if (String(plan.strategy || '') === 'market') {
         const price = Math.max(0, Number(plan.market?.price || 0));

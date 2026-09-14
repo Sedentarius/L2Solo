@@ -13,7 +13,10 @@ const C4EnchantScrolls = invoke('GameServer/Items/C4EnchantScrolls');
 const EffectStore = invoke('GameServer/Effects/EffectStore');
 const EffectTicker = invoke('GameServer/Effects/EffectTicker');
 
-const armors = require('../data/Items/Armors/armors.json');
+const armors = [
+    ...require('../data/Items/Armors/armors.json'),
+    ...require('../data/Items/Armors/c4_b_grade.json')
+];
 const weapons = require('../data/Items/Weapons/weapons.json');
 const others = [
     ...require('../data/Items/Others/others.json'),
@@ -173,11 +176,11 @@ assert.ok(EffectStore.list(summonBuffTarget.summon).some((effect) => effect.key 
 assert.ok(EffectStore.list(summonBuffTarget.summon).some((effect) => effect.key === 'empower'), 'servitor profile should support magic-oriented summons too');
 
 for (const rank of ['none', 'd', 'c', 'b', 'a', 's']) {
-    assert.strictEqual(adminShop[`armor-${rank}`], `armor:${rank}`, `armor-${rank} should resolve from the live armor datapack`);
+    if (rank !== 'b') assert.strictEqual(adminShop[`armor-${rank}`], `armor:${rank}`, `armor-${rank} should resolve from the live armor datapack`);
     assert.strictEqual(adminShop[`weapon-${rank}`], `weapon:${rank}`, `weapon-${rank} should resolve from the live weapon datapack`);
     assert.deepStrictEqual(
         AdminShop.itemIdsForSource(adminShop[`armor-${rank}`]),
-        armors.filter((item) => !petGear[item.selfId] && !item.template.kind.endsWith('.Pet') && (item.etc?.rank || 'none') === rank).map((item) => item.selfId),
+        rank === 'b' ? adminShop['armor-b'] : armors.filter((item) => !petGear[item.selfId] && !item.template.kind.endsWith('.Pet') && (item.etc?.rank || 'none') === rank).map((item) => item.selfId),
         `armor-${rank} should expose every ${rank} armor item id`
     );
     assert.deepStrictEqual(
@@ -186,6 +189,42 @@ for (const rank of ['none', 'd', 'c', 'b', 'a', 's']) {
         `weapon-${rank} should expose every ${rank} weapon item id`
     );
 }
+// The B-grade shop must sell complete wearable sets, including specialized gloves/boots.
+const C4ArmorSets = invoke('GameServer/Items/C4ArmorSets');
+const Item = invoke('GameServer/Item/Item');
+const bIds = AdminShop.itemIdsForSource(adminShop['armor-b']);
+assert.strictEqual(bIds.length, 55);
+assert.strictEqual(new Set(bIds).size, bIds.length);
+for (const id of bIds) {
+    assert(armors.some(item => item.selfId === id && item.etc.rank === 'b'), `B shop template ${id} must exist`);
+}
+for (const id of [104, 366, 494, 683]) assert(!bIds.includes(id), `legacy item ${id} must not clutter the B shop`);
+for (const set of C4ArmorSets.ARMOR_SETS.filter(set => set.skillId >= 3518 && set.skillId <= 3529)) {
+    const parts = [set.chest, set.legs, set.head, set.gloves, set.feet, set.shield].filter(Boolean);
+    const equipped = parts.map(id => {
+        assert(bIds.includes(id), `${set.name} part ${id} must be sold`);
+        const item = new Item(id, utils.crushOb(armors.find(row => row.selfId === id)));
+        item.setEquipped(true);
+        return item;
+    });
+    assert(C4ArmorSets.activeSets(equipped).includes(set), `${set.name} bought from the shop must activate`);
+    assert(!C4ArmorSets.activeSets(equipped.filter(item => item.fetchSelfId() !== set.gloves)).includes(set), 'incomplete sets must not activate');
+}
+let bPacket;
+const bSession = {
+    actor: { backpack: { fetchTotalAdena: () => 0 } },
+    dataSendToMe(packet) { bPacket = packet; }
+};
+AdminShop(bSession, ['admin-shop', 'armor-b']);
+assert.strictEqual(bPacket[0], 0x11);
+assert.strictEqual(bPacket.readUInt16LE(9), bIds.length);
+assert.deepStrictEqual([...bSession.activeAdminShop.itemIds], bIds);
+for (let index = 0; index < bIds.length; index++) {
+    const offset = 11 + index * 32;
+    assert.strictEqual(bPacket.readInt32LE(offset + 6), bIds[index]);
+    assert.strictEqual(bPacket.readInt32LE(offset + 28), 0, 'B armor must remain free');
+}
+
 const petPage = utils.parseRawFile('data/Html/Admin/pets.html');
 assert(adminHtml.includes('html Admin/pets'));
 for (const category of ['food', 'equipment', 'summons']) {

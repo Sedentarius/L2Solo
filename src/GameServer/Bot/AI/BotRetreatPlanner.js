@@ -225,20 +225,25 @@ function plan(bot, threatActor, options = {}) {
     const threat = point(threatActor);
     const threatId = actorId(threatActor);
     const preferredPoint = options.preferredPoint ? point(options.preferredPoint) : null;
+    const partyAnchor = options.partyAnchor ? point(options.partyAnchor) : null;
+    const partyRadius = Math.max(100, Number(options.partyRadius || 450));
     const direction = awayVector(from, threat, preferredPoint);
     const aggroRadius = Number(options.aggroRadius || NpcAggro.AGGRO_RADIUS);
-    const searchRadius = distance + aggroRadius + AGGRO_BUFFER;
+    const searchRadius = (partyAnchor ? distance2d(from, partyAnchor) + partyRadius : distance) + aggroRadius + AGGRO_BUFFER;
     const hazards = [...(world.fetchNpcsInRadius?.(from.locX, from.locY, searchRadius) || [])
         .filter((npc) => isPotentialAggro(npc, threatId)),
         ...(options.threats || []).filter(actor => actorId(actor) !== threatId && !actor.state?.fetchDead?.())];
 
     const evaluatedCandidates = [];
-    for (let angleRank = 0; angleRank < CANDIDATE_ANGLES.length; angleRank++) {
-        const angle = CANDIDATE_ANGLES[angleRank];
+    const angles = partyAnchor ? [0, -45, 45, -90, 90, -135, 135, 180, null] : CANDIDATE_ANGLES;
+    for (let angleRank = 0; angleRank < angles.length; angleRank++) {
+        const angle = angles[angleRank];
         const rotated = rotate(direction, angle);
+        const origin = partyAnchor || from;
+        const step = partyAnchor ? (angle === null ? 0 : Math.min(distance, partyRadius)) : distance;
         const destination = {
-            locX: Math.round(from.locX + (rotated.x * distance)),
-            locY: Math.round(from.locY + (rotated.y * distance)),
+            locX: Math.round(origin.locX + (rotated.x * step)),
+            locY: Math.round(origin.locY + (rotated.y * step)),
             locZ: from.locZ
         };
         destination.locZ = groundHeight(geodata, destination, from.locZ);
@@ -247,6 +252,17 @@ function plan(bot, threatActor, options = {}) {
             angleRank,
             ...routeCandidate(options, geodata, from, destination)
         }, from, threat, hazards, aggroRadius);
+        if (partyAnchor) {
+            // Regroup into the leader's circle or kite inside it. A geodata
+            // detour outside that circle must not turn into a solo escape.
+            const routeLimit = Math.max(partyRadius, distance2d(from, partyAnchor)) + RETREAT_PATH_TOLERANCE;
+            candidate.partyMovementAllowed = candidate.routeUsable && !candidate.lowLodWarp
+                && distance2d(candidate.to, partyAnchor) <= partyRadius + 1
+                && distance2d(candidate.to, from) >= 32
+                && [candidate.to, ...(candidate.route || [])].every(waypoint => distance2d(waypoint, partyAnchor) <= routeLimit)
+                && candidate.newAggroCount === 0;
+            candidate.safe = candidate.safe && candidate.partyMovementAllowed;
+        }
         evaluatedCandidates.push(candidate);
         // Angles are ordered by tactical preference. Once a fully safe route
         // is found, later previews cannot improve any safety dimension and
@@ -254,13 +270,16 @@ function plan(bot, threatActor, options = {}) {
         if (candidate.safe) break;
     }
 
-    const candidates = evaluatedCandidates.sort(compareCandidates);
+    const candidates = evaluatedCandidates.sort((first, second) =>
+        (partyAnchor ? Number(second.partyMovementAllowed) - Number(first.partyMovementAllowed) : 0)
+        || compareCandidates(first, second));
     const selected = candidates[0];
     return {
         from,
         to: selected.to,
         requestedTo: selected.requestedTo,
         threatId,
+        ...(partyAnchor ? { partyAnchor, partyRadius, partyMovementAllowed: selected.partyMovementAllowed } : {}),
         distance,
         selectedAngle: selected.angle,
         movesAway: selected.movesAway,
@@ -313,7 +332,7 @@ function retreat(session, bot, threat, options = {}) {
         candidates: result.candidates.map((candidate) => ({ ...candidate })),
         at: Date.now()
     };
-    if (planOptions.requireSafe !== true || result.safe === true) {
+    if (result.partyMovementAllowed !== false && (planOptions.requireSafe !== true || result.safe === true)) {
         bot.moveTo({ from: result.from, to: { ...result.requestedTo } });
     }
     return result;

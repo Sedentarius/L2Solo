@@ -10,12 +10,13 @@ function pickupRequest(session, actor, data) {
         return;
     }
 
-    if (actor.state.fetchTowards() === 'pickup') {
-        return;
-    }
+    if (actor.state.fetchTowards() === 'pickup' && actor.automation.pickupTargetId === data.id) return;
 
-    actor.storedPickup = data;
+    Generics.clearStoredActions(session, actor);
     Generics.stopAutomation(session, actor);
+    // StopMove is not a position handshake. Start immediately and allow a
+    // new item request to replace an in-flight pickup approach.
+    Generics.pickupExec(session, actor, data);
 }
 
 module.exports = pickupRequest;

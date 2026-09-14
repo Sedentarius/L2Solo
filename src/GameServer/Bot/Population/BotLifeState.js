@@ -3494,6 +3494,12 @@ const BotLifeState = {
         return cache.recent(safeLimit);
     },
 
+    populationSeedStates() {
+        // A hard population cap must see every identity, including old states
+        // outside the bounded, recent-state views used by UI and planners.
+        return Array.from(cache.values());
+    },
+
     stateRevision() {
         return cache.revision;
     },

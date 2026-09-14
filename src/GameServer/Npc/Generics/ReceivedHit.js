@@ -56,6 +56,7 @@ function receivedHit(session, actor, npc, hit, options = {}) {
     }
 
     npc.automation.replenishVitals(npc);
+    if (npc.canEngageCombat?.() === false) return;
     if (typeof npc.addDamageHate === 'function') {
         npc.addDamageHate(session, actor, hit, hit);
     }

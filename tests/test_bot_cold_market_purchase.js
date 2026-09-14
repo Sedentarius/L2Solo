@@ -11,6 +11,8 @@ const BotLifeState = invoke('GameServer/Bot/Population/BotLifeState');
 const MarketOpportunity = invoke('GameServer/Bot/Economy/MarketOpportunity');
 const MarketTelemetry = invoke('GameServer/Bot/Economy/MarketTelemetry');
 const BuyStoreService = invoke('GameServer/Bot/Economy/ColdMarketBuyStoreService');
+const GearAcquisitionPlanner = invoke('GameServer/Bot/AI/GearAcquisitionPlanner');
+const BotGear = invoke('GameServer/Bot/AI/BotGear');
 
 DataCache.init();
 
@@ -407,6 +409,63 @@ async function run() {
     assert.strictEqual(materialPurchase.inventory['1864'].amount, 3);
     assert.strictEqual(materialPurchase.inventory['1864'].equipped, false);
     assert.strictEqual(materialPurchase.inventory['1'].equipped, true, 'material purchase must not disturb equipped gear');
+
+    const starterInventory = BotLifeState.inventorySummaryFromItems(
+        BotGear.planFor({ classId: 31, level: 1 }).items
+    );
+    let progressing = {
+        ...state,
+        characterId: 91,
+        level: 19,
+        adena: 1000000,
+        inventory: { ...starterInventory, 57: { selfId: 57, amount: 1000000 } },
+        stats: { classId: 31, role: 'dps', equipment: BotLifeState.equipmentSummaryFromInventory(starterInventory) }
+    };
+    const initialWeaponPlan = GearAcquisitionPlanner.planFor(progressing);
+    assert.strictEqual(initialWeaponPlan.target.slot, 7, 'the starter weapon still gets its first upgrade');
+    progressing.stats.equipmentPlan = initialWeaponPlan;
+    progressing = await BotLifeState.applyMarketPurchase(progressing, {
+        selfId: initialWeaponPlan.target.selfId,
+        price: initialWeaponPlan.market.price,
+        sourceType: 'npc'
+    });
+    assert(progressing?.inventory[initialWeaponPlan.target.selfId]?.equipped);
+    // A fresh state without purchase history must make the same decision.
+    delete progressing.stats.lastMarketPurchase;
+    const protectionPlan = GearAcquisitionPlanner.planFor(JSON.parse(JSON.stringify(progressing)));
+    assert([6, 9, 10, 11, 12, 15].includes(protectionPlan.target.slot),
+        'after the first weapon improvement, lagging basic armour must beat another weapon purchase');
+    progressing.stats.equipmentPlan = protectionPlan;
+    const protectedState = await BotLifeState.applyMarketPurchase(progressing, {
+        selfId: protectionPlan.target.selfId,
+        price: protectionPlan.market.price,
+        sourceType: 'npc'
+    });
+    assert(protectedState?.inventory[protectionPlan.target.selfId]?.equipped,
+        'the protection selected by the planner must actually be equipped after purchase');
+    assert(protectedState.inventory[initialWeaponPlan.target.selfId].equipped);
+    const protectedSync = calls.filter((call) => call.type === 'inventory-sync' && call.characterId === 91).at(-1);
+    assert(protectedSync.inventory[protectionPlan.target.selfId].equipped,
+        'the native purchase must persist the newly selected protection');
+
+    const palusState = {
+        ...state,
+        characterId: 92,
+        level: 25,
+        adena: 300000,
+        inventory: { ...starterInventory, 57: { selfId: 57, amount: 300000 } },
+        stats: { classId: 32, role: 'tank', equipment: BotLifeState.equipmentSummaryFromInventory(starterInventory) }
+    };
+    const palusPlan = GearAcquisitionPlanner.planFor(palusState);
+    assert.strictEqual(palusPlan.target.selfId, 347);
+    palusState.stats.equipmentPlan = palusPlan;
+    const palusPurchase = await BotLifeState.applyMarketPurchase(palusState, {
+        selfId: palusPlan.target.selfId, price: palusPlan.market.price, sourceType: 'npc'
+    });
+    assert(palusPurchase?.inventory[347]?.equipped, 'the affordable D chest must be bought and equipped');
+    assert.strictEqual(palusPurchase.inventory[21].equipped, false, 'the starting Shirt must be replaced');
+    assert.strictEqual(palusPurchase.adena, 300000 - palusPlan.market.price);
+    assert(palusPurchase.adena >= palusPlan.market.reserve, 'the purchase must retain the operating reserve');
 
     console.log('Bot cold market purchase checks passed');
 }

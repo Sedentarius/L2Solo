@@ -4,10 +4,12 @@ const DataCache = invoke('GameServer/DataCache');
 const Formulas = invoke('GameServer/Formulas');
 const C4SkillRules = invoke('GameServer/Skills/C4SkillRules');
 const ColdCombatProfile = invoke('GameServer/Bot/Population/ColdCombatProfile');
+const ColdClassPolicy = invoke('GameServer/Bot/Population/ColdClassPolicy');
 const BotRoles = invoke('GameServer/Bot/AI/BotRoles');
 const ChargeLifecycle = invoke('GameServer/Skills/ChargeLifecycle');
 const HealingPotionStock = invoke('GameServer/Bot/AI/HealingPotionStock');
 const BotHuntingGroundPolicy = invoke('GameServer/Bot/AI/BotHuntingGroundPolicy');
+const TargetMatchup = invoke('GameServer/Bot/AI/BotTargetMatchup');
 
 function clamp(value, min, max) {
     return Math.max(min, Math.min(max, value));
@@ -363,42 +365,13 @@ function effectiveSkillPower(profile, skill, hp) {
         : basePower;
 }
 
-function chooseSkill(profile, hp, mp, cooldowns, time, charges = 0, rng) {
-    return ColdCombatProfile.offensiveSkills(profile)
-        .filter((skill) => {
-            const requiredCharges = Math.max(0, Number(C4SkillRules.resolve(skill).requires?.charges) || 0);
-            return Number(skill.mp || 0) <= mp
-                && Number(cooldowns[skill.selfId] || 0) <= time
-                && requiredCharges <= charges;
-        })
-        .map((skill) => {
-            const semantic = C4SkillRules.resolve(skill);
-            const magic = skill.spell === true;
-            const power = effectiveSkillPower(profile, skill, hp);
-            let rawDamage = magic
-                ? Formulas.calcMagicDamage(profile.mAtk, Math.max(1, power), 1)
-                : Formulas.calcPhysicalDamage(profile.pAtk, profile.equipment.pAtkRnd, 1, power, { rng });
-            const requiredCharges = Math.max(0, Number(semantic.requires?.charges) || 0);
-            if (requiredCharges > 0) rawDamage *= 0.8 + (0.201 * charges);
-            return { skill, magic, power, score: rawDamage / actionDelayMs(profile, skill) };
-        })
-        .sort((a, b) => b.score - a.score)[0] || null;
+function chooseSkill(profile, hp, mp, cooldowns, time, charges = 0, rng, context = {}) {
+    const selected=ColdClassPolicy.select(profile,{hp,mp,cooldowns,time,charges,...context});
+    return selected?{...selected,power:effectiveSkillPower(profile,selected.skill,hp)}:null;
 }
 
-function chooseChargeSkill(profile, mp, cooldowns, time, charges = 0) {
-    const needed = ColdCombatProfile.offensiveSkills(profile).reduce((maximum, skill) => (
-        Math.max(maximum, Number(C4SkillRules.resolve(skill).requires?.charges) || 0)
-    ), 0);
-    if (needed <= charges) return null;
-    return (profile.skills || []).filter((skill) => {
-        const semantic = C4SkillRules.resolve(skill);
-        const requiredWeapon = Number(semantic.requires?.weaponsAllowed) || 0;
-        return !skill.passive
-            && semantic.skillType === C4SkillRules.CHARGE
-            && Number(skill.mp || 0) <= mp
-            && Number(cooldowns[skill.selfId] || 0) <= time
-            && (!requiredWeapon || (requiredWeapon & profile.weaponMask) !== 0);
-    }).sort((a, b) => Number(b.level || 0) - Number(a.level || 0))[0] || null;
+function chooseChargeSkill(profile, mp, cooldowns, time, charges = 0, context = {}) {
+    return ColdClassPolicy.select(profile,{hp:profile.maxHp,mp,cooldowns,time,charges,...context,prepare:true});
 }
 
 function activeMusicEffectForSkill(profile, skill, timestamp) {
@@ -529,35 +502,7 @@ function startColdPotion(fighter, time) {
 }
 
 function summonNpcStats(fighter, details) {
-    const direct = (DataCache.npcs || []).find((entry) => Number(entry.selfId) === Number(details.npcId));
-    const skill = (DataCache.skills || []).find((entry) => Number(entry.selfId) === Number(details.skillId));
-    const skillLevel = Number(details.skillLevel || 1);
-    const levelCandidates = (skill?.levels || [])
-        .map((level) => ({
-            level: Number(level.level) || 0,
-            npc: (DataCache.npcs || []).find((entry) => Number(entry.selfId) === Number(level.npcId))
-        }))
-        .filter((entry) => entry.npc)
-        .sort((a, b) => Math.abs(a.level - skillLevel) - Math.abs(b.level - skillLevel));
-    const summonName = String(skill?.template?.name || skill?.name || '').toLowerCase();
-    const fallbackIds = summonName.includes('soulless') || summonName.includes('reanimated')
-        || summonName.includes('corrupted') || summonName.includes('cursed man')
-        ? [12070, 12366, 12071, 12367]
-        : [];
-    const familyFallback = fallbackIds
-        .map((id) => (DataCache.npcs || []).find((entry) => Number(entry.selfId) === id))
-        .find(Boolean);
-    const npc = direct || levelCandidates[0]?.npc || familyFallback;
-    return {
-        npcId: Number(details.npcId || 0),
-        maxHp: Math.max(1, Number(npc?.vitals?.maxHp || fighter.profile.maxHp * 1.15)),
-        pAtk: Math.max(1, Number(npc?.stats?.pAtk || fighter.profile.pAtk * 0.85)),
-        pAtkRnd: Math.max(0, Number(npc?.stats?.pAtkRnd || fighter.profile.equipment?.pAtkRnd || 0)),
-        pDef: Math.max(1, Number(npc?.stats?.pDef || fighter.profile.pDef * 0.8)),
-        accur: Math.max(1, Number(npc?.stats?.accur || fighter.profile.accur)),
-        critical: Math.max(0, Number(npc?.stats?.crit || fighter.profile.critical)),
-        atkSpd: Math.max(1, Number(npc?.stats?.atkSpd || fighter.profile.atkSpd))
-    };
+    return invoke('GameServer/Bot/Population/ColdSummonProfile')(fighter.profile, details);
 }
 
 function persistedSummon(fighter, timestamp) {
@@ -670,14 +615,16 @@ function summonDamage(fighter, mob, rng) {
     ));
 }
 
-function resolveFight({ state, spot, pressure, targetNpcId = 0, rng, timestamp = Date.now() }) {
+function resolveFight({ state, spot, pressure, targetNpcId = 0, rng, timestamp = Date.now(), fightLimitMs = 12000, maxActions = 48 }) {
     const fightState = mutableCombatState(state);
     let bot = botCombatStats(fightState, timestamp);
-    const mob = ColdCombatProfile.npcForSpot(spot, rng, { preferredNpcId: targetNpcId }) || {
+    const mob = ColdCombatProfile.npcForSpot(spot, rng, { preferredNpcId: targetNpcId,
+        matchupProfiles: TargetMatchup.coldProfiles(bot, fightState, timestamp) }) || {
         level: Number(spot.avgLevel || bot.level), maxHp: Math.max(1, Number(spot.mob?.hp || 1)),
         pAtk: Math.max(1, Number(spot.mob?.damage || 1)), pAtkRnd: 0, pDef: 1, mDef: 1,
         accur: 1, evasion: 0, critical: 0, atkSpd: 253, mAtk: 1, castSpd: 333
     };
+    if (mob.avoided) return { avoided: true, reason: mob.reason };
     const vitals = {
         hp: Number(state.vitals?.hp ?? bot.maxHp),
         mp: Number(state.vitals?.mp ?? bot.maxMp),
@@ -711,19 +658,21 @@ function resolveFight({ state, spot, pressure, targetNpcId = 0, rng, timestamp =
     let charges = chargeState.charges;
     let chargeExpiresAt = chargeState.chargeExpiresAt;
     const cooldowns = { ...(state.stats?.coldCombat?.cooldowns || {}) };
-    const fightLimitMs = 12000;
 
     // A resolve contains only a handful of fights, and a fight itself is
     // bounded by time and actions. This is deliberately cheaper than a live
     // Actor while retaining its hit, critical, damage and speed formulas.
-    while (vitals.hp > 0 && mobHp > 0 && time < fightLimitMs && actions < 48) {
+    while (vitals.hp > 0 && mobHp > 0 && time < fightLimitMs && actions < maxActions) {
         const summonReadyAt = soloFighter.summon?.active
             ? Number(soloFighter.summonReadyAt)
             : Number.POSITIVE_INFINITY;
         const summonActs = summonReadyAt <= botReadyAt && summonReadyAt <= mobReadyAt;
         const botActs = !summonActs && botReadyAt <= mobReadyAt;
         time = summonActs ? summonReadyAt : botActs ? botReadyAt : mobReadyAt;
-        if (time >= fightLimitMs) break;
+        if (time >= fightLimitMs) {
+            time = fightLimitMs;
+            break;
+        }
         applyColdPotionTicks(soloFighter, time);
         actions += 1;
 
@@ -779,7 +728,7 @@ function resolveFight({ state, spot, pressure, targetNpcId = 0, rng, timestamp =
                 botReadyAt += actionDelayMs(bot, music.skill);
                 continue;
             }
-            const chargeSkill = chooseChargeSkill(bot, vitals.mp, cooldowns, timestamp + time, charges);
+            const chargeSkill = chooseChargeSkill(bot, vitals.mp, cooldowns, timestamp + time, charges, {hp:vitals.hp,mob,summon:soloFighter.summon});
             if (chargeSkill) {
                 const semantic = C4SkillRules.resolve(chargeSkill);
                 const nextCharges = { charges, chargeExpiresAt };
@@ -792,7 +741,7 @@ function resolveFight({ state, spot, pressure, targetNpcId = 0, rng, timestamp =
                 botReadyAt += actionDelayMs(bot, chargeSkill);
                 continue;
             }
-            const selected = chooseSkill(bot, vitals.hp, vitals.mp, cooldowns, timestamp + time, charges);
+            const selected = chooseSkill(bot, vitals.hp, vitals.mp, cooldowns, timestamp + time, charges, rng, {mob,summon:soloFighter.summon});
             const skill = selected?.skill || null;
             const magic = selected?.magic === true;
             let damage = 0;
@@ -865,7 +814,7 @@ function resolveFight({ state, spot, pressure, targetNpcId = 0, rng, timestamp =
             effects: soloFighter.profile.effects,
             inventory: fightState.inventory,
             summon: soloFighter.summon || null,
-            debug: { actions, skillUses, heals, musicUses, summonUses, summonActions, potionsUsed: soloFighter.potionsUsed, mobSelfId: mob.selfId || null, timedOut: !died }
+            debug: { actions, durationMs: time, skillUses, heals, musicUses, summonUses, summonActions, potionsUsed: soloFighter.potionsUsed, mobSelfId: mob.selfId || null, timedOut: !died }
         };
     }
 
@@ -909,7 +858,7 @@ function resolveFight({ state, spot, pressure, targetNpcId = 0, rng, timestamp =
         effects: soloFighter.profile.effects,
         inventory: fightState.inventory,
         summon: soloFighter.summon || null,
-        debug: { actions, skillUses, heals, musicUses, summonUses, summonActions, potionsUsed: soloFighter.potionsUsed, mobSelfId: mob.selfId || null, timedOut: false }
+        debug: { actions, durationMs: time, skillUses, heals, musicUses, summonUses, summonActions, potionsUsed: soloFighter.potionsUsed, mobSelfId: mob.selfId || null, timedOut: false }
     };
 }
 
@@ -944,11 +893,6 @@ function applyAllyHeal(caster, allies, heal) {
 }
 
 function resolvePartyFight({ members, spot, targetNpcId = 0, rng = Math.random, timestamp = Date.now() }) {
-    const mob = ColdCombatProfile.npcForSpot(spot, rng, { preferredNpcId: targetNpcId }) || {
-        level: Number(spot.avgLevel || 1), maxHp: Math.max(1, Number(spot.mob?.hp || 1)),
-        pAtk: Math.max(1, Number(spot.mob?.damage || 1)), pAtkRnd: 0, pDef: 1, mDef: 1,
-        accur: 1, evasion: 0, critical: 0, atkSpd: 253
-    };
     const fighters = members.map((state) => {
         const fighterState = mutableCombatState(state);
         const profile = botCombatStats(fighterState, timestamp);
@@ -979,6 +923,14 @@ function resolvePartyFight({ members, spot, targetNpcId = 0, rng = Math.random, 
             now: timestamp
         };
     });
+    const matchupProfiles = fighters.filter(f => f.vitals.hp > 0)
+        .flatMap(f => TargetMatchup.coldProfiles(f.profile, f.state, timestamp));
+    const mob = ColdCombatProfile.npcForSpot(spot, rng, { preferredNpcId: targetNpcId, matchupProfiles }) || {
+        level: Number(spot.avgLevel || 1), maxHp: Math.max(1, Number(spot.mob?.hp || 1)),
+        pAtk: Math.max(1, Number(spot.mob?.damage || 1)), pAtkRnd: 0, pDef: 1, mDef: 1,
+        accur: 1, evasion: 0, critical: 0, atkSpd: 253
+    };
+    if (mob.avoided) return { avoided: true, reason: mob.reason, members: fighters, won: false };
     let mobHp = mob.maxHp;
     let mobReadyAt = 0;
     let time = 0;
@@ -1055,7 +1007,7 @@ function resolvePartyFight({ members, spot, targetNpcId = 0, rng = Math.random, 
                 continue;
             }
 
-            const chargeSkill = chooseChargeSkill(next.profile, next.vitals.mp, next.cooldowns, timestamp + time, next.charges);
+            const chargeSkill = chooseChargeSkill(next.profile, next.vitals.mp, next.cooldowns, timestamp + time, next.charges, {hp:next.vitals.hp,mob,party:true,summon:next.summon});
             if (chargeSkill) {
                 const semantic = C4SkillRules.resolve(chargeSkill);
                 addCharges(next, 1, semantic.maxCharges, timestamp + time);
@@ -1065,7 +1017,7 @@ function resolvePartyFight({ members, spot, targetNpcId = 0, rng = Math.random, 
                 next.readyAt += actionDelayMs(next.profile, chargeSkill);
                 continue;
             }
-            const selected = chooseSkill(next.profile, next.vitals.hp, next.vitals.mp, next.cooldowns, timestamp + time, next.charges);
+            const selected = chooseSkill(next.profile, next.vitals.hp, next.vitals.mp, next.cooldowns, timestamp + time, next.charges, rng, {mob,party:true,summon:next.summon});
             const skill = selected?.skill || null;
             let damage = 0;
             if (selected?.magic) {
@@ -1142,7 +1094,8 @@ function resolvePartyFight({ members, spot, targetNpcId = 0, rng = Math.random, 
 }
 
 const BackgroundResolver = {
-    combat: { chooseSkill, chooseHeal, applyAllyHeal, actionDelayMs, hitSucceeds },
+    combat: { chooseSkill, chooseChargeSkill, coldChargeState, expireCharges, addCharges, consumeCharges,
+        chooseHeal, applyAllyHeal, actionDelayMs, hitSucceeds },
     resolveDeathRecovery,
     resolveRest,
     resolvePartyFight,
@@ -1304,6 +1257,11 @@ const BackgroundResolver = {
 
         const maxFights = Math.max(1, Math.floor(elapsedMs / 12000));
         const fights = Math.min(maxFights, Math.max(1, Math.ceil((spot.density || 1) / 3)));
+        // Spend the cycle's available combat time on the current monster before
+        // starting another. Slow kills must not repeatedly reset at 12 seconds.
+        // Retain the old action budget and cap simulated combat at one minute.
+        const combatBudgetMs = Math.min(60000, Math.max(12000, elapsedMs));
+        const actionBudget = fights * 48;
         const events = [];
         const materialize = { exp: 0, sp: 0, adena: 0, items: [] };
         const patch = {
@@ -1324,16 +1282,26 @@ const BackgroundResolver = {
         let summonUses = 0;
         let summonActions = 0;
         let potionsUsed = 0;
+        let combatMs = 0;
         const foughtNpcIds = [];
+        let attemptedFights = 0;
 
         for (let i = 0; i < fights; i++) {
+            if (combatMs >= combatBudgetMs || combatActions >= actionBudget) break;
             const fightState = {
                 ...state,
                 vitals: patch.vitals,
                 inventory: patch.inventory || state.inventory,
                 stats: { ...(state.stats || {}), ...(patch.stats || {}) }
             };
-            const result = resolveFight({ state: fightState, spot, pressure, targetNpcId, rng, timestamp });
+            const result = resolveFight({ state: fightState, spot, pressure, targetNpcId, rng,
+                timestamp: timestamp + combatMs, fightLimitMs: combatBudgetMs - combatMs,
+                maxActions: actionBudget - combatActions });
+            if (result.avoided) {
+                patch.stats.lastReason = result.reason;
+                break;
+            }
+            attemptedFights += 1;
             patch.vitals.hp = result.hp;
             patch.vitals.maxHp = result.maxHp;
             patch.vitals.mp = result.mp;
@@ -1356,6 +1324,7 @@ const BackgroundResolver = {
             materialize.adena += result.adena;
             materialize.items.push(...result.loot);
             combatActions += Number(result.debug?.actions || 0);
+            combatMs += Number(result.debug?.durationMs || 0);
             skillUses += Number(result.debug?.skillUses || 0);
             heals += Number(result.debug?.heals || 0);
             musicUses += Number(result.debug?.musicUses || 0);
@@ -1398,6 +1367,10 @@ const BackgroundResolver = {
             }
         }
 
+        patch.stats.huntEfficiency = invoke('GameServer/Bot/AI/BotHuntEfficiency').record(state, {
+            spotId:spot.id,combatMs,exp:materialize.exp,timestamp,
+            recoveryMs:Math.max(0,Number(patch.stats.restUntil || timestamp)-timestamp)
+        });
         if (wins > 0 && !died) {
             events.push({
                 type: 'hunt',
@@ -1414,7 +1387,7 @@ const BackgroundResolver = {
             nextResolveAt: patch.stats?.restUntil || timestamp + 30000 + Math.round(rng() * 90000),
             debug: {
                 elapsedMs,
-                fights,
+                fights: attemptedFights,
                 wins,
                 died,
                 dropsRolled: materialize.items.length,

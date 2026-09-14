@@ -1,0 +1,465 @@
+{
+    "source": "L2J Lisvus C4 datapack/data/multisell: 1002, 81262504, 81262505, 81262506, 81262507",
+    "recipes": [
+        {
+            "sourceId": 612,
+            "productId": 5710,
+            "style": "heavy"
+        },
+        {
+            "sourceId": 612,
+            "productId": 5711,
+            "style": "light"
+        },
+        {
+            "sourceId": 612,
+            "productId": 5712,
+            "style": "robe"
+        },
+        {
+            "sourceId": 2464,
+            "productId": 5714,
+            "style": "heavy"
+        },
+        {
+            "sourceId": 2464,
+            "productId": 5715,
+            "style": "light"
+        },
+        {
+            "sourceId": 2464,
+            "productId": 5716,
+            "style": "robe"
+        },
+        {
+            "sourceId": 2487,
+            "productId": 5718,
+            "style": "heavy"
+        },
+        {
+            "sourceId": 2487,
+            "productId": 5719,
+            "style": "light"
+        },
+        {
+            "sourceId": 2487,
+            "productId": 5720,
+            "style": "robe"
+        },
+        {
+            "sourceId": 2475,
+            "productId": 5722,
+            "style": "heavy"
+        },
+        {
+            "sourceId": 2475,
+            "productId": 5723,
+            "style": "light"
+        },
+        {
+            "sourceId": 2475,
+            "productId": 5724,
+            "style": "robe"
+        },
+        {
+            "sourceId": 554,
+            "productId": 5726,
+            "style": "heavy"
+        },
+        {
+            "sourceId": 554,
+            "productId": 5727,
+            "style": "light"
+        },
+        {
+            "sourceId": 554,
+            "productId": 5728,
+            "style": "robe"
+        },
+        {
+            "sourceId": 600,
+            "productId": 5730,
+            "style": "heavy"
+        },
+        {
+            "sourceId": 600,
+            "productId": 5731,
+            "style": "light"
+        },
+        {
+            "sourceId": 600,
+            "productId": 5732,
+            "style": "robe"
+        },
+        {
+            "sourceId": 2439,
+            "productId": 5734,
+            "style": "heavy"
+        },
+        {
+            "sourceId": 2439,
+            "productId": 5735,
+            "style": "light"
+        },
+        {
+            "sourceId": 2439,
+            "productId": 5736,
+            "style": "robe"
+        },
+        {
+            "sourceId": 601,
+            "productId": 5738,
+            "style": "heavy"
+        },
+        {
+            "sourceId": 601,
+            "productId": 5739,
+            "style": "light"
+        },
+        {
+            "sourceId": 601,
+            "productId": 5740,
+            "style": "robe"
+        },
+        {
+            "sourceId": 6674,
+            "productId": 6373,
+            "style": null
+        },
+        {
+            "sourceId": 6675,
+            "productId": 6374,
+            "style": null
+        },
+        {
+            "sourceId": 6676,
+            "productId": 6375,
+            "style": null
+        },
+        {
+            "sourceId": 6677,
+            "productId": 6376,
+            "style": null
+        },
+        {
+            "sourceId": 6678,
+            "productId": 6377,
+            "style": null
+        },
+        {
+            "sourceId": 6679,
+            "productId": 6378,
+            "style": null
+        },
+        {
+            "sourceId": 6680,
+            "productId": 6379,
+            "style": null
+        },
+        {
+            "sourceId": 6681,
+            "productId": 6380,
+            "style": null
+        },
+        {
+            "sourceId": 6682,
+            "productId": 6381,
+            "style": null
+        },
+        {
+            "sourceId": 6683,
+            "productId": 6382,
+            "style": null
+        },
+        {
+            "sourceId": 6684,
+            "productId": 6383,
+            "style": null
+        },
+        {
+            "sourceId": 6685,
+            "productId": 6384,
+            "style": null
+        },
+        {
+            "sourceId": 6686,
+            "productId": 6385,
+            "style": null
+        },
+        {
+            "sourceId": 6687,
+            "productId": 6386,
+            "style": null
+        },
+        {
+            "sourceId": 6724,
+            "productId": 858,
+            "style": null
+        },
+        {
+            "sourceId": 6725,
+            "productId": 889,
+            "style": null
+        },
+        {
+            "sourceId": 6726,
+            "productId": 920,
+            "style": null
+        },
+        {
+            "sourceId": 5287,
+            "productId": 365,
+            "style": null
+        },
+        {
+            "sourceId": 5288,
+            "productId": 388,
+            "style": null
+        },
+        {
+            "sourceId": 5289,
+            "productId": 512,
+            "style": null
+        },
+        {
+            "sourceId": 5292,
+            "productId": 641,
+            "style": null
+        },
+        {
+            "sourceId": 5308,
+            "productId": 2407,
+            "style": null
+        },
+        {
+            "sourceId": 5297,
+            "productId": 2385,
+            "style": null
+        },
+        {
+            "sourceId": 5298,
+            "productId": 2389,
+            "style": null
+        },
+        {
+            "sourceId": 5293,
+            "productId": 2382,
+            "style": null
+        },
+        {
+            "sourceId": 5294,
+            "productId": 547,
+            "style": null
+        },
+        {
+            "sourceId": 5301,
+            "productId": 2393,
+            "style": null
+        },
+        {
+            "sourceId": 5304,
+            "productId": 2400,
+            "style": null
+        },
+        {
+            "sourceId": 5305,
+            "productId": 2405,
+            "style": null
+        },
+        {
+            "sourceId": 5320,
+            "productId": 2394,
+            "style": null
+        },
+        {
+            "sourceId": 5326,
+            "productId": 2408,
+            "style": null
+        },
+        {
+            "sourceId": 5311,
+            "productId": 374,
+            "style": null
+        },
+        {
+            "sourceId": 5312,
+            "productId": 2418,
+            "style": null
+        },
+        {
+            "sourceId": 5315,
+            "productId": 2498,
+            "style": null
+        },
+        {
+            "sourceId": 5316,
+            "productId": 2383,
+            "style": null
+        },
+        {
+            "sourceId": 5317,
+            "productId": 2419,
+            "style": null
+        },
+        {
+            "sourceId": 5323,
+            "productId": 2395,
+            "style": null
+        },
+        {
+            "sourceId": 5329,
+            "productId": 2409,
+            "style": null
+        },
+        {
+            "sourceId": 5290,
+            "productId": 5765,
+            "style": "heavy"
+        },
+        {
+            "sourceId": 5290,
+            "productId": 5766,
+            "style": "light"
+        },
+        {
+            "sourceId": 5290,
+            "productId": 5767,
+            "style": "robe"
+        },
+        {
+            "sourceId": 5295,
+            "productId": 5768,
+            "style": "heavy"
+        },
+        {
+            "sourceId": 5295,
+            "productId": 5769,
+            "style": "light"
+        },
+        {
+            "sourceId": 5295,
+            "productId": 5770,
+            "style": "robe"
+        },
+        {
+            "sourceId": 5313,
+            "productId": 5771,
+            "style": "heavy"
+        },
+        {
+            "sourceId": 5313,
+            "productId": 5772,
+            "style": "light"
+        },
+        {
+            "sourceId": 5313,
+            "productId": 5773,
+            "style": "robe"
+        },
+        {
+            "sourceId": 5318,
+            "productId": 5774,
+            "style": "heavy"
+        },
+        {
+            "sourceId": 5318,
+            "productId": 5775,
+            "style": "light"
+        },
+        {
+            "sourceId": 5318,
+            "productId": 5776,
+            "style": "robe"
+        },
+        {
+            "sourceId": 5291,
+            "productId": 5777,
+            "style": "heavy"
+        },
+        {
+            "sourceId": 5291,
+            "productId": 5778,
+            "style": "light"
+        },
+        {
+            "sourceId": 5291,
+            "productId": 5779,
+            "style": "robe"
+        },
+        {
+            "sourceId": 5296,
+            "productId": 5780,
+            "style": "heavy"
+        },
+        {
+            "sourceId": 5296,
+            "productId": 5781,
+            "style": "light"
+        },
+        {
+            "sourceId": 5296,
+            "productId": 5782,
+            "style": "robe"
+        },
+        {
+            "sourceId": 5314,
+            "productId": 5783,
+            "style": "heavy"
+        },
+        {
+            "sourceId": 5314,
+            "productId": 5784,
+            "style": "light"
+        },
+        {
+            "sourceId": 5314,
+            "productId": 5785,
+            "style": "robe"
+        },
+        {
+            "sourceId": 5319,
+            "productId": 5786,
+            "style": "heavy"
+        },
+        {
+            "sourceId": 5319,
+            "productId": 5787,
+            "style": "light"
+        },
+        {
+            "sourceId": 5319,
+            "productId": 5788,
+            "style": "robe"
+        },
+        {
+            "sourceId": 6323,
+            "productId": 933,
+            "style": null
+        },
+        {
+            "sourceId": 6324,
+            "productId": 871,
+            "style": null
+        },
+        {
+            "sourceId": 6325,
+            "productId": 902,
+            "style": null
+        },
+        {
+            "sourceId": 6326,
+            "productId": 924,
+            "style": null
+        },
+        {
+            "sourceId": 6327,
+            "productId": 862,
+            "style": null
+        },
+        {
+            "sourceId": 6328,
+            "productId": 893,
+            "style": null
+        }
+    ]
+}

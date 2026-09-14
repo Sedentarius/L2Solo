@@ -23,11 +23,12 @@ function powerRatio(context = {}) {
     const npcMDef = positive(context.npcMDef);
     const npcMaxHp = positive(context.npcMaxHp);
     const offenseRatios = [];
-    if (botPAtk && npcPDef) offenseRatios.push(botPAtk / npcPDef);
-    if (botMAtk && npcMDef) offenseRatios.push(botMAtk / npcMDef);
-    if (!offenseRatios.length || !botPDef || !npcPAtk || !botMaxHp || !npcMaxHp) return null;
+    if (context.botRole !== 'mage' && botPAtk && npcPDef) offenseRatios.push(botPAtk / npcPDef);
+    if ((!context.botRole || context.botRole === 'mage') && botMAtk && npcMDef) offenseRatios.push(botMAtk / npcMDef);
+    const combinedOffense = positive(context.botOffenseRatio);
+    if ((!combinedOffense && !offenseRatios.length) || !botPDef || !npcPAtk || !botMaxHp || !npcMaxHp) return null;
 
-    const offense = Math.max(...offenseRatios);
+    const offense = combinedOffense || Math.max(...offenseRatios);
     const resilience = botPDef / npcPAtk;
     const health = botMaxHp / npcMaxHp;
     return Math.cbrt(Math.max(0.001, offense * resilience * health));
@@ -49,6 +50,9 @@ function score(context = {}) {
     }
     if (context.retryCooldown) {
         return { eligible: false, score: -Infinity, reason: 'retry_cooldown', reasons: ['retry_cooldown'] };
+    }
+    if (!context.incomingThreat && context.targetMatchup?.eligible === false) {
+        return { eligible: false, score: -Infinity, reason: 'target_resistance', reasons: ['target_resistance'] };
     }
     if (!context.incomingThreat && levelGap > MAX_LEVEL_ADVANTAGE) {
         return { eligible: false, score: -Infinity, reason: 'level_too_high', reasons: ['level_too_high'] };
@@ -75,6 +79,10 @@ function score(context = {}) {
     }
 
     let value = 1000;
+    if (!context.incomingThreat && context.targetMatchup) {
+        value -= context.targetMatchup.penalty;
+        reasons.push(`target_efficiency:${context.targetMatchup.efficiency.toFixed(2)}`);
+    }
     value -= distance / 10;
     reasons.push(`distance:${Math.round(distance)}`);
 

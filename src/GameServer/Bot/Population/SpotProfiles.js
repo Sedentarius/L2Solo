@@ -364,7 +364,9 @@ const SpotProfiles = {
             reservationKey,
             maxReservationGroups: MAX_CLAN_EQUIPMENT_RESERVATIONS_PER_SPOT
         } : {};
-        const routeOptions = { ...options, occupancy, excludedSpotIds, capacityUnits, ...reservationOptions };
+        const TargetMatchup = invoke('GameServer/Bot/AI/BotTargetMatchup');
+        const routeOptions = { ...options, occupancy, excludedSpotIds, capacityUnits, ...reservationOptions,
+            matchupProfiles: TargetMatchup.stateProfiles(state, { ...options, mode: LevelingRoutes.modeForState(state, options) }) };
         const currentMatch = currentSpot ? LevelingRoutes.scoreSpot(currentSpot, state, routeOptions) : null;
         // Staying on the leader's ground still admits any teammates reserved
         // elsewhere. Check them before either current-spot shortcut, while
@@ -373,6 +375,7 @@ const SpotProfiles = {
             && capacityUnitsFor(capacityStates, occupancy[currentSpot.id]) > 0
             && !hasCapacityForStates(currentSpot, capacityStates, occupancy, reservationOptions);
         const mustRelocate = currentSpot && (currentMatch.localityPenalty > 0
+            || currentMatch.targetMatchup?.eligible === false
             || currentMatch.huntingGround?.allowed === false
             || shouldLeaveOverCapacity(state, currentSpot, occupancy)
             || currentNeedsRoom

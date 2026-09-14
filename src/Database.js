@@ -4143,8 +4143,23 @@ const Database = {
         }, 'craft:self'));
     },
 
-    combineInventoryItems(characterId, { ingredients, product }) {
+    unsealInventoryItem(characterId, sourceId, productId, validate) {
         return withCharacterFlush(characterId, () => inTransaction(() => {
+            validate?.();
+            const row = one('SELECT * FROM items WHERE id = ? AND characterId = ?', [sourceId, characterId]);
+            const recipe = row && invoke('GameServer/Items/C4Unseal').resolve(row.selfId, productId);
+            const item = recipe && invoke('GameServer/DataCache').items.find(i => i.selfId === recipe.productId);
+            if (!item || Number(row.amount) !== 1 || Number(row.equipped) !== 0) throw Error('unseal_source_changed');
+            // Update in place: enchant and all other instance metadata survive.
+            write('UPDATE items SET selfId = ?, name = ?, slot = ? WHERE id = ? AND characterId = ?',
+                [item.selfId, item.template.name, item.etc.slot, sourceId, characterId]);
+            return { ...row, selfId:item.selfId, name:item.template.name, slot:item.etc.slot };
+        }, 'item:unseal'));
+    },
+
+    combineInventoryItems(characterId, { ingredients, product, validate }) {
+        return withCharacterFlush(characterId, () => inTransaction(() => {
+            validate?.();
             const required = new Map();
             (ingredients || []).forEach((ingredient) => {
                 const selfId = Number(ingredient.selfId || 0);

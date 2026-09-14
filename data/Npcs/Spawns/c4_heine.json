@@ -1,0 +1,473 @@
+[
+  {
+    "selfId": "c4_heine",
+    "bounds": [],
+    "spawns": [
+      {
+        "selfId": 7917,
+        "name": "Dupuis",
+        "coords": [
+          {
+            "locX": 106938,
+            "locY": 218283,
+            "locZ": -3672,
+            "head": 0
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 7916,
+        "name": "Gosta",
+        "coords": [
+          {
+            "locX": 106942,
+            "locY": 218040,
+            "locZ": -3672,
+            "head": 0
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 7969,
+        "name": "Iason Heine",
+        "coords": [
+          {
+            "locX": 109695,
+            "locY": 220008,
+            "locZ": -3512,
+            "head": 7656
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 7894,
+        "name": "Natools",
+        "coords": [
+          {
+            "locX": 109627,
+            "locY": 220168,
+            "locZ": -3512,
+            "head": 0
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 7896,
+        "name": "Mia",
+        "coords": [
+          {
+            "locX": 109625,
+            "locY": 220238,
+            "locZ": -3512,
+            "head": 62216
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 7895,
+        "name": "Kluck",
+        "coords": [
+          {
+            "locX": 109623,
+            "locY": 220091,
+            "locZ": -3512,
+            "head": 2088
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 7909,
+        "name": "Anabel",
+        "coords": [
+          {
+            "locX": 111549,
+            "locY": 217381,
+            "locZ": -3456,
+            "head": 28808
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 7907,
+        "name": "Minevia",
+        "coords": [
+          {
+            "locX": 111221,
+            "locY": 217236,
+            "locZ": -3456,
+            "head": 5384
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 7908,
+        "name": "Tanios",
+        "coords": [
+          {
+            "locX": 111548,
+            "locY": 217133,
+            "locZ": -3456,
+            "head": 28808
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 7899,
+        "name": "Flauen",
+        "coords": [
+          {
+            "locX": 111386,
+            "locY": 219413,
+            "locZ": -3544,
+            "head": 49756
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 7901,
+        "name": "Arti",
+        "coords": [
+          {
+            "locX": 113967,
+            "locY": 218584,
+            "locZ": -3624,
+            "head": 52200
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 7902,
+        "name": "Karuna",
+        "coords": [
+          {
+            "locX": 114373,
+            "locY": 218268,
+            "locZ": -3624,
+            "head": 21824
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 7900,
+        "name": "Marcus",
+        "coords": [
+          {
+            "locX": 113739,
+            "locY": 218423,
+            "locZ": -3624,
+            "head": 0
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 7904,
+        "name": "Naiel",
+        "coords": [
+          {
+            "locX": 114205,
+            "locY": 219156,
+            "locZ": -3624,
+            "head": 3208
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 7903,
+        "name": "Traus",
+        "coords": [
+          {
+            "locX": 114251,
+            "locY": 219489,
+            "locZ": -3624,
+            "head": 54784
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 7898,
+        "name": "Morning",
+        "coords": [
+          {
+            "locX": 107763,
+            "locY": 218725,
+            "locZ": -3656,
+            "head": 12192
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 7914,
+        "name": "Sorbo",
+        "coords": [
+          {
+            "locX": 108744,
+            "locY": 219006,
+            "locZ": -3672,
+            "head": 60792
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 7913,
+        "name": "Tushku",
+        "coords": [
+          {
+            "locX": 108744,
+            "locY": 218963,
+            "locZ": -3672,
+            "head": 52240
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 7915,
+        "name": "Takina",
+        "coords": [
+          {
+            "locX": 108744,
+            "locY": 218920,
+            "locZ": -3672,
+            "head": 6504
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 7921,
+        "name": "Timos",
+        "coords": [
+          {
+            "locX": 115735,
+            "locY": 219407,
+            "locZ": -3664,
+            "head": 32768
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 7920,
+        "name": "Kraisen",
+        "coords": [
+          {
+            "locX": 115737,
+            "locY": 219156,
+            "locZ": -3664,
+            "head": 32768
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 7890,
+        "name": "Espen",
+        "coords": [
+          {
+            "locX": 115799,
+            "locY": 217684,
+            "locZ": -3576,
+            "head": 16416
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 7891,
+        "name": "Verona",
+        "coords": [
+          {
+            "locX": 115957,
+            "locY": 217807,
+            "locZ": -3584,
+            "head": 29320
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 7893,
+        "name": "Payel",
+        "coords": [
+          {
+            "locX": 107141,
+            "locY": 216674,
+            "locZ": -3592,
+            "head": 19624
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 7892,
+        "name": "Enverun",
+        "coords": [
+          {
+            "locX": 107082,
+            "locY": 216673,
+            "locZ": -3592,
+            "head": 13168
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 7897,
+        "name": "Roman",
+        "coords": [
+          {
+            "locX": 108003,
+            "locY": 218963,
+            "locZ": -3656,
+            "head": 43208
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 7905,
+        "name": "Squillari",
+        "coords": [
+          {
+            "locX": 111385,
+            "locY": 216821,
+            "locZ": -3456,
+            "head": 16264
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 7906,
+        "name": "Ranton",
+        "coords": [
+          {
+            "locX": 111226,
+            "locY": 216994,
+            "locZ": -3456,
+            "head": 5384
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 7910,
+        "name": "Xairakin",
+        "coords": [
+          {
+            "locX": 115904,
+            "locY": 219919,
+            "locZ": -3624,
+            "head": 32648
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 7912,
+        "name": "Xenovia",
+        "coords": [
+          {
+            "locX": 115614,
+            "locY": 220280,
+            "locZ": -3624,
+            "head": 54096
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 7911,
+        "name": "Brikus",
+        "coords": [
+          {
+            "locX": 115618,
+            "locY": 219666,
+            "locZ": -3624,
+            "head": 11680
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      }
+    ]
+  }
+]

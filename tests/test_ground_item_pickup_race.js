@@ -23,6 +23,8 @@ try {
         dataSendToMe(packet) { pickupMessages.push({ session: this, packet }); },
         dataSendToMeAndOthers(packet, item) { deletedObjects.push({ session: this, packet, item }); }
     };
+    playerSession.actor = { backpack: {} };
+    botSession.actor = { backpack: {} };
     const groundAdena = {
         fetchId: () => 700001,
         fetchSelfId: () => 57,
@@ -39,8 +41,24 @@ try {
         { session: botSession, amount: 20 }
     ];
 
-    assert.strictEqual(pickupItem.call(world, playerSession, {}, groundAdena), true, 'the first pickup must claim the ground Adena');
-    assert.strictEqual(pickupItem.call(world, botSession, {}, groundAdena), false, 'a stale competing pickup must not claim the same ground object twice');
+    const playerActor = playerSession.actor;
+    playerSession.actor = null;
+    assert.strictEqual(pickupItem.call(world, playerSession, playerActor, groundAdena), false);
+    playerSession.actor = { backpack: {} };
+    assert.strictEqual(pickupItem.call(world, playerSession, playerActor, groundAdena), false, 'a replaced actor must not collect an old pickup');
+    playerSession.actor = playerActor;
+    playerActor.isDead = () => true;
+    assert.strictEqual(pickupItem.call(world, playerSession, playerActor, groundAdena), false);
+    delete playerActor.isDead;
+    const botActor = botSession.actor;
+    botSession.actor = null;
+    assert.strictEqual(pickupItem.call(world, playerSession, playerActor, groundAdena), false, 'an invalid allocation must leave the whole drop intact');
+    botSession.actor = botActor;
+    assert.deepStrictEqual(world.items.spawns, [groundAdena]);
+    assert.strictEqual(purchases.length, 0);
+    assert.strictEqual(deletedObjects.length, 0);
+    assert.strictEqual(pickupItem.call(world, playerSession, playerActor, groundAdena), true, 'the first pickup must claim the ground Adena');
+    assert.strictEqual(pickupItem.call(world, botSession, botActor, groundAdena), false, 'a stale competing pickup must not claim the same ground object twice');
     assert.strictEqual(world.items.spawns.length, 0, 'the claimed ground object must be removed exactly once');
     assert.deepStrictEqual(
         purchases.map(({ session, selfId, amount }) => ({ accountId: session.accountId, selfId, amount })),
@@ -59,7 +77,7 @@ try {
         fetchAmount: () => 1
     };
     world.items.spawns.push(groundSaber);
-    assert.strictEqual(pickupItem.call(world, playerSession, {}, groundSaber), true, 'the normalized weapon drop must be picked up');
+    assert.strictEqual(pickupItem.call(world, playerSession, playerActor, groundSaber), true, 'the normalized weapon drop must be picked up');
     const saberMessage = pickupMessages.at(-1);
     assert.strictEqual(saberMessage.textId, ConsoleText.caption.pickup, 'a single weapon must use the pickup message without an xN amount');
     assert.strictEqual(saberMessage.params.length, 1, 'a single weapon pickup message must contain only the item name');

@@ -571,6 +571,43 @@ assert.strictEqual(
     'a stronger full-body set must satisfy both NPC bridge chest and legs slots'
 );
 const BotGear = invoke('GameServer/Bot/AI/BotGear');
+const BotLifeState = invoke('GameServer/Bot/Population/BotLifeState');
+const palusStarterInventory = BotLifeState.inventorySummaryFromItems(
+    BotGear.planFor({ classId: 31, level: 1 }).items
+);
+function palusWithBudget(adena) {
+    const inventory = { ...palusStarterInventory, 57: { selfId: 57, amount: adena } };
+    return {
+        level: 25,
+        adena,
+        stats: { classId: 32, role: 'tank', equipment: BotLifeState.equipmentSummaryFromInventory(inventory) },
+        inventory
+    };
+}
+const affordableArmorState = palusWithBudget(300000);
+const affordableArmorPlan = GearAcquisitionPlanner.planFor(affordableArmorState);
+assert.strictEqual(affordableArmorPlan.target.selfId, 347,
+    'Palus Knight must buy affordable Ring Mail instead of saving exclusively for an unfunded Saber');
+assert(affordableArmorPlan.market.price + affordableArmorPlan.market.reserve <= affordableArmorState.adena);
+const armorGoal = NeedsEvaluator.evaluate({
+    ...affordableArmorState,
+    stats: { ...affordableArmorState.stats, equipmentPlan: affordableArmorPlan }
+}).find((goal) => goal.type === 'upgrade_gear');
+assert.strictEqual(armorGoal.plan.expectedBenefit, 'market_search_for_gear',
+    'the affordable armour plan must produce a purchase goal, not an Adena farming goal');
+assert.strictEqual(armorGoal.priority, 87);
+assert.strictEqual(GearAcquisitionPlanner.planFor(palusWithBudget(1000000)).target.selfId, 123,
+    'an affordable entry D weapon must retain its first-kit priority');
+assert.strictEqual(GearAcquisitionPlanner.planFor(palusWithBudget(10000)).target.selfId, 123,
+    'when no basic D purchase is affordable, retain a concrete weapon savings target');
+const reserveLimitedArmor = GearAcquisitionPlanner.planFor(palusWithBudget(100000));
+assert.notStrictEqual(reserveLimitedArmor.target.selfId, 347,
+    'a chest that would consume the operational reserve must yield to another affordable basic slot');
+assert(reserveLimitedArmor.market.price + reserveLimitedArmor.market.reserve <= 100000);
+assert.notStrictEqual(GearAcquisitionPlanner.staticNpcUpgradePlan(affordableArmorState, {
+    excludedSlots: [10]
+}).target.slot, 10, 'city-pass slot exclusions must survive affordable-slot selection');
+
 const skeletonBuckler = DataCache.items.find((item) => item.template?.name === 'Skeleton Buckler');
 const noGradeNpcShieldInventory = BotGear.planFor({ classId: 0, level: 10 }).items.reduce((inventory, item) => {
     if (Number(item.slot) === 8) return inventory;

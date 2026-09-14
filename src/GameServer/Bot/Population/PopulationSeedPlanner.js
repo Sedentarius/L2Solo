@@ -32,14 +32,22 @@ function isPlaying(state = {}) {
     return !['merchant', 'crafting'].includes(state.activity);
 }
 
+function isGeneratedPopulation(state = {}) {
+    // Account identity survives hot/cold snapshots that lack seed metadata.
+    // Keep wave-only legacy states compatible, but never count craft services.
+    const account = String(state.accountName || '');
+    if (account.startsWith('bot_craft_')) return false;
+    return account.startsWith('bot_pop_') || Number(state.stats?.populationWave || 0) > 0;
+}
+
 function snapshot(states = []) {
     const playing = states.filter(isPlaying);
     // Wave pacing deliberately follows hunting bots: a bot that opens a
     // private store has left its farming spot and should be backfilled there.
     // The hard cap, however, covers every generated character, including the
     // ones temporarily selling in town.
-    const population = states.filter((state) => Number(state.stats?.populationWave || 0) > 0);
-    const playingPopulation = playing.filter((state) => Number(state.stats?.populationWave || 0) > 0);
+    const population = states.filter(isGeneratedPopulation);
+    const playingPopulation = playing.filter(isGeneratedPopulation);
     const populationByStarterRegion = playingPopulation.reduce((counts, state) => {
         const region = String(state.stats?.starterRegion || '');
         if (STARTER_REGIONS.some((entry) => entry.id === region)) {
@@ -77,7 +85,7 @@ function waveLevelThreshold(multiplier = ProgressionRates.profile().multiplier) 
 }
 
 function nextWave(snapshot = {}, levelThreshold = waveLevelThreshold()) {
-    if (!snapshot.hasPopulationSeed) return 1;
+    if (!snapshot.hasPopulationSeed || !snapshot.latestWave) return 1;
     // Advance exactly one cohort at a time. Legacy/static bots must neither
     // suppress the first wave nor jump several waves on server restart.
     return snapshot.latestCohortAverageLevel >= levelThreshold

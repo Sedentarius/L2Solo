@@ -286,6 +286,7 @@ const SpotService = {
             role: options.role || status.role,
             equipment: options.equipment
         };
+        routeOptions.matchupProfiles = invoke('GameServer/Bot/AI/BotTargetMatchup').stateProfiles(routeState, routeOptions);
 
         const candidates = this.ensureIndexed()
             .filter((spot) => spot.density >= (options.minDensity || 4))
@@ -324,7 +325,7 @@ const SpotService = {
                     ...candidate,
                     spot: decoratedSpot,
                     score: candidate.score + routeMatch.routeScore + routeMatch.variation
-                        - routeMatch.crowdPenalty - routeMatch.localityPenalty,
+                        - routeMatch.crowdPenalty - routeMatch.localityPenalty - routeMatch.targetMatchup.penalty,
                     route: decoratedSpot.route || null,
                     routeScore: routeMatch.routeScore,
                     crowdPenalty: routeMatch.crowdPenalty,

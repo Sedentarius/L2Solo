@@ -1,0 +1,530 @@
+[
+    {
+        "selfId": 5710,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Zubei's Gauntlets - Heavy Armor",
+            "class1": 1,
+            "class2": 1,
+            "mass": 590,
+            "price": 519000
+        },
+        "stats": {
+            "pDef": 41,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 9,
+            "rank": "b",
+            "cristals": 69
+        }
+    },
+    {
+        "selfId": 5711,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Zubei's Gauntlets - Light Armor",
+            "class1": 1,
+            "class2": 1,
+            "mass": 590,
+            "price": 519000
+        },
+        "stats": {
+            "pDef": 41,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 9,
+            "rank": "b",
+            "cristals": 69
+        }
+    },
+    {
+        "selfId": 5712,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Zubei's Gauntlets - Robe",
+            "class1": 1,
+            "class2": 1,
+            "mass": 590,
+            "price": 519000
+        },
+        "stats": {
+            "pDef": 41,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 9,
+            "rank": "b",
+            "cristals": 69
+        }
+    },
+    {
+        "selfId": 5714,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Avadon Gloves - Heavy Armor",
+            "class1": 1,
+            "class2": 1,
+            "mass": 590,
+            "price": 519000
+        },
+        "stats": {
+            "pDef": 41,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 9,
+            "rank": "b",
+            "cristals": 69
+        }
+    },
+    {
+        "selfId": 5715,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Avadon Gloves - Light Armor",
+            "class1": 1,
+            "class2": 1,
+            "mass": 590,
+            "price": 519000
+        },
+        "stats": {
+            "pDef": 41,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 9,
+            "rank": "b",
+            "cristals": 69
+        }
+    },
+    {
+        "selfId": 5716,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Avadon Gloves - Robe",
+            "class1": 1,
+            "class2": 1,
+            "mass": 590,
+            "price": 519000
+        },
+        "stats": {
+            "pDef": 41,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 9,
+            "rank": "b",
+            "cristals": 69
+        }
+    },
+    {
+        "selfId": 5718,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Blue Wolf Gloves - Heavy Armor",
+            "class1": 1,
+            "class2": 1,
+            "mass": 590,
+            "price": 804000
+        },
+        "stats": {
+            "pDef": 44,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 9,
+            "rank": "b",
+            "cristals": 107
+        }
+    },
+    {
+        "selfId": 5719,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Blue Wolf Gloves - Light Armor",
+            "class1": 1,
+            "class2": 1,
+            "mass": 590,
+            "price": 804000
+        },
+        "stats": {
+            "pDef": 44,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 9,
+            "rank": "b",
+            "cristals": 107
+        }
+    },
+    {
+        "selfId": 5720,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Blue Wolf Gloves - Robe",
+            "class1": 1,
+            "class2": 1,
+            "mass": 590,
+            "price": 804000
+        },
+        "stats": {
+            "pDef": 44,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 9,
+            "rank": "b",
+            "cristals": 107
+        }
+    },
+    {
+        "selfId": 5722,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Doom Gloves - Heavy Armor",
+            "class1": 1,
+            "class2": 1,
+            "mass": 580,
+            "price": 804000
+        },
+        "stats": {
+            "pDef": 44,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 9,
+            "rank": "b",
+            "cristals": 107
+        }
+    },
+    {
+        "selfId": 5723,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Doom Gloves - Light Armor",
+            "class1": 1,
+            "class2": 1,
+            "mass": 580,
+            "price": 804000
+        },
+        "stats": {
+            "pDef": 44,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 9,
+            "rank": "b",
+            "cristals": 107
+        }
+    },
+    {
+        "selfId": 5724,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Doom Gloves - Robe",
+            "class1": 1,
+            "class2": 1,
+            "mass": 580,
+            "price": 804000
+        },
+        "stats": {
+            "pDef": 44,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 9,
+            "rank": "b",
+            "cristals": 107
+        }
+    },
+    {
+        "selfId": 5726,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Zubei's Boots - Heavy Armor",
+            "class1": 1,
+            "class2": 1,
+            "mass": 1180,
+            "price": 519000
+        },
+        "stats": {
+            "pDef": 41,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 12,
+            "rank": "b",
+            "cristals": 69
+        }
+    },
+    {
+        "selfId": 5727,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Zubei's Boots - Light Armor",
+            "class1": 1,
+            "class2": 1,
+            "mass": 1180,
+            "price": 519000
+        },
+        "stats": {
+            "pDef": 41,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 12,
+            "rank": "b",
+            "cristals": 69
+        }
+    },
+    {
+        "selfId": 5728,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Zubei's Boots - Robe",
+            "class1": 1,
+            "class2": 1,
+            "mass": 1180,
+            "price": 519000
+        },
+        "stats": {
+            "pDef": 41,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 12,
+            "rank": "b",
+            "cristals": 69
+        }
+    },
+    {
+        "selfId": 5730,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Avadon Boots - Heavy Armor",
+            "class1": 1,
+            "class2": 1,
+            "mass": 1180,
+            "price": 519000
+        },
+        "stats": {
+            "pDef": 41,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 12,
+            "rank": "b",
+            "cristals": 69
+        }
+    },
+    {
+        "selfId": 5731,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Avadon Boots - Light Armor",
+            "class1": 1,
+            "class2": 1,
+            "mass": 1180,
+            "price": 519000
+        },
+        "stats": {
+            "pDef": 41,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 12,
+            "rank": "b",
+            "cristals": 69
+        }
+    },
+    {
+        "selfId": 5732,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Avadon Boots - Robe",
+            "class1": 1,
+            "class2": 1,
+            "mass": 1180,
+            "price": 519000
+        },
+        "stats": {
+            "pDef": 41,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 12,
+            "rank": "b",
+            "cristals": 69
+        }
+    },
+    {
+        "selfId": 5734,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Blue Wolf Boots - Heavy Armor",
+            "class1": 1,
+            "class2": 1,
+            "mass": 1130,
+            "price": 804000
+        },
+        "stats": {
+            "pDef": 44,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 12,
+            "rank": "b",
+            "cristals": 107
+        }
+    },
+    {
+        "selfId": 5735,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Blue Wolf Boots - Light Armor",
+            "class1": 1,
+            "class2": 1,
+            "mass": 1130,
+            "price": 804000
+        },
+        "stats": {
+            "pDef": 44,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 12,
+            "rank": "b",
+            "cristals": 107
+        }
+    },
+    {
+        "selfId": 5736,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Blue Wolf Boots - Robe",
+            "class1": 1,
+            "class2": 1,
+            "mass": 1130,
+            "price": 804000
+        },
+        "stats": {
+            "pDef": 44,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 12,
+            "rank": "b",
+            "cristals": 107
+        }
+    },
+    {
+        "selfId": 5738,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Doom Boots - Heavy Armor",
+            "class1": 1,
+            "class2": 1,
+            "mass": 1130,
+            "price": 804000
+        },
+        "stats": {
+            "pDef": 44,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 12,
+            "rank": "b",
+            "cristals": 107
+        }
+    },
+    {
+        "selfId": 5739,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Doom Boots - Light Armor",
+            "class1": 1,
+            "class2": 1,
+            "mass": 1130,
+            "price": 804000
+        },
+        "stats": {
+            "pDef": 44,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 12,
+            "rank": "b",
+            "cristals": 107
+        }
+    },
+    {
+        "selfId": 5740,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Doom Boots - Robe",
+            "class1": 1,
+            "class2": 1,
+            "mass": 1130,
+            "price": 804000
+        },
+        "stats": {
+            "pDef": 44,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 12,
+            "rank": "b",
+            "cristals": 107
+        }
+    }
+]

@@ -2987,6 +2987,8 @@ const PopulationService = {
                 : null;
             const partyRouteOptions = {
                 mode: 'party',
+                matchupProfiles: invoke('GameServer/Bot/AI/BotTargetMatchup').stateProfiles(leader,
+                    { capacityStates: members, timestamp: startedAt, mode: 'party' }),
                 role: PartyComposition.roleForState(leader),
                 excludedSpotIds,
                 timestamp: startedAt
@@ -3223,6 +3225,17 @@ const PopulationService = {
                     debug: result.debug
                 })));
             }).finally(() => Metrics.recordResolveDuration(Date.now() - startedAt));
+        }
+        const MammonUnseal = invoke('GameServer/Bot/AI/BotMammonUnseal');
+        if (state.activity === 'crafting' && state.stats?.mammonReturn) {
+            return MammonUnseal.finish(state,startedAt)
+                .then(next => LifeState.upsertState(next,'mammon_unseal_complete'))
+                .then(saved => ({ok:!!saved,state:saved || state}));
+        }
+        const mammonTravel = MammonUnseal.beginTravel(state,startedAt);
+        if (mammonTravel) {
+            return LifeState.upsertState(mammonTravel,'mammon_unseal_travel')
+                .then(saved => ({ok:!!saved,state:saved || state}));
         }
         if (GearAcquisitionPlanner.isCraftService(state)) {
             const { equipmentPlan, ...serviceStats } = state.stats || {};

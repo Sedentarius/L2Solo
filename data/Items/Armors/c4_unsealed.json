@@ -1,0 +1,838 @@
+[
+    {
+        "selfId": 5765,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Dark Crystal Gloves - Heavy Armor",
+            "class1": 1,
+            "class2": 1,
+            "mass": 580,
+            "price": 1160000
+        },
+        "stats": {
+            "pDef": 46,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 9,
+            "rank": "a",
+            "cristals": 92
+        }
+    },
+    {
+        "selfId": 5766,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Dark Crystal Gloves - Light Armor",
+            "class1": 1,
+            "class2": 1,
+            "mass": 580,
+            "price": 1160000
+        },
+        "stats": {
+            "pDef": 46,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 9,
+            "rank": "a",
+            "cristals": 92
+        }
+    },
+    {
+        "selfId": 5767,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Dark Crystal Gloves - Robe",
+            "class1": 1,
+            "class2": 1,
+            "mass": 580,
+            "price": 1160000
+        },
+        "stats": {
+            "pDef": 46,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 9,
+            "rank": "a",
+            "cristals": 92
+        }
+    },
+    {
+        "selfId": 5768,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Tallum Gloves - Heavy Armor",
+            "class1": 1,
+            "class2": 1,
+            "mass": 580,
+            "price": 1160000
+        },
+        "stats": {
+            "pDef": 46,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 9,
+            "rank": "a",
+            "cristals": 92
+        }
+    },
+    {
+        "selfId": 5769,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Tallum Gloves - Light Armor",
+            "class1": 1,
+            "class2": 1,
+            "mass": 580,
+            "price": 1160000
+        },
+        "stats": {
+            "pDef": 46,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 9,
+            "rank": "a",
+            "cristals": 92
+        }
+    },
+    {
+        "selfId": 5770,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Tallum Gloves - Robe",
+            "class1": 1,
+            "class2": 1,
+            "mass": 580,
+            "price": 1160000
+        },
+        "stats": {
+            "pDef": 46,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 9,
+            "rank": "a",
+            "cristals": 92
+        }
+    },
+    {
+        "selfId": 5771,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Gauntlets of Nightmare - Heavy Armor",
+            "class1": 1,
+            "class2": 1,
+            "mass": 550,
+            "price": 1760000
+        },
+        "stats": {
+            "pDef": 49,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 9,
+            "rank": "a",
+            "cristals": 140
+        }
+    },
+    {
+        "selfId": 5772,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Gauntlets of Nightmare - Light Armor",
+            "class1": 1,
+            "class2": 1,
+            "mass": 550,
+            "price": 1760000
+        },
+        "stats": {
+            "pDef": 49,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 9,
+            "rank": "a",
+            "cristals": 140
+        }
+    },
+    {
+        "selfId": 5773,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Gauntlets of Nightmare - Robe",
+            "class1": 1,
+            "class2": 1,
+            "mass": 550,
+            "price": 1760000
+        },
+        "stats": {
+            "pDef": 49,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 9,
+            "rank": "a",
+            "cristals": 140
+        }
+    },
+    {
+        "selfId": 5774,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Majestic Gauntlets - Heavy Armor",
+            "class1": 1,
+            "class2": 1,
+            "mass": 540,
+            "price": 1760000
+        },
+        "stats": {
+            "pDef": 49,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 9,
+            "rank": "a",
+            "cristals": 140
+        }
+    },
+    {
+        "selfId": 5775,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Majestic Gauntlets - Light Armor",
+            "class1": 1,
+            "class2": 1,
+            "mass": 540,
+            "price": 1760000
+        },
+        "stats": {
+            "pDef": 49,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 9,
+            "rank": "a",
+            "cristals": 140
+        }
+    },
+    {
+        "selfId": 5776,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Majestic Gauntlets - Robe",
+            "class1": 1,
+            "class2": 1,
+            "mass": 540,
+            "price": 1760000
+        },
+        "stats": {
+            "pDef": 49,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 9,
+            "rank": "a",
+            "cristals": 140
+        }
+    },
+    {
+        "selfId": 5777,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Dark Crystal Boots - Heavy Armor",
+            "class1": 1,
+            "class2": 1,
+            "mass": 1110,
+            "price": 1160000
+        },
+        "stats": {
+            "pDef": 46,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 12,
+            "rank": "a",
+            "cristals": 92
+        }
+    },
+    {
+        "selfId": 5778,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Dark Crystal Boots - Light Armor",
+            "class1": 1,
+            "class2": 1,
+            "mass": 1110,
+            "price": 1160000
+        },
+        "stats": {
+            "pDef": 46,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 12,
+            "rank": "a",
+            "cristals": 92
+        }
+    },
+    {
+        "selfId": 5779,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Dark Crystal Boots - Robe",
+            "class1": 1,
+            "class2": 1,
+            "mass": 1110,
+            "price": 1160000
+        },
+        "stats": {
+            "pDef": 46,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 12,
+            "rank": "a",
+            "cristals": 92
+        }
+    },
+    {
+        "selfId": 5780,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Tallum Boots - Heavy Armor",
+            "class1": 1,
+            "class2": 1,
+            "mass": 1130,
+            "price": 1160000
+        },
+        "stats": {
+            "pDef": 46,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 12,
+            "rank": "a",
+            "cristals": 92
+        }
+    },
+    {
+        "selfId": 5781,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Tallum Boots - Light Armor",
+            "class1": 1,
+            "class2": 1,
+            "mass": 1130,
+            "price": 1160000
+        },
+        "stats": {
+            "pDef": 46,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 12,
+            "rank": "a",
+            "cristals": 92
+        }
+    },
+    {
+        "selfId": 5782,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Tallum Boots - Robe",
+            "class1": 1,
+            "class2": 1,
+            "mass": 1130,
+            "price": 1160000
+        },
+        "stats": {
+            "pDef": 46,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 12,
+            "rank": "a",
+            "cristals": 92
+        }
+    },
+    {
+        "selfId": 5783,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Boots of Nightmare - Heavy Armor",
+            "class1": 1,
+            "class2": 1,
+            "mass": 1110,
+            "price": 1760000
+        },
+        "stats": {
+            "pDef": 49,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 12,
+            "rank": "a",
+            "cristals": 140
+        }
+    },
+    {
+        "selfId": 5784,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Boots of Nightmare - Light Armor",
+            "class1": 1,
+            "class2": 1,
+            "mass": 1110,
+            "price": 1760000
+        },
+        "stats": {
+            "pDef": 49,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 12,
+            "rank": "a",
+            "cristals": 140
+        }
+    },
+    {
+        "selfId": 5785,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Boots of Nightmare - Robe",
+            "class1": 1,
+            "class2": 1,
+            "mass": 1110,
+            "price": 1760000
+        },
+        "stats": {
+            "pDef": 49,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 12,
+            "rank": "a",
+            "cristals": 140
+        }
+    },
+    {
+        "selfId": 5786,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Majestic Boots - Heavy Armor",
+            "class1": 1,
+            "class2": 1,
+            "mass": 1110,
+            "price": 1760000
+        },
+        "stats": {
+            "pDef": 49,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 12,
+            "rank": "a",
+            "cristals": 140
+        }
+    },
+    {
+        "selfId": 5787,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Majestic Boots - Light Armor",
+            "class1": 1,
+            "class2": 1,
+            "mass": 1110,
+            "price": 1760000
+        },
+        "stats": {
+            "pDef": 49,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 12,
+            "rank": "a",
+            "cristals": 140
+        }
+    },
+    {
+        "selfId": 5788,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Majestic Boots - Robe",
+            "class1": 1,
+            "class2": 1,
+            "mass": 1110,
+            "price": 1760000
+        },
+        "stats": {
+            "pDef": 49,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 12,
+            "rank": "a",
+            "cristals": 140
+        }
+    },
+    {
+        "selfId": 6373,
+        "template": {
+            "kind": "Armor.Chain",
+            "name": "Imperial Crusader Breastplate",
+            "class1": 1,
+            "class2": 1,
+            "mass": 7620,
+            "price": 14300000
+        },
+        "stats": {
+            "pDef": 205,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 10,
+            "rank": "s",
+            "cristals": 715
+        }
+    },
+    {
+        "selfId": 6374,
+        "template": {
+            "kind": "Armor.Chain",
+            "name": "Imperial Crusader Gaiters",
+            "class1": 1,
+            "class2": 1,
+            "mass": 3260,
+            "price": 8960000
+        },
+        "stats": {
+            "pDef": 128,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 11,
+            "rank": "s",
+            "cristals": 448
+        }
+    },
+    {
+        "selfId": 6375,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Imperial Crusader Gauntlets",
+            "class1": 1,
+            "class2": 1,
+            "mass": 540,
+            "price": 3580000
+        },
+        "stats": {
+            "pDef": 55,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 9,
+            "rank": "s",
+            "cristals": 179
+        }
+    },
+    {
+        "selfId": 6376,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Imperial Crusader Boots",
+            "class1": 1,
+            "class2": 1,
+            "mass": 1110,
+            "price": 3580000
+        },
+        "stats": {
+            "pDef": 55,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 12,
+            "rank": "s",
+            "cristals": 179
+        }
+    },
+    {
+        "selfId": 6377,
+        "template": {
+            "kind": "Armor.Shield",
+            "name": "Imperial Crusader Shield",
+            "class1": 1,
+            "class2": 1,
+            "mass": 1170,
+            "price": 3760000
+        },
+        "stats": {
+            "pDef": 290,
+            "mDef": 0,
+            "evasion": -8,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 8,
+            "rank": "s",
+            "cristals": 188
+        }
+    },
+    {
+        "selfId": 6378,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Imperial Crusader Helmet",
+            "class1": 1,
+            "class2": 1,
+            "mass": 550,
+            "price": 5370000
+        },
+        "stats": {
+            "pDef": 83,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 6,
+            "rank": "s",
+            "cristals": 268
+        }
+    },
+    {
+        "selfId": 6379,
+        "template": {
+            "kind": "Armor.Leather",
+            "name": "Draconic Leather Armor",
+            "class1": 1,
+            "class2": 1,
+            "mass": 4950,
+            "price": 17400000
+        },
+        "stats": {
+            "pDef": 249,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 15,
+            "rank": "s",
+            "cristals": 870
+        }
+    },
+    {
+        "selfId": 6380,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Draconic Leather Gloves",
+            "class1": 1,
+            "class2": 1,
+            "mass": 540,
+            "price": 3580000
+        },
+        "stats": {
+            "pDef": 55,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 9,
+            "rank": "s",
+            "cristals": 179
+        }
+    },
+    {
+        "selfId": 6381,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Draconic Leather Boots",
+            "class1": 1,
+            "class2": 1,
+            "mass": 1110,
+            "price": 3580000
+        },
+        "stats": {
+            "pDef": 55,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 12,
+            "rank": "s",
+            "cristals": 179
+        }
+    },
+    {
+        "selfId": 6382,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Draconic Leather Helmet",
+            "class1": 1,
+            "class2": 1,
+            "mass": 550,
+            "price": 5370000
+        },
+        "stats": {
+            "pDef": 83,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 6,
+            "rank": "s",
+            "cristals": 268
+        }
+    },
+    {
+        "selfId": 6383,
+        "template": {
+            "kind": "Armor.Fabric",
+            "name": "Major Arcana Robe",
+            "class1": 1,
+            "class2": 1,
+            "mass": 2300,
+            "price": 17400000
+        },
+        "stats": {
+            "pDef": 166,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 866
+        },
+        "etc": {
+            "slot": 15,
+            "rank": "s",
+            "cristals": 870
+        }
+    },
+    {
+        "selfId": 6384,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Major Arcana Gloves",
+            "class1": 1,
+            "class2": 1,
+            "mass": 540,
+            "price": 3580000
+        },
+        "stats": {
+            "pDef": 55,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 9,
+            "rank": "s",
+            "cristals": 179
+        }
+    },
+    {
+        "selfId": 6385,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Major Arcana Boots",
+            "class1": 1,
+            "class2": 1,
+            "mass": 1110,
+            "price": 3580000
+        },
+        "stats": {
+            "pDef": 55,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 12,
+            "rank": "s",
+            "cristals": 179
+        }
+    },
+    {
+        "selfId": 6386,
+        "template": {
+            "kind": "Armor.Wear",
+            "name": "Major Arcana Circlet",
+            "class1": 1,
+            "class2": 1,
+            "mass": 550,
+            "price": 5370000
+        },
+        "stats": {
+            "pDef": 83,
+            "mDef": 0,
+            "evasion": 0,
+            "maxMp": 0
+        },
+        "etc": {
+            "slot": 6,
+            "rank": "s",
+            "cristals": 268
+        }
+    }
+]

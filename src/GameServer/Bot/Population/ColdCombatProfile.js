@@ -10,7 +10,8 @@ const BotRoles = invoke('GameServer/Bot/AI/BotRoles');
 const BotHuntingTargetPolicy = invoke('GameServer/Bot/AI/BotHuntingTargetPolicy');
 const NpcSkills = invoke('GameServer/Npc/NpcSkills');
 
-const PROFILE_VERSION = 4;
+// Rebuild database-derived snapshots that omitted template magic/cast/reuse metadata.
+const PROFILE_VERSION = 5;
 const npcCombatCache = new WeakMap();
 
 const WEAPON_MASK_BY_KIND = Object.freeze({
@@ -196,6 +197,8 @@ function npcCombatStats(npc) {
         mAtk: adjustedNpcStat(npc.stats?.mAtk, actor, 'mAtk'),
         pDef: adjustedNpcStat(npc.stats?.pDef, actor, 'pDef'),
         mDef: adjustedNpcStat(npc.stats?.mDef, actor, 'mDef'),
+        basePDef: number(npc.stats?.pDef, 1),
+        baseMDef: number(npc.stats?.mDef, 1),
         atkSpd: adjustedNpcStat(npc.stats?.atkSpd, actor, 'pAtkSpd'),
         castSpd: adjustedNpcStat(npc.stats?.castSpd, actor, 'castSpd'),
         accur: Math.max(1, Formulas.calcAccur(level, dex, number(npc.stats?.accur))
@@ -223,9 +226,10 @@ function effectiveBase(profile, stat, timestamp, sources) {
 function skillDefinition(selfId, level) {
     const skill = (DataCache.skills || []).find((candidate) => Number(candidate.selfId) === Number(selfId));
     if (!skill) return null;
-    return (skill.levels || []).find((row) => number(row.level) === number(level))
+    const definition = (skill.levels || []).find((row) => number(row.level) === number(level))
         || (skill.levels || []).filter((row) => number(row.level) <= number(level)).at(-1)
         || null;
+    return definition ? { ...skill.template, ...skill.time, ...definition } : null;
 }
 
 const FIRST_CLASS_TO_BASE = new Map(
@@ -619,16 +623,27 @@ function corpseSummonSkills(profile = {}) {
 
 function npcForSpot(spot = {}, rng = Math.random, options = {}) {
     const rawEntries = Array.isArray(spot.npcEntries) && spot.npcEntries.length ? spot.npcEntries : (spot.npcSelfIds || []).map((selfId) => ({ selfId, count: 1 }));
-    const entries = rawEntries.filter((entry) => {
+    let entries = rawEntries.filter((entry) => {
         const npc = (DataCache.npcs || []).find((candidate) => number(candidate.selfId) === number(entry.selfId));
         return npc && !BotRaidSafety.isProtectedRaidEntity(npc) && BotHuntingTargetPolicy.canHunt(npc);
     });
     if (entries.length === 0) return null;
+    const encounterEntries = entries;
+    const Matchup = invoke('GameServer/Bot/AI/BotTargetMatchup');
+    if (options.matchupProfiles?.length) {
+        entries = entries.map(entry => {
+            const npc = (DataCache.npcs || []).find(n => number(n.selfId) === number(entry.selfId));
+            const match = Matchup.evaluate(options.matchupProfiles, npcCombatStats(npc));
+            return { ...entry, match };
+        }).filter(entry => entry.match.eligible);
+        if (!entries.length) return { avoided: true, reason: 'target_resistance' };
+    }
     const pickEntry = (candidates) => {
-        const total = candidates.reduce((sum, entry) => sum + Math.max(1, number(entry.count, 1)), 0);
+        const weight = entry => Math.max(1, number(entry.count, 1)) * Math.min(1, entry.match?.efficiency ?? 1) ** 2;
+        const total = candidates.reduce((sum, entry) => sum + weight(entry), 0);
         let needle = rng() * total;
         return candidates.find((entry) => {
-            needle -= Math.max(1, number(entry.count, 1));
+            needle -= weight(entry);
             return needle <= 0;
         }) || candidates[0];
     };
@@ -640,7 +655,7 @@ function npcForSpot(spot = {}, rng = Math.random, options = {}) {
     // real hunting ground. Nearby aggressive mobs can engage first instead of
     // making the bot immune to the rest of the encounter table.
     const aggressive = preferred
-        ? entries.filter((entry) => number(entry.selfId) !== preferredNpcId
+        ? encounterEntries.filter((entry) => number(entry.selfId) !== preferredNpcId
             && (DataCache.npcs || []).find((npc) => number(npc.selfId) === number(entry.selfId))?.template?.hostile === true)
         : [];
     const interruptionChance = Math.max(0, Math.min(1, number(options.aggressiveInterruptionChance, 0.25)));

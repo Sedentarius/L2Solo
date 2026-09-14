@@ -1,7 +1,7 @@
 const ItemDisposition = invoke('GameServer/Bot/Economy/ItemDisposition');
 const LifeState = invoke('GameServer/Bot/Population/BotLifeState');
 const MerchantStoreConfigs = invoke('GameServer/Bot/MerchantStoreConfigs');
-const TradeService = invoke('GameServer/Bot/TradeService');
+const StaticMerchantPricing = invoke('GameServer/Bot/Economy/StaticMerchantPricing');
 const MarketTelemetry = invoke('GameServer/Bot/Economy/MarketTelemetry');
 
 // Fixed buy stores are an intentionally unlimited Adena source for the
@@ -22,7 +22,7 @@ function candidatesFor(state, town) {
         const offer = buyers.reduce((best, buyer) => {
             const line = (buyer.items || []).find((entry) => Number(entry.selfId) === Number(item.selfId));
             if (!line) return best;
-            const price = TradeService.ratedPrice(item.selfId, line.priceRate ?? 1);
+            const price = StaticMerchantPricing.priceFor(buyer, line);
             return !best || price > best.price ? { buyer, price } : best;
         }, null);
         if (!offer || offer.price <= 0) return [];

@@ -3,6 +3,7 @@ const BotRoles = invoke('GameServer/Bot/AI/BotRoles');
 const GearSkillHints = invoke('GameServer/Bot/AI/GearSkillHints');
 const BotEquipmentCompatibility = invoke('GameServer/Bot/AI/BotEquipmentCompatibility');
 const BotWeaponCompatibility = invoke('GameServer/Bot/AI/BotWeaponCompatibility');
+const ArmorPolicy = invoke('GameServer/Bot/AI/BotArmorPolicy');
 
 const ARMOR_SLOTS = {
     earringRight: 1,
@@ -272,8 +273,8 @@ function buildJewels(rank, level) {
 }
 
 function planFor(character) {
-    const level = Number(character.level || 1);
-    const classId = Number(character.classId || 0);
+    const level = Number(character.fetchLevel?.() || character.level || character.stats?.level || 1);
+    const classId = Number(BotRoles.classIdOf(character) ?? 0);
     const role = BotRoles.inferRole(classId);
     const band = gradeForLevel(level);
     const rank = band.rank;
@@ -288,7 +289,15 @@ function planFor(character) {
         }
     }
 
-    plan.push(...buildArmor(rank, level, style));
+    const armor = buildArmor(rank, level, style);
+    const catalog = allItems();
+    const byId = new Map(catalog.map(item => [item.selfId,item]));
+    const baseline = armor.map(item => byId.get(item.selfId)).filter(Boolean);
+    const kind = BotEquipmentCompatibility.armorKindFor(role, classId);
+    const available = catalog.filter(item => item.rank === rank && item.price > 0
+        && (item.kind === kind || item.kind === 'Armor.Wear') && item.price <= priceCapFor(rank,level));
+    plan.push(...ArmorPolicy.optimize(baseline,available,{ role, classId,
+        budget: baseline.reduce((sum,item) => sum + item.price,0) }).map(item => itemEntry(item,item.slot)));
     plan.push(...buildJewels(rank, level));
 
     return {

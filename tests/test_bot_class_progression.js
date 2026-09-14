@@ -75,8 +75,9 @@ try {
     Promise.all([
         BotClassProgression.reconcile({ characterId: 1, classId: 31, level: 42, seed: 'Halen1183' }),
         BotClassProgression.reconcile({ characterId: 2, classId: 49, level: 42, seed: 'Bren1465' }),
-        BotClassProgression.reconcile({ characterId: 3, classId: 2, level: 76, seed: 'Veteran' })
-    ]).then(([darkFighter, orcMystic, veteran]) => {
+        BotClassProgression.reconcile({ characterId: 3, classId: 2, level: 76, seed: 'Veteran' }),
+        BotClassProgression.reconcile({ characterId: 4, classId: 8, level: 74, seed: 'DaggerVeteran' })
+    ]).then(async ([darkFighter, orcMystic, veteran]) => {
         assert.ok([33, 34, 36, 37].includes(darkFighter.classId),
             'a level 42 Dark Fighter must pass both profession transfers through a valid branch');
         assert.ok([51, 52].includes(orcMystic.classId), 'a level 42 Orc Mystic must pass both profession transfers');
@@ -88,6 +89,8 @@ try {
             assert.ok(defined.some((entry) => entry.level === skill.level), `bot skills must use a defined datapack level (${skill.selfId}:${skill.level})`);
         });
         assert.strictEqual(classes.get(3), 88, 'the third profession must be persisted');
+        assert.strictEqual(skillsFor(4).find(skill => skill.selfId === 263)?.level, 37,
+            'level 74 dagger bot must learn Deadly Blow 37 instead of falling back to rank 21');
         assert.strictEqual(BotRoles.inferRole(97), 'healer', 'Cardinal must retain its healer role');
         assert.strictEqual(BotRoles.inferRole(98), 'buffer', 'Hierophant must retain its buffer role');
         assert.strictEqual(BotRoles.inferRole(21), 'buffer', 'Swordsinger must be treated as party support');
@@ -105,7 +108,25 @@ try {
         assert.strictEqual(BotRoles.inferRole(117), 'spoiler', 'Fortune Seeker must be recognized as a spoiler');
         assert.strictEqual(BotRoles.combatRoleFor({ classId: 57, level: 40 }), 'dps', 'a non-spoiler dwarf branch should remain DPS in combat for now');
         assert.strictEqual(BotRoles.inferRole(118), 'crafter', 'Maestro must retain its crafter role');
-        console.log('Bot class progression checks passed');
+        const ColdProfile = invoke('GameServer/Bot/Population/ColdCombatProfile');
+        for (const template of DataCache.classTemplates) {
+            const classId = template.classId;
+            const level = ClassProgression.firstProfMap[classId] ? 19
+                : ClassProgression.secondProfMap[classId] ? 39
+                    : ClassProgression.getThirdClass(classId) ? 78 : 74;
+            const id = 10000 + classId;
+            await BotClassProgression.reconcile({characterId:id,classId,level});
+            const expected = ColdProfile.skillRecordsFromTree(classId,level);
+            assert.deepStrictEqual(skillsFor(id).map(s=>[s.selfId,s.level]).sort((a,b)=>a[0]-b[0]),
+                expected.map(s=>[s.selfId,s.level]).sort((a,b)=>a[0]-b[0]), `hot/cold training agrees for class ${classId}`);
+        }
+        assert.strictEqual(DataCache.classTemplates.length,89);
+        const beforeRanks=skillsFor(4).map(s=>[s.selfId,s.level]);
+        await BotClassProgression.reconcile({characterId:4,classId:8,level:74});
+        assert.deepStrictEqual(skillsFor(4).map(s=>[s.selfId,s.level]),beforeRanks,'repeated ancestor reconciliation must not downgrade or duplicate skills');
+        assert.ok(skillsFor(10097).some(s=>s.selfId===1011),'restored Cardinal inherits Heal');
+        assert.ok(!skillsFor(10112).some(s=>s.selfId===1028),'restored Shillien Saint must not borrow Might of Heaven');
+        console.log('Bot class progression checks passed: all 89 restored classes match cold training');
     }).catch((error) => {
         console.error(error);
         process.exitCode = 1;

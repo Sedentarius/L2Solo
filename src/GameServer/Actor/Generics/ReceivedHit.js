@@ -70,16 +70,21 @@ function applyTransferPain(session, actor, hit) {
         return incoming;
     }
 
+    // Lisvus C4 uses the master's 4000-unit forget range, not the later
+    // chronicles' short transfer radius. A servitor must survive the transfer.
+    const distanceSquared = ['fetchLocX', 'fetchLocY', 'fetchLocZ'].reduce((sum, coord) => {
+        const delta = (Number(actor[coord]?.()) || 0) - (Number(summon[coord]?.()) || 0);
+        return sum + delta * delta;
+    }, 0);
+    if (distanceSquared > 4000 * 4000) return incoming;
+
     const desired = Math.floor(incoming * percent / 100);
     const summonHp = Math.max(0, Number(summon.fetchHp?.()) || 0);
-    const transferred = Math.min(desired, summonHp);
+    const transferred = Math.min(desired, Math.max(0, summonHp - 1));
     if (!transferred) return incoming;
 
     summon.setHp(summonHp - transferred);
     summon.broadcastVitals?.();
-    if ((Number(summon.fetchHp?.()) || 0) <= 0) {
-        invoke(path.npc).die(session, session?.actor, summon);
-    }
     return incoming - transferred;
 }
 

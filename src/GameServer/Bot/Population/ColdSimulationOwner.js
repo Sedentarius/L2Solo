@@ -29,6 +29,9 @@ function eligibility(state = {}, options = {}) {
     }
     if (options.hasWarehouseWorkflow === true) return { ok: false, reason: 'warehouse_state' };
     const stats = state.stats || {};
+    if (stats.mammonReturn || (Number(stats.mammonRetryAt || 0) <= Date.now()
+        && Object.values(state.inventory || {}).some(item => Number(item.amount)>0
+            && invoke('GameServer/Items/C4Unseal').options(item.selfId).length))) return { ok:false, reason:'craft_state' };
     if (stats.warehouseWorkflow || stats.warehouseErrand) return { ok: false, reason: 'warehouse_state' };
     if (stats.marketStore || stats.marketReturn) return { ok: false, reason: 'market_state' };
     if (stats.craftShop || stats.craftStationId || stats.craftReturn) return { ok: false, reason: 'craft_state' };

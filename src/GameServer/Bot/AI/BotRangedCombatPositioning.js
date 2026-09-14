@@ -14,6 +14,7 @@ function distance2d(first, second) {
 
 function isAutonomousArcher(session, bot, target, role = BotRoles.inferRole(bot)) {
     return role === 'archer' &&
+        bot?.backpack?.fetchTotalWeaponKind?.() === 'Weapon.Bow' &&
         session?.partyCompanion !== true &&
         !session?.followPlayerSession &&
         target?.fetchAttackable?.() === true &&

@@ -1,6 +1,7 @@
 const ReceivePacket = invoke('Packet/Receive');
 
 function destCancel(session, buffer) {
+    invoke('GameServer/Geodata/PlayerTransitionRecovery').cancel(session);
     const packet = new ReceivePacket(buffer);
     packet.readH();
 

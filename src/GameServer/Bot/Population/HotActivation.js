@@ -17,6 +17,7 @@ function activationPlan(state, options = {}) {
     }
 
     if (activity === 'dead' || activity === 'resting') return 'resting';
+    if (activity === 'crafting' && state.stats?.mammonReturn) return 'shopping';
     if (activity === 'crafting') return 'merchant';
     if (HOT_PLANS.has(activity)) return activity;
     return 'hunting';
@@ -117,12 +118,13 @@ const HotActivation = {
             if (pendingActivations.has(state.characterId)) {
                 return { ok: false, reason: 'activation_pending', state };
             }
-            const craftShop = state.activity === 'crafting' && state.stats?.craftShop
+            const mammonVisit = state.activity === 'crafting' && !!state.stats?.mammonReturn;
+            const craftShop = state.activity === 'crafting' && !mammonVisit && state.stats?.craftShop
                 ? CraftShopService.profileFor(state) : null;
             const marketStore = state.activity === 'merchant' ? state.stats?.marketStore : null;
             const placement = ActivationPlacement.resolve(state, {
                 ...options,
-                keepStoreLocation: options.keepStoreLocation || !!marketStore || !!craftShop,
+                keepStoreLocation: options.keepStoreLocation || !!marketStore || !!craftShop || mammonVisit,
                 storeLoc: marketStore?.loc || craftShop?.loc || state.loc
             });
             // A failed placement must not dissolve a party, remove a market
@@ -197,7 +199,7 @@ const HotActivation = {
                         locX: placement.loc?.locX,
                         locY: placement.loc?.locY,
                         locZ: placement.loc?.locZ,
-                        keepStoreLocation: !!marketStore || !!craftShop,
+                        keepStoreLocation: !!marketStore || !!craftShop || mammonVisit,
                         coldLifeState: !marketStore && !craftShop ? state : null,
                         populationLocationPolicy: reason === 'near_player' && !options.forceNearPlayer
                             ? 'physical' : 'return',

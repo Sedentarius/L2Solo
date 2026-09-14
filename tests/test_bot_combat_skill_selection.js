@@ -226,8 +226,103 @@ try {
         partyCompanion: true,
         followPlayerSession: {}
     }, closeArcher, closeTarget, playerPartyGenerics);
-    assert.strictEqual(playerPartyGenerics.skills.length, 1,
-        'the autonomous kite boundary must not override player-party combat positioning');
+    assert.strictEqual(playerPartyGenerics.attacks.length, 1,
+        'a safe party archer must use its bow without the autonomous kite boundary blocking combat');
+    assert.strictEqual(playerPartyGenerics.skills.length, 0,
+        'a safe party archer must save its offensive skills');
+
+    const partyArcher = { ...archer, fetchId: () => 20100, fetchIsOnline: () => true };
+    let tankHp = 100;
+    const partyTank = {
+        ...bot(5), fetchId: () => 20101, fetchHp: () => tankHp, fetchIsOnline: () => true
+    };
+    const partyHealer = { ...bot(15), fetchId: () => 20102, fetchIsOnline: () => true };
+    const leaderSession = { actor: partyTank };
+    const partyArcherSession = { actor: partyArcher, partyCompanion: true, followPlayerSession: leaderSession };
+    const healerSession = { actor: partyHealer, partyCompanion: true, followPlayerSession: leaderSession };
+    const savedPartyUser = World.user;
+    World.user = { sessions: [leaderSession, partyArcherSession, healerSession] };
+    const partyMob = {
+        ...npc(20200), fetchAttackable: () => true, isDead: () => false,
+        fetchDestId: () => partyTank.fetchId()
+    };
+    const add = { ...partyMob, fetchId: () => 20201 };
+    const checkPartyAttack = (label, target, nearby, expectSkill) => {
+        World.fetchNpcsInRadius = () => nearby;
+        const calls = generics();
+        BotAI.executeCombat(partyArcherSession, partyArcher, target, calls);
+        assert.strictEqual(calls.skills.length, expectSkill ? 1 : 0, label);
+        assert.strictEqual(calls.attacks.length, expectSkill ? 0 : 1, label);
+        if (!expectSkill) {
+            assert.strictEqual(calls.attacks[0].range, 700, 'conserving skills must preserve bow attack range');
+            assert.strictEqual(partyArcherSession.lastCombatDecision.reason, 'party_archer_conserve_skills');
+        }
+    };
+    checkPartyAttack('one mob on a healthy tank is routine farming', partyMob, [partyMob], false);
+    tankHp = 49;
+    checkPartyAttack('a wounded party member unlocks offensive shots', partyMob, [partyMob], true);
+    tankHp = 100;
+    checkPartyAttack('recovering party HP returns the archer to autoattacks', partyMob, [partyMob], false);
+    checkPartyAttack('a mob attacking the archer is dangerous', {
+        ...partyMob, fetchDestId: () => partyArcher.fetchId()
+    }, [], true);
+    checkPartyAttack('a mob attacking the healer is dangerous', {
+        ...partyMob, fetchDestId: () => partyHealer.fetchId()
+    }, [], true);
+    checkPartyAttack('two active attackers unlock offensive shots', partyMob, [partyMob, add], true);
+    checkPartyAttack('an idle nearby mob is not an active add', partyMob, [partyMob, {
+        ...add, fetchDestId: () => 0
+    }], false);
+    checkPartyAttack('a dead add is not dangerous', partyMob, [partyMob, {
+        ...add, isDead: () => true
+    }], false);
+    EffectStore.apply(add, { id: 1069, key: 'sleep', type: 'debuff', durationMs: 10000 });
+    checkPartyAttack('a sleeping add does not unlock damage skills', partyMob, [partyMob, add], false);
+    EffectStore.remove(add, 'sleep');
+    const partyPvpCalls = generics();
+    BotAI.executePvPCombat(partyArcherSession, partyArcher, npc(20202), partyPvpCalls);
+    assert.strictEqual(partyPvpCalls.skills.length, 1, 'a healthy party archer must use offensive skills in PvP');
+    const lastMpArcher = { ...partyArcher, fetchMp: () => 5 };
+    const lastMpPvpCalls = generics();
+    BotAI.executePvPCombat(partyArcherSession, lastMpArcher, npc(20202), lastMpPvpCalls);
+    assert.strictEqual(lastMpPvpCalls.skills.length, 1, 'party PvP must allow the last affordable shot without a mana reserve');
+    const archerPolicy = invoke('GameServer/Bot/AI/PartyArcherCombatPolicy');
+    let archerHitting = true;
+    let archerCasting = false;
+    let archerStops = 0;
+    partyArcher.state = {
+        fetchHits: () => archerHitting, setHits: value => { archerHitting = value; },
+        fetchCasts: () => archerCasting, setCasts: value => { archerCasting = value; }
+    };
+    partyArcher.automation = { abortAll: () => { archerStops += 1; } };
+    World.fetchNpcsInRadius = () => [partyMob];
+    assert.strictEqual(archerPolicy.reviewAutoAttack(partyArcherSession, partyArcher, partyMob), false,
+        'routine farming must not restart a repeating bow attack');
+    tankHp = 49;
+    delete partyArcherSession.partyArcherSkillReviewAt;
+    assert.strictEqual(archerPolicy.reviewAutoAttack(partyArcherSession, partyArcher, partyMob), true,
+        'new party danger must release a repeating autoattack for an available skill');
+    assert.strictEqual(archerHitting, false, 'the following-state busy guard must allow the emergency skill');
+    assert.strictEqual(archerStops, 1);
+    const emergencyCalls = generics();
+    BotAI.executeCombat(partyArcherSession, partyArcher, partyMob, emergencyCalls);
+    assert.strictEqual(emergencyCalls.skills.length, 1, 'the next combat dispatch must actually select the emergency shot');
+    archerHitting = true;
+    partyArcher.canUseSkill = () => false;
+    delete partyArcherSession.partyArcherSkillReviewAt;
+    assert.strictEqual(archerPolicy.reviewAutoAttack(partyArcherSession, partyArcher, partyMob), false,
+        'a skill on reuse must not interrupt the existing autoattack');
+    partyArcher.canUseSkill = () => true;
+    archerCasting = true;
+    delete partyArcherSession.partyArcherSkillReviewAt;
+    assert.strictEqual(archerPolicy.reviewAutoAttack(partyArcherSession, partyArcher, partyMob), false,
+        'the danger review must not cancel an active cast');
+    archerCasting = false;
+    tankHp = 100;
+    assert.strictEqual(archerPolicy.reviewAutoAttack(partyArcherSession, partyArcher, npc(20202), { pvp: true }), true,
+        'PvP must reconsider repeating autoattacks even when the party is healthy');
+    World.user = savedPartyUser;
+    World.fetchNpcsInRadius = () => [];
 
     const bowWithMeleeSkill = bot(9, [skill(3, { name: 'Power Strike', mp: 5, range: 50, power: 500 })], 100, 'Weapon.Bow');
     const bowWithMeleeSkillGenerics = generics();
@@ -592,9 +687,14 @@ try {
 
     const reserveHealer = bot(15, [skill(1300, { mp: 20, power: 100, spell: true })], 50);
     const reserveGenerics = generics();
-    BotAI.executeCombat({}, reserveHealer, npc(1105), reserveGenerics);
+    BotAI.executeCombat({ hotBackgroundPartyId: 'support-party' }, reserveHealer, npc(1105), reserveGenerics);
     assert.strictEqual(reserveGenerics.skills.length, 0, 'healer should preserve support MP instead of casting an expensive nuke');
     assert.strictEqual(reserveGenerics.attacks.length, 0, 'a healer preserving support MP must not melee a healthy target');
+
+    const soloHealerGenerics = generics();
+    BotAI.executeCombat({}, reserveHealer, npc(1105), soloHealerGenerics);
+    assert.strictEqual(soloHealerGenerics.skills[0]?.selfId, 1300,
+        'solo healer can spend offensive MP while retaining the smaller self-support reserve');
 
     const supportingHealer = bot(15, [skill(1301, { mp: 5, power: 20, spell: true })], 100);
     const supportingGenerics = generics();
@@ -703,6 +803,11 @@ try {
     assert.strictEqual(BotAI.executeCombat({}, dagger, protectedMinion, protectedMinionGenerics), false,
         'the final combat boundary must reject raid minion templates even without a live boss link');
     assert.strictEqual(protectedMinionGenerics.attacks.length, 0, 'a bot must not basic-attack a raid minion');
+
+    const groupCaster = bot(15, [skill(1177, { spell:true, mp:5 })], 100, 'Weapon.Blunt');
+    const groupSession = {};
+    BotAI.executePvPCombat(groupSession, groupCaster, npc(11125), generics(), {party:true});
+    assert(groupSession.lastCombatDecision.reasons.includes('class_mode:party_pvp'), 'resolved party context reaches native offensive scoring for the leader');
 
     console.log('Bot combat skill selection checks passed');
 } finally {

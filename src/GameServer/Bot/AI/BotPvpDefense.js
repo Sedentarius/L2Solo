@@ -5,6 +5,8 @@ const Potions = invoke('GameServer/Bot/AI/HealingPotionStock');
 const Restrictions = invoke('GameServer/Effects/EffectRestrictions');
 const Retreat = invoke('GameServer/Bot/AI/BotRetreatPlanner');
 const Voice = invoke('GameServer/Bot/AI/BotChatVoice');
+const Config = require('../Population/PopulationConfig');
+const Aggression = require('../../Social/PvpAggression');
 
 const CRITICAL_HP = 0.15;
 const ESCAPE_DISTANCE = 1800;
@@ -90,7 +92,8 @@ function tick(session, bot, Generics, BotAI, { now = Date.now(), rng = Math.rand
     const hpRatio = bot.fetchHp() / Math.max(1, bot.fetchMaxHp());
     // One roll per encounter, never per tick: staying means fighting on even
     // at critical HP, rather than eventually fleeing with probability 1.
-    if (encounter.action === 'fight' && hpRatio <= CRITICAL_HP && !encounter.criticalChecked) {
+    const retreatHp = Aggression.retreatHp(CRITICAL_HP, Config.pvpAggression);
+    if (encounter.action === 'fight' && hpRatio <= retreatHp && !encounter.criticalChecked) {
         encounter.criticalChecked = true;
         if (rng() < encounter.criticalFleeChance) {
             encounter.action = 'flee';
@@ -147,6 +150,7 @@ function tick(session, bot, Generics, BotAI, { now = Date.now(), rng = Math.rand
     }
     if (Tactics.support(session, bot, context, Generics, now)) return true;
     if (Tactics.control(session, bot, context, target, Generics, now)) return true;
+    if (invoke('GameServer/Bot/AI/BotPvpPositioning').reposition(session,bot,context,now)) return true;
     // Native auto-attacks repeat without yielding an idle AI tick. Revisit
     // skills that came off reuse instead of being stuck on basic attacks for
     // the rest of a long duel.
@@ -154,12 +158,14 @@ function tick(session, bot, Generics, BotAI, { now = Date.now(), rng = Math.rand
         now - Number(encounter.lastSkillReviewAt || 0) >= 2000) {
         encounter.lastSkillReviewAt = now;
         const role = invoke('GameServer/Bot/AI/BotRoles').combatRoleFor(bot);
-        if (invoke('GameServer/Bot/AI/BotCombatUtility').select(bot, target, role, { pvp: true, avoidAreaDamage: true })) {
+        if (invoke('GameServer/Bot/AI/BotCombatUtility').select(bot, target, role, { session, party: context.members.length > 1, pvp: true, avoidAreaDamage: true })) {
             Tactics.stop(session, bot);
         }
     }
     if (bot.state?.fetchTowards?.() || bot.state?.fetchHits?.() || bot.state?.fetchCasts?.()) return true;
-    BotAI.executePvPCombat(session, bot, target, Generics, { avoidAreaDamage: true });
+    BotAI.executePvPCombat(session, bot, target, Generics, {
+        party: context.members.length > 1, avoidAreaDamage: true, activeMobs: threats.length
+    });
     return true;
 }
 

@@ -242,6 +242,7 @@ const BackgroundPartyResolver = {
         let summonActions = 0;
         let potionsUsed = 0;
         const defeatedNpcIds = [];
+        let avoidedReason = null;
         const combatHelp = new Map();
         let combatMembers = members.map((state) => ({
             ...state,
@@ -249,6 +250,10 @@ const BackgroundPartyResolver = {
         }));
         for (let i = 0; i < fights; i++) {
             const encounter = BackgroundResolver.resolvePartyFight({ members: combatMembers, spot, targetNpcId, rng, timestamp });
+            if (encounter.avoided) {
+                avoidedReason = encounter.reason;
+                break;
+            }
             for (const help of encounter.help || []) combatHelp.set(`${help.sourceId}:${help.targetId}:${help.type}`, help);
             combatActions += Number(encounter.debug?.actions || 0);
             skillUses += encounter.members.reduce((sum, member) => sum + Number(member.skillUses || 0), 0);
@@ -339,6 +344,7 @@ const BackgroundPartyResolver = {
                         },
                         stats: {
                             ...(resolved.stats || {}),
+                            ...(avoidedReason ? { lastReason: avoidedReason } : {}),
                             coldCombat: hp <= 0 ? {
                                 ...(resolved.stats?.coldCombat || {}),
                                 charges: 0,

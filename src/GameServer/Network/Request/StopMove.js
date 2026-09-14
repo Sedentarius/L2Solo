@@ -19,6 +19,7 @@ function stopMove(session, buffer) {
 }
 
 function consume(session, data) {
+    invoke('GameServer/Geodata/PlayerTransitionRecovery').cancel(session);
     utils.infoWarn('GameServer', 'stopped actor');
     session.dataSendToMeAndOthers(ServerResponse.stopMove(session.actor.fetchId(), data), session.actor);
 }

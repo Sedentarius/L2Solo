@@ -150,6 +150,7 @@ const DEFAULTS = {
     coldCompetitionActionsEnabled: true,
     coldCompetitionConflictsEnabled: true,
     coldCompetitionPvpEnabled: true,
+    pvpAggression: 0.5,
     partyMinSize: 2,
     partyMaxSize: 5,
     // Shared safety ceiling for every background party. Admission never
@@ -223,6 +224,7 @@ const DEFAULTS = {
 };
 
 const ENV_KEYS = {
+    pvpAggression: 'BOT_PVP_AGGRESSION',
     enabled: 'BOT_POPULATION_ENABLED',
     backgroundResolverEnabled: 'BOT_BACKGROUND_RESOLVER_ENABLED',
     backgroundPartyEnabled: 'BOT_BACKGROUND_PARTY_ENABLED',
@@ -375,5 +377,6 @@ const PopulationConfig = applyOverrides(
     envOverrides()
 );
 PopulationConfig.maxPlayingPopulation = Math.max(0, Math.min(2000, Math.floor(Number(PopulationConfig.maxPlayingPopulation) || 0)));
+PopulationConfig.pvpAggression = require('../../Social/PvpAggression').normalize(PopulationConfig.pvpAggression);
 
 module.exports = PopulationConfig;

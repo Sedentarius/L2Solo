@@ -674,7 +674,7 @@ const BotManager = {
                         // clan title while publishing the store overlay.
                         session.actor.setPrivateStoreType(privateStore.storeType);
 
-                        const storeItems = TradeService.normalizeStoreItems(privateStore);
+                        const storeItems = TradeService.normalizeStoreItems(privateStore, { staticStore: !runtimeStore && !!storeCfg });
 
                         session.actor.setPrivateStore({
                             storeType: privateStore.storeType,
