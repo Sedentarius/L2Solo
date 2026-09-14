@@ -547,9 +547,6 @@ function queueRandomGroundPickup(looterSession, item) {
     if (!pickerSession) return null;
 
     const pickup = { id: item.fetchId() };
-    // Player pickup requests wait for the next client ValidatePosition.
-    // Hot bots update their location server-side, so leaving this in
-    // storedPickup makes the visible drop stay on the ground forever.
     // Keep an independent FIFO because a mob can drop Adena and items in
     // the same reward pass while Automation has only one pickup timer.
     pickerSession.partyGroundPickupQueue ??= [];

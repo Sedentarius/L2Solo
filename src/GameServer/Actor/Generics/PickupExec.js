@@ -2,26 +2,21 @@ const ServerResponse = invoke('GameServer/Network/Response');
 const World          = invoke('GameServer/World/World');
 
 function pickupExec(session, actor, data, onComplete, canContinue = () => true) {
+    const generation = actor?.automation?.pickupGeneration;
     const isCurrent = () => actor && session?.actor === actor &&
+        actor.automation?.pickupGeneration === generation &&
         !actor.isDead?.() && actor.fetchIsOnline?.() !== false && canContinue();
     World.fetchItem(data.id).then((item) => {
         if (!isCurrent()) { onComplete?.(); return; }
-        actor.automation.schedulePickup(session, actor, item, () => {
+        const scheduled = actor.automation.schedulePickup(session, actor, item, () => {
             if (!isCurrent()) { onComplete?.(); return; }
-            actor.state.setPickinUp(true);
             session.dataSendToMeAndOthers(ServerResponse.pickupItem(actor.fetchId(), item), actor);
-
-            setTimeout(() => {
-                if (isCurrent()) World.pickupItem(session, actor, item);
-            }, 250);
-
-            setTimeout(() => {
-                // A cancelled party attempt must not clear a newer native
-                // action's state. Its owner already reset the pickup flag.
-                if (isCurrent()) actor.state.setPickinUp(false);
-                onComplete?.();
-            }, 500);
+            // Lisvus awards on arrival; GetItem's client animation does not
+            // impose a server-side pickup cooldown.
+            World.pickupItem(session, actor, item);
+            onComplete?.();
         });
+        if (scheduled === false) onComplete?.();
     }).catch((err) => {
         utils.infoWarn(
             'GameServer',

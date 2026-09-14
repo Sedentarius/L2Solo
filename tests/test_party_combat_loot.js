@@ -122,12 +122,12 @@ function allowed(item=drop()){return Policy.allowed(support,leader,item,sessions
         assert(World.items.spawns.includes(addedAggro));assert.strictEqual(purchases.length,3);
         World.npc.spawns.pop();
 
-        // Arrival's delayed 250-ms award must also re-check urgent support,
-        // even when no AI tick runs between arrival and that timer.
+        // Arrival must re-check urgent support even when no AI tick runs
+        // after the emergency appears. There is no post-arrival award delay.
         support.actor.x=-300;support.partyGroundPickupQueue=[];World.items.spawns=[];
-        const late=drop(-310);World.items.spawns.push(late);ready();Loot.queueRandomGroundPickup(leader,late);
+        const late=drop(-400);World.items.spawns.push(late);ready();Loot.queueRandomGroundPickup(leader,late);
         await wait(120);leader.actor.hp=40;await wait(550);
-        assert(World.items.spawns.includes(late),'new emergency before the award timer prevents pickup');
+        assert(World.items.spawns.includes(late),'new emergency before arrival prevents pickup without an AI tick');
         assert.strictEqual(purchases.length,3);
         assert.strictEqual(support.actor.state.pickup,false,'aborted award releases pickup state');
         console.log('Party combat loot: tank protection, attack/skill clearance, priorities, native movement/distribution, reassignment and interruption passed');

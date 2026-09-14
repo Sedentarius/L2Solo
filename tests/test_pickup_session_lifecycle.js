@@ -11,23 +11,23 @@ async function main() {
         packet: Response.pickupItem, timer: global.setTimeout, update: Database.updateItemAmount };
     try {
         for (const change of ['disconnect', 'replace', 'death', 'offline', 'none']) {
-            const timers = [];
+            let arrive;
             let awarded = 0, completed = 0;
             const actor = { fetchId: () => 1, state: { setPickinUp() {} },
-                automation: { schedulePickup(_session, _actor, _item, callback) { callback(); } } };
+                automation: { schedulePickup(_session, _actor, _item, callback) { arrive = callback; } } };
             const session = { actor, dataSendToMeAndOthers() {} };
             World.fetchItem = () => Promise.resolve({});
             World.pickupItem = () => { awarded++; };
             Response.pickupItem = () => ({});
-            global.setTimeout = (callback, delay) => { timers.push({ callback, delay }); };
+            global.setTimeout = () => { throw new Error('Pickup must not introduce an animation cooldown'); };
             pickupExec(session, actor, { id: 7 }, () => { completed++; });
             await Promise.resolve();
-            assert.strictEqual(timers.length, 2);
+            assert.strictEqual(typeof arrive, 'function');
             if (change === 'disconnect') session.actor = null;
             if (change === 'replace') session.actor = {};
             if (change === 'death') actor.isDead = () => true;
             if (change === 'offline') actor.fetchIsOnline = () => false;
-            timers.sort((a, b) => a.delay - b.delay).forEach(timer => timer.callback());
+            arrive();
             assert.strictEqual(awarded, change === 'none' ? 1 : 0, change);
             assert.strictEqual(completed, 1, 'cancelled pickups must still complete');
         }

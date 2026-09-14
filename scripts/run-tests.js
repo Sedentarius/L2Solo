@@ -431,6 +431,7 @@ const tests = [
     'tests/test_party_combat_loot.js',
     'tests/test_ground_item_pickup_race.js',
     'tests/test_pickup_session_lifecycle.js',
+    'tests/test_pickup_c4_timing.js',
     'tests/test_npc_reward_non_stackable_amount.js',
     'tests/test_party_hud_throttle.js',
     'tests/test_party_pull_pause.js',

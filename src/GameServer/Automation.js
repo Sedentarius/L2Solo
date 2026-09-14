@@ -416,76 +416,51 @@ class Automation extends SelectedModel {
     }
 
     schedulePickup(session, src, dst, callback) {
+        const restrictions = invoke('GameServer/Effects/EffectRestrictions');
+        if (!restrictions.canUseBasicAction(src)) return false;
+        this.stopMoveInterpolation();
         if (session) session.activeMoveGoal = null;
-        const from = {
-            locX: src.fetchLocX(),
-            locY: src.fetchLocY(),
-            locZ: src.fetchLocZ(),
-        };
-
-        const to = {
-            locX: dst.fetchLocX(),
-            locY: dst.fetchLocY(),
-            locZ: dst.fetchLocZ(),
-        };
-
-        // Execute each time, or else creature is stuck
-        session.dataSendToMeAndOthers(ServerResponse.moveToLocation(src.fetchId(), { from: from, to: to }), src);
-
-        // Calculate duration
-        src.state.setTowards('pickup');
-        const ticks = this.ticksToMove(
-            from.locX, from.locY, from.locZ, to.locX, to.locY, to.locZ, 0, src.fetchCollectiveRunSpd()
-        );
-
-        // Dynamically update coordinates step-by-step for bots while running to prevent teleportation/snapping on reschedule
-        if (session && (session.constructor.name === 'BotSession' || (session.accountId && session.accountId.startsWith('bot_')))) {
-            if (session.moveTimer) {
-                clearInterval(session.moveTimer);
-                session.moveTimer = null;
-            }
-
-            const dx = to.locX - from.locX;
-            const dy = to.locY - from.locY;
-            const dz = to.locZ - from.locZ;
-
-            const tickRate = 250;
-            const steps = Math.ceil(ticks / tickRate);
-            let step = 0;
-
-            session.moveTimer = setInterval(() => {
-                step++;
-                if (step >= steps) {
-                    src.setLocXYZ(to);
-                    clearInterval(session.moveTimer);
-                    session.moveTimer = null;
-                } else {
-                    const ratio = step / steps;
-                    src.setLocXYZ({
-                        locX: Math.round(from.locX + dx * ratio),
-                        locY: Math.round(from.locY + dy * ratio),
-                        locZ: Math.round(from.locZ + dz * ratio)
-                    });
-                }
-            }, tickRate);
-        }
-
-        // Arrived
-        Timer.start(this.timer.pickup, () => {
+        const from = { locX: src.fetchLocX(), locY: src.fetchLocY(), locZ: src.fetchLocZ() };
+        const dx = dst.fetchLocX() - from.locX;
+        const dy = dst.fetchLocY() - from.locY;
+        const distance = Math.hypot(dx, dy);
+        // Lisvus thinkPickUp checks 36 + the actor's collision radius.
+        if (distance <= 36 + Math.max(0, Number(src.fetchRadius?.()) || 0)) {
             src.state.setTowards(false);
-            if (session && (session.constructor.name === 'BotSession' || (session.accountId && session.accountId.startsWith('bot_')))) {
-                src.setLocXYZ(to);
-                if (session.moveTimer) {
-                    clearInterval(session.moveTimer);
-                    session.moveTimer = null;
-                }
-            }
             callback();
-
+            return true;
+        }
+        if (!restrictions.canMove(src)) return false;
+        const speed = src.state.fetchWalkin?.()
+            ? src.fetchCollectiveWalkSpd() : src.fetchCollectiveRunSpd();
+        if (!Number.isFinite(speed) || speed <= 0) return false;
+        // Match onIntentionPickUp's 20-unit approach offset. Do not add the
+        // generic movement timer's extra tick to every item in a loot pile.
+        const ratio = Math.max(0, distance - 20) / distance;
+        const to = {
+            locX: Math.round(from.locX + dx * ratio),
+            locY: Math.round(from.locY + dy * ratio),
+            locZ: Math.round(from.locZ + (dst.fetchLocZ() - from.locZ) * ratio)
+        };
+        const ticks = 1000 * Math.hypot(to.locX - from.locX, to.locY - from.locY) / speed;
+        session.dataSendToMeAndOthers(ServerResponse.moveToLocation(src.fetchId(), { from, to }), src);
+        this.pickupTargetId = dst.fetchId();
+        src.state.setTowards('pickup');
+        this.startMoveInterpolation(session, src, to, ticks);
+        Timer.start(this.timer.pickup, () => {
+            Timer.clear(this.timer.pickup);
+            this.stopMoveInterpolation();
+            src.setLocXYZ(to);
+            this.pickupTargetId = null;
+            src.state.setTowards(false);
+            callback();
         }, ticks);
+        return true;
     }
 
     abortAll(creature, { notifyClient = true } = {}) {
+        this.pickupGeneration = Number(this.pickupGeneration || 0) + 1;
+        this.pickupTargetId = null;
         this.playerAttackApproach = null;
         this.stopMoveInterpolation();
         const wasMoving = !!creature?.state?.inMotion?.() && !creature?.session?.pendingPathRequest;
