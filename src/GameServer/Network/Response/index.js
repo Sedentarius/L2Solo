@@ -1,4 +1,5 @@
 module.exports = {
+    validateLocation: require('./ValidateLocation'),
     exStorageMaxCount: require('./ExStorageMaxCount'),
     ride: require('./Ride'),
     petItemList: require('./PetItemList'),
