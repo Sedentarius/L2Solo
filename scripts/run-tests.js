@@ -181,6 +181,7 @@ const tests = [
     'tests/test_bot_gear.js',
     'tests/test_bot_equipment_compatibility.js',
     'tests/test_bot_economy_pricing.js',
+    'tests/test_static_merchant_pricing.js',
     'tests/test_bot_gear_acquisition.js',
     'tests/test_bot_dual_sword_combine.js',
     'tests/test_bot_dual_sword_database.js',

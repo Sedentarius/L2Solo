@@ -1147,5 +1147,12 @@ module.exports = {
 
     allEntries() {
         return flatten(Object.values(NPC_LISTS).flat());
+    },
+
+    allOffers() {
+        // Keep different prices for the same item; arbitrage checks need the
+        // cheapest offer, not the first NPC's price retained by flatten().
+        const names = new Set([...Object.values(NPC_LISTS).flat(), ...Object.values(FALLBACKS).flat()]);
+        return [...names].flatMap((name) => (LISTS[name] || []).map(normalizeEntry));
     }
 };

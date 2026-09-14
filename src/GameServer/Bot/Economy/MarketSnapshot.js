@@ -2,7 +2,7 @@ const LifeState = invoke('GameServer/Bot/Population/BotLifeState');
 const MerchantStoreConfigs = invoke('GameServer/Bot/MerchantStoreConfigs');
 const MarketTelemetry = invoke('GameServer/Bot/Economy/MarketTelemetry');
 const MarketDemandIndex = invoke('GameServer/Bot/Economy/MarketDemandIndex');
-const TradeService = invoke('GameServer/Bot/TradeService');
+const StaticMerchantPricing = invoke('GameServer/Bot/Economy/StaticMerchantPricing');
 const DataCache = invoke('GameServer/DataCache');
 const Database = invoke('Database');
 const World = invoke('GameServer/World/World');
@@ -181,8 +181,8 @@ function fixedStores(itemsById) {
     return Object.entries(MerchantStoreConfigs).flatMap(([ownerName, store]) => {
         if (![1, 3].includes(Number(store?.storeType))) return [];
         const items = normalizeStoreItems(store.items, itemsById, (line) => (
-            line.price ?? TradeService.ratedPrice(line.selfId, line.priceRate ?? 1)
-        ));
+            StaticMerchantPricing.priceFor(store, line)
+        )).filter((line) => line.price > 0);
         if (!items.length) return [];
         return [storeRow({
             id: `fixed:${ownerName}`,

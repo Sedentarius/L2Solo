@@ -85,14 +85,15 @@ function isSellableInventoryItem(item) {
     return item && !item.fetchPetLocked?.() && !item.fetchEquipped() && item.fetchSelfId() !== 57;
 }
 
-function normalizeStoreItems(storeCfg) {
+function normalizeStoreItems(storeCfg, { staticStore = false } = {}) {
     let fakeObjectIdSeq = 600000000 + utils.randomNumber(100000000);
+    const pricing = staticStore ? invoke('GameServer/Bot/Economy/StaticMerchantPricing') : null;
     return storeCfg.items.map((item) => ({
         objectId: ++fakeObjectIdSeq,
         selfId: item.selfId,
-        price: item.price ?? ratedPrice(item.selfId, item.priceRate ?? 1),
+        price: pricing ? pricing.priceFor(storeCfg, item) : item.price ?? ratedPrice(item.selfId, item.priceRate ?? 1),
         count: item.count ?? 1
-    }));
+    })).filter((item) => !staticStore || item.price > 0);
 }
 
 function describeStoreItems(items, limit = 3) {
