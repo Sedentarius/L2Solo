@@ -615,7 +615,7 @@ function summonDamage(fighter, mob, rng) {
     ));
 }
 
-function resolveFight({ state, spot, pressure, targetNpcId = 0, rng, timestamp = Date.now() }) {
+function resolveFight({ state, spot, pressure, targetNpcId = 0, rng, timestamp = Date.now(), fightLimitMs = 12000, maxActions = 48 }) {
     const fightState = mutableCombatState(state);
     let bot = botCombatStats(fightState, timestamp);
     const mob = ColdCombatProfile.npcForSpot(spot, rng, { preferredNpcId: targetNpcId,
@@ -658,19 +658,21 @@ function resolveFight({ state, spot, pressure, targetNpcId = 0, rng, timestamp =
     let charges = chargeState.charges;
     let chargeExpiresAt = chargeState.chargeExpiresAt;
     const cooldowns = { ...(state.stats?.coldCombat?.cooldowns || {}) };
-    const fightLimitMs = 12000;
 
     // A resolve contains only a handful of fights, and a fight itself is
     // bounded by time and actions. This is deliberately cheaper than a live
     // Actor while retaining its hit, critical, damage and speed formulas.
-    while (vitals.hp > 0 && mobHp > 0 && time < fightLimitMs && actions < 48) {
+    while (vitals.hp > 0 && mobHp > 0 && time < fightLimitMs && actions < maxActions) {
         const summonReadyAt = soloFighter.summon?.active
             ? Number(soloFighter.summonReadyAt)
             : Number.POSITIVE_INFINITY;
         const summonActs = summonReadyAt <= botReadyAt && summonReadyAt <= mobReadyAt;
         const botActs = !summonActs && botReadyAt <= mobReadyAt;
         time = summonActs ? summonReadyAt : botActs ? botReadyAt : mobReadyAt;
-        if (time >= fightLimitMs) break;
+        if (time >= fightLimitMs) {
+            time = fightLimitMs;
+            break;
+        }
         applyColdPotionTicks(soloFighter, time);
         actions += 1;
 
@@ -1255,6 +1257,11 @@ const BackgroundResolver = {
 
         const maxFights = Math.max(1, Math.floor(elapsedMs / 12000));
         const fights = Math.min(maxFights, Math.max(1, Math.ceil((spot.density || 1) / 3)));
+        // Spend the cycle's available combat time on the current monster before
+        // starting another. Slow kills must not repeatedly reset at 12 seconds.
+        // Retain the old action budget and cap simulated combat at one minute.
+        const combatBudgetMs = Math.min(60000, Math.max(12000, elapsedMs));
+        const actionBudget = fights * 48;
         const events = [];
         const materialize = { exp: 0, sp: 0, adena: 0, items: [] };
         const patch = {
@@ -1277,19 +1284,24 @@ const BackgroundResolver = {
         let potionsUsed = 0;
         let combatMs = 0;
         const foughtNpcIds = [];
+        let attemptedFights = 0;
 
         for (let i = 0; i < fights; i++) {
+            if (combatMs >= combatBudgetMs || combatActions >= actionBudget) break;
             const fightState = {
                 ...state,
                 vitals: patch.vitals,
                 inventory: patch.inventory || state.inventory,
                 stats: { ...(state.stats || {}), ...(patch.stats || {}) }
             };
-            const result = resolveFight({ state: fightState, spot, pressure, targetNpcId, rng, timestamp });
+            const result = resolveFight({ state: fightState, spot, pressure, targetNpcId, rng,
+                timestamp: timestamp + combatMs, fightLimitMs: combatBudgetMs - combatMs,
+                maxActions: actionBudget - combatActions });
             if (result.avoided) {
                 patch.stats.lastReason = result.reason;
                 break;
             }
+            attemptedFights += 1;
             patch.vitals.hp = result.hp;
             patch.vitals.maxHp = result.maxHp;
             patch.vitals.mp = result.mp;
@@ -1375,7 +1387,7 @@ const BackgroundResolver = {
             nextResolveAt: patch.stats?.restUntil || timestamp + 30000 + Math.round(rng() * 90000),
             debug: {
                 elapsedMs,
-                fights,
+                fights: attemptedFights,
                 wins,
                 died,
                 dropsRolled: materialize.items.length,

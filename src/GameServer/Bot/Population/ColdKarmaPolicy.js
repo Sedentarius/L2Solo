@@ -1,5 +1,6 @@
 const LevelingRoutes = invoke('GameServer/Bot/AI/LevelingRoutes');
 const SpotService = invoke('GameServer/Bot/AI/SpotService');
+const SpotRiskPolicy = invoke('GameServer/Bot/Population/SpotRiskPolicy');
 
 function active(state) {
     return Number(state?.stats?.karma || 0) > 0;
@@ -17,16 +18,22 @@ function targetForSpot(state, spot) {
 
 function plan(state, spots, timestamp = Date.now()) {
     if (!active(state)) return null;
-    const clean = { ...state, stats: { ...(state.stats || {}), equipmentPlan: null,
+    const backoff = SpotRiskPolicy.backoffForStates([state], state.spotId, timestamp);
+    const routedState = backoff && !SpotRiskPolicy.activeBackoffs(state, timestamp)
+        .some(entry => entry.spotId === state.spotId)
+        ? SpotRiskPolicy.withBackoff(state, backoff, timestamp) : state;
+    const clean = { ...routedState, stats: { ...(routedState.stats || {}), equipmentPlan: null,
         partyRequest: null, marketReturn: null, craftReturn: null, craftStationId: null,
         warehouseWorkflow: null, warehouseErrand: null, supplyErrand: null } };
     const travel = clean.stats.travel;
-    if (state.activity === 'traveling' && travel?.reason === 'karma_washing') {
+    const excludedSpotIds = SpotRiskPolicy.excludedSpotIdsForStates([clean], timestamp);
+    if (state.activity === 'traveling' && travel?.reason === 'karma_washing'
+        && !excludedSpotIds.has(travel.spotId)) {
         return { targetNpcId: 0, plannedState: clean, spot: spots.find(spot => spot.id === travel.spotId) || null };
     }
     const candidates = spots.filter(spot => {
         const point = spot.center;
-        return point && !utils.isInPeaceZone(point.locX, point.locY)
+        return point && !excludedSpotIds.has(spot.id) && !utils.isInPeaceZone(point.locX, point.locY)
             && LevelingRoutes.isSpotAllowedForState(spot, clean, { mode: 'solo' })
             && Number(spot.minLevel || 1) <= Number(state.level || 1)
             && Number(spot.maxLevel || spot.minLevel || 1) >= Math.max(1, Number(state.level || 1) - 8);

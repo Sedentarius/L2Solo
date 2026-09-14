@@ -43,6 +43,40 @@ try {
     const hunter = Policy.plan({ ...planned.plannedState, ...arrived.patch }, [field], route.arrivalAt + 1);
     assert.strictEqual(hunter.plannedState.activity, 'hunting', 'arrival must not start another journey');
     assert.strictEqual(hunter.targetNpcId, 204, 'washing must prefer weaker mobs instead of random stronger neighbours');
+    const alternate = { ...field, id: 'alternate', center: { locX: 24000, locY: 0, locZ: 0 } };
+    const failed = { ...hunter.plannedState, stats: { ...hunter.plannedState.stats,
+        spotRisk: { version: 2, spotId: field.id, windowFights: 12, windowWins: 0, windowDeaths: 0 } } };
+    const rerouted = Policy.plan(failed, [field, alternate], 5000);
+    assert.strictEqual(rerouted.plannedState.stats.travel.spotId, alternate.id,
+        'karma washing must leave a nearby field after repeated fights without wins');
+    const backoff = rerouted.plannedState.stats.spotBackoffs.find(entry => entry.spotId === field.id);
+    assert.strictEqual(backoff.reason, 'low_win_rate');
+    assert.strictEqual(backoff.until, 5000 + 60 * 60 * 1000);
+    const enRoute = Policy.plan(rerouted.plannedState, [field, alternate], 6000);
+    assert.deepStrictEqual(enRoute.plannedState.stats.travel, rerouted.plannedState.stats.travel,
+        'an ongoing safe walk must keep its original arrival deadline');
+    assert.strictEqual(enRoute.plannedState.stats.spotBackoffs[0].until, backoff.until,
+        'planning during travel must not extend an existing backoff');
+    const dying = { ...failed, stats: { ...failed.stats,
+        spotRisk: { version: 2, spotId: field.id, windowFights: 5, windowWins: 0, windowDeaths: 2 } } };
+    const deathRoute = Policy.plan(dying, [field, alternate], 5000);
+    assert.strictEqual(deathRoute.plannedState.stats.travel.spotId, alternate.id);
+    assert.strictEqual(deathRoute.plannedState.stats.spotBackoffs[0].reason, 'death_pressure');
+    const noAlternative = Policy.plan(failed, [field], 5000);
+    assert.strictEqual(noAlternative.spot, null);
+    assert.strictEqual(noAlternative.plannedState.activity, 'resting',
+        'lack of alternatives must not send a PK back to a failed field');
+    const arrivalState = { ...rerouted.plannedState, activity: 'hunting', spotId: alternate.id,
+        loc: alternate.center, stats: { ...rerouted.plannedState.stats, travel: null, spotRisk: null } };
+    assert.strictEqual(Policy.plan(arrivalState, [field, alternate], 7000).spot.id, alternate.id,
+        'persisted backoff must survive relocation and risk-window replacement');
+    const returned = { ...arrivalState, spotId: field.id, loc: field.center };
+    assert.strictEqual(Policy.plan(returned, [field, alternate], 7000).plannedState.stats.travel.spotId, alternate.id,
+        'an active backoff must reject even a nearby field after its risk window was replaced');
+    const unsafeTravel = { ...returned, activity: 'traveling', stats: { ...returned.stats,
+        travel: { ...route, reason: 'karma_washing', spotId: field.id } } };
+    assert.strictEqual(Policy.plan(unsafeTravel, [field, alternate], 7000).plannedState.stats.travel.spotId, alternate.id,
+        'saved travel toward an excluded spot must be replanned');
     assert.strictEqual(Policy.plan({ ...state, stats: { karma: 0 } }, [field]), null, 'normal goals resume at zero karma');
     const dead = Policy.plan({ ...state, activity: 'dead' }, [field]);
     assert.strictEqual(dead.plannedState.activity, 'dead', 'washing must not bypass death recovery');
