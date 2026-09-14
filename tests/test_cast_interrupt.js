@@ -96,7 +96,7 @@ global.setTimeout = (callback, delay) => {
     return timer;
 };
 global.clearTimeout = (timer) => {
-    timer.canceled = true;
+    if (timer) timer.canceled = true;
 };
 
 try {

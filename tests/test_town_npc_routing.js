@@ -79,12 +79,12 @@ specializedPetManagers.forEach((row) => assert(
 const townsWithoutSellers = Object.values(TownRespawn.towns)
     .map((town) => town.name)
     .filter((town) => TownServiceCatalog.rowsForTown(town, TownServiceCatalog.ROLES.SELLER).length === 0);
-assert.deepStrictEqual(townsWithoutSellers, ['Heine'],
-    'missing local services must remain explicit datapack gaps instead of fabricated town-center NPCs');
+assert.deepStrictEqual(townsWithoutSellers, [],
+    'every town, including populated Heine, must expose real local sellers');
 const townsWithoutGenericMerchants = Object.values(TownRespawn.towns)
     .map((town) => town.name)
     .filter((town) => TownServiceCatalog.rowsForTown(town, TownServiceCatalog.ROLES.GENERIC_MERCHANT).length === 0);
-assert.deepStrictEqual(townsWithoutGenericMerchants, ['Heine'],
+assert.deepStrictEqual(townsWithoutGenericMerchants, [],
     'specialization filtering must not create new town coverage gaps');
 
 const expectedTown = new Map([
