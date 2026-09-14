@@ -8,6 +8,7 @@ const DecisionService = invoke('GameServer/Bot/AI/BotDecisionService');
 const BotBuffs       = invoke('GameServer/Bot/AI/BotBuffs');
 const PartyAwareness = invoke('GameServer/Bot/AI/PartyAwareness');
 const BotTargetScorer = invoke('GameServer/Bot/AI/BotTargetScorer');
+const TargetMatchup = invoke('GameServer/Bot/AI/BotTargetMatchup');
 const BotPvpRisk      = invoke('GameServer/Bot/AI/BotPvpRisk');
 const BotRoles        = invoke('GameServer/Bot/AI/BotRoles');
 const SummonerTactics = invoke('GameServer/Bot/AI/SummonerTactics');
@@ -114,8 +115,11 @@ function findPreferredMonster(session, bot, radius, options = {}) {
     }, new Map());
     const spotIdAt = (actor) => `${Math.floor(actor.fetchLocX() / TARGET_SPOT_GRID_SIZE)}_${Math.floor(actor.fetchLocY() / TARGET_SPOT_GRID_SIZE)}`;
     const currentSpotId = String(session.currentSpot?.id || spotIdAt(bot)).split(':')[0];
-    // Actor totals are invariant for this target scan. Compute them once;
-    // candidate NPCs use their cheap base stats to keep dense cells bounded.
+    const partyActors = session.followPlayerSession || session.hotBackgroundPartyId
+        ? PartyAwareness.partyActors(session.followPlayerSession || session) : [];
+    const matchupProfiles = TargetMatchup.actorProfiles(partyActors.length ? partyActors : [bot]);
+    const matchupStats = TargetMatchup.profileStats(matchupProfiles);
+    // Actor totals and attack profiles are invariant for this bounded scan.
     const botCombatStats = {
         pAtk: bot.fetchCollectivePAtk?.(),
         mAtk: bot.fetchCollectiveMAtk?.(),
@@ -128,6 +132,7 @@ function findPreferredMonster(session, bot, radius, options = {}) {
             const claimed = claimedIds.has(Number(npc.fetchId()));
             const npcSpotId = spotIdAt(npc);
             const clan = npc.fetchClanName?.();
+            const matchupTarget = TargetMatchup.targetView(npc, matchupStats);
             const scoreContext = {
                 attackable: npc.fetchAttackable(),
                 raidEntity: BotRaidSafety.isProtectedRaidEntity(npc),
@@ -141,14 +146,19 @@ function findPreferredMonster(session, bot, radius, options = {}) {
                 npcSpotId,
                 claimed,
                 socialAllies: clan ? Math.max(0, (clanCounts.get(clan) || 1) - 1) : 0,
-                solo: isSoloHunter(session),
+                solo: isSoloHunter(session) && partyActors.length <= 1,
+                botRole: BotRoles.combatRoleFor(bot),
+                botOffenseRatio: matchupProfiles.length > 1 ? matchupProfiles.reduce((sum, profile) => sum
+                    + (profile.role === 'mage' ? Number(profile.mAtk || 0) / Math.max(1, matchupTarget.mDef || 1)
+                        : Number(profile.pAtk || 0) / Math.max(1, matchupTarget.pDef || 1)), 0) : undefined,
+                targetMatchup: TargetMatchup.evaluate(matchupProfiles, matchupTarget),
                 botPAtk: botCombatStats.pAtk,
                 botMAtk: botCombatStats.mAtk,
                 botPDef: botCombatStats.pDef,
                 botMaxHp: botCombatStats.maxHp,
                 npcPAtk: npc.fetchPAtk?.() ?? npc.fetchCollectivePAtk?.(),
-                npcPDef: npc.fetchPDef?.() ?? npc.fetchCollectivePDef?.(),
-                npcMDef: npc.fetchMDef?.() ?? npc.fetchCollectiveMDef?.(),
+                npcPDef: matchupTarget.pDef,
+                npcMDef: matchupTarget.mDef,
                 npcMaxHp: npc.fetchMaxHp?.()
             };
             return {
@@ -481,6 +491,7 @@ function targetProgressing(session, bot, target) {
 }
 
 module.exports = {
+    findPreferredMonster,
     limitTargetCandidates,
     claimedTargetIds,
     tick(session, bot, Generics, BotAI) {
@@ -616,6 +627,7 @@ module.exports = {
             const groundSafety = currentGround
                 ? BotHuntingGroundPolicy.evaluate(currentGround, { level: bot.fetchLevel() }, {
                     mode: 'solo',
+                    matchupProfiles: TargetMatchup.actorProfiles([bot]),
                     equipment: equippedItems(bot)
                 })
                 : { allowed: true };

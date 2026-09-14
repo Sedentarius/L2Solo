@@ -2987,6 +2987,8 @@ const PopulationService = {
                 : null;
             const partyRouteOptions = {
                 mode: 'party',
+                matchupProfiles: invoke('GameServer/Bot/AI/BotTargetMatchup').stateProfiles(leader,
+                    { capacityStates: members, timestamp: startedAt, mode: 'party' }),
                 role: PartyComposition.roleForState(leader),
                 excludedSpotIds,
                 timestamp: startedAt

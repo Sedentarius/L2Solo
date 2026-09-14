@@ -9,6 +9,7 @@ const BotRoles = invoke('GameServer/Bot/AI/BotRoles');
 const ChargeLifecycle = invoke('GameServer/Skills/ChargeLifecycle');
 const HealingPotionStock = invoke('GameServer/Bot/AI/HealingPotionStock');
 const BotHuntingGroundPolicy = invoke('GameServer/Bot/AI/BotHuntingGroundPolicy');
+const TargetMatchup = invoke('GameServer/Bot/AI/BotTargetMatchup');
 
 function clamp(value, min, max) {
     return Math.max(min, Math.min(max, value));
@@ -501,35 +502,7 @@ function startColdPotion(fighter, time) {
 }
 
 function summonNpcStats(fighter, details) {
-    const direct = (DataCache.npcs || []).find((entry) => Number(entry.selfId) === Number(details.npcId));
-    const skill = (DataCache.skills || []).find((entry) => Number(entry.selfId) === Number(details.skillId));
-    const skillLevel = Number(details.skillLevel || 1);
-    const levelCandidates = (skill?.levels || [])
-        .map((level) => ({
-            level: Number(level.level) || 0,
-            npc: (DataCache.npcs || []).find((entry) => Number(entry.selfId) === Number(level.npcId))
-        }))
-        .filter((entry) => entry.npc)
-        .sort((a, b) => Math.abs(a.level - skillLevel) - Math.abs(b.level - skillLevel));
-    const summonName = String(skill?.template?.name || skill?.name || '').toLowerCase();
-    const fallbackIds = summonName.includes('soulless') || summonName.includes('reanimated')
-        || summonName.includes('corrupted') || summonName.includes('cursed man')
-        ? [12070, 12366, 12071, 12367]
-        : [];
-    const familyFallback = fallbackIds
-        .map((id) => (DataCache.npcs || []).find((entry) => Number(entry.selfId) === id))
-        .find(Boolean);
-    const npc = direct || levelCandidates[0]?.npc || familyFallback;
-    return {
-        npcId: Number(details.npcId || 0),
-        maxHp: Math.max(1, Number(npc?.vitals?.maxHp || fighter.profile.maxHp * 1.15)),
-        pAtk: Math.max(1, Number(npc?.stats?.pAtk || fighter.profile.pAtk * 0.85)),
-        pAtkRnd: Math.max(0, Number(npc?.stats?.pAtkRnd || fighter.profile.equipment?.pAtkRnd || 0)),
-        pDef: Math.max(1, Number(npc?.stats?.pDef || fighter.profile.pDef * 0.8)),
-        accur: Math.max(1, Number(npc?.stats?.accur || fighter.profile.accur)),
-        critical: Math.max(0, Number(npc?.stats?.crit || fighter.profile.critical)),
-        atkSpd: Math.max(1, Number(npc?.stats?.atkSpd || fighter.profile.atkSpd))
-    };
+    return invoke('GameServer/Bot/Population/ColdSummonProfile')(fighter.profile, details);
 }
 
 function persistedSummon(fighter, timestamp) {
@@ -645,11 +618,13 @@ function summonDamage(fighter, mob, rng) {
 function resolveFight({ state, spot, pressure, targetNpcId = 0, rng, timestamp = Date.now() }) {
     const fightState = mutableCombatState(state);
     let bot = botCombatStats(fightState, timestamp);
-    const mob = ColdCombatProfile.npcForSpot(spot, rng, { preferredNpcId: targetNpcId }) || {
+    const mob = ColdCombatProfile.npcForSpot(spot, rng, { preferredNpcId: targetNpcId,
+        matchupProfiles: TargetMatchup.coldProfiles(bot, fightState, timestamp) }) || {
         level: Number(spot.avgLevel || bot.level), maxHp: Math.max(1, Number(spot.mob?.hp || 1)),
         pAtk: Math.max(1, Number(spot.mob?.damage || 1)), pAtkRnd: 0, pDef: 1, mDef: 1,
         accur: 1, evasion: 0, critical: 0, atkSpd: 253, mAtk: 1, castSpd: 333
     };
+    if (mob.avoided) return { avoided: true, reason: mob.reason };
     const vitals = {
         hp: Number(state.vitals?.hp ?? bot.maxHp),
         mp: Number(state.vitals?.mp ?? bot.maxMp),
@@ -916,11 +891,6 @@ function applyAllyHeal(caster, allies, heal) {
 }
 
 function resolvePartyFight({ members, spot, targetNpcId = 0, rng = Math.random, timestamp = Date.now() }) {
-    const mob = ColdCombatProfile.npcForSpot(spot, rng, { preferredNpcId: targetNpcId }) || {
-        level: Number(spot.avgLevel || 1), maxHp: Math.max(1, Number(spot.mob?.hp || 1)),
-        pAtk: Math.max(1, Number(spot.mob?.damage || 1)), pAtkRnd: 0, pDef: 1, mDef: 1,
-        accur: 1, evasion: 0, critical: 0, atkSpd: 253
-    };
     const fighters = members.map((state) => {
         const fighterState = mutableCombatState(state);
         const profile = botCombatStats(fighterState, timestamp);
@@ -951,6 +921,14 @@ function resolvePartyFight({ members, spot, targetNpcId = 0, rng = Math.random, 
             now: timestamp
         };
     });
+    const matchupProfiles = fighters.filter(f => f.vitals.hp > 0)
+        .flatMap(f => TargetMatchup.coldProfiles(f.profile, f.state, timestamp));
+    const mob = ColdCombatProfile.npcForSpot(spot, rng, { preferredNpcId: targetNpcId, matchupProfiles }) || {
+        level: Number(spot.avgLevel || 1), maxHp: Math.max(1, Number(spot.mob?.hp || 1)),
+        pAtk: Math.max(1, Number(spot.mob?.damage || 1)), pAtkRnd: 0, pDef: 1, mDef: 1,
+        accur: 1, evasion: 0, critical: 0, atkSpd: 253
+    };
+    if (mob.avoided) return { avoided: true, reason: mob.reason, members: fighters, won: false };
     let mobHp = mob.maxHp;
     let mobReadyAt = 0;
     let time = 0;
@@ -1308,6 +1286,10 @@ const BackgroundResolver = {
                 stats: { ...(state.stats || {}), ...(patch.stats || {}) }
             };
             const result = resolveFight({ state: fightState, spot, pressure, targetNpcId, rng, timestamp });
+            if (result.avoided) {
+                patch.stats.lastReason = result.reason;
+                break;
+            }
             patch.vitals.hp = result.hp;
             patch.vitals.maxHp = result.maxHp;
             patch.vitals.mp = result.mp;

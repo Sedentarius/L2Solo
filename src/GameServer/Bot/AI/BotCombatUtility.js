@@ -3,6 +3,7 @@ const Attack = invoke('GameServer/Skills/WeaponMask');
 const Formulas = invoke('GameServer/Formulas');
 const ClassPolicy = invoke('GameServer/Bot/AI/BotClassPolicy');
 const Feedback = invoke('GameServer/Bot/AI/BotActionFeedback');
+const TargetMatchup = invoke('GameServer/Bot/AI/BotTargetMatchup');
 
 const OFFENSIVE_TYPES = new Set([
     C4SkillRules.DAMAGE,
@@ -183,6 +184,11 @@ function evaluateCandidate(bot, target, skill, role, policy = {}, plannedCharges
     const preference = ClassPolicy.offensivePreference(bot, target, skill, { ...policy, classProfile });
     score += preference.score;
     reasons.push(...preference.reasons);
+    const effectiveness = TargetMatchup.skillModifier(bot, target, skill, policy.matchupTarget);
+    // Keep a last-resort attack available in self-defense, but prefer an
+    // effective learned element/weapon skill when the target resists another.
+    score += Math.round(180 * Math.log2(Math.max(0.01, Math.min(2, effectiveness))));
+    if (effectiveness !== 1) reasons.push(`target_efficiency:${effectiveness.toFixed(2)}`);
     return { skill, score: Math.round(score), reasons, cost, range, power,
         intent: type === C4SkillRules.DRAIN && bot.fetchHp?.() < bot.fetchMaxHp?.() ? 'damage_and_sustain' : 'damage',
         policyAdjustment: adjustment,
@@ -194,7 +200,8 @@ function evaluate(bot, target, skill, role, policy = {}) {
 }
 
 function select(bot, target, role, policy = {}) {
-    policy = { ...policy, classProfile: policy.classProfile || ClassPolicy.profileFor(bot, policy) };
+    policy = { ...policy, classProfile: policy.classProfile || ClassPolicy.profileFor(bot, policy),
+        matchupTarget: TargetMatchup.targetView(target, TargetMatchup.skillStats(bot)) };
     const skills = bot?.skillset?.skills || [];
     const candidates = role === 'mage'
         ? skills.filter((skill) => skill.fetchSpell?.() === true)

@@ -2,6 +2,7 @@ const BotRoles = invoke('GameServer/Bot/AI/BotRoles');
 const ClassPolicy = invoke('GameServer/Bot/AI/BotClassPolicy');
 const BotHuntingGroundPolicy = invoke('GameServer/Bot/AI/BotHuntingGroundPolicy');
 const HuntEfficiency = invoke('GameServer/Bot/AI/BotHuntEfficiency');
+const TargetMatchup = invoke('GameServer/Bot/AI/BotTargetMatchup');
 
 const ECONOMIC_ROLES = {
     54: 'spoiler',
@@ -363,8 +364,10 @@ function scoreSpot(spot, state = {}, options = {}) {
     const huntingGroundPenalty = huntingGround.allowed ? 0 : 10000;
     const variation = stableVariation(spot, state);
     const efficiencyAdjustment = (options.efficiencyScores || HuntEfficiency.scores(state,options.timestamp,context.mode)).get(spot.id) || 0;
+    const targetMatchup = TargetMatchup.spotMatchup(spot, TargetMatchup.stateProfiles(state, { ...options, mode: context.mode }));
     const score = baseScore(spot, context) + (routeMatch ? routeMatch.score : 0)
-        + variation + efficiencyAdjustment - crowdPenalty - localityPenalty - huntingGroundPenalty;
+        + variation + efficiencyAdjustment - crowdPenalty - localityPenalty - huntingGroundPenalty
+        - targetMatchup.penalty - (targetMatchup.eligible ? 0 : 10000);
 
     return {
         score,
@@ -382,6 +385,7 @@ function scoreSpot(spot, state = {}, options = {}) {
         huntingGroundPenalty,
         huntingGround,
         efficiencyAdjustment,
+        targetMatchup,
         variation
     };
 }
@@ -408,7 +412,8 @@ function decorateSpot(spot, match) {
 }
 
 function rankedSpots(spots, state = {}, options = {}) {
-    options = { ...options, efficiencyScores: HuntEfficiency.scores(state,options.timestamp,modeForState(state,options)) };
+    options = { ...options, matchupProfiles: TargetMatchup.stateProfiles(state, { ...options, mode: modeForState(state, options) }),
+        efficiencyScores: HuntEfficiency.scores(state,options.timestamp,modeForState(state,options)) };
     return (spots || [])
         .map((spot) => {
             const match = scoreSpot(spot, state, options);
@@ -425,6 +430,7 @@ function rankedSpots(spots, state = {}, options = {}) {
                 localityPenalty: match.localityPenalty,
                 huntingGroundPenalty: match.huntingGroundPenalty,
                 efficiencyAdjustment: match.efficiencyAdjustment,
+                targetMatchup: match.targetMatchup,
                 huntingGround: match.huntingGround
             };
         })
@@ -433,12 +439,13 @@ function rankedSpots(spots, state = {}, options = {}) {
 
 function bestSpot(spots, state = {}, options = {}) {
     return rankedSpots(spots, state, options)
-        .find((candidate) => candidate.huntingGround?.allowed !== false) || null;
+        .find((candidate) => candidate.huntingGround?.allowed !== false && candidate.targetMatchup?.eligible !== false) || null;
 }
 
 function isSpotAllowedForState(spot, state = {}, options = {}) {
     const tags = tagsForSpot(spot);
-    return BotHuntingGroundPolicy.evaluate(spot, state, { ...options, tags }).allowed;
+    return BotHuntingGroundPolicy.evaluate(spot, state, { ...options, tags }).allowed
+        && TargetMatchup.spotMatchup(spot, TargetMatchup.stateProfiles(state, { ...options, mode: modeForState(state, options) })).eligible;
 }
 
 module.exports = {

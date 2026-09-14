@@ -43,7 +43,7 @@ function select(profile,{hp,mp,cooldowns,time,charges=0,mob,party=false,pvp=fals
     const mode=ClassPolicy.modeFor(cached.actor,{party,pvp});
     if(!cached.policies.has(mode))cached.policies.set(mode,{mode,classProfile:ClassPolicy.profileFor(cached.actor,{mode})});
     const policy=cached.policies.get(mode),role=Roles.combatRoleFor(cached.actor);
-    const target=mob?{fetchHp:()=>mob.maxHp,fetchUndead:()=>mob.undead===true}:null;
+    const target=mob?{fetchHp:()=>mob.maxHp,fetchUndead:()=>mob.undead===true,matchupTarget:mob}:null;
     if(prepare)return Utility.selectChargePlan(cached.actor,role,policy,target)?.skill.coldRecord||null;
     const selected=Utility.select(cached.actor,target,role,policy);
     return selected?{skill:selected.skill.coldRecord,magic:selected.skill.fetchSpell()===true,
