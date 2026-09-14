@@ -147,6 +147,30 @@ const capped = Planner.plan(profiles, [
 ], 1700, 30);
 assert.strictEqual(capped.missing.length, 10, 'the final partial wave must stop exactly at the hard population cap');
 
+const missingMetadata = Array.from({ length: 1700 }, (_, index) => ({
+    characterId: 10000 + index,
+    accountName: `bot_pop_${index.toString(36)}`,
+    level: 55,
+    activity: index < 33 ? 'merchant' : 'hunting',
+    stats: index < 33 ? {} : { populationWave: 11 }
+}));
+assert.strictEqual(Planner.plan(profiles, missingMetadata, 1700, 30).population, 1700,
+    'durable population accounts must count even after seed metadata is lost');
+assert.strictEqual(Planner.plan(profiles, missingMetadata, 1700, 30).missing.length, 0,
+    'missing seed metadata must not create replacement characters');
+const unmarked = missingMetadata.map((state) => ({ ...state, stats: {} }));
+assert.strictEqual(Planner.plan(profiles, unmarked, 1700, 30).missing.length, 0);
+assert.strictEqual(Planner.plan(profiles, unmarked.slice(0, 10), 1700, 30).wave, 1,
+    'legacy population accounts without a wave must not produce a zero wave');
+const services = Array.from({ length: 74 }, (_, index) => ({
+    characterId: 20000 + index,
+    accountName: index < 31 ? `bot_craft_${index}` : `bot_static_${index}`,
+    activity: index < 31 ? 'crafting' : 'merchant',
+    stats: index < 31 ? { generatedCold: true } : {}
+}));
+assert.strictEqual(Planner.plan(profiles, [...missingMetadata, ...services], 1700, 30).population, 1700,
+    'static craft and merchant services must stay outside the dynamic cap');
+
 const generatedNames = Array.from({ length: 5000 }, (_, index) => GeneratedColdSeeder.nameFor(Date.now() + index));
 assert.ok(generatedNames.every((name) => name.length >= 3 && name.length <= 16), 'generated names must fit the character-name column');
 assert.ok(generatedNames.every((name) => /^[A-Za-z]+$/.test(name)), 'generated names must remain client-safe alphabetic nicknames');
@@ -156,6 +180,39 @@ assert.ok(generatedNames.every((name) => /^[A-Z][a-z]+[A-Z][a-z]+$/.test(name)),
 assert.strictEqual(new Set(generatedNames).size, generatedNames.length, 'readable names must remain unique across a full population sample');
 
 (async () => {
+    const LifeState = invoke('GameServer/Bot/Population/BotLifeState');
+    const SpotProfiles = invoke('GameServer/Bot/Population/SpotProfiles');
+    const Database = invoke('Database');
+    const originalSpots = SpotProfiles.ensure;
+    const originalServices = GeneratedColdSeeder.ensureCraftServices;
+    const originalFetchUserPassword = Database.fetchUserPassword;
+    // More than both the former 1800 seed slice and the 2000 UI bound.
+    const overCap = Array.from({ length: 2200 }, (_, index) => ({
+        ...missingMetadata[index % missingMetadata.length],
+        characterId: 30000 + index,
+        accountName: `bot_pop_full_${index}`,
+        phase: index % 2 ? 'hot' : 'cold',
+        updatedAt: index
+    }));
+    [...overCap, ...services].forEach((state) => LifeState.acceptLifecycleRow({
+        ...state, statsJson: JSON.stringify(state.stats)
+    }));
+    try {
+        SpotProfiles.ensure = () => profiles;
+        GeneratedColdSeeder.ensureCraftServices = async () => ({ created: 0, seeded: 0 });
+        Database.fetchUserPassword = async () => { throw new Error('Unexpected population account creation'); };
+        assert.strictEqual(LifeState.allStates(1800).length, 1800);
+        assert.strictEqual(LifeState.populationSeedStates().length, 2274,
+            'population accounting must not inherit recent-state limits');
+        const result = await GeneratedColdSeeder.seedPopulation();
+        assert.strictEqual(result.error, undefined);
+        assert.strictEqual(result.total, 2200, 'the real seeder must report every dynamic identity');
+        assert.strictEqual(result.seeded, 0, 'an over-cap database must never be backfilled');
+    } finally {
+        SpotProfiles.ensure = originalSpots;
+        GeneratedColdSeeder.ensureCraftServices = originalServices;
+        Database.fetchUserPassword = originalFetchUserPassword;
+    }
     let clock = 0;
     let yields = 0;
     const processed = [];
