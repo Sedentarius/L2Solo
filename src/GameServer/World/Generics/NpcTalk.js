@@ -14,6 +14,11 @@ function npcTalk(session, npc) {
         title
     };
 
+    if (Number(npc.fetchSelfId()) === 8126) {
+        invoke('GameServer/Items/MammonUnsealService').menu(session);
+        return;
+    }
+
     // The C4 Arena Manager is a normal warehouse-shaped NPC in the source
     // datapack, but this server exposes the duel menu through a runtime
     // service. Keep it ahead of generic warehouse/quest routing.

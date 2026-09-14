@@ -127,6 +127,8 @@ function merchantTarget(offer, town) {
 function planErrand(session, bot, town, purchaseCount = 0, excludedSlots = []) {
     if (!town?.name || purchaseCount >= MAX_PURCHASES_PER_VISIT) return null;
     const state = currentState(session, bot, town);
+    const unseal = invoke('GameServer/Bot/AI/BotMammonUnseal').plan(session,bot,town,state);
+    if (unseal) return unseal;
     const DualCraft = invoke('GameServer/Bot/AI/CompanionDualSwordCrafting');
     const prepared = DualCraft.plan(session,bot,town,state);
     if (prepared.handled) return prepared.errand;
