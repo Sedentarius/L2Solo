@@ -5,6 +5,7 @@ const SPAWN_AGGRO_DELAY_MS = 10000;
 const AGGRO_RADIUS = 500;
 const MAX_AGGRO_Z_DIFFERENCE = 400;
 const GeodataEngine = invoke('GameServer/Geodata/GeodataEngine');
+const TownGuard = invoke('GameServer/Npc/TownGuard');
 
 function isHotBotSession(session) {
     return !!(
@@ -28,6 +29,7 @@ function isLiveSession(session) {
 function isEligible(npc, now = Date.now()) {
     return !!(
         npc?.fetchHostile?.() &&
+        !TownGuard.isTownGuard(npc) &&
         npc.state?.fetchDead?.() !== true &&
         npc.state?.fetchCombats?.() !== true &&
         Number(npc.aggroEligibleAt || 0) <= now

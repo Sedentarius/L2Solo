@@ -1,0 +1,1769 @@
+[
+  {
+    "selfId": 7890,
+    "template": {
+      "kind": "Merchant",
+      "name": "Espen",
+      "title": "Trader",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 132
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 6,
+      "size": 24.5
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 7891,
+    "template": {
+      "kind": "Merchant",
+      "name": "Verona",
+      "title": "Trader",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 132
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 24.5
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 7892,
+    "template": {
+      "kind": "Merchant",
+      "name": "Enverun",
+      "title": "Trader",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 132
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 10,
+      "size": 24
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 7893,
+    "template": {
+      "kind": "Merchant",
+      "name": "Payel",
+      "title": "Trader",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 132
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 24
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 7894,
+    "template": {
+      "kind": "VillageMaster",
+      "name": "Natools",
+      "title": "Warehouse Chief",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 132
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 17.5
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 7895,
+    "template": {
+      "kind": "Warehouse",
+      "name": "Kluck",
+      "title": "Warehouse Freightman",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 132
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 17
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 7896,
+    "template": {
+      "kind": "Warehouse",
+      "name": "Mia",
+      "title": "Warehouse Keeper",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 132
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 7,
+      "size": 18
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 7897,
+    "template": {
+      "kind": "VillageMaster",
+      "name": "Roman",
+      "title": "Head Blacksmith",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 132
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 16.5
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 7898,
+    "template": {
+      "kind": "Trainer",
+      "name": "Morning",
+      "title": "Blacksmith",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 132
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 17.5
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 7899,
+    "template": {
+      "kind": "Teleporter",
+      "name": "Flauen",
+      "title": "Gatekeeper",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 132
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8.5,
+      "size": 23.5
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 7900,
+    "template": {
+      "kind": "VillageMaster",
+      "name": "Marcus",
+      "title": "Grand Master",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 132
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 21.5
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 7901,
+    "template": {
+      "kind": "Trainer",
+      "name": "Arti",
+      "title": "Master",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 132
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 23
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 7902,
+    "template": {
+      "kind": "Trainer",
+      "name": "Karuna",
+      "title": "Master",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 132
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 23
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 7903,
+    "template": {
+      "kind": "Trainer",
+      "name": "Traus",
+      "title": "Master",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 132
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 7,
+      "size": 22.5
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 7904,
+    "template": {
+      "kind": "Trainer",
+      "name": "Naiel",
+      "title": "Master",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 132
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 22.5
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 7905,
+    "template": {
+      "kind": "VillageMaster",
+      "name": "Squillari",
+      "title": "High Priest",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 132
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 24
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 7906,
+    "template": {
+      "kind": "Trainer",
+      "name": "Ranton",
+      "title": "Priest",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 132
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 23
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 7907,
+    "template": {
+      "kind": "Trainer",
+      "name": "Minevia",
+      "title": "Magister",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 132
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 23.5
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 7908,
+    "template": {
+      "kind": "Trainer",
+      "name": "Tanios",
+      "title": "Priest",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 132
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 7,
+      "size": 22.2
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 7909,
+    "template": {
+      "kind": "Trainer",
+      "name": "Anabel",
+      "title": "Magister",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 132
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 7,
+      "size": 21.2
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 7910,
+    "template": {
+      "kind": "VillageMaster",
+      "name": "Xairakin",
+      "title": "Grand Master",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 132
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 23
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 7911,
+    "template": {
+      "kind": "Trainer",
+      "name": "Brikus",
+      "title": "Master",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 132
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 23
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 7912,
+    "template": {
+      "kind": "Trainer",
+      "name": "Xenovia",
+      "title": "Magister",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 132
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 23
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 7913,
+    "template": {
+      "kind": "VillageMaster",
+      "name": "Tushku",
+      "title": "High Prefect",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 132
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 26
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 7914,
+    "template": {
+      "kind": "Trainer",
+      "name": "Sorbo",
+      "title": "Prefect",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 132
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 24
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 7915,
+    "template": {
+      "kind": "Trainer",
+      "name": "Takina",
+      "title": "Seer",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 132
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 28
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 7916,
+    "template": {
+      "kind": "Guard",
+      "name": "Gosta",
+      "title": "Captain",
+      "level": 80,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1814,
+      "pAtkRnd": 30,
+      "pDef": 576,
+      "mAtk": 1144,
+      "mDef": 468,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 176
+    },
+    "vitals": {
+      "maxHp": 4551,
+      "maxMp": 1859,
+      "revHp": 13.43,
+      "revMp": 3.09,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 24
+    },
+    "equipment": {
+      "weapon": 129,
+      "shield": 102,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 7917,
+    "template": {
+      "kind": "Guard",
+      "name": "Dupuis",
+      "title": "Guard",
+      "level": 80,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 4031,
+      "pAtkRnd": 30,
+      "pDef": 576,
+      "mAtk": 1144,
+      "mDef": 468,
+      "atkSpd": 249,
+      "castSpd": 227,
+      "atkRadius": 1100,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 176
+    },
+    "vitals": {
+      "maxHp": 4551,
+      "maxMp": 1859,
+      "revHp": 13.43,
+      "revMp": 3.09,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 24
+    },
+    "equipment": {
+      "weapon": 275,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 7920,
+    "template": {
+      "kind": "Guard",
+      "name": "Kraisen",
+      "title": "Guard",
+      "level": 80,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1814,
+      "pAtkRnd": 30,
+      "pDef": 576,
+      "mAtk": 1144,
+      "mDef": 468,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 176
+    },
+    "vitals": {
+      "maxHp": 4551,
+      "maxMp": 1859,
+      "revHp": 13.43,
+      "revMp": 3.09,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 24
+    },
+    "equipment": {
+      "weapon": 2,
+      "shield": 102,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 7921,
+    "template": {
+      "kind": "Guard",
+      "name": "Timos",
+      "title": "Guard",
+      "level": 80,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 4031,
+      "pAtkRnd": 30,
+      "pDef": 576,
+      "mAtk": 1144,
+      "mDef": 468,
+      "atkSpd": 249,
+      "castSpd": 227,
+      "atkRadius": 1100,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 176
+    },
+    "vitals": {
+      "maxHp": 4551,
+      "maxMp": 1859,
+      "revHp": 13.43,
+      "revMp": 3.09,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 24
+    },
+    "equipment": {
+      "weapon": 275,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 7969,
+    "template": {
+      "kind": "Npc",
+      "name": "Iason Heine",
+      "title": "",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 132
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 9.5,
+      "size": 22.5
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  }
+]

@@ -251,6 +251,44 @@ module.exports = {
         ]
     },
 
+    // Heine market around dagger's captured plaza position (111380, 219034).
+    // Together with Lina, four stalls sit 140 units from the center.
+    "Maelis": {
+        title: "B/A materials",
+        town: "Heine",
+        storeType: 1,
+        locX: 111240, locY: 219034, locZ: -3536,
+        items: [
+            rs(1885, 2500), rs(1886, 600), rs(1887, 1200),
+            rs(1888, 1200), rs(1889, 2200), rs(1890, 700),
+            rs(1893, 450), rs(1894, 1400), s(80, 0.60, 2)
+        ]
+    },
+    "Nelio": {
+        title: "Heine gear",
+        town: "Heine",
+        storeType: 1,
+        locX: 111380, locY: 218894, locZ: -3536,
+        items: [
+            s(79, 0.60, 3), s(97, 0.60, 3), s(98, 0.60, 2),
+            s(442, 0.61, 3), s(473, 0.61, 3), s(603, 0.62, 5),
+            s(2463, 0.62, 5), s(856, 0.64, 6), s(887, 0.64, 8)
+        ]
+    },
+    "Corvin": {
+        title: "Buy mats and drops",
+        town: "Heine",
+        storeType: 3,
+        locX: 111520, locY: 219034, locZ: -3536,
+        items: [
+            rb(1885), rb(1886), rb(1887), rb(1888), rb(1889),
+            rb(1890), rb(1893), rb(1894), rb(1874), rb(1875),
+            b(1830, 0.60), b(1343, 0.55), b(1539, 0.62),
+            b(91, 0.56), b(212, 0.56), b(284, 0.56),
+            b(79, 0.56), b(97, 0.56), b(856, 0.58), b(887, 0.58), b(918, 0.58)
+        ]
+    },
+
     // Starter-village liquidity. These stores complement the dedicated shot
     // sellers below: each racial starting market gets useful no-grade stock
     // and a local material/drop buyer instead of routing every bag to TI.
@@ -426,7 +464,7 @@ module.exports = {
         title: "Shots: B Grade",
         town: "Heine",
         storeType: 1,
-        locX: 111500, locY: 219500, locZ: -3544,
+        locX: 111380, locY: 219174, locZ: -3536,
         items: shotsForGrade(3)
     },
     "Mila": {

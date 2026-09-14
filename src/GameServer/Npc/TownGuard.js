@@ -4,7 +4,7 @@ const TOWN_GUARD_NAME = /^(?:Gludio|Dion|Giran|Oren|Aden|Goddard|Rune|Innadril|H
 const AGGRO_RADIUS = 1000;
 
 function isTownGuard(npc) {
-    return !!(npc?.fetchName?.() && TOWN_GUARD_NAME.test(npc.fetchName()));
+    return npc?.fetchKind?.() === 'Guard' || !!(npc?.fetchName?.() && TOWN_GUARD_NAME.test(npc.fetchName()));
 }
 
 function distanceSquared(first, second) {
@@ -14,7 +14,7 @@ function distanceSquared(first, second) {
 }
 
 function canEngage(guard, actor) {
-    if (!isTownGuard(guard) || actor?.fetchKarma?.() <= 0 || guard.state?.fetchDead?.()) return false;
+    if (!isTownGuard(guard) || !(Number(actor?.fetchKarma?.()) > 0) || guard.state?.fetchDead?.()) return false;
     if (distanceSquared(guard, actor) > AGGRO_RADIUS * AGGRO_RADIUS) return false;
     return GeodataEngine.hasLineOfSight(
         guard.fetchLocX(), guard.fetchLocY(), guard.fetchLocZ(),
@@ -23,7 +23,7 @@ function canEngage(guard, actor) {
 }
 
 function engageNearby(session, actor, npcs) {
-    if (actor?.fetchKarma?.() <= 0) return [];
+    if (!(Number(actor?.fetchKarma?.()) > 0)) return [];
     return (npcs || []).filter((npc) => canEngage(npc, actor)).map((guard) => {
         guard.enterCombatState(session, actor);
         return guard;

@@ -620,6 +620,8 @@ const GIRAN_PET_SUPPLY_BASE = [
 ];
 
 const LISTS = {
+    ...Object.fromEntries(Object.entries(require('../../../../data/Npcs/c4_heine_shops.json'))
+        .map(([npcId, entries]) => [`heine${npcId}`, entries])),
     starterWeapons: [
         { selfId: 1, price: 883 },
         { selfId: 4, price: 883 },
@@ -1018,6 +1020,10 @@ const LISTS = {
 };
 
 const NPC_LISTS = {
+    7890: ['heine7890'],
+    7891: ['heine7891'],
+    7892: ['heine7892'],
+    7893: ['heine7893'],
     7001: ['starterWeapons', 'starterMysticWeapons'],
     7002: ['starterArmor'],
     7003: ['talkingIslandJewelry', 'talkingIslandSpellbooks'],
