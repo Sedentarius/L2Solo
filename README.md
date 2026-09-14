@@ -30,6 +30,7 @@ Clean C4 client protocol 656
 
 ## Latest updates
 
+- **2026-09-14** Better class-specific bot gameplay, fixes, and improvements
 - **2026-09-12** Bot persistent social memory and hot/cold PvP
 - **2026-09-08** Pets, striders, clan lvl 4, fixes and updates
 - **2026-09-06** Bot PvP, save game, save TP location, optimization, chat, navigation
