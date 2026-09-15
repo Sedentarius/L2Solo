@@ -149,6 +149,9 @@ function reviewDelayFor(actionType, goal, result = {}, ok = true, productive = w
 
 function deferredRetryDelay(actionType, result = {}) {
     const reason = String(result?.code || result?.reason || '');
+    if (actionType === ACTION_TYPES.PLAN && result?.retryable === true && reason === 'clan_planning_deferred') {
+        return Math.min(5000, Config.actionRetryMs);
+    }
     if (
         actionType === ACTION_TYPES.PLAN &&
         result?.pending === true &&

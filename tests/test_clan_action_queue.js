@@ -447,6 +447,22 @@ async function main() {
         assert(ClanActionService.metrics().stages.defer.count >= 1, 'defer settlement latency must be observable');
         assert(ClanActionService.metrics().stages['execute:party'].count >= 1,
             'party execution latency must remain separately observable');
+        const retryPlan = await Database.enqueueClanAction({
+            clanId: replanCreated.clanId,
+            actionKey: `clan:${replanCreated.clanId}:worker-retry-test`,
+            actionType: 'goal_plan', priority: 1000, availableAt: Date.now() - 1, payload: {}
+        });
+        const [claimedWorkerPlan] = await Database.claimClanActions({ limit: 1 });
+        assert.strictEqual(claimedWorkerPlan.id, retryPlan.actionId);
+        const goalService = invoke('GameServer/Clan/ClanGoalService');
+        const originalResolveGoal = goalService.resolveClan;
+        let deferredWorkerPlan;
+        try {
+            goalService.resolveClan = async () => ({ ok: true, skipped: true, retryable: true, reason: 'clan_planning_deferred' });
+            deferredWorkerPlan = await ClanActionService.resolveAction(claimedWorkerPlan);
+        } finally { goalService.resolveClan = originalResolveGoal; }
+        assert.strictEqual(deferredWorkerPlan.deferred, true, 'worker failure/staleness must retry the same durable action');
+        assert.strictEqual(deferredWorkerPlan.status, 'pending');
         assert.strictEqual(
             ClanActionService.reviewDelayFor('goal_plan', { type: 'equipment' }, { changed: false }),
             ClanActionService.config.equipmentReviewMs,

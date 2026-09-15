@@ -425,6 +425,7 @@ const tests = [
     'tests/test_clan_player_warehouse.js',
     'tests/test_clan_warehouse_equipment_exchange.js',
     'tests/test_clan_gear_stall_and_spoil.js',
+    'tests/test_clan_planning_worker.js',
     'tests/test_npc_social_aggro.js',
     'tests/test_npc_hot_bot_aggro.js',
     'tests/test_npc_known_object_lifecycle.js',

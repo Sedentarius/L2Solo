@@ -125,7 +125,8 @@ async function main() {
         assert.strictEqual(helperStats.clanPartyObjective.priority, 'required');
         assert.strictEqual(helperStats.clanPartyObjective.clanOperation, 'equipment');
         assert.strictEqual(helperStats.clanPartyObjective.maxPartySize, 5);
-        assert.strictEqual(helperStats.clanPartyObjective.minPartySize, 5);
+        assert.strictEqual(helperStats.clanPartyObjective.minPartySize,
+            invoke('GameServer/Clan/ClanSimulationConfig').operationMinMembers);
         assert.strictEqual(
             PartyRequestPlanner.partyObjectiveForState({ stats: helperStats }).clanGoalKey,
             firstGoal.goalKey,

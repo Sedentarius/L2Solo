@@ -26,7 +26,7 @@ const DEFAULTS = {
     operationMaxMembers: 9,
     operationMaxTargetLevelGap: 5,
     catastrophicFailureThreshold: 5,
-    llmGoalManagementEnabled: false,
+    llmGoalManagementEnabled: true,
     llmTitleManagementEnabled: false,
     goalReviewMs: 5 * 60 * 1000,
     equipmentReviewMs: 15 * 60 * 1000,
