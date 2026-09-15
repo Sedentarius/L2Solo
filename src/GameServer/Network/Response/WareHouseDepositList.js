@@ -18,7 +18,7 @@ module.exports = function wareHouseDepositList(items, adena, type = 1) {
             .writeH(item.fetchClass2())
             .writeH(0)
             .writeD(bodyPart(item))
-            .writeH(0).writeH(0).writeH(0)
+            .writeH(item.fetchEnchantLevel?.() || 0).writeH(0).writeH(0)
             .writeD(item.fetchId());
     });
     return packet.fetchBuffer();

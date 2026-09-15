@@ -36,6 +36,22 @@ assert.strictEqual(depositList.readInt32LE(11), 77, 'warehouse deposit rows must
 assert.strictEqual(GameOpcodes.table[0x31], GameRequest.warehouseDeposit, 'C4 warehouse deposit request must be wired');
 assert.strictEqual(GameOpcodes.table[0x32], GameRequest.warehouseWithdraw, 'C4 warehouse withdrawal request must be wired');
 
+const enchantedShield = new Item(78, {
+    selfId: 627, name: 'Aspis', kind: 'Armor.Shield', class1: 1, class2: 1,
+    amount: 1, enchant: 7, equipped: false, slot: 8
+});
+for (const type of [1, 2]) {
+    for (const name of ['wareHouseDepositList', 'wareHouseWithdrawalList']) {
+        const packet = ServerResponse[name]([enchantedShield, packetItem], 345, type);
+        assert.strictEqual(packet.readUInt16LE(1), type, `${name} must preserve warehouse type`);
+        assert.strictEqual(packet.readUInt16LE(7), 2, `${name} must preserve item count`);
+        // C4 rows start at byte 9, span 32 bytes, and carry enchant at row offset 22.
+        assert.strictEqual(packet.readUInt16LE(31), 7, `${name} type ${type} must display +7 gear`);
+        assert.strictEqual(packet.readInt32LE(37), 78, `${name} must preserve the trailing object id`);
+        assert.strictEqual(packet.readUInt16LE(63), 0, `${name} must keep ordinary items unenchanted`);
+    }
+}
+
 const original = {
     fetchWarehouseItems: Database.fetchWarehouseItems,
     transferInventoryToWarehouse: Database.transferInventoryToWarehouse,
