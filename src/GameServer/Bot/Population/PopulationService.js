@@ -3295,7 +3295,7 @@ const PopulationService = {
             const previousFarmPlan = previousPlan?.status === 'active'
                 && ['direct_drop', 'craft'].includes(previousPlan.strategy)
                 && previousPlan.next?.spotId;
-            const previousAvailabilitySource = previousFarmPlan
+            const previousAvailabilitySource = previousFarmPlan && !replanContext.failure
                 ? GearAcquisitionPlanner.bestSourceForPlan(state, previousPlan, spots, { occupancy })
                 : null;
             const reusablePartyRequest = !state.party?.partyId
@@ -3324,7 +3324,7 @@ const PopulationService = {
             acquisitionPlan = {
                 ...finalizedPlan,
                 marketFallback: finalizedPlan.status === 'active' && finalizedPlan.strategy === 'craft'
-                    && Number(finalizedPlan.startedAt || startedAt) + 20 * 60 * 1000 <= Date.now()
+                    && Number(finalizedPlan.acquisitionProgress?.at || finalizedPlan.startedAt || startedAt) + 20 * 60 * 1000 <= Date.now()
             };
         }
         const partyRequest = partyRequestForPlan(state, acquisitionPlan, startedAt);

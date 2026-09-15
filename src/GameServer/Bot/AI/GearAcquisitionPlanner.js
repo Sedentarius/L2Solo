@@ -23,7 +23,7 @@ const RANKS = ['none', 'd', 'c', 'b', 'a', 's'];
 const WEAPON_SLOTS = new Set([7, 14]);
 const ARMOR_SLOTS = new Set([6, 9, 10, 11, 12, 15]);
 const JEWEL_SLOTS = new Set([1, 2, 3, 4, 5]);
-const RATE_MODEL_VERSION = 10;
+const RATE_MODEL_VERSION = 11;
 const DIRECT_FAILURE_RESOLVE_LIMIT = 8;
 const DIRECT_DROP_EXHAUSTION_MULTIPLIER = 3;
 const DIRECT_ROUTE_COOLDOWN_MS = 60 * 60 * 1000;
@@ -334,7 +334,7 @@ function candidateEffort(candidate, state, options = {}) {
                 missingRoute = true;
                 return sum;
             }
-            return sum + material.missing / Math.max(Number(source.expectedYield || 0), 0.000001);
+            return sum + source.effort;
         }, 8);
     return Math.min(directEffort, marketEffortValue, missingRoute ? Infinity : materialEffort);
 }
@@ -538,10 +538,13 @@ function preferredTarget(state = {}, options = {}) {
         : null;
     const recipesByProduct = new Map(recipes.map((recipe) => [Number(recipe.productId), recipe]));
     const excluded = excludedTargetIds(options);
+    const excludedMaterials = new Set((options.excludedMaterialIds || []).map(Number));
     const allCandidates = (DataCache.items || [])
         .filter((item) => suitable(item, state, role, recipeRank || gradeForLevel(state.level)))
         .filter((item) => !excluded.has(Number(item.selfId)))
         .map((item) => ({ item, recipe: recipesByProduct.get(Number(item.selfId)) || null }))
+        .filter(({ item, recipe }) => !recipeNeedsExcludedMaterial(recipe, state, excludedMaterials)
+            || !!marketOfferForTarget(item, state, options))
         .filter(({ recipe }) => !options.recipeId || Number(recipe?.recipeId) === Number(options.recipeId))
         .filter(({ item }) => Number(owned.get(Number(item.selfId)) || 0) < 1)
         .filter(({ item }) => (missingDualSword && item.template?.kind === 'Weapon.Dual')
@@ -599,7 +602,11 @@ function preferredTarget(state = {}, options = {}) {
     // blocked goal. Returning null preserves the recovery metadata while the
     // bot continues its normal leveling route and retries after the failed
     // target's cooldown expires.
-    return available[0]?.candidate || null;
+    // Stable per-character preferences spread comparable routes without
+    // sacrificing a clearly better offer. Diagnostics without an ID stay stable.
+    const peers = available.filter((entry) => entry.score >= Number(available[0]?.score || 0) * 0.85);
+    const index = Math.abs(Math.imul(Number(state.characterId || 0), 2654435761) >>> 0) % Math.max(1, peers.length);
+    return peers[index]?.candidate || null;
 }
 
 function preferredDropTarget(state = {}, options = {}) {
@@ -1029,6 +1036,69 @@ function partyRouteFailure(state = {}, plan = {}, timestamp = Date.now()) {
     };
 }
 
+// Keep the failure on the acquisition plan so it survives travel, idle ticks
+// and restarts, including ticks where there is no alternative equipment.
+function acquisitionCooldown(state) {
+    return (120 + Math.abs(Number(state.characterId || 0)) % 121) * 60000;
+}
+
+function abandonAcquisition(state, itemId, timestamp = Date.now(), reason = 'market_unfilled') {
+    const plan = state.stats?.equipmentPlan;
+    if (!plan?.target?.selfId || isClanOwnedPlan(plan)) return state;
+    if (Number(plan.target.selfId) !== Number(itemId)
+        && Number(plan.next?.itemId) !== Number(itemId)
+        && !(plan.materials || []).some((material) => Number(material.selfId) === Number(itemId))) return state;
+    const recoveryTargets = (plan.recoveryTargets || []).filter((entry) => (
+        Number(entry.until) > timestamp && Number(entry.targetId) !== Number(plan.target.selfId)
+    ));
+    recoveryTargets.push({ targetId: Number(plan.target.selfId), itemId: Number(itemId),
+        reason, failedAt: timestamp, until: timestamp + acquisitionCooldown(state) });
+    return { ...state, stats: { ...state.stats, partyRequest: null, marketWanted: null,
+        equipmentPlan: { status: 'abandoned', strategy: 'none', grade: gradeForLevel(state.level),
+            reason, recoveryTargets, target: null, next: null, materials: [] } } };
+}
+
+function craftProgress(state, plan) {
+    // Count only useful ingredients, including nested recipes. Extra common
+    // drops beyond the recipe's needs must not mask a missing rare blade/edge.
+    const requirements = {};
+    const visit = (recipe, crafts = 1, seen = new Set()) => {
+        if (!recipe || seen.has(recipe.recipeId)) return;
+        const nextSeen = new Set(seen).add(recipe.recipeId);
+        for (const material of recipe.materials || []) {
+            if (CraftSupplementMaterials.isSupplementalMaterial(material.selfId)) continue;
+            const required = Number(material.amount || 0) * crafts;
+            requirements[material.selfId] = (requirements[material.selfId] || 0) + required;
+            const component = C4RecipeItems.resolveByProductId(material.selfId);
+            if (component) visit(component, Math.ceil(required / Math.max(1, Number(component.productCount || 1))), nextSeen);
+        }
+    };
+    visit(C4RecipeItems.resolveByRecipeId(plan.recipeId) || C4DualSwordCombinations.resolveByRecipeId(plan.recipeId));
+    return Object.fromEntries(Object.entries(requirements).map(([id, required]) => (
+        [id, Math.min(required, Number(state.inventory?.[id]?.amount || 0))]
+    )));
+}
+
+function craftPlanFailure(state, plan, timestamp) {
+    if (plan?.status !== 'active' || plan.strategy !== 'craft' || isClanOwnedPlan(plan)) return null;
+    const progress = plan.acquisitionProgress;
+    if (!progress || timestamp - Number(progress.at) < acquisitionCooldown(state)) return null;
+    const amounts = craftProgress(state, plan);
+    if (Object.entries(amounts).some(([id, amount]) => amount > Number(progress.amounts?.[id] || 0))) return null;
+    return { targetId: Number(plan.target?.selfId), itemId: Number(plan.next?.itemId),
+        npcId: Number(plan.next?.npcId), reason: 'craft_stalled' };
+}
+
+function recipeNeedsExcludedMaterial(recipe, state, excluded, seen = new Set()) {
+    if (!excluded.size || !recipe || seen.has(recipe.recipeId)) return false;
+    const nextSeen = new Set(seen).add(recipe.recipeId);
+    return (recipe.materials || []).some((material) => {
+        if (Number(state.inventory?.[material.selfId]?.amount || 0) >= Number(material.amount)) return false;
+        return excluded.has(Number(material.selfId))
+            || recipeNeedsExcludedMaterial(C4RecipeItems.resolveByProductId(material.selfId), state, excluded, nextSeen);
+    });
+}
+
 function replanContextFor(state = {}, previousPlan = null, timestamp = Date.now()) {
     const currentGrade = gradeForLevel(state.level);
     const currentLevel = Number(state.level || 1);
@@ -1042,15 +1112,17 @@ function replanContextFor(state = {}, previousPlan = null, timestamp = Date.now(
         : [];
     const failure = sameGrade
         ? (directPlanFailure(state, previousPlan, timestamp)
-            || partyRouteFailure(state, previousPlan, timestamp))
+            || partyRouteFailure(state, previousPlan, timestamp)
+            || craftPlanFailure(state, previousPlan, timestamp))
         : null;
     if (failure) {
         const recovery = {
             targetId: failure.targetId,
             npcId: failure.npcId,
+            itemId: failure.itemId,
             reason: failure.reason,
             failedAt: timestamp,
-            until: timestamp + DIRECT_ROUTE_COOLDOWN_MS
+            until: timestamp + (failure.itemId ? acquisitionCooldown(state) : DIRECT_ROUTE_COOLDOWN_MS)
         };
         const index = recoveryTargets.findIndex((entry) => Number(entry.targetId) === failure.targetId);
         if (index >= 0) recoveryTargets[index] = recovery;
@@ -1072,6 +1144,7 @@ function replanContextFor(state = {}, previousPlan = null, timestamp = Date.now(
         failure,
         recoveryTargets,
         excludedTargetIds: recoveryTargets.map((entry) => Number(entry.targetId)),
+        excludedMaterialIds: recoveryTargets.map((entry) => Number(entry.itemId || 0)).filter(Boolean),
         forceMarketTargetId: Number(failure?.targetId || currentMarketRecovery?.targetId || 0) || null
     };
 }
@@ -1108,8 +1181,16 @@ function finalizePlan(state = {}, previousPlan = null, rawPlan = {}, context = {
             until: timestamp + DIRECT_ROUTE_COOLDOWN_MS
         });
     }
+    const amounts = rawPlan?.strategy === 'craft' ? craftProgress(state, rawPlan) : null;
+    const previousProgress = previousPlan?.acquisitionProgress;
+    const sameCraftTarget = previousPlan?.strategy === 'craft'
+        && Number(previousPlan.target?.selfId) === Number(rawPlan?.target?.selfId);
+    const progressed = !sameCraftTarget || !previousProgress || Object.entries(amounts || {})
+        .some(([id, amount]) => amount > Number(previousProgress.amounts?.[id] || 0));
     return {
         ...rawPlan,
+        grade: rawPlan.grade || gradeForLevel(state.level),
+        ...(amounts ? { acquisitionProgress: progressed ? { at: timestamp, amounts } : previousProgress } : {}),
         // Clan-owned gear objectives must survive the normal solo replan. The
         // route/item may be refreshed, but ownership of the beneficiary goal
         // remains durable until the target is equipped.
@@ -1265,8 +1346,13 @@ function itemIdForPlan(plan = {}) {
         : Number(plan.next?.itemId || 0);
 }
 
+function plannedMaterialAcquired(state, plan) {
+    return plan?.strategy === 'craft' && Number(plan.next?.requiredTotal || 0) > 0
+        && Number(state.inventory?.[plan.next.itemId]?.amount || 0) >= Number(plan.next.requiredTotal);
+}
+
 function bestSourceForPlan(state = {}, plan = {}, spots = [], options = {}) {
-    if (plan?.status !== 'active') return null;
+    if (plan?.status !== 'active' || plannedMaterialAcquired(state, plan)) return null;
     const itemId = itemIdForPlan(plan);
     if (!itemId) return null;
     return bestSourceForState(sourceForItem(itemId, spots, state, options), state, options);
@@ -1291,7 +1377,9 @@ function retargetPlanSource(state = {}, plan = {}, source = null) {
         npcId: Number(source.npcId || 0) || null,
         npcName: source.npcName || null,
         kind: source.kind || 'drop',
-        itemId
+        itemId,
+        amount: plan.next?.amount || 1,
+        requiredTotal: plan.next?.requiredTotal
     };
     const materials = plan.strategy === 'craft'
         ? (plan.materials || []).map((material) => Number(material.selfId) === itemId
@@ -1336,6 +1424,10 @@ function replacementPlanFor(state = {}, previousPlan = {}, spots = [], options =
     const targetId = Number(previousPlan?.target?.selfId || 0);
     const excluded = new Set((options.excludedTargetIds || []).map(Number).filter(Boolean));
     if (!excluded.has(targetId)) {
+        if (plannedMaterialAcquired(state, previousPlan)) {
+            const refreshed = planFor(state, { ...options, spots, recipeId: previousPlan.recipeId });
+            if (['active', 'component_ready', 'ready_to_craft', 'complete'].includes(refreshed?.status)) return refreshed;
+        }
         const source = bestSourceForPlan(state, previousPlan, spots, options);
         if (source) return retargetPlanSource(state, previousPlan, source);
     }
@@ -1461,22 +1553,29 @@ function stationRecipeIds() {
 }
 
 function farmSourceForMaterial(itemId, state, spots, allowedRecipeIds, requiredAmount = 1, visited = new Set(), options = {}) {
-    const direct = bestSourceForState(sourceForItem(itemId, spots, state, options), state, options);
-    if (direct) return { ...direct, itemId: Number(itemId) };
     if (visited.has(Number(itemId))) return null;
-
+    const direct = bestSourceForState(sourceForItem(itemId, spots, state, options), state, options);
+    const directRoute = direct ? { ...direct, itemId: Number(itemId), requiredAmount,
+        requiredTotal: requiredAmount + Number(state.inventory?.[itemId]?.amount || 0),
+        effort: requiredAmount / Math.max(direct.expectedYield || 0, 0.000001) } : null;
     const component = C4RecipeItems.resolveByProductId(itemId);
-    if (!component || !allowedRecipeIds.has(Number(component.recipeId))) return null;
+    if (!component || !allowedRecipeIds.has(Number(component.recipeId))) return directRoute;
     const nextVisited = new Set(visited).add(Number(itemId));
-    const componentCrafts = Math.max(1, Math.ceil(Number(requiredAmount || 1) / Math.max(1, Number(component.productCount || 1))));
+    const crafts = Math.max(1, Math.ceil(requiredAmount / Math.max(1, Number(component.productCount || 1))));
+    const routes = [];
     for (const ingredient of component.materials || []) {
-        const owned = Number(inventoryMap(state.inventory).get(Number(ingredient.selfId)) || 0);
-        const required = Number(ingredient.amount || 0) * componentCrafts;
+        const owned = Number(state.inventory?.[ingredient.selfId]?.amount || 0);
+        const required = Number(ingredient.amount || 0) * crafts;
         if (owned >= required || CraftSupplementMaterials.isSupplementalMaterial(ingredient.selfId)) continue;
         const source = farmSourceForMaterial(ingredient.selfId, state, spots, allowedRecipeIds, required - owned, nextVisited, options);
-        if (source) return source;
+        // A recipe is viable only if every missing ingredient has a route.
+        if (!source) return directRoute;
+        routes.push(source);
     }
-    return null;
+    const effort = 8 + routes.reduce((sum, route) => sum + route.effort, 0);
+    if (directRoute && directRoute.effort <= effort) return directRoute;
+    const next = routes.filter((route) => route.spotId).sort((left, right) => right.effort - left.effort)[0];
+    return { ...(next || { itemId: Number(itemId), requiredAmount }), effort };
 }
 
 function hasReadyCraftComponent(recipe, state, allowedRecipeIds, visited = new Set()) {
@@ -1624,11 +1723,11 @@ function rawPlanFor(state = {}, options = {}) {
     }));
     const missingMaterialPlans = materialPlans.filter((material) => material.missing > 0 && !CraftSupplementMaterials.isSupplementalMaterial(material.selfId));
     const nextMaterial = missingMaterialPlans.slice().sort((a, b) => (
-        (b.missing / Math.max(b.source?.expectedYield || 0.000001, 0.000001)) - (a.missing / Math.max(a.source?.expectedYield || 0.000001, 0.000001))
+        (b.source?.effort ?? Infinity) - (a.source?.effort ?? Infinity)
     ))[0] || null;
     const directKills = direct ? 1 / Math.max(direct.expectedYield, 0.000001) : Infinity;
     const craftKills = target.recipe
-        ? missingMaterialPlans.reduce((sum, material) => sum + material.missing / Math.max(material.source?.expectedYield || 0.000001, 0.000001), 0)
+        ? missingMaterialPlans.reduce((sum, material) => sum + (material.source?.effort ?? Infinity), 0)
         : Infinity;
     const offer = marketOfferForTarget(target.item, state, planningOptions);
     const buy = offer && marketEffort(offer, state) <= Math.min(directKills, craftKills);
@@ -1639,7 +1738,7 @@ function rawPlanFor(state = {}, options = {}) {
             : target.recipe ? 'craft' : 'blocked';
     const next = strategy === 'direct_drop'
         ? direct && { ...direct, itemId: Number(target.item.selfId) }
-        : strategy === 'craft' ? nextMaterial?.source && { ...nextMaterial.source, itemId: Number(nextMaterial.selfId) } : null;
+        : strategy === 'craft' ? nextMaterial?.source && { ...nextMaterial.source } : null;
     // Keep final-equipment readiness distinct from an available intermediate
     // craft.  Both routes go to a station, but reporting a ready Cokes batch
     // as "can craft Atuba Mace" made the progression telemetry lie and hid
@@ -1675,7 +1774,7 @@ function rawPlanFor(state = {}, options = {}) {
         expectedKills: next ? Math.ceil(strategy === 'direct_drop' ? directKills : craftKills) : 0,
         market: buy ? { town: offer.town || 'Giran', price: Number(offer.price), sourceType: offer.sourceType } : null,
         materials: materialPlans.map(({ source, ...material }) => ({ ...material, sourceSpotId: source?.spotId || null })),
-        next: next ? { spotId: next.spotId, npcId: next.npcId, npcName: next.npcName, kind: next.kind, itemId: next.itemId } : null,
+        next: next ? { spotId: next.spotId, npcId: next.npcId, npcName: next.npcName, kind: next.kind, itemId: next.itemId, amount: next.requiredAmount || 1, requiredTotal: next.requiredTotal } : null,
         ...(combine ? { combine } : {})
     };
 }
@@ -1726,4 +1825,4 @@ function sameObjective(left, right) {
     );
 }
 
-module.exports = { RATE_MODEL_VERSION, DIRECT_FAILURE_RESOLVE_LIMIT, PARTY_ROUTE_FAILURE_ATTEMPT_LIMIT, gradeForLevel, isCraftService, roleFor, itemScore, isRealCatalogItem, suitable, isSlotUpgrade, combatReadiness, progressionPriceCap, operationalAdenaReserve, equippedSlotsFor, equipInventoryUpgrades, preferredTarget, preferredDropTarget, preferredNoGradeTarget, marketOfferForTarget, marketPlanForTarget, marketRecoveryPlanForTarget, staticNpcUpgradePlan, staticNpcKitAdequate, itemDropChance, itemDropYield, partyNeedForSource, partyNeedReasonForSource, soloSafeForSource, bestSourceForState, bestSourceForPlan, safeFallbackForPlan, retargetPlanSource, replacementPlanFor, sourceForItem, farmSourceForMaterial, missingMaterials, directPlanFailure, partyRouteFailure, replanContextFor, rateProfileSignature, withinExpectedKillLimit, isBotEligibleSourceNpcId, isClanOwnedPlan, equipmentTargetFulfilled, clanGoalPlanLocked, finalizePlan, planFor, shouldFinishPreviousPlan, scoreSpot, sameObjective };
+module.exports = { RATE_MODEL_VERSION, DIRECT_FAILURE_RESOLVE_LIMIT, PARTY_ROUTE_FAILURE_ATTEMPT_LIMIT, gradeForLevel, isCraftService, roleFor, itemScore, isRealCatalogItem, suitable, isSlotUpgrade, combatReadiness, progressionPriceCap, operationalAdenaReserve, equippedSlotsFor, equipInventoryUpgrades, preferredTarget, preferredDropTarget, preferredNoGradeTarget, marketOfferForTarget, marketPlanForTarget, marketRecoveryPlanForTarget, staticNpcUpgradePlan, staticNpcKitAdequate, itemDropChance, itemDropYield, partyNeedForSource, partyNeedReasonForSource, soloSafeForSource, bestSourceForState, bestSourceForPlan, safeFallbackForPlan, retargetPlanSource, replacementPlanFor, sourceForItem, farmSourceForMaterial, missingMaterials, directPlanFailure, partyRouteFailure, abandonAcquisition, replanContextFor, rateProfileSignature, withinExpectedKillLimit, isBotEligibleSourceNpcId, isClanOwnedPlan, equipmentTargetFulfilled, clanGoalPlanLocked, finalizePlan, planFor, shouldFinishPreviousPlan, scoreSpot, sameObjective };
