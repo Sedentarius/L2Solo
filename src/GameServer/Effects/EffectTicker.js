@@ -306,6 +306,7 @@ function applyManaHot(session, source, target, effect) {
 }
 
 function applyDamage(session, source, target, damage) {
+    if (invoke('GameServer/Effects/EffectStore').hasDebuff(target, 'petrification')) return;
     if (session && source && target?.fetchId && source !== target) {
         if (target.fetchId() >= 2000000) {
             invoke(path.actor).receivedHit(session, target, damage, { wakeSleep: true, source });
