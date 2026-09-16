@@ -23,6 +23,9 @@ function enterWorld(session, actor) {
 
     // Set character as online
     actor.setIsOnline(true);
+    // Prepared bot actors also load their skills here before joining the world.
+    if (invoke('GameServer/World/World').user?.sessions?.includes(session))
+        invoke('GameServer/Clan/ClanService').broadcastMemberPresence(actor);
 
     // Effects must be available before the stat calculation; e.g. a max-HP
     // buff affects the cap used when the persisted HP is restored.

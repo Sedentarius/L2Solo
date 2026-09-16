@@ -226,7 +226,7 @@ function members(session) {
         return;
     }
 
-    const rows = clan.members
+    const rows = ClanService.membersForDisplay(clan)
         .sort((a, b) => a.name.localeCompare(b.name))
         .map((member) => `${member.name} Lv.${member.level}${Number(member.id) === Number(clan.leaderId) ? ' leader' : ''}`)
         .join('<br1>');

@@ -32,6 +32,7 @@ function isCriticalSnapshotReason(reason = '', state = null) {
 }
 
 function notifyColdSnapshot(state, reason = 'state_changed', options = {}) {
+    invoke('GameServer/Clan/ClanService').syncColdMember(state);
     changeListeners.forEach((listener) => {
         try {
             listener(state, reason);
@@ -1455,6 +1456,7 @@ const BotLifeState = {
     acceptLifecycleRow(row) {
         const snapshot = normalize(row);
         cache.set(snapshot.characterId, snapshot);
+        invoke('GameServer/Clan/ClanService').syncColdMember(snapshot);
         return snapshot;
     },
 
@@ -3486,6 +3488,7 @@ const BotLifeState = {
             }
         };
         cache.set(id, next);
+        invoke('GameServer/Clan/ClanService').syncColdMember(next);
         return next;
     },
 
