@@ -15,6 +15,7 @@ const QUESTS = Object.freeze({
         startEvent: 'start',
         collectItemId: 1160,
         collectAmount: 13,
+        preferredKillNpcIds: [456],
         priority: 50
     })
 });
@@ -123,16 +124,29 @@ function npcLocation(npcSelfId) {
     return findNpcNode(DataCache.npcSpawns || [], Number(npcSelfId));
 }
 
+function questKillTargets(spec) {
+    const quest = require('../../Quest/QuestRegistry').activeQuests()
+        .find((entry) => Number(entry.id) === Number(spec?.questId));
+    return (quest?.killNpcs || []).map(Number).filter((id) => Number.isSafeInteger(id) && id > 0);
+}
+
+function preferredRank(spec, spot) {
+    const entries = new Set((spot?.npcEntries || []).map((entry) => Number(entry.selfId)));
+    const preferred = (spec?.preferredKillNpcIds || []).map(Number);
+    const index = preferred.findIndex((id) => entries.has(id));
+    return index >= 0 ? index : preferred.length + 1;
+}
+
 function killSpot(spec, state = {}) {
     if (!spec) return null;
-    const quest = require('../../Quest/QuestRegistry').activeQuests()
-        .find((entry) => Number(entry.id) === Number(spec.questId));
-    const targets = new Set((quest?.killNpcs || []).map(Number));
+    const targets = new Set(questKillTargets(spec));
     if (!targets.size) return null;
     const profiles = SpotProfiles.ensure() || [];
     const matching = profiles.filter((spot) => (spot.npcEntries || []).some((entry) => targets.has(Number(entry.selfId))));
     if (!matching.length) return null;
     matching.sort((left, right) => {
+        const preferred = preferredRank(spec, left) - preferredRank(spec, right);
+        if (preferred) return preferred;
         const leftLevel = Math.abs(Number(left.avgLevel || left.minLevel || state.level || 1) - Number(state.level || 1));
         const rightLevel = Math.abs(Number(right.avgLevel || right.minLevel || state.level || 1) - Number(state.level || 1));
         return leftLevel - rightLevel || String(left.id).localeCompare(String(right.id));
@@ -142,9 +156,10 @@ function killSpot(spec, state = {}) {
 
 function killTargetForSpot(spec, spot) {
     if (!spec || !spot) return 0;
-    const quest = require('../../Quest/QuestRegistry').activeQuests()
-        .find((entry) => Number(entry.id) === Number(spec.questId));
-    const targets = new Set((quest?.killNpcs || []).map(Number));
+    const entries = new Set((spot.npcEntries || []).map((entry) => Number(entry.selfId)));
+    const preferred = (spec.preferredKillNpcIds || []).map(Number).find((id) => entries.has(id));
+    if (preferred) return preferred;
+    const targets = new Set(questKillTargets(spec));
     return Number((spot.npcEntries || []).find((entry) => targets.has(Number(entry.selfId)))?.selfId || 0);
 }
 
@@ -162,5 +177,6 @@ module.exports = {
     killSpot,
     killTargetForSpot,
     npcLocation,
+    questKillTargets,
     specFor
 };
