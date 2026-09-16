@@ -8,6 +8,7 @@ const tests = [
     'tests/test_player_move_destination_height.js',
     'tests/test_clan_presence.js',
     'tests/test_clan_cold_progress.js',
+    'tests/test_inventory_weight.js',
     'tests/test_mammon_unseal.js',
     'tests/test_bot_target_matchup.js',
     'tests/test_bot_action_feedback.js',

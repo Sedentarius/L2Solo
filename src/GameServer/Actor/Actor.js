@@ -154,6 +154,10 @@ class Actor extends ActorModel {
                 { id: 0xc, value: creature.fetchMaxMp() },
                 { id: 0x21, value: creature.fetchCp?.() || 0 },
                 { id: 0x22, value: creature.fetchMaxCp?.() || 0 },
+                ...(creature === this ? [
+                    { id: 0x0e, value: this.backpack.fetchTotalLoad() },
+                    { id: 0x0f, value: this.fetchMaxLoad() }
+                ] : []),
             ])
         );
     }

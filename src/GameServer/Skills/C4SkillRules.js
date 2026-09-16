@@ -175,7 +175,7 @@ const RULES = {
     },
     1: { skillType: DAMAGE, trait: 'physical', target: 'enemy', ssBoost: 1, requires: { weaponsAllowed: 512, itemKind: 'Dual Sword' } },
     2: { skillType: EFFECT, trait: 'confusion', effect: 'confusion', effectType: 'debuff', target: 'enemy', baseLandRate: 80, mobOnly: true, castRange: 600, effectRange: 1100 },
-    3: { skillType: DAMAGE, trait: 'sword', ssBoost: 1 },
+    3: { skillType: DAMAGE, trait: 'sword', ssBoost: 1, requires: { weaponsAllowed: 2060 } },
     4: { skillType: EFFECT, trait: 'buff', effect: 'dash', effectType: 'buff', target: 'self', baseLandRate: 100, aggroPointsByLevel: [204, 438], statsByLevel: { runSpdAdd: [40, 66] } },
     5: { skillType: DAMAGE, trait: 'physical', target: 'enemy', ssBoost: 1, requires: { weaponsAllowed: 512, itemKind: 'Dual Sword', charges: 2, condition: 128, conditionValue: 2 } },
     6: { skillType: DAMAGE, trait: 'physical', target: 'enemy', ssBoost: 1, requires: { weaponsAllowed: 524, charges: 1, condition: 128, conditionValue: 1 } },
@@ -208,7 +208,7 @@ const RULES = {
     92: { skillType: EFFECT, trait: 'shock', effect: 'stun', effectType: 'debuff', target: 'enemy', baseLandRate: 80, levelDepend: 2, requires: { weaponsAllowed: 1048576, itemKind: 'shield' }, castRange: 40, effectRange: 400 },
     100: { skillType: DAMAGE_EFFECT, trait: 'shock', effect: 'stun', effectType: 'debuff', target: 'enemy', isMagic: false, ssBoost: 1, baseLandRate: 50, levelDepend: 1, magicLevelByLevel: [18, 19, 20, 22, 23, 24, 26, 27, 28, 30, 31, 32, 34, 35, 36], maxLevel: 15, durationMs: 9000, castRange: 40, effectRange: 400, reuseTime: 13000, hitTime: 1080, coolTime: 720, overHit: true, nextActionAttack: true, requires: { weaponsAllowed: 16392 } },
     101: { skillType: DAMAGE_EFFECT, trait: 'shock', effect: 'stun', effectType: 'debuff', target: 'enemy', isMagic: false, ssBoost: 1, baseLandRate: 50, levelDepend: 1, magicLevelByLevel: [34, 35, 36, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74], maxLevel: 40, powerByLevel: [287, 306, 326, 369, 392, 417, 442, 469, 496, 525, 555, 586, 618, 651, 686, 722, 758, 796, 835, 875, 916, 959, 1002, 1046, 1091, 1136, 1183, 1230, 1278, 1327, 1376, 1425, 1475, 1525, 1576, 1626, 1677, 1727, 1777, 1827], mpConsumeByLevel: [69, 72, 74, 80, 82, 85, 85, 87, 90, 93, 95, 98, 101, 104, 107, 109, 110, 112, 115, 118, 121, 124, 126, 129, 132, 135, 135, 138, 140, 143, 145, 148, 150, 153, 155, 157, 160, 162, 164, 166], durationMs: 9000, castRange: 900, effectRange: 1400, reuseTime: 10000, hitTime: 3000, coolTime: 1000, overHit: true, nextActionAttack: true, requires: { weaponsAllowed: 32 } },
-    102: { skillType: EFFECT, trait: 'root', effect: 'root', effectType: 'debuff', target: 'enemy', baseLandRate: 80, levelDepend: 2, magicLevelByLevel: [36, 40, 43, 46, 49, 52, 55, 58, 60, 62, 64, 66, 68, 70, 72, 74], maxLevel: 16, power: 80, mpConsumeByLevel: [17, 18, 19, 22, 23, 24, 25, 28, 28, 29, 30, 32, 33, 33, 34, 35], hitTime: 3000, reuseTime: 7000, durationMs: 120000, castRange: 600, effectRange: 1100, statsByLevel: { runSpdMul: [0.3, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5] } },
+    102: { skillType: EFFECT, trait: 'slow', effect: 'entangle', effectType: 'debuff', target: 'enemy', baseLandRate: 80, levelDepend: 2, magicLevelByLevel: [36, 40, 43, 46, 49, 52, 55, 58, 60, 62, 64, 66, 68, 70, 72, 74], maxLevel: 16, power: 80, mpConsumeByLevel: [17, 18, 19, 22, 23, 24, 25, 28, 28, 29, 30, 32, 33, 33, 34, 35], hitTime: 3000, reuseTime: 7000, durationMs: 120000, castRange: 600, effectRange: 1100, statsByLevel: { runSpdMul: [0.3, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5] } },
     103: { skillType: EFFECT, trait: 'poison', effect: 'poison', effectType: 'debuff', target: 'corpse_mob', sourceTarget: 'area', radius: 400, baseLandRateByLevel: [5, 6, 7, 8], levelDepend: 1, castRange: 400, effectRange: 900, dot: { count: 10, intervalMs: 3000, damageByLevel: [31, 38, 45, 52] } },
     104: { skillType: EFFECT, trait: 'detect_weakness', effect: 'detect_weakness', effectType: 'buff', target: 'self', effectTargetKind: 'plant', baseLandRate: 100, aggroPoints: 438, stats: { 'pAtk-plants': 1.5 } },
     105: { skillType: DAMAGE_EFFECT, trait: 'water', effect: 'freezing_strike', effectType: 'debuff', target: 'enemy', radius: 205, baseLandRate: 60, levelDepend: 1, magicLevelByLevel: [34, 36, 38, 40, 42, 43, 45, 46, 48, 49, 51, 52, 54, 55, 57, 58, 60, 62, 64, 66, 68, 70, 72, 74], maxLevel: 24, powerByLevel: [26, 28, 30, 31, 33, 34, 36, 37, 39, 40, 42, 43, 45, 46, 48, 49, 51, 53, 56, 58, 59, 61, 63, 65], mpConsumeByLevel: [15, 17, 18, 18, 19, 19, 20, 22, 23, 23, 24, 24, 25, 25, 27, 28, 28, 29, 30, 32, 33, 33, 34, 35], hitTime: 3000, reuseTime: 8000, durationMs: 120000, castRange: 600, effectRange: 1100, stats: { runSpdMul: 0.7 } },
@@ -1384,9 +1384,9 @@ function inferDebuff(name) {
     if (lower.includes('stun')) return { effect: 'stun', trait: 'shock', baseLandRate: 50 };
     if (lower.includes('poison')) return { effect: 'poison', trait: 'poison', baseLandRate: 70 };
     if (lower.includes('bleed')) return { effect: 'bleed', trait: 'bleed', baseLandRate: 70 };
-    if (lower.includes('entangle') || lower.includes('root')) return { effect: 'root', trait: 'root', baseLandRate: 70 };
+    if (lower.includes('root')) return { effect: 'root', trait: 'root', baseLandRate: 70 };
     if (lower.includes('hex') || lower.includes('power break')) return { effect: normalizeKey(name), trait: 'debuff', baseLandRate: 80 };
-    if (lower.includes('cripple') || lower.includes('slow')) return { effect: 'slow', trait: 'slow', baseLandRate: 70 };
+    if (lower.includes('entangle') || lower.includes('cripple') || lower.includes('slow')) return { effect: 'slow', trait: 'slow', baseLandRate: 70 };
     return null;
 }
 

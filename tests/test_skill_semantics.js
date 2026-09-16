@@ -6606,14 +6606,34 @@ const sleepAgainstShield = SkillEffects.execute(session(), caster, mentallyProte
 assert.strictEqual(sleepAgainstShield.effect, null, 'Mental Shield sleepResist should lower Sleep land chance below the roll');
 assert.strictEqual(sleepAgainstShield.effectResisted, true, 'Sleep blocked by Mental Shield should report effect resistance');
 
+// Entangle slows movement; it must not inherit root restrictions or resistance.
+for (let level = 1; level <= 16; level++) {
+    const target = statActor();
+    SkillEffects.execute(session(), caster, target, mentalShield, {
+        magicSkill: true, rng: () => 0, attack: { clearLoadedShot() {} }
+    });
+    const entangle = skill({ selfId: 102, name: 'Entangle', spell: true, power: level, level, buff: 120000 });
+    const outcome = SkillEffects.execute(session(), caster, target, entangle, {
+        magicSkill: true, rng: () => 0, attack: { clearLoadedShot() {} }
+    });
+    assert.strictEqual(outcome.effect.key, 'entangle');
+    assert.strictEqual(EffectStats.multiplier(target, 'runSpdMul'), level === 1 ? 0.3 : 0.5);
+    assert.strictEqual(EffectStore.impairments(target).rooted, false, 'Entangle must not root');
+    assert.strictEqual(EffectRestrictions.canMove(target), true, 'Entangle permits slower movement');
+    assert.strictEqual(EffectRestrictions.canAttack(target), true);
+    assert.strictEqual(EffectRestrictions.canCast(target), true);
+}
 const entangle = skill({ selfId: 102, name: 'Entangle', spell: true, power: 1, level: 1, buff: 120000 });
 const entangleAgainstShield = SkillEffects.execute(session(), caster, mentallyProtected, entangle, {
-    magicSkill: true,
-    rng: () => 0.5,
-    attack: { clearLoadedShot() {} }
+    magicSkill: true, rng: () => 0.5, attack: { clearLoadedShot() {} }
 });
-assert.strictEqual(entangleAgainstShield.effect, null, 'Mental Shield rootResist should lower Entangle land chance below the roll');
-assert.strictEqual(entangleAgainstShield.effectResisted, true, 'Entangle blocked by Mental Shield should report effect resistance');
+assert(entangleAgainstShield.effect, 'Mental Shield root resistance must not resist Entangle');
+const shieldTestRoot = skill({ selfId: 1201, name: 'Dryad Root', spell: true, power: 1, level: 1, buff: 30000 });
+const rootAgainstShield = SkillEffects.execute(session(), caster, mentallyProtected, shieldTestRoot, {
+    magicSkill: true, rng: () => 0.5, attack: { clearLoadedShot() {} }
+});
+assert.strictEqual(rootAgainstShield.effect, null, 'Mental Shield must still resist actual roots');
+assert.strictEqual(rootAgainstShield.effectResisted, true);
 
 const holdUndeadData = activeSkills.find((entry) => entry.selfId === 1042);
 assert(holdUndeadData, 'Hold Undead should be present in active skills data');
@@ -7385,6 +7405,17 @@ assert.strictEqual(quiverA.skillType, C4SkillRules.CREATE_ITEM, 'Quiver of Arrow
 assert.deepStrictEqual([quiverA.itemConsumeId, quiverA.itemConsumeCount, quiverA.createItemId, quiverA.createItemCount], [1461, 1, 1344, 450], 'Quiver A must retain sourced material and arrow batch');
 
 const restrictedSkillAttack = new Attack();
+// Power Strike uses the C4 sword/blunt/two-handed sword mask at every level.
+const powerStrikeUser = creature({ id: 2000311 });
+for (let level = 1; level <= 9; level++) {
+    const strike = skill({ selfId: 3, name: 'Power Strike', spell: false, level, power: 30, distance: 40 });
+    for (const kind of ['Weapon.Sword', 'Weapon.Blunt', 'Weapon.GreatSword', 'Weapon.Fist', 'Weapon.DualFist', 'Weapon.Bow', 'Weapon.Knife', 'Weapon.Pole', 'Weapon.Dual', '']) {
+        powerStrikeUser.backpack.fetchTotalWeaponKind = () => kind;
+        const allowed = ['Weapon.Sword', 'Weapon.Blunt', 'Weapon.GreatSword'].includes(kind);
+        assert.strictEqual(restrictedSkillAttack.skillUseConditionFailure(powerStrikeUser, strike),
+            allowed ? null : 'Incorrect weapon.', `Power Strike level ${level}, weapon ${kind || 'unarmed'}`);
+    }
+}
 const bowUser = creature({ id: 2000306 });
 bowUser.backpack.fetchTotalWeaponKind = () => 'Weapon.Bow';
 const fatalCounter = skill({ selfId: 314, name: 'Fatal Counter', spell: false, level: 1, power: 2908, distance: 900 });
