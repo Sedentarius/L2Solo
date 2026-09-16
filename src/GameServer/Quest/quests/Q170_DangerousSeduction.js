@@ -16,17 +16,31 @@ module.exports = {
     if (
       e !== "start" ||
       s.isStarted() ||
+      s.isCompleted() ||
       a.fetchRace() !== 2 ||
       a.fetchLevel() < 21
     )
       return null;
     await s.setState("started");
     await s.set("cond", 1);
+    s.playSound("ItemSound.quest_accept");
     return p("Vellior", "Defeat Merkenis.");
   },
   async onTalk(s) {
-    if (!s.isStarted())
-      return p("Vellior", '<a action="bypass -h quest 170 start">Accept.</a>');
+    if (s.isCompleted())
+      return p("Vellior", "Dangerous Seduction: You have already completed this quest.");
+    if (!s.isStarted()) {
+      const a = s.session.actor;
+      if (a.fetchRace() !== 2)
+        return p("Vellior", "Dangerous Seduction: This task is for Dark Elves only.");
+      if (a.fetchLevel() < 21)
+        return p("Vellior", "Dangerous Seduction: Come back after reaching level 21.");
+      return p(
+        "Vellior",
+        "Dangerous Seduction: Defeat Merkenis and bring me the nightmare crystal.",
+        '<a action="bypass -h quest 170 start">Accept the task.</a>',
+      );
+    }
     if (!n(s, I)) return p("Vellior", "Bring the nightmare crystal.");
     await Q().takeItem(s.session, I, -1);
     await Q().rewardAdena(s.session, 102680);

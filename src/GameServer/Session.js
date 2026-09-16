@@ -175,6 +175,10 @@ class Session {
     }
 
     setActor(properties) {
+        // The connection survives returning to character selection.
+        this.questStates = new Map();
+        this.questStatesLoaded = false;
+        this.activeNpcTalk = null;
         this.actor = new Actor(this, properties);
     }
 

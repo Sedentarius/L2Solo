@@ -28,6 +28,7 @@ module.exports = (c) => ({
   name: c.name,
   npcs: [G, T, S, D],
   startNpcs: [G],
+  canTalk: (s) => s.isStarted() || s.isCompleted() || Number(s.session.actor.fetchRace()) === c.race,
   eventNpc: (e) =>
     ({
       start: G,
@@ -48,9 +49,9 @@ module.exports = (c) => ({
         !has(s, MARK)
       )
         return null;
+      await Q.giveItem(s.session, O1, 1);
       await s.setState("started");
       await s.set("cond", 1);
-      await Q.giveItem(s.session, O1, 1);
       s.playSound(A);
       return page("Galladucci", "Take the order to Gentler.");
     }
@@ -96,6 +97,9 @@ module.exports = (c) => ({
             '<a action="bypass -h quest ' + c.id + ' start">Accept.</a>',
           )
         : page("Galladucci", "This journey requires the Mark of Traveler.");
+    // Recover starts saved before the missing order template was added.
+    if (id === G && cnd === 1 && has(s, MARK) && !has(s, O1) && !has(s, H))
+      await q().giveItem(s.session, O1, 1);
     const e =
       id === T
         ? "hilt"

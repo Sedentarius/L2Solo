@@ -31,8 +31,12 @@ function enterWorld(session, buffer) {
         }).catch(error => utils.infoWarn('Character', 'shortcut login initialization failed: %s', error.message));
         session.dataSendToMe(GameTime.isNight() ? ServerResponse.sunset() : ServerResponse.sunrise());
         sendClanWindow(session);
-        if (session.actor.fetchClanId?.()) invoke('GameServer/Quest/QuestService').ensureLoaded(session)
-            .catch(error => utils.infoWarn('ClanQuest', 'login resume failed: %s', error.message));
+        const questActor = session.actor;
+        const quests = invoke('GameServer/Quest/QuestService');
+        quests.ensureLoaded(session).then(() => {
+            if (session.actor === questActor)
+                session.dataSendToMe(ServerResponse.questList(quests.active(session)));
+        }).catch(error => utils.infoWarn('Quest', 'login load failed: %s', error.message));
         session.dataSendToMe(ServerResponse.userInfo(session.actor));
         session.dataSendToMe(ServerResponse.exStorageMaxCount(session.actor));
         session.dataSendToMe(ServerResponse.abnormalStatusUpdate.fromActor(session.actor));

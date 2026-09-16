@@ -10,19 +10,14 @@ module.exports = {
   name: "Dwarven Kinship",
   npcs: [C, H, N],
   startNpcs: [C],
-  eventNpc: (e) => (e === "start" ? C : null),
-  async onEvent(s, e) {
-    if (e !== "start" || s.isStarted() || s.session.actor.fetchLevel() < 15)
-      return null;
-    await s.setState("started");
-    await s.set("cond", 1);
-    await Q().giveItem(s.session, L, 1);
-    s.playSound("ItemSound.quest_accept");
-    return p("Carlon", "Take my letter to Haprock.");
+  eventNpc: (e) => {
+    if (e === "start") return C;
+    if (e === "haprock" || e === "haprock_finish") return H;
+    if (e === "norman_finish") return N;
+    return null;
   },
   async onTalk(s, x) {
-    const q = Q(),
-      id = x.fetchSelfId(),
+    const id = x.fetchSelfId(),
       c = s.getInt("cond");
     if (s.isCompleted())
       return p("Quest", "You have already completed this quest.");
@@ -47,29 +42,37 @@ module.exports = {
   },
   async onEvent(s, e) {
     const q = Q();
+    if (s.isCompleted()) return null;
     if (e === "start" && !s.isStarted()) {
       if (s.session.actor.fetchLevel() < 15) return null;
+      await q.giveItem(s.session, L, 1);
       await s.setState("started");
       await s.set("cond", 1);
-      await q.giveItem(s.session, L, 1);
+      s.playSound("ItemSound.quest_accept");
       return p("Carlon", "Take my letter to Haprock.");
     }
+    if (!s.isStarted()) return null;
     if (e === "haprock" && s.getInt("cond") === 1) {
-      await q.takeItem(s.session, L);
+      if (!(await q.takeItem(s.session, L)))
+        return p("Haprock", "You do not have the letter.");
       await q.giveItem(s.session, NL, 1);
       await q.rewardAdena(s.session, 2000);
       await s.set("cond", 2);
       return p("Haprock", "Take this to Norman, or finish here.");
     }
     if (e === "haprock_finish" && s.getInt("cond") === 2) {
-      await q.takeItem(s.session, NL);
+      if (!(await q.takeItem(s.session, NL)))
+        return p("Quest", "You do not have the letter for Norman.");
       await q.rewardAdena(s.session, 3000);
+      s.playSound("ItemSound.quest_finish");
       await s.exit(false);
       return p("Haprock", "Farewell.");
     }
     if (e === "norman_finish" && s.getInt("cond") === 2) {
-      await q.takeItem(s.session, NL);
+      if (!(await q.takeItem(s.session, NL)))
+        return p("Quest", "You do not have the letter for Norman.");
       await q.rewardAdena(s.session, 20000);
+      s.playSound("ItemSound.quest_finish");
       await s.exit(false);
       return p("Norman", "Welcome, kin.");
     }
