@@ -87,6 +87,22 @@ function persistState(state, reason = 'quest_bridge_state') {
     return BotLifeState.upsertState(state, reason);
 }
 
+function hydrateSessionIntent(session) {
+    if (!session) return null;
+    // Once a hot session has an explicit value, including null after a
+    // completed quest, it is the current in-memory handoff value. Do not let a
+    // concurrent read of an older lifecycle snapshot resurrect an old step.
+    if (Object.prototype.hasOwnProperty.call(session, 'questBridge')) return session.questBridge;
+
+    const characterId = characterIdOf(session);
+    const lifecycle = characterId ? BotLifeState.snapshot(characterId) : null;
+    const source = lifecycle || session.coldLifeState || null;
+    const intent = intentFrom(source);
+    session.questBridge = intent || null;
+    if (lifecycle && session.coldLifeState) session.coldLifeState = lifecycle;
+    return session.questBridge;
+}
+
 async function persistSessionIntent(session, intent, reason = 'quest_bridge_state') {
     const timestamp = Date.now();
     const normalized = intent ? normalizeIntent({ ...intent, createdAt: intent.createdAt }, timestamp) : null;
@@ -95,7 +111,12 @@ async function persistSessionIntent(session, intent, reason = 'quest_bridge_stat
     if (!characterId) return normalized;
     const lifecycle = BotLifeState.snapshot(characterId);
     if (!lifecycle) return normalized;
-    await persistState(withIntent(lifecycle, normalized, timestamp), reason);
+    const saved = await persistState(withIntent(lifecycle, normalized, timestamp), reason);
+    // HotActivation keeps the pre-activation cold state on the session so
+    // Cooldown can merge live actor data back into it. Keep that handoff copy
+    // synchronized whenever the quest intent changes, otherwise cooling could
+    // restore an older quest step/target after a successful hot interaction.
+    if (saved && session.coldLifeState) session.coldLifeState = saved;
     return normalized;
 }
 
@@ -186,7 +207,7 @@ function hotTravel(session, target, options = {}) {
 }
 
 function activeIntent(session) {
-    return session?.questBridge || intentFrom(BotLifeState.snapshot(characterIdOf(session))) || null;
+    return hydrateSessionIntent(session);
 }
 
 async function talkHot(session, npc, options = {}) {
@@ -260,6 +281,7 @@ module.exports = {
     clear,
     coldTravel,
     hotTravel,
+    hydrateSessionIntent,
     intentFrom,
     normalizeIntent,
     persistSessionIntent,
