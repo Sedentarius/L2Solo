@@ -289,7 +289,12 @@ function execute(session, actor, target, skill, context = {}) {
             }
             if (semantic.effect) result.effect = applyEffect(session, target, skill, semantic, actor);
             if (semantic.turnBack && typeof target?.fetchHead === 'function' && typeof target?.setHead === 'function') {
-                target.setHead(Number(actor?.fetchHead?.()) & 0xffff);
+                const oldHeading = Number(target.fetchHead()) & 0xffff;
+                const heading = Number(actor?.fetchHead?.()) & 0xffff;
+                target.setHead(heading);
+                // C4 Bluff rotates the visible target as well as its server heading.
+                session.dataSendToMeAndOthers?.(ServerResponse.beginRotation(target.fetchId(), oldHeading), target);
+                session.dataSendToMeAndOthers?.(ServerResponse.stopRotation(target.fetchId(), heading), target);
             }
         }
         clearLoadedShot(context.attack || actor.attack, actor, magicSkill);

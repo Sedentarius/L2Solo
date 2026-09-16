@@ -1,4 +1,6 @@
 module.exports = {
+    beginRotation: require('./BeginRotation'),
+    stopRotation: require('./StopRotation'),
     skillCoolTime: require('./SkillCoolTime'),
     validateLocation: require('./ValidateLocation'),
     exStorageMaxCount: require('./ExStorageMaxCount'),
