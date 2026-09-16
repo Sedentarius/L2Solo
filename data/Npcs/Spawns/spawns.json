@@ -2037,7 +2037,7 @@
 },{
     "selfId": "24_18_NPC_031201_08",
     "bounds": [{ "locX": 148876, "locY": 26588, "minZ": -2281, "maxZ": -2081 }, { "locX": 149076, "locY": 26588, "minZ": -2281, "maxZ": -2081 }, { "locX": 149076, "locY": 26788, "minZ": -2281, "maxZ": -2081 }, { "locX": 148876, "locY": 26788, "minZ": -2281, "maxZ": -2081 }],
-    "spawns": [{ "selfId": 7845, "name": "Klump", "coords": [{ "locX": 148959, "locY": 26687, "locZ": -2189, "head": 32768 }], "total": 1, "respawn": 60, "bias": 0 }, { "selfId": 7843, "name": "Romp", "coords": [{ "locX": 148959, "locY": 26733, "locZ": -2189, "head": 32768 }], "total": 1, "respawn": 60, "bias": 0 }, { "selfId": 7844, "name": "Walderal", "coords": [{ "locX": 148959, "locY": 26641, "locZ": -2189, "head": 32768 }], "total": 1, "respawn": 60, "bias": 0 }]
+    "spawns": [{ "selfId": 7845, "name": "Klump", "coords": [{ "locX": 148960, "locY": 26145, "locZ": -2192, "head": 24576 }], "total": 1, "respawn": 60, "bias": 0 }, { "selfId": 7843, "name": "Romp", "coords": [{ "locX": 148859, "locY": 27258, "locZ": -2192, "head": 49152 }], "total": 1, "respawn": 60, "bias": 0 }, { "selfId": 7844, "name": "Walderal", "coords": [{ "locX": 148155, "locY": 26254, "locZ": -2192, "head": 0 }], "total": 1, "respawn": 60, "bias": 0 }]
 },{
     "selfId": "24_18_NPC_031201_09",
     "bounds": [{ "locX": 150268, "locY": 28284, "minZ": -2349, "maxZ": -2149 }, { "locX": 150468, "locY": 28284, "minZ": -2349, "maxZ": -2149 }, { "locX": 150468, "locY": 28484, "minZ": -2349, "maxZ": -2149 }, { "locX": 150268, "locY": 28484, "minZ": -2349, "maxZ": -2149 }],
