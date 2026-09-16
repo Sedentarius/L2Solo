@@ -1,6 +1,7 @@
 const GoalState = invoke('GameServer/Bot/Goals/GoalState');
 const NeedsEvaluator = invoke('GameServer/Bot/Goals/NeedsEvaluator');
 const GoalPlanner = invoke('GameServer/Bot/Goals/GoalPlanner');
+const AutonomousQuestCatalog = invoke('GameServer/Bot/Quest/AutonomousQuestCatalog');
 
 function reviewSpot(state, explicitSpot = null, existingGoal = null) {
     if (explicitSpot) return explicitSpot;
@@ -19,6 +20,8 @@ function reviewDecision(state, existing, options, timestamp) {
         spot: reviewSpot(state, options.spot, existing?.current),
         now: timestamp
     });
+    const questCandidate = AutonomousQuestCatalog.candidateFor(state, { timestamp });
+    if (questCandidate) candidates.push(questCandidate);
     const marketCandidate = candidates.find((candidate) => candidate?.type === 'sell_inventory' || candidate?.type === 'buy_craft_material'
         || ['market_search_for_weapon', 'market_search_for_gear'].includes(candidate?.plan?.expectedBenefit));
     const activeMarketGoal = existing?.current?.type === 'sell_inventory' || existing?.current?.type === 'buy_craft_material'
