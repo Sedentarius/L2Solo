@@ -10,6 +10,7 @@ const Database = invoke('Database');
 const DataCache = invoke('GameServer/DataCache');
 const LifeState = invoke('GameServer/Bot/Population/BotLifeState');
 const GoalService = invoke('GameServer/Bot/Goals/GoalService');
+const GoalState = invoke('GameServer/Bot/Goals/GoalState');
 const Catalog = invoke('GameServer/Bot/Quest/AutonomousQuestCatalog');
 const Bridge = invoke('GameServer/Bot/Quest/BotQuestBridge');
 const ColdQuestRuntime = invoke('GameServer/Bot/Quest/ColdQuestRuntime');
@@ -81,14 +82,42 @@ async function main() {
         inventory: {}
     };
 
-    // Character 1 belongs to admission bucket 1. Minute 1 proves that the
-    // ordinary goal planner can choose the quest over generic level grinding.
+    // Character 1 belongs to admission bucket 1. Seed a still-fresh generic
+    // progression goal first: the higher-priority quest must be allowed to
+    // preempt it instead of waiting for that goal's review window to expire.
+    await GoalState.set(1, {
+        type: 'progress_level',
+        status: 'active',
+        priority: 35,
+        target: { level: 7 },
+        plan: { kind: 'farm_route' },
+        blockers: [],
+        reviewedAt: 59000,
+        nextReviewAt: 30 * 60 * 1000
+    });
     const goal = await GoalService.review(lifecycle, { now: 60000 });
     assert.equal(goal.current.type, 'complete_quest');
     assert.equal(goal.current.target.questId, 165);
     assert.equal(Catalog.candidateFor(lifecycle, { timestamp: 60000 }).type, 'complete_quest');
     assert.equal(Catalog.candidateFor({ ...lifecycle, characterId: 2 }, { timestamp: 60000 }), null,
         'staggering should prevent every eligible bot from selecting the same quest at once');
+
+    // A quest is ordinary progression, not an emergency. A stronger active
+    // goal such as recovery must retain ownership of the bot until its review.
+    await GoalState.set(1, {
+        type: 'recover',
+        status: 'active',
+        priority: 90,
+        target: { hpPct: 0.8 },
+        plan: { kind: 'rest' },
+        blockers: [],
+        reviewedAt: 60000,
+        nextReviewAt: 30 * 60 * 1000
+    });
+    const protectedGoal = await GoalService.review(lifecycle, { now: 61000 });
+    assert.equal(protectedGoal.current.type, 'recover',
+        'autonomous quest selection must not preempt a higher-priority active goal');
+    await GoalState.set(1, goal.current);
 
     const nelsyaLoc = Catalog.npcLocation(7348);
     assert.ok(nelsyaLoc, 'autonomous catalog must resolve the real Nelsya world spawn');
