@@ -91,9 +91,10 @@ async function run() {
             overhitHot.snapshot(), 'Over-hit EXP and unchanged SP must match hot and cold paths');
 
         const cappedExp = ProgressionCap.maximumAllowedExperience();
-        const cappedHot = hotActor(40, cappedExp, 5);
+        const cappedLevel = ProgressionCap.effectiveLevelCap();
+        const cappedHot = hotActor(cappedLevel, cappedExp, 5);
         ExperienceReward(session, cappedHot, 1000, 20);
-        const cappedCold = await coldAward(coldState(40, cappedExp, 5), 1000, 20);
+        const cappedCold = await coldAward(coldState(cappedLevel, cappedExp, 5), 1000, 20);
         assert.deepStrictEqual({ level: cappedCold.level, exp: cappedCold.exp, sp: cappedCold.sp },
             cappedHot.snapshot(), 'content-cap discard must match hot and cold paths');
 

@@ -3,6 +3,7 @@ const assert = require('assert');
 require('../src/Global');
 
 const ProgressionRates = invoke('GameServer/ProgressionRates');
+const ProgressionCap = invoke('GameServer/Progression/ProgressionCap');
 const DataCache = invoke('GameServer/DataCache');
 const ExperienceReward = invoke('GameServer/Actor/Generics/ExperienceReward');
 const SendPacket = invoke('Packet/Send');
@@ -11,8 +12,8 @@ const originalRate = process.env.L2NODE_PROGRESSION_RATE;
 
 DataCache.init();
 assert.strictEqual(options.default.General.maxLevel, 78, 'Chronicle 4 must stop at level 78');
-assert.strictEqual(options.default.Progression.contentCap, 40, 'the initial certified-content frontier must be level 40');
-assert.strictEqual(ExperienceReward.resolveLevel(DataCache.experience[40] - 1, options.default.General.maxLevel, DataCache.experience), 40, 'the content frontier must cap level resolution at 40');
+assert.strictEqual(ProgressionCap.contentCap(), 78, 'the default content cap must derive from the C4 maximum level');
+assert.strictEqual(ExperienceReward.resolveLevel(DataCache.experience[78] - 1, options.default.General.maxLevel, DataCache.experience), 78, 'default progression must reach the full C4 maximum level');
 const level80Packet = new SendPacket(0x04).writeD(4200000000n).fetchBuffer(false);
 assert.strictEqual(level80Packet.readUInt32LE(1), 4200000000, 'C4 packets must serialize the level-80 experience threshold as an unsigned D value');
 

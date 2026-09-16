@@ -20,13 +20,13 @@ const base = {
 };
 
 const timestamp = 100000;
-const healthy = GoalPlanner.plan(NeedsEvaluator.evaluate({ ...base, level: 39 }, { spot, now: timestamp }), timestamp);
+const healthy = GoalPlanner.plan(NeedsEvaluator.evaluate(base, { spot, now: timestamp }), timestamp);
 assert.strictEqual(healthy.type, 'progress_level');
 assert.strictEqual(healthy.plan.spotId, 'cruma');
 
-const poor = GoalPlanner.plan(NeedsEvaluator.evaluate({ ...base, level: 39, adena: 50 }, { spot, now: timestamp }), timestamp);
+const poor = GoalPlanner.plan(NeedsEvaluator.evaluate({ ...base, adena: 50 }, { spot, now: timestamp }), timestamp);
 assert.strictEqual(poor.type, 'earn_adena');
-assert.strictEqual(poor.target.adena, 4680);
+assert.strictEqual(poor.target.adena, 4800);
 
 const resting = GoalPlanner.plan(NeedsEvaluator.evaluate({
     ...base,
@@ -215,10 +215,8 @@ for (const status of ['active', 'ready_to_craft', 'blocked']) {
     }, { spot, now: timestamp });
     assert(!cCraftCandidates.some((candidate) => candidate.type === 'upgrade_gear'),
         `${status} C-grade crafting must not turn into an unavailable NPC shopping goal`);
-    assert(!cCraftCandidates.some((candidate) => candidate.type === 'progress_level'),
-        `${status} C-grade crafting must not request progression beyond the content cap`);
-    assert.strictEqual(GoalPlanner.plan(cCraftCandidates, timestamp), null,
-        `${status} C-grade crafting may remain idle when no capped activity is currently executable`);
+    assert.strictEqual(GoalPlanner.plan(cCraftCandidates, timestamp).type, 'progress_level',
+        `${status} C-grade crafting must leave ordinary leveling available while no material route is executable`);
 }
 
 const completedNoGradeKitCandidates = NeedsEvaluator.evaluate({
@@ -263,7 +261,7 @@ assert.strictEqual(staleMarketPlanGoal.target.itemId, expectedChest.selfId, 'the
 assert.strictEqual(staleMarketPlanGoal.target.adena, expectedChestPrice, 'the next item must use its own price rather than the completed offer');
 assert.strictEqual(staleMarketPlanGoal.plan.marketTown, null, 'the next item must be replanned before choosing a market town');
 
-const noSnapshot = GoalPlanner.plan(NeedsEvaluator.evaluate({ ...base, level: 39, stats: { classId: 0, build: { grade: 'c' } } }, { spot, now: timestamp }), timestamp);
+const noSnapshot = GoalPlanner.plan(NeedsEvaluator.evaluate({ ...base, stats: { classId: 0, build: { grade: 'c' } } }, { spot, now: timestamp }), timestamp);
 assert.notStrictEqual(noSnapshot.type, 'upgrade_gear', 'missing equipment data must not invent a gear deficit');
 
 const preFocusGoal = GoalPlanner.plan(NeedsEvaluator.evaluate({

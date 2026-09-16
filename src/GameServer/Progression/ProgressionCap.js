@@ -16,7 +16,10 @@ function positiveInteger(value, label) {
 
 function validate(config = options.default) {
     const maxLevel = positiveInteger(configValue(config, 'General', 'maxLevel'), 'General.maxLevel');
-    const contentCap = positiveInteger(configValue(config, 'Progression', 'contentCap'), 'Progression.contentCap');
+    const configuredContentCap = configValue(config, 'Progression', 'contentCap');
+    const contentCap = configuredContentCap === undefined
+        ? maxLevel
+        : positiveInteger(configuredContentCap, 'Progression.contentCap');
     if (maxLevel > C4_MAX_LEVEL) {
         throw new Error(`General.maxLevel cannot exceed the Chronicle 4 limit of ${C4_MAX_LEVEL}`);
     }

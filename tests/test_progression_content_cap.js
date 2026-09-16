@@ -16,7 +16,9 @@ const NpcDied = invoke('GameServer/Actor/Generics/NpcDied');
 DataCache.init();
 
 function config(maxLevel, contentCap) {
-    return { General: { maxLevel }, Progression: { contentCap } };
+    const value = { General: { maxLevel } };
+    if (contentCap !== undefined) value.Progression = { contentCap };
+    return value;
 }
 
 function actorAt(level, exp, karma = 0) {
@@ -42,7 +44,10 @@ function actorAt(level, exp, karma = 0) {
 
 async function run() {
     assert.strictEqual(ProgressionCap.maxLevel(), 78);
-    assert.strictEqual(ProgressionCap.contentCap(), 40);
+    assert.strictEqual(ProgressionCap.contentCap(), 78);
+    assert.deepStrictEqual(ProgressionCap.validate(config(78)), { maxLevel: 78, contentCap: 78 });
+    assert.strictEqual(ProgressionCap.levelForExperience(Number(DataCache.experience[78]) - 1), 78,
+        'the upstream default must allow progression through level 78');
     assert.throws(() => ProgressionCap.validate(config(78, 79)), /cannot exceed/);
     assert.throws(() => ProgressionCap.validate(config(78, 0)), /greater than zero/);
     assert.throws(() => ProgressionCap.validate(config(79, 40)), /Chronicle 4/);
@@ -57,6 +62,8 @@ async function run() {
     assert.throws(() => ProgressionCap.validate(config(78, 79)), /cannot exceed/,
         'the absolute level 78 limit must prevent level 79');
 
+    options.default.Progression = { contentCap: 40 };
+    assert.strictEqual(ProgressionCap.contentCap(), 40, 'an explicit staged content cap must remain supported');
     const level40Maximum = ProgressionCap.maximumAllowedExperience();
     const originalResponse = { userInfo: ServerResponse.userInfo, consoleText: ServerResponse.consoleText };
     const originalExperienceWrite = CharacterWriteQueue.experience;

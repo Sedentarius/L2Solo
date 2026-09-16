@@ -7,7 +7,7 @@ const EffectStats = invoke('GameServer/Effects/EffectStats');
 const ProgressionCap = invoke('GameServer/Progression/ProgressionCap');
 
 function resolveLevel(totalExp, maxLevel, experience) {
-    const contentCap = Math.min(Number(maxLevel) || 1, options.default.Progression.contentCap);
+    const contentCap = Math.min(Number(maxLevel) || 1, ProgressionCap.contentCap());
     return ProgressionCap.levelForExperience(totalExp, 1, {
         General: { maxLevel },
         Progression: { contentCap }
