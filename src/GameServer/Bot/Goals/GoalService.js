@@ -26,8 +26,14 @@ function reviewDecision(state, existing, options, timestamp) {
         || ['market_search_for_weapon', 'market_search_for_gear'].includes(candidate?.plan?.expectedBenefit));
     const activeMarketGoal = existing?.current?.type === 'sell_inventory' || existing?.current?.type === 'buy_craft_material'
         || ['market_search_for_weapon', 'market_search_for_gear'].includes(existing?.current?.plan?.expectedBenefit);
+    const questCanPreempt = !!questCandidate
+        && existing?.current?.status === 'active'
+        && existing.current.type !== 'complete_quest'
+        && Number(questCandidate.priority || 0) > Number(existing.current.priority || 0);
     if (existing?.current?.nextReviewAt > timestamp && existing.current.status === 'active'
-        && !marketCandidate && !activeMarketGoal) return { result: existing, unchanged: true, goal: null };
+        && !marketCandidate && !activeMarketGoal && !questCanPreempt) {
+        return { result: existing, unchanged: true, goal: null };
+    }
 
     const goal = GoalPlanner.plan(candidates, timestamp);
     if (!goal) return { result: null, unchanged: true, goal: null };
