@@ -1,4 +1,5 @@
 module.exports = {
+    skillCoolTime: require('./SkillCoolTime'),
     validateLocation: require('./ValidateLocation'),
     exStorageMaxCount: require('./ExStorageMaxCount'),
     ride: require('./Ride'),

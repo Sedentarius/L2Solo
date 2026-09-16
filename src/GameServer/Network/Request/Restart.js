@@ -1,10 +1,10 @@
 const ServerResponse = invoke('GameServer/Network/Response');
 const Shared         = invoke('GameServer/Network/Shared');
 
-function restart(session, buffer) {
+async function restart(session, buffer) {
 
     invoke('GameServer/World/ArenaDuelService').release(session, 'restart');
-    session.persistCharacterStatus?.();
+    await session.persistCharacterStatus?.();
     if (session.actor) invoke('GameServer/Effects/EffectTicker').clearAll(session.actor);
     session.actor?.destructor();
 

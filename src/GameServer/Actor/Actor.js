@@ -17,6 +17,7 @@ class Actor extends ActorModel {
         this.attack     = new Attack();
         this.automation = new Automation();
         this.skillReuseUntil = new Map();
+        this.skillReuseDetails = new Map();
 
         this.session    = session;
         this.previousXY = undefined;
@@ -114,7 +115,11 @@ class Actor extends ActorModel {
         if (reuse > 100 && invoke('GameServer/Skills/SkillMastery').succeeds(this, skill)) {
             reuse = 100;
         }
+        reuse = Math.max(0, Math.round(reuse));
         this.skillReuseUntil.set(skill.fetchSelfId(), now + reuse);
+        (this.skillReuseDetails ||= new Map()).set(skill.fetchSelfId(), {
+            duration: reuse, level: skill.fetchLevel?.() || 1
+        });
     }
 
     revive() {

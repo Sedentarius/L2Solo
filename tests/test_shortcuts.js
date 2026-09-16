@@ -41,6 +41,7 @@ async function main() {
     try {
         await request(2, 13, 92);
         assert.equal(packets[0][0], 0x44);
+        assert.equal(packets[1][0], 0xc1, 'registering a skill synchronizes cooldowns');
         assert.deepStrictEqual(fields(packets[0], 1, 5), [2, 13, 92, 40, 1]);
         for (const kind of [1, 3, 4, 5]) {
             await request(kind, kind + 20, 123);

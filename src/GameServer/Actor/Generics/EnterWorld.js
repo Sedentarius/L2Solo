@@ -43,9 +43,10 @@ function enterWorld(session, actor) {
     // Calculate accumulated statistics
     Generics.calculateStats(session, actor);
     CharacterStatus.restoreVitals(actor, vitals);
-    for (const [skillId, until] of Object.entries(session.coldLifeState?.stats?.coldCombat?.cooldowns || {})) {
-        if (until > Date.now()) actor.skillReuseUntil?.set(Number(skillId), until);
-    }
+    const coldCooldowns = session.coldLifeState?.stats?.coldCombat?.cooldowns;
+    invoke('GameServer/Skills/SkillReuse').restore(actor, coldCooldowns
+        ? Object.entries(coldCooldowns).map(([id, until]) => ({ id: Number(id), until }))
+        : actor.model.skillCooldowns);
     session.pvpActionReadyAt = Number(session.coldLifeState?.stats?.coldPvp?.readyAt || 0);
     const flagRemaining = Number(session.coldLifeState?.stats?.coldPvp?.flagUntil || 0) - Date.now();
     if (flagRemaining > 0) invoke('GameServer/Actor/PvpFlag').restore(session, actor, session.coldLifeState.stats.coldPvp.flagUntil);

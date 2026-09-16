@@ -28,6 +28,7 @@ function enterWorld(session, buffer) {
         // Wait for both, otherwise every unresolved skill is sent as level one.
         Promise.all([shortcutsReady, skillsReady]).then(([shortcuts]) => {
             session.dataSendToMe(ServerResponse.shortcutInit(shortcuts, session.actor.skillset));
+            session.dataSendToMe(ServerResponse.skillCoolTime(session.actor));
         }).catch(error => utils.infoWarn('Character', 'shortcut login initialization failed: %s', error.message));
         session.dataSendToMe(GameTime.isNight() ? ServerResponse.sunset() : ServerResponse.sunrise());
         sendClanWindow(session);
