@@ -85,8 +85,13 @@ async function main() {
         adena: 0
     };
 
-    assert.deepEqual(Planner.killNpcIds(lifecycle.stats.questBridge), [456]);
-    assert.equal(Planner.isKillTarget(lifecycle.stats.questBridge, 456), true);
+    // Q165 authors four valid kill targets. Wolf (456) is guaranteed to drop,
+    // while the other three retain their authored probabilistic callbacks.
+    const authoredTargets = [456, 529, 532, 536];
+    assert.deepEqual(Planner.killNpcIds(lifecycle.stats.questBridge), authoredTargets);
+    authoredTargets.forEach((npcId) => {
+        assert.equal(Planner.isKillTarget(lifecycle.stats.questBridge, npcId), true);
+    });
     assert.equal(Planner.isKillTarget(lifecycle.stats.questBridge, 457), false);
 
     const hotSession = {
@@ -212,7 +217,10 @@ async function main() {
 main().catch((error) => {
     console.error(error);
     process.exitCode = 1;
-}).finally(() => {
-    Database.close();
-    fs.rmSync(directory, { recursive: true, force: true });
+}).finally(async () => {
+    try {
+        await Database.close();
+    } finally {
+        fs.rmSync(directory, { recursive: true, force: true, maxRetries: 8, retryDelay: 100 });
+    }
 });
