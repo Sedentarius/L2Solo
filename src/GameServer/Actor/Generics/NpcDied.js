@@ -190,8 +190,10 @@ function npcDied(session, actor, npc) {
         })).catch(() => {});
     }
     const PetRuntime = invoke('GameServer/Pets/PetRuntime');
-    const remainingShare = PetRuntime.rewardDamage(npc, npc.fetchAcquiredExp(), npc.fetchRewardSp());
-    const rewards = partyRewardShares(participants, npc.fetchAcquiredExp() * remainingShare, npc.fetchRewardSp() * remainingShare);
+    const overhit = invoke('GameServer/Progression/OverhitReward').consume(npc, actor, npc.fetchAcquiredExp());
+    if (overhit.eligible) session.dataSendToMe?.(invoke('GameServer/Network/Response').systemMessage(361));
+    const remainingShare = PetRuntime.rewardDamage(npc, overhit.adjustedExp, npc.fetchRewardSp());
+    const rewards = partyRewardShares(participants, overhit.adjustedExp * remainingShare, npc.fetchRewardSp() * remainingShare);
 
     // C4's ordinary quest callback is attributed to the actual killer, not to
     // every party member that receives shared EXP.

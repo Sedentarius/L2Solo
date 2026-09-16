@@ -41,7 +41,7 @@ function estimateFightCount({ party, members, spot, elapsedMs }) {
     return Math.max(1, Math.min(4, Math.round(baseWindows * densityFactor * cohesionFactor)));
 }
 
-function distributeRewards({ members, spot, wins, defeatedNpcIds = [], pressure, rng, timestamp }) {
+function distributeRewards({ members, spot, wins, defeatedNpcIds = [], overhitContexts = [], pressure, rng, timestamp }) {
     const expMultiplier = Number(pressure?.expMultiplier || 1);
     const rates = ProgressionRates.profile();
     const memberProgression = members.map((state) => ({
@@ -53,9 +53,11 @@ function distributeRewards({ members, spot, wins, defeatedNpcIds = [], pressure,
         const progression = BackgroundDropResolver.progressionForFight({
             spot, npcSelfId: defeatedNpcIds[winIndex], rng
         });
+        const adjustedExp = invoke('GameServer/Progression/OverhitReward')
+            .resolveContext(overhitContexts[winIndex], progression.exp).adjustedExp;
         PartyRewardMath.sharesForLevels(
             members.map((state) => Number(state.level || 1)),
-            progression.exp,
+            adjustedExp,
             progression.sp
         ).forEach((share) => {
             memberProgression[share.index].exp += Math.round(share.exp * expMultiplier * rates.exp
@@ -233,6 +235,7 @@ const BackgroundPartyResolver = {
 
         const fights = estimateFightCount({ party, members, spot, elapsedMs });
         let wins = 0;
+        const overhitContexts = [];
         let losses = 0;
         let combatActions = 0;
         let skillUses = 0;
@@ -279,12 +282,13 @@ const BackgroundPartyResolver = {
             if (encounter.won) {
                 wins += 1;
                 if (Number(encounter.debug?.mobSelfId) > 0) defeatedNpcIds.push(Number(encounter.debug.mobSelfId));
+                overhitContexts.push(encounter.debug?.overhitContext || null);
             }
             else losses += 1;
             if (!encounter.won || combatMembers.some((member) => Number(member.vitals?.hp || 0) <= 0)) break;
         }
 
-        const rewards = distributeRewards({ members, spot, wins, defeatedNpcIds, pressure, rng, timestamp });
+        const rewards = distributeRewards({ members, spot, wins, defeatedNpcIds, overhitContexts, pressure, rng, timestamp });
         const memberResults = [];
         const events = [];
         let deaths = 0;
