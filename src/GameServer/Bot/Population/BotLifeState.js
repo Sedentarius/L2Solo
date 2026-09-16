@@ -2213,9 +2213,25 @@ const BotLifeState = {
 
         const timestamp = Number(options.timestamp || now());
         const experienceAward = ProgressionCap.applyAward(state.exp, result.materialize?.exp);
-        const exp = experienceAward.totalExp;
+        const progressionLevel = ProgressionCap.levelForExperience(experienceAward.totalExp, Number(state.level || 1));
+        let progressionState = { ...state, exp: experienceAward.totalExp, level: progressionLevel };
+        const nextDeathsForPenalty = Number(result.patch?.deathCount ?? state.stats?.deaths ?? 0);
+        const newDeath = (result.patch?.activity === 'dead' || result.debug?.died === true)
+            && nextDeathsForPenalty > Number(state.stats?.deaths || 0);
+        if (newDeath) {
+            progressionState = invoke('GameServer/Progression/DeathExperience').applyColdDeath(progressionState, {
+                timestamp,
+                cold: true
+            }).state;
+        } else if (result.patch?.restoreExpPercent !== undefined) {
+            progressionState = invoke('GameServer/Progression/DeathExperience').restoreCold(progressionState, {
+                restoreExpPercent: result.patch.restoreExpPercent,
+                timestamp
+            }).state;
+        }
+        const exp = progressionState.exp;
         const sp = Number(state.sp || 0) + Number(result.materialize?.sp || 0);
-        const level = ProgressionCap.levelForExperience(exp, Number(state.level || 1));
+        const level = progressionState.level;
         const materializedItems = result.materialize?.items || [];
         const materializedAdenaItems = materializedItems
             .filter((item) => Number(item.selfId) === 57)
@@ -2243,8 +2259,11 @@ const BotLifeState = {
         // this order silently restores the previous counters after every
         // solo/party fight (including deaths).
         const patchedStats = {
-            ...(state.stats || {}),
-            ...(result.patch?.stats || {})
+            ...(progressionState.stats || {}),
+            ...(result.patch?.stats || {}),
+            ...(progressionState.stats?.deathExperience
+                ? { deathExperience: progressionState.stats.deathExperience }
+                : {})
         };
         const stats = {
             ...patchedStats,

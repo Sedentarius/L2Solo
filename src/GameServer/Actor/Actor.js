@@ -117,9 +117,9 @@ class Actor extends ActorModel {
         this.skillReuseUntil.set(skill.fetchSelfId(), now + reuse);
     }
 
-    revive() {
+    revive(options) {
         invoke(path.actor).revive(
-            this.session, this
+            this.session, this, options
         );
     }
 

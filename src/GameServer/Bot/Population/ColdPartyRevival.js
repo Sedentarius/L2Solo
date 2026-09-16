@@ -48,7 +48,7 @@ function resolve({ party, members, timestamp: at, episodeId, assessRelationship 
             stats: { ...caster.stats, restUntil: until, coldCombat: { ...caster.stats?.coldCombat,
                 cooldowns: { ...caster.stats?.coldCombat?.cooldowns, [skill.selfId]: at + Number(skill.reuse || 0) } } }
         });
-        patches.set(dead.characterId, { activity: 'resting', vitals: { ...dead.vitals, hp: 1 },
+        patches.set(dead.characterId, { activity: 'resting', restoreExpPercent: Number(skill.power || 0), vitals: { ...dead.vitals, hp: 1 },
             stats: { ...dead.stats, restUntil: until, lastResurrectAt: at,
                 coldPvp: { ...dead.stats?.coldPvp, recoverUntil: 0, flagUntil: 0 },
                 coldCombat: { ...dead.stats?.coldCombat, effects: [], cp: 0, cpAt: at, charges: 0, chargeExpiresAt: null, summon: null } } });

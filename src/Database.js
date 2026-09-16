@@ -1105,7 +1105,21 @@ function applySchemaMigrations() {
             );
             CREATE INDEX IF NOT EXISTS clan_social_memory_updated ON clan_social_memory(updatedAt, clanId);
         `)],
-        [39, () => require('./DatabasePartyCandidateProjection').install(connection)]
+        [39, () => require('./DatabasePartyCandidateProjection').install(connection)],
+        [40, () => connection.exec(`
+            CREATE TABLE IF NOT EXISTS character_death_experience (
+                characterId INTEGER PRIMARY KEY REFERENCES characters(id) ON DELETE CASCADE,
+                deathSequence INTEGER NOT NULL DEFAULT 1,
+                expBeforeDeath INTEGER NOT NULL,
+                expLost INTEGER NOT NULL,
+                expAfterDeath INTEGER NOT NULL,
+                deathContext TEXT NOT NULL DEFAULT '{}',
+                penaltyAppliedAt INTEGER NOT NULL,
+                pendingRestoration INTEGER NOT NULL DEFAULT 1 CHECK(pendingRestoration IN (0, 1)),
+                resolvedAt INTEGER,
+                resolutionReason TEXT NOT NULL DEFAULT ''
+            );
+        `)]
     ];
     const applied = new Set(connection.prepare('SELECT version FROM schema_migrations').all().map((row) => Number(row.version)));
     migrations.forEach(([version, apply]) => {
@@ -6616,6 +6630,66 @@ const Database = {
             [exp, KARMA_XP_DIVIDER, level, exp, sp, id], 'character:cold-experience'));
     },
     updateCharacterExperience(id, level, exp, sp) { return withCharacterFlush(id, () => update('characters', { level, exp, sp }, 'id = ?', [id], 'character:experience')); },
+    fetchCharacterDeathExperience(id) {
+        return selectOne('character_death_experience', ['*'], 'characterId = ?', [Number(id)], 'character:death-exp-fetch')
+            .then((rows) => rows[0] || null);
+    },
+    applyCharacterDeathExperience(record) {
+        const id = Number(record.characterId);
+        return withCharacterFlush(id, () => inTransaction(() => {
+            const existing = one('SELECT * FROM character_death_experience WHERE characterId = ?', [id]);
+            const character = one('SELECT level, exp, sp FROM characters WHERE id = ?', [id]);
+            if (!character) throw new Error(`death experience character missing: ${id}`);
+            if (existing && Number(existing.pendingRestoration) === 1
+                && Number(existing.expAfterDeath) === Number(character.exp)) {
+                return { ...existing, duplicate: true };
+            }
+            const sequence = Number(existing?.deathSequence || 0) + 1;
+            write('UPDATE characters SET level = ?, exp = ? WHERE id = ?', [record.level, record.expAfterDeath, id]);
+            write(`INSERT INTO character_death_experience
+                (characterId, deathSequence, expBeforeDeath, expLost, expAfterDeath, deathContext,
+                 penaltyAppliedAt, pendingRestoration, resolvedAt, resolutionReason)
+                VALUES (?, ?, ?, ?, ?, ?, ?, 1, NULL, '')
+                ON CONFLICT(characterId) DO UPDATE SET
+                    deathSequence = excluded.deathSequence,
+                    expBeforeDeath = excluded.expBeforeDeath,
+                    expLost = excluded.expLost,
+                    expAfterDeath = excluded.expAfterDeath,
+                    deathContext = excluded.deathContext,
+                    penaltyAppliedAt = excluded.penaltyAppliedAt,
+                    pendingRestoration = 1,
+                    resolvedAt = NULL,
+                    resolutionReason = ''`, [id, sequence, record.expBeforeDeath, record.expLost,
+                record.expAfterDeath, JSON.stringify(record.deathContext || {}), record.penaltyAppliedAt]);
+            return { ...record, deathSequence: sequence, pendingRestoration: 1, duplicate: false };
+        }, 'character:death-exp-apply'));
+    },
+    restoreCharacterDeathExperience(id, restorePercent, resolvedAt = Date.now()) {
+        const characterId = Number(id);
+        const percent = Math.max(0, Math.min(100, Number(restorePercent) || 0));
+        return withCharacterFlush(characterId, () => inTransaction(() => {
+            const death = one('SELECT * FROM character_death_experience WHERE characterId = ?', [characterId]);
+            if (!death || Number(death.pendingRestoration) !== 1) return null;
+            const character = one('SELECT level, exp, sp FROM characters WHERE id = ?', [characterId]);
+            if (!character) return null;
+            const restoredExp = Math.min(Number(death.expLost), Math.round(Number(death.expLost) * percent / 100));
+            const totalExp = Math.min(Number(death.expBeforeDeath), Number(character.exp) + restoredExp);
+            const level = invoke('GameServer/Progression/ProgressionCap').levelForExperience(totalExp, character.level);
+            const consumed = write(`UPDATE character_death_experience
+                SET pendingRestoration = 0, resolvedAt = ?, resolutionReason = 'resurrection'
+                WHERE characterId = ? AND pendingRestoration = 1`, [resolvedAt, characterId]);
+            if (Number(consumed.affectedRows) !== 1) return null;
+            write('UPDATE characters SET level = ?, exp = ? WHERE id = ?', [level, totalExp, characterId]);
+            return { ...death, pendingRestoration: 0, restoredExp, totalExp, level, restorePercent: percent };
+        }, 'character:death-exp-restore'));
+    },
+    clearCharacterDeathExperience(id, reason = 'invalidated', resolvedAt = Date.now()) {
+        const characterId = Number(id);
+        return withCharacterFlush(characterId, () => run(`UPDATE character_death_experience
+            SET pendingRestoration = 0, resolvedAt = ?, resolutionReason = ?
+            WHERE characterId = ? AND pendingRestoration = 1`,
+        [resolvedAt, String(reason || 'invalidated'), characterId], 'character:death-exp-clear'));
+    },
     updateCharacterVitals(id, hp, maxHp, mp, maxMp) { return withCharacterFlush(id, () => update('characters', { hp, maxHp, mp, maxMp }, 'id = ?', [id], 'character:vitals')); },
     updateCharacterStatus(id, { hp, mp, cp, effects }) { return withCharacterFlush(id, () => update('characters', { hp, mp, cp, effects }, 'id = ?', [id], 'character:status')); },
     updateCharacterPvpPkKarma(id, pvp, pk, karma) { return withCharacterFlush(id, () => update('characters', { pvp, pk, karma }, 'id = ?', [id], 'character:karma')); },

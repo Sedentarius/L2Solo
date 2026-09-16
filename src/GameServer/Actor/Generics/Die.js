@@ -17,9 +17,27 @@ function clearEffectsOnDeath(session, actor) {
     EffectTicker.refreshEffects(session, actor);
 }
 
-function die(session, actor) {
+function die(session, actor, context = {}) {
     if (actor.isDead()) {
         return;
+    }
+
+    const victimSession = actor.session || session;
+    const ArenaCombatRules = invoke('GameServer/World/ArenaCombatRules');
+    if (typeof actor.fetchExp === 'function' && typeof actor.setExpSp === 'function' && !actor.fetchKind) {
+        const source = context.source || context.killer || session?.actor;
+        invoke('GameServer/Progression/DeathExperience').applyDeathPenalty(victimSession, actor, {
+            timestamp: context.timestamp,
+            arena: ArenaCombatRules.isArenaParticipant(actor),
+            killerPlayable: !!source && !source.fetchKind,
+            clanWar: context.clanWar === true,
+            festival: context.festival === true,
+            event: context.event === true,
+            pvpZone: context.pvpZone === true,
+            siegeZone: context.siegeZone === true,
+            siegeParticipant: context.siegeParticipant === true,
+            killerSiegeNpc: context.killerSiegeNpc === true
+        });
     }
 
     if ((actor.fetchMounted?.() || actor.mounted) && actor.pet?.petData) invoke('GameServer/Pets/PetRuntime').die(actor.pet);
@@ -33,13 +51,13 @@ function die(session, actor) {
     actor.state.destructor();
     actor.state.setDead(true);
     session.dataSendToMeAndOthers(ServerResponse.die(actor.fetchId()), actor);
-    invoke('GameServer/Clan/ClanAllianceService').onDeath(actor.session || session);
+    invoke('GameServer/Clan/ClanAllianceService').onDeath(victimSession);
     const ArenaDuelService = invoke('GameServer/World/ArenaDuelService');
     // ReceivedHit is invoked with the attacker's session, while the actor
     // being killed owns the authoritative victim session. Arena death must
     // therefore be routed through actor.session or the player death branch
     // is missed whenever the ephemeral clone lands the final hit.
-    if (ArenaDuelService.onPlayerDeath?.(actor?.session || session)) return;
+    if (ArenaDuelService.onPlayerDeath?.(victimSession)) return;
     if (session?.accountId?.startsWith?.('bot_') && session.arenaEphemeral !== true) {
         Promise.resolve(invoke('GameServer/Bot/AI/BotEventJournal').record({
             botId: actor.fetchId(),
