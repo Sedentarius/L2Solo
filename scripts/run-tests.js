@@ -451,6 +451,7 @@ const tests = [
     'tests/test_progression_rates.js',
     'tests/test_knowledge_base_generator.js',
     'tests/test_quest_packets.js',
+    'tests/test_quest_registry_integrity.js',
     'tests/test_quest_availability.js',
     'tests/test_quest_spawn_radar.js',
     'tests/test_quest_runtime.js',
