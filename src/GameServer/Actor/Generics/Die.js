@@ -17,6 +17,19 @@ function clearEffectsOnDeath(session, actor) {
     EffectTicker.refreshEffects(session, actor);
 }
 
+function resolveDeathCause(context = {}, fallbackActor = null) {
+    const source = context.source || context.killer || fallbackActor;
+    const resolvedKiller = context.killer || null;
+    const killerPlayable = !!source && !source.fetchKind;
+    return {
+        source,
+        killerPlayable,
+        // A pet/servitor can remain a non-playable damage source for EXP while
+        // still being recognized as player-caused for death-item-drop rules.
+        playerControlledKiller: killerPlayable || (!!resolvedKiller && !resolvedKiller.fetchKind)
+    };
+}
+
 function die(session, actor, context = {}) {
     if (actor.isDead()) {
         return;
@@ -25,10 +38,7 @@ function die(session, actor, context = {}) {
     const victimSession = actor.session || session;
     const ArenaDuelService = invoke('GameServer/World/ArenaDuelService');
     if (typeof actor.fetchExp === 'function' && typeof actor.setExpSp === 'function' && !actor.fetchKind) {
-        const source = context.source || context.killer || session?.actor;
-        const resolvedKiller = context.killer || null;
-        const sourcePlayable = !!source && !source.fetchKind;
-        const playerControlledKiller = sourcePlayable || (!!resolvedKiller && !resolvedKiller.fetchKind);
+        const cause = resolveDeathCause(context, session?.actor);
         const deathContext = {
             timestamp: Number(context.timestamp || Date.now()),
             arena: victimSession?.arenaEphemeral === true || !!victimSession?.arenaDuelId
@@ -36,11 +46,11 @@ function die(session, actor, context = {}) {
             // Keep the existing DeathExperience classification unchanged: a
             // pet/servitor source remains non-playable here until its EXP rule
             // is independently established for C4.
-            killerPlayable: sourcePlayable,
+            killerPlayable: cause.killerPlayable,
             // Item-drop rules must still recognize a player-owned pet/servitor
             // as a PvP cause. ReceivedHit supplies the resolved owning character
             // through context.killer when one exists.
-            playerControlledKiller,
+            playerControlledKiller: cause.playerControlledKiller,
             clanWar: context.clanWar === true,
             festival: context.festival === true,
             event: context.event === true,
@@ -92,3 +102,4 @@ function die(session, actor, context = {}) {
 }
 
 module.exports = die;
+module.exports.resolveDeathCause = resolveDeathCause;
