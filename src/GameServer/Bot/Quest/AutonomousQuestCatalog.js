@@ -3,6 +3,7 @@ const SpotProfiles = invoke('GameServer/Bot/Population/SpotProfiles');
 
 const DARK_ELF_CLASS_IDS = new Set(Array.from({ length: 13 }, (_, index) => 31 + index));
 const QUEST_BUCKETS = 8;
+const SPOT_GRID_SIZE = 6000;
 
 const QUESTS = Object.freeze({
     165: Object.freeze({
@@ -137,13 +138,51 @@ function preferredRank(spec, spot) {
     return index >= 0 ? index : preferred.length + 1;
 }
 
+function authoredHuntingSpot(spec) {
+    if (!spec) return null;
+    const targets = questKillTargets(spec);
+    const ordered = [...new Set([
+        ...(spec.preferredKillNpcIds || []).map(Number),
+        ...targets
+    ].filter((id) => Number.isSafeInteger(id) && id > 0))];
+    for (const npcSelfId of ordered) {
+        const center = npcLocation(npcSelfId);
+        if (!center) continue;
+        const template = (DataCache.npcs || []).find((npc) => Number(npc.selfId) === npcSelfId) || {};
+        const level = Math.max(1, Number(template.template?.level || template.level || 1));
+        const name = template.template?.name || template.name || `NPC ${npcSelfId}`;
+        const gridX = Math.floor(center.locX / SPOT_GRID_SIZE);
+        const gridY = Math.floor(center.locY / SPOT_GRID_SIZE);
+        return {
+            id: `${gridX}_${gridY}`,
+            name: `${name} quest hunting ground`,
+            center: { ...center },
+            minLevel: level,
+            maxLevel: level,
+            avgLevel: level,
+            density: 1,
+            npcNames: [name],
+            npcSelfIds: [npcSelfId],
+            npcEntries: [{ selfId: npcSelfId, name, level, count: 1 }],
+            arrivalPoints: [{ ...center }],
+            levelCounts: { [String(level)]: 1 },
+            dominantLevels: [{ level, count: 1 }],
+            tags: [],
+            tagsAuthoritative: false,
+            route: null,
+            authoredQuestFallback: true
+        };
+    }
+    return null;
+}
+
 function killSpot(spec, state = {}) {
     if (!spec) return null;
     const targets = new Set(questKillTargets(spec));
     if (!targets.size) return null;
     const profiles = SpotProfiles.ensure() || [];
     const matching = profiles.filter((spot) => (spot.npcEntries || []).some((entry) => targets.has(Number(entry.selfId))));
-    if (!matching.length) return null;
+    if (!matching.length) return authoredHuntingSpot(spec);
     matching.sort((left, right) => {
         const preferred = preferredRank(spec, left) - preferredRank(spec, right);
         if (preferred) return preferred;
@@ -166,7 +205,9 @@ function killTargetForSpot(spec, spot) {
 module.exports = {
     QUESTS,
     QUEST_BUCKETS,
+    SPOT_GRID_SIZE,
     admissionBucket,
+    authoredHuntingSpot,
     bucketFor,
     candidateFor,
     classRace,
