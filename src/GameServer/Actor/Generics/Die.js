@@ -26,11 +26,21 @@ function die(session, actor, context = {}) {
     const ArenaDuelService = invoke('GameServer/World/ArenaDuelService');
     if (typeof actor.fetchExp === 'function' && typeof actor.setExpSp === 'function' && !actor.fetchKind) {
         const source = context.source || context.killer || session?.actor;
+        const resolvedKiller = context.killer || null;
+        const sourcePlayable = !!source && !source.fetchKind;
+        const playerControlledKiller = sourcePlayable || (!!resolvedKiller && !resolvedKiller.fetchKind);
         const deathContext = {
             timestamp: Number(context.timestamp || Date.now()),
             arena: victimSession?.arenaEphemeral === true || !!victimSession?.arenaDuelId
                 || !!ArenaDuelService.duelForActor?.(actor),
-            killerPlayable: !!source && !source.fetchKind,
+            // Keep the existing DeathExperience classification unchanged: a
+            // pet/servitor source remains non-playable here until its EXP rule
+            // is independently established for C4.
+            killerPlayable: sourcePlayable,
+            // Item-drop rules must still recognize a player-owned pet/servitor
+            // as a PvP cause. ReceivedHit supplies the resolved owning character
+            // through context.killer when one exists.
+            playerControlledKiller,
             clanWar: context.clanWar === true,
             festival: context.festival === true,
             event: context.event === true,
