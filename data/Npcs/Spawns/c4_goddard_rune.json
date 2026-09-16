@@ -1,0 +1,2744 @@
+[
+  {
+    "selfId": "c4_goddard",
+    "bounds": [],
+    "spawns": [
+      {
+        "selfId": 8837,
+        "name": "Adventure Guild Member",
+        "coords": [
+          {
+            "locX": 144604,
+            "locY": -57124,
+            "locZ": -2976,
+            "head": 0
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8838,
+        "name": "Adventure Guild Member",
+        "coords": [
+          {
+            "locX": 146856,
+            "locY": -56424,
+            "locZ": -2776,
+            "head": 26000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8839,
+        "name": "Adventure Guild Member",
+        "coords": [
+          {
+            "locX": 148548,
+            "locY": -56376,
+            "locZ": -2776,
+            "head": 5000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8840,
+        "name": "Adventure Guild Member",
+        "coords": [
+          {
+            "locX": 147556,
+            "locY": -57828,
+            "locZ": -2976,
+            "head": 49000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8841,
+        "name": "Adventure Guild Member",
+        "coords": [
+          {
+            "locX": 150748,
+            "locY": -57372,
+            "locZ": -2976,
+            "head": 28000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8402,
+        "name": "Manor Manager",
+        "coords": [
+          {
+            "locX": 145704,
+            "locY": -57104,
+            "locZ": -2976,
+            "head": 39000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 12898,
+        "name": "Aida",
+        "coords": [
+          {
+            "locX": 146416,
+            "locY": -55568,
+            "locZ": -2768,
+            "head": 32000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8355,
+        "name": "Kalmer",
+        "coords": [
+          {
+            "locX": 146488,
+            "locY": -55432,
+            "locZ": -2776,
+            "head": 1000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 12897,
+        "name": "Helga",
+        "coords": [
+          {
+            "locX": 147134,
+            "locY": -56576,
+            "locZ": -2768,
+            "head": 41192
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8354,
+        "name": "Volfrem",
+        "coords": [
+          {
+            "locX": 147072,
+            "locY": -56416,
+            "locZ": -2776,
+            "head": 11500
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8608,
+        "name": "Belinda",
+        "coords": [
+          {
+            "locX": 146560,
+            "locY": -53632,
+            "locZ": -2728,
+            "head": 16000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8585,
+        "name": "Sparky the Cat",
+        "coords": [
+          {
+            "locX": 146688,
+            "locY": -52592,
+            "locZ": -2728,
+            "head": 16000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8283,
+        "name": "Alminas",
+        "coords": [
+          {
+            "locX": 146416,
+            "locY": -52564,
+            "locZ": -2728,
+            "head": 49500
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8282,
+        "name": "Justin",
+        "coords": [
+          {
+            "locX": 146688,
+            "locY": -52576,
+            "locZ": -2728,
+            "head": 49500
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8755,
+        "name": "Halaster",
+        "coords": [
+          {
+            "locX": 146553,
+            "locY": -52608,
+            "locZ": -2728,
+            "head": 49500
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8281,
+        "name": "Cerenas",
+        "coords": [
+          {
+            "locX": 147376,
+            "locY": -52416,
+            "locZ": -2728,
+            "head": 49000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8692,
+        "name": "Priest of Dawn",
+        "coords": [
+          {
+            "locX": 148256,
+            "locY": -55504,
+            "locZ": -2776,
+            "head": 60000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8702,
+        "name": "Saint's Follower",
+        "coords": [
+          {
+            "locX": 149492,
+            "locY": -57200,
+            "locZ": -2976,
+            "head": 18000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8588,
+        "name": "Agnes",
+        "coords": [
+          {
+            "locX": 149488,
+            "locY": -57152,
+            "locZ": -2976,
+            "head": 57000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 12896,
+        "name": "Millicent",
+        "coords": [
+          {
+            "locX": 148381,
+            "locY": -56525,
+            "locZ": -2768,
+            "head": 49153
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8353,
+        "name": "Gerard",
+        "coords": [
+          {
+            "locX": 148224,
+            "locY": -56496,
+            "locZ": -2768,
+            "head": 21000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 12895,
+        "name": "Branhillde",
+        "coords": [
+          {
+            "locX": 149024,
+            "locY": -55456,
+            "locZ": -2768,
+            "head": 65021
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8352,
+        "name": "Lambert",
+        "coords": [
+          {
+            "locX": 148912,
+            "locY": -55568,
+            "locZ": -2768,
+            "head": 32000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8293,
+        "name": "Gunter",
+        "coords": [
+          {
+            "locX": 149360,
+            "locY": -56336,
+            "locZ": -2776,
+            "head": 27000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8691,
+        "name": "Training Dummy",
+        "coords": [
+          {
+            "locX": 148784,
+            "locY": -53456,
+            "locZ": -2728,
+            "head": 0
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8691,
+        "name": "Training Dummy",
+        "coords": [
+          {
+            "locX": 148976,
+            "locY": -53456,
+            "locZ": -2728,
+            "head": 0
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8691,
+        "name": "Training Dummy",
+        "coords": [
+          {
+            "locX": 148976,
+            "locY": -53264,
+            "locZ": -2728,
+            "head": 0
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8691,
+        "name": "Training Dummy",
+        "coords": [
+          {
+            "locX": 148784,
+            "locY": -53264,
+            "locZ": -2728,
+            "head": 0
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8284,
+        "name": "Elena",
+        "coords": [
+          {
+            "locX": 147840,
+            "locY": -53872,
+            "locZ": -2728,
+            "head": 17000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8691,
+        "name": "Training Dummy",
+        "coords": [
+          {
+            "locX": 148976,
+            "locY": -53008,
+            "locZ": -2728,
+            "head": 0
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8691,
+        "name": "Training Dummy",
+        "coords": [
+          {
+            "locX": 148784,
+            "locY": -53008,
+            "locZ": -2728,
+            "head": 0
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8276,
+        "name": "Bernhard",
+        "coords": [
+          {
+            "locX": 148880,
+            "locY": -52608,
+            "locZ": -2728,
+            "head": 49500
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8277,
+        "name": "Felix",
+        "coords": [
+          {
+            "locX": 149008,
+            "locY": -52560,
+            "locZ": -2728,
+            "head": 49500
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8278,
+        "name": "Bronwyn",
+        "coords": [
+          {
+            "locX": 148736,
+            "locY": -52560,
+            "locZ": -2728,
+            "head": 49500
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8280,
+        "name": "Bastian",
+        "coords": [
+          {
+            "locX": 148048,
+            "locY": -52416,
+            "locZ": -2728,
+            "head": 49000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8279,
+        "name": "Gregory",
+        "coords": [
+          {
+            "locX": 147712,
+            "locY": -52688,
+            "locZ": -2728,
+            "head": 49000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8674,
+        "name": "Patrol",
+        "coords": [
+          {
+            "locX": 149864,
+            "locY": -57020,
+            "locZ": -2976,
+            "head": 59000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8674,
+        "name": "Patrol",
+        "coords": [
+          {
+            "locX": 150012,
+            "locY": -56808,
+            "locZ": -2976,
+            "head": 59000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8693,
+        "name": "Priest of Dusk",
+        "coords": [
+          {
+            "locX": 149888,
+            "locY": -56624,
+            "locZ": -2976,
+            "head": 59000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8701,
+        "name": "Saint's Follower",
+        "coords": [
+          {
+            "locX": 149528,
+            "locY": -57180,
+            "locZ": -2976,
+            "head": 27000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8700,
+        "name": "Saint's Follower",
+        "coords": [
+          {
+            "locX": 149536,
+            "locY": -57136,
+            "locZ": -2976,
+            "head": 35000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8295,
+        "name": "Henrik",
+        "coords": [
+          {
+            "locX": 144364,
+            "locY": -57580,
+            "locZ": -2976,
+            "head": 44000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8294,
+        "name": "Sven",
+        "coords": [
+          {
+            "locX": 144584,
+            "locY": -57904,
+            "locZ": -2976,
+            "head": 32000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8589,
+        "name": "Duda-Mara Totem Spirit",
+        "coords": [
+          {
+            "locX": 144340,
+            "locY": -55752,
+            "locZ": -2968,
+            "head": 35000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8291,
+        "name": "Terava",
+        "coords": [
+          {
+            "locX": 144252,
+            "locY": -55584,
+            "locZ": -2968,
+            "head": 51000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8290,
+        "name": "Skahi",
+        "coords": [
+          {
+            "locX": 144256,
+            "locY": -55824,
+            "locZ": -2968,
+            "head": 8000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8289,
+        "name": "Lakan",
+        "coords": [
+          {
+            "locX": 144228,
+            "locY": -55720,
+            "locZ": -2968,
+            "head": 60000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8288,
+        "name": "Aklan",
+        "coords": [
+          {
+            "locX": 144204,
+            "locY": -55780,
+            "locZ": -2968,
+            "head": 2000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8286,
+        "name": "Drakon",
+        "coords": [
+          {
+            "locX": 144808,
+            "locY": -54732,
+            "locZ": -2968,
+            "head": 62000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8285,
+        "name": "Samael",
+        "coords": [
+          {
+            "locX": 145080,
+            "locY": -54592,
+            "locZ": -2968,
+            "head": 45000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8287,
+        "name": "Kamilen",
+        "coords": [
+          {
+            "locX": 145168,
+            "locY": -54880,
+            "locZ": -2968,
+            "head": 28000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8597,
+        "name": "Tobald",
+        "coords": [
+          {
+            "locX": 146624,
+            "locY": -58976,
+            "locZ": -2976,
+            "head": 12000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8274,
+        "name": "Fundin",
+        "coords": [
+          {
+            "locX": 146688,
+            "locY": -59008,
+            "locZ": -2976,
+            "head": 12000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8272,
+        "name": "Noel",
+        "coords": [
+          {
+            "locX": 146432,
+            "locY": -58784,
+            "locZ": -2968,
+            "head": 0
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8587,
+        "name": "Gedrik",
+        "coords": [
+          {
+            "locX": 146628,
+            "locY": -58776,
+            "locZ": -2976,
+            "head": 45000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8273,
+        "name": "Borodin",
+        "coords": [
+          {
+            "locX": 146580,
+            "locY": -58752,
+            "locZ": -2976,
+            "head": 45000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8583,
+        "name": "Feynn",
+        "coords": [
+          {
+            "locX": 146428,
+            "locY": -58880,
+            "locZ": -2968,
+            "head": 28000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8271,
+        "name": "Hilda",
+        "coords": [
+          {
+            "locX": 146396,
+            "locY": -58696,
+            "locZ": -2968,
+            "head": 60000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8600,
+        "name": "Pamela Aprodia",
+        "coords": [
+          {
+            "locX": 146228,
+            "locY": -57400,
+            "locZ": -2968,
+            "head": 44000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8270,
+        "name": "Stefano",
+        "coords": [
+          {
+            "locX": 146172,
+            "locY": -57380,
+            "locZ": -2968,
+            "head": 54000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8269,
+        "name": "Mona",
+        "coords": [
+          {
+            "locX": 146528,
+            "locY": -57936,
+            "locZ": -2968,
+            "head": 22000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8268,
+        "name": "Hakon",
+        "coords": [
+          {
+            "locX": 146412,
+            "locY": -57484,
+            "locZ": -2968,
+            "head": 43000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8267,
+        "name": "Lietta",
+        "coords": [
+          {
+            "locX": 146440,
+            "locY": -57500,
+            "locZ": -2968,
+            "head": 43000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8758,
+        "name": "Rafi",
+        "coords": [
+          {
+            "locX": 148952,
+            "locY": -58402,
+            "locZ": -2976,
+            "head": 7937
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8265,
+        "name": "Annette",
+        "coords": [
+          {
+            "locX": 148928,
+            "locY": -58400,
+            "locZ": -2976,
+            "head": 20000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8264,
+        "name": "Olsun",
+        "coords": [
+          {
+            "locX": 149008,
+            "locY": -57696,
+            "locZ": -2968,
+            "head": 5000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8584,
+        "name": "Valentine",
+        "coords": [
+          {
+            "locX": 149352,
+            "locY": -57452,
+            "locZ": -2968,
+            "head": 6000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8263,
+        "name": "Liesel",
+        "coords": [
+          {
+            "locX": 149312,
+            "locY": -57360,
+            "locZ": -2968,
+            "head": 40000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8579,
+        "name": "Klaus",
+        "coords": [
+          {
+            "locX": 149278,
+            "locY": -57653,
+            "locZ": -2968,
+            "head": 22000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8261,
+        "name": "Renee",
+        "coords": [
+          {
+            "locX": 149232,
+            "locY": -57680,
+            "locZ": -2968,
+            "head": 22000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8262,
+        "name": "Rupert",
+        "coords": [
+          {
+            "locX": 149372,
+            "locY": -57552,
+            "locZ": -2968,
+            "head": 32000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8260,
+        "name": "Judith",
+        "coords": [
+          {
+            "locX": 149380,
+            "locY": -57590,
+            "locZ": -2968,
+            "head": 32000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8259,
+        "name": "Janne",
+        "coords": [
+          {
+            "locX": 149152,
+            "locY": -58776,
+            "locZ": -2968,
+            "head": 31000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8258,
+        "name": "Helmut",
+        "coords": [
+          {
+            "locX": 149012,
+            "locY": -58894,
+            "locZ": -2968,
+            "head": 22000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8257,
+        "name": "Veronica",
+        "coords": [
+          {
+            "locX": 148975,
+            "locY": -58919,
+            "locZ": -2968,
+            "head": 22000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8741,
+        "name": "Ossian",
+        "coords": [
+          {
+            "locX": 150208,
+            "locY": -57872,
+            "locZ": -2976,
+            "head": 26000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8740,
+        "name": "Caradine",
+        "coords": [
+          {
+            "locX": 150144,
+            "locY": -57920,
+            "locZ": -2976,
+            "head": 24000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8673,
+        "name": "Patrol",
+        "coords": [
+          {
+            "locX": 147492,
+            "locY": -61188,
+            "locZ": -3496,
+            "head": 49000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8297,
+        "name": "Bayard",
+        "coords": [
+          {
+            "locX": 147504,
+            "locY": -59424,
+            "locZ": -2976,
+            "head": 27653
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8674,
+        "name": "Patrol",
+        "coords": [
+          {
+            "locX": 145616,
+            "locY": -56976,
+            "locZ": -2976,
+            "head": 39000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8674,
+        "name": "Patrol",
+        "coords": [
+          {
+            "locX": 145464,
+            "locY": -56776,
+            "locZ": -2976,
+            "head": 39000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8673,
+        "name": "Patrol",
+        "coords": [
+          {
+            "locX": 143280,
+            "locY": -58800,
+            "locZ": -3456,
+            "head": 39000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8673,
+        "name": "Patrol",
+        "coords": [
+          {
+            "locX": 143072,
+            "locY": -58496,
+            "locZ": -3440,
+            "head": 39000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8296,
+        "name": "Cadmon",
+        "coords": [
+          {
+            "locX": 147920,
+            "locY": -59424,
+            "locZ": -2976,
+            "head": 0
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8674,
+        "name": "Patrol",
+        "coords": [
+          {
+            "locX": 147600,
+            "locY": -58012,
+            "locZ": -2976,
+            "head": 47253
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8674,
+        "name": "Patrol",
+        "coords": [
+          {
+            "locX": 147824,
+            "locY": -58016,
+            "locZ": -2976,
+            "head": 49000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8673,
+        "name": "Patrol",
+        "coords": [
+          {
+            "locX": 147900,
+            "locY": -61196,
+            "locZ": -3504,
+            "head": 49000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8292,
+        "name": "Andrei",
+        "coords": [
+          {
+            "locX": 149216,
+            "locY": -56544,
+            "locZ": -2776,
+            "head": 27000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8299,
+        "name": "Eugen",
+        "coords": [
+          {
+            "locX": 150832,
+            "locY": -57904,
+            "locZ": -2976,
+            "head": 0
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8298,
+        "name": "Ulrich",
+        "coords": [
+          {
+            "locX": 151060,
+            "locY": -57576,
+            "locZ": -2976,
+            "head": 53000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8673,
+        "name": "Patrol",
+        "coords": [
+          {
+            "locX": 152192,
+            "locY": -58864,
+            "locZ": -3480,
+            "head": 59000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8673,
+        "name": "Patrol",
+        "coords": [
+          {
+            "locX": 152432,
+            "locY": -58576,
+            "locZ": -3488,
+            "head": 59000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8690,
+        "name": "Monument of Heroes",
+        "coords": [
+          {
+            "locX": 147408,
+            "locY": -55232,
+            "locZ": -2728,
+            "head": 49000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8688,
+        "name": "Grand Olympiad Manager",
+        "coords": [
+          {
+            "locX": 147472,
+            "locY": -55232,
+            "locZ": -2728,
+            "head": 49000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 7767,
+        "name": "Auctioneer",
+        "coords": [
+          {
+            "locX": 149272,
+            "locY": -55888,
+            "locZ": -2776,
+            "head": 48000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8092,
+        "name": "Black Marketeer of Mammon",
+        "coords": [
+          {
+            "locX": 144400,
+            "locY": -54048,
+            "locZ": -2976,
+            "head": 49000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 7990,
+        "name": "Lottery Ticket Seller",
+        "coords": [
+          {
+            "locX": 147908,
+            "locY": -55221,
+            "locZ": -2728,
+            "head": 48000
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      }
+    ]
+  },
+  {
+    "selfId": "c4_rune",
+    "bounds": [],
+    "spawns": [
+      {
+        "selfId": 8833,
+        "name": "Adventure Guild Member",
+        "coords": [
+          {
+            "locX": 42912,
+            "locY": -47648,
+            "locZ": -792,
+            "head": 500
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8834,
+        "name": "Adventure Guild Member",
+        "coords": [
+          {
+            "locX": 40528,
+            "locY": -52308,
+            "locZ": -832,
+            "head": 0
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8835,
+        "name": "Adventure Guild Member",
+        "coords": [
+          {
+            "locX": 45552,
+            "locY": -49888,
+            "locZ": -792,
+            "head": 34000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8836,
+        "name": "Adventure Guild Member",
+        "coords": [
+          {
+            "locX": 37552,
+            "locY": -47440,
+            "locZ": -1128,
+            "head": 16500
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8340,
+        "name": "Mathias",
+        "coords": [
+          {
+            "locX": 42596,
+            "locY": -47988,
+            "locZ": -792,
+            "head": 0
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8341,
+        "name": "Richtor",
+        "coords": [
+          {
+            "locX": 42596,
+            "locY": -48484,
+            "locZ": -792,
+            "head": 0
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8346,
+        "name": "Sirius",
+        "coords": [
+          {
+            "locX": 42544,
+            "locY": -46688,
+            "locZ": -800,
+            "head": 16000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8266,
+        "name": "Kaiser",
+        "coords": [
+          {
+            "locX": 43477,
+            "locY": -49561,
+            "locZ": -792,
+            "head": 58198
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8309,
+        "name": "Woods",
+        "coords": [
+          {
+            "locX": 43456,
+            "locY": -49520,
+            "locZ": -792,
+            "head": 0
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8695,
+        "name": "Priest of Dusk",
+        "coords": [
+          {
+            "locX": 44528,
+            "locY": -48420,
+            "locZ": -792,
+            "head": 17000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8578,
+        "name": "Hilgendorf",
+        "coords": [
+          {
+            "locX": 44216,
+            "locY": -48880,
+            "locZ": -792,
+            "head": 33000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8314,
+        "name": "Donal",
+        "coords": [
+          {
+            "locX": 43560,
+            "locY": -48912,
+            "locZ": -792,
+            "head": 1000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8313,
+        "name": "Lunin",
+        "coords": [
+          {
+            "locX": 43308,
+            "locY": -48444,
+            "locZ": -792,
+            "head": 16500
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8594,
+        "name": "Mond",
+        "coords": [
+          {
+            "locX": 43556,
+            "locY": -48864,
+            "locZ": -792,
+            "head": 1000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8315,
+        "name": "Daisy",
+        "coords": [
+          {
+            "locX": 43556,
+            "locY": -48640,
+            "locZ": -792,
+            "head": 0
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8312,
+        "name": "Durin",
+        "coords": [
+          {
+            "locX": 43348,
+            "locY": -48444,
+            "locZ": -792,
+            "head": 16500
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8311,
+        "name": "Hugin",
+        "coords": [
+          {
+            "locX": 43556,
+            "locY": -48592,
+            "locZ": -792,
+            "head": 0
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8308,
+        "name": "Achim",
+        "coords": [
+          {
+            "locX": 44976,
+            "locY": -47440,
+            "locZ": -792,
+            "head": 17000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8302,
+        "name": "Vladimir",
+        "coords": [
+          {
+            "locX": 44704,
+            "locY": -47472,
+            "locZ": -792,
+            "head": 0
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8303,
+        "name": "Alisha",
+        "coords": [
+          {
+            "locX": 44620,
+            "locY": -47620,
+            "locZ": -792,
+            "head": 50000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8301,
+        "name": "Nils",
+        "coords": [
+          {
+            "locX": 44700,
+            "locY": -47396,
+            "locZ": -792,
+            "head": 0
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8673,
+        "name": "Patrol",
+        "coords": [
+          {
+            "locX": 43584,
+            "locY": -46528,
+            "locZ": -792,
+            "head": 25000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8694,
+        "name": "Priest of Dawn",
+        "coords": [
+          {
+            "locX": 45664,
+            "locY": -50368,
+            "locZ": -792,
+            "head": 29000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8673,
+        "name": "Patrol",
+        "coords": [
+          {
+            "locX": 46672,
+            "locY": -49888,
+            "locZ": -808,
+            "head": 8000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8345,
+        "name": "Ian",
+        "coords": [
+          {
+            "locX": 46832,
+            "locY": -50912,
+            "locZ": -808,
+            "head": 57000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8673,
+        "name": "Patrol",
+        "coords": [
+          {
+            "locX": 46272,
+            "locY": -47632,
+            "locZ": -808,
+            "head": 5000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8673,
+        "name": "Patrol",
+        "coords": [
+          {
+            "locX": 46752,
+            "locY": -48496,
+            "locZ": -808,
+            "head": 0
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8318,
+        "name": "Greta",
+        "coords": [
+          {
+            "locX": 45392,
+            "locY": -48496,
+            "locZ": -792,
+            "head": 16500
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8319,
+        "name": "Hans",
+        "coords": [
+          {
+            "locX": 45620,
+            "locY": -48460,
+            "locZ": -792,
+            "head": 22000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8592,
+        "name": "Telson",
+        "coords": [
+          {
+            "locX": 45184,
+            "locY": -48624,
+            "locZ": -792,
+            "head": 49000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8317,
+        "name": "Lombert",
+        "coords": [
+          {
+            "locX": 45136,
+            "locY": -48624,
+            "locZ": -792,
+            "head": 49000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8316,
+        "name": "Vincenz",
+        "coords": [
+          {
+            "locX": 45072,
+            "locY": -48784,
+            "locZ": -792,
+            "head": 49000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8306,
+        "name": "Natasha",
+        "coords": [
+          {
+            "locX": 45408,
+            "locY": -47424,
+            "locZ": -792,
+            "head": 49000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8307,
+        "name": "Weber",
+        "coords": [
+          {
+            "locX": 45120,
+            "locY": -47452,
+            "locZ": -792,
+            "head": 49000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8305,
+        "name": "Candice",
+        "coords": [
+          {
+            "locX": 45184,
+            "locY": -47444,
+            "locZ": -792,
+            "head": 49000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8304,
+        "name": "Astrid",
+        "coords": [
+          {
+            "locX": 45472,
+            "locY": -47424,
+            "locZ": -792,
+            "head": 49000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8673,
+        "name": "Patrol",
+        "coords": [
+          {
+            "locX": 45268,
+            "locY": -46820,
+            "locZ": -808,
+            "head": 13000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8674,
+        "name": "Patrol",
+        "coords": [
+          {
+            "locX": 40832,
+            "locY": -48560,
+            "locZ": -768,
+            "head": 0
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8674,
+        "name": "Patrol",
+        "coords": [
+          {
+            "locX": 40832,
+            "locY": -47920,
+            "locZ": -768,
+            "head": 0
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8674,
+        "name": "Patrol",
+        "coords": [
+          {
+            "locX": 41104,
+            "locY": -52152,
+            "locZ": -824,
+            "head": 57000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8673,
+        "name": "Patrol",
+        "coords": [
+          {
+            "locX": 41568,
+            "locY": -52624,
+            "locZ": -824,
+            "head": 25000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8673,
+        "name": "Patrol",
+        "coords": [
+          {
+            "locX": 44736,
+            "locY": -51904,
+            "locZ": -808,
+            "head": 58000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8673,
+        "name": "Patrol",
+        "coords": [
+          {
+            "locX": 43584,
+            "locY": -52240,
+            "locZ": -808,
+            "head": 57000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8673,
+        "name": "Patrol",
+        "coords": [
+          {
+            "locX": 45456,
+            "locY": -51424,
+            "locZ": -808,
+            "head": 49000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8344,
+        "name": "Schmidt",
+        "coords": [
+          {
+            "locX": 46384,
+            "locY": -51408,
+            "locZ": -808,
+            "head": 57000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8342,
+        "name": "Dimitri",
+        "coords": [
+          {
+            "locX": 40640,
+            "locY": -52620,
+            "locZ": -872,
+            "head": 40000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8343,
+        "name": "Bellard",
+        "coords": [
+          {
+            "locX": 40848,
+            "locY": -52880,
+            "locZ": -912,
+            "head": 36000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8339,
+        "name": "Hakran",
+        "coords": [
+          {
+            "locX": 37728,
+            "locY": -49216,
+            "locZ": -1128,
+            "head": 49000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8338,
+        "name": "Anton",
+        "coords": [
+          {
+            "locX": 37008,
+            "locY": -49200,
+            "locZ": -1128,
+            "head": 49000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8336,
+        "name": "Rahorakti",
+        "coords": [
+          {
+            "locX": 38432,
+            "locY": -49184,
+            "locZ": -1105,
+            "head": 40000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8335,
+        "name": "Kayan",
+        "coords": [
+          {
+            "locX": 38512,
+            "locY": -49552,
+            "locZ": -1105,
+            "head": 33000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8334,
+        "name": "Tifaren",
+        "coords": [
+          {
+            "locX": 38464,
+            "locY": -49920,
+            "locZ": -1105,
+            "head": 57000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8699,
+        "name": "Stanislava",
+        "coords": [
+          {
+            "locX": 38384,
+            "locY": -48064,
+            "locZ": -1152,
+            "head": 49000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8698,
+        "name": "Arisha",
+        "coords": [
+          {
+            "locX": 38208,
+            "locY": -48048,
+            "locZ": 896,
+            "head": 0
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8674,
+        "name": "Patrol",
+        "coords": [
+          {
+            "locX": 37456,
+            "locY": -48752,
+            "locZ": -1128,
+            "head": 16000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8674,
+        "name": "Patrol",
+        "coords": [
+          {
+            "locX": 37248,
+            "locY": -48752,
+            "locZ": -1128,
+            "head": 16000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8674,
+        "name": "Patrol",
+        "coords": [
+          {
+            "locX": 37240,
+            "locY": -47712,
+            "locZ": -1128,
+            "head": 49000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8674,
+        "name": "Patrol",
+        "coords": [
+          {
+            "locX": 37468,
+            "locY": -47712,
+            "locZ": -1128,
+            "head": 49000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8337,
+        "name": "Mekara",
+        "coords": [
+          {
+            "locX": 38220,
+            "locY": -49012,
+            "locZ": -1105,
+            "head": 48000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8691,
+        "name": "Training Dummy",
+        "coords": [
+          {
+            "locX": 37200,
+            "locY": -46912,
+            "locZ": -1144,
+            "head": 0
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8323,
+        "name": "Beryl",
+        "coords": [
+          {
+            "locX": 37240,
+            "locY": -46916,
+            "locZ": -1144,
+            "head": 49000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8691,
+        "name": "Training Dummy",
+        "coords": [
+          {
+            "locX": 37616,
+            "locY": -46912,
+            "locZ": -1144,
+            "head": 0
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8327,
+        "name": "Tazki",
+        "coords": [
+          {
+            "locX": 37648,
+            "locY": -46920,
+            "locZ": -1144,
+            "head": 49000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8322,
+        "name": "Erian",
+        "coords": [
+          {
+            "locX": 38060,
+            "locY": -46920,
+            "locZ": -1144,
+            "head": 49000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8326,
+        "name": "Lambac",
+        "coords": [
+          {
+            "locX": 38368,
+            "locY": -46728,
+            "locZ": -1144,
+            "head": 33000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8321,
+        "name": "Siegmund",
+        "coords": [
+          {
+            "locX": 38368,
+            "locY": -46912,
+            "locZ": -1128,
+            "head": 33000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8324,
+        "name": "Andromeda",
+        "coords": [
+          {
+            "locX": 38368,
+            "locY": -47096,
+            "locZ": -1144,
+            "head": 33000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8691,
+        "name": "Training Dummy",
+        "coords": [
+          {
+            "locX": 38020,
+            "locY": -46912,
+            "locZ": -1144,
+            "head": 0
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8333,
+        "name": "Rumiel",
+        "coords": [
+          {
+            "locX": 36548,
+            "locY": -50064,
+            "locZ": -1096,
+            "head": 47000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8332,
+        "name": "Amelia",
+        "coords": [
+          {
+            "locX": 36336,
+            "locY": -49904,
+            "locZ": -1096,
+            "head": 10000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8331,
+        "name": "Valdis",
+        "coords": [
+          {
+            "locX": 36256,
+            "locY": -49536,
+            "locZ": -1096,
+            "head": 0
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8674,
+        "name": "Patrol",
+        "coords": [
+          {
+            "locX": 36412,
+            "locY": -48448,
+            "locZ": -1152,
+            "head": 0
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8674,
+        "name": "Patrol",
+        "coords": [
+          {
+            "locX": 36416,
+            "locY": -48032,
+            "locZ": -1152,
+            "head": 0
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8350,
+        "name": "Dominic",
+        "coords": [
+          {
+            "locX": 35416,
+            "locY": -48076,
+            "locZ": 896,
+            "head": 0
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8349,
+        "name": "Benedict",
+        "coords": [
+          {
+            "locX": 35408,
+            "locY": -48368,
+            "locZ": 896,
+            "head": 0
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8348,
+        "name": "Agripel",
+        "coords": [
+          {
+            "locX": 35480,
+            "locY": -48224,
+            "locZ": 896,
+            "head": 0
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8330,
+        "name": "Wagner",
+        "coords": [
+          {
+            "locX": 36448,
+            "locY": -49072,
+            "locZ": -1096,
+            "head": 0
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8329,
+        "name": "Eliyah",
+        "coords": [
+          {
+            "locX": 36528,
+            "locY": -49024,
+            "locZ": -1096,
+            "head": 44000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8328,
+        "name": "Innocentin",
+        "coords": [
+          {
+            "locX": 36476,
+            "locY": -49032,
+            "locZ": -1096,
+            "head": 55000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8325,
+        "name": "Themis",
+        "coords": [
+          {
+            "locX": 36832,
+            "locY": -46916,
+            "locZ": -1144,
+            "head": 49000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8691,
+        "name": "Training Dummy",
+        "coords": [
+          {
+            "locX": 36792,
+            "locY": -46912,
+            "locZ": -1144,
+            "head": 0
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8690,
+        "name": "Monument of Heroes",
+        "coords": [
+          {
+            "locX": 36048,
+            "locY": -48268,
+            "locZ": -1096,
+            "head": 0
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8688,
+        "name": "Grand Olympiad Manager",
+        "coords": [
+          {
+            "locX": 36048,
+            "locY": -48208,
+            "locZ": -1096,
+            "head": 0
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8593,
+        "name": "Dorothy",
+        "coords": [
+          {
+            "locX": 45184,
+            "locY": -48624,
+            "locZ": -792,
+            "head": 49000
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 7990,
+        "name": "Lottery Ticket Seller",
+        "coords": [
+          {
+            "locX": 43664,
+            "locY": -47664,
+            "locZ": -792,
+            "head": 50000
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      }
+    ]
+  }
+]

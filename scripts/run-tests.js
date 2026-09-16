@@ -5,6 +5,7 @@ const tests = [
     'tests/test_npc_passive_retaliation.js',
     'tests/test_player_transition_recovery.js',
     'tests/test_heine_npcs.js',
+    'tests/test_goddard_rune_npcs.js',
     'tests/test_player_move_destination_height.js',
     'tests/test_altar_underwater.js',
     'tests/test_clan_presence.js',
