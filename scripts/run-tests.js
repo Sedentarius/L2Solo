@@ -6,6 +6,7 @@ const tests = [
     'tests/test_player_transition_recovery.js',
     'tests/test_heine_npcs.js',
     'tests/test_player_move_destination_height.js',
+    'tests/test_altar_underwater.js',
     'tests/test_clan_presence.js',
     'tests/test_clan_cold_progress.js',
     'tests/test_inventory_weight.js',
