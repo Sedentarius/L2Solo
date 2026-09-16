@@ -1,3 +1,4 @@
+const { canDeposit } = require('./WarehouseItemRules');
 const ItemTemplateIndex = require('../Item/ItemTemplateIndex');
 const Database = invoke('Database');
 const DataCache = invoke('GameServer/DataCache');
@@ -84,7 +85,7 @@ async function deposit(session, lines) {
     const actor = session.actor;
     const backpack = actor.backpack;
     await CharacterWriteQueue.flushCharacter(actor.fetchId());
-    const inventory = backpack.fetchItems();
+    const inventory = backpack.fetchItems().filter(canDeposit);
     if (!validateLines(lines, inventory)) throw new Error('invalid clan warehouse deposit');
 
     const transfers = lines.map((line) => {
