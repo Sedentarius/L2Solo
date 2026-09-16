@@ -1141,7 +1141,7 @@
 },{
     "selfId": "NPC_t22_19_030917_04",
     "bounds": [{ "locX": 78992, "locY": 53548, "minZ": -1684, "maxZ": -1484 }, { "locX": 79192, "locY": 53548, "minZ": -1684, "maxZ": -1484 }, { "locX": 79192, "locY": 53748, "minZ": -1684, "maxZ": -1484 }, { "locX": 78992, "locY": 53748, "minZ": -1684, "maxZ": -1484 }],
-    "spawns": [{ "selfId": 7178, "name": "Zenkin", "coords": [{ "locX": 79088, "locY": 53695, "locZ": -1540, "head": 0 }], "total": 1, "respawn": 60, "bias": 0 }, { "selfId": 7179, "name": "Raudia", "coords": [{ "locX": 79088, "locY": 53597, "locZ": -1542, "head": 0 }], "total": 1, "respawn": 60, "bias": 0 }]
+    "spawns": [{ "selfId": 7178, "name": "Zenkin", "coords": [{ "locX": 79111, "locY": 53657, "locZ": -1544, "head": 0 }], "total": 1, "respawn": 60, "bias": 0 }, { "selfId": 7179, "name": "Raudia", "coords": [{ "locX": 79088, "locY": 53597, "locZ": -1542, "head": 0 }], "total": 1, "respawn": 60, "bias": 0 }]
 },{
     "selfId": "NPC_t22_19_030917_05",
     "bounds": [{ "locX": 79354, "locY": 54826, "minZ": -1696, "maxZ": -1496 }, { "locX": 79554, "locY": 54826, "minZ": -1696, "maxZ": -1496 }, { "locX": 79554, "locY": 55026, "minZ": -1696, "maxZ": -1496 }, { "locX": 79354, "locY": 55026, "minZ": -1696, "maxZ": -1496 }],
