@@ -13,9 +13,9 @@ async function main() {
         for (const change of ['disconnect', 'replace', 'death', 'offline', 'none']) {
             let arrive;
             let awarded = 0, completed = 0;
-            const actor = { fetchId: () => 1, state: { setPickinUp() {} },
+            const actor = { fetchId: () => 1, fetchLocX: () => 0, fetchLocY: () => 0, fetchLocZ: () => 0, fetchHead: () => 0, state: { setPickinUp() {} },
                 automation: { schedulePickup(_session, _actor, _item, callback) { arrive = callback; } } };
-            const session = { actor, dataSendToMeAndOthers() {} };
+            const session = { actor, dataSendToMe() {}, dataSendToMeAndOthers() {} };
             World.fetchItem = () => Promise.resolve({});
             World.pickupItem = () => { awarded++; };
             Response.pickupItem = () => ({});
@@ -31,11 +31,20 @@ async function main() {
             assert.strictEqual(awarded, change === 'none' ? 1 : 0, change);
             assert.strictEqual(completed, 1, 'cancelled pickups must still complete');
         }
+        const rejectedPackets = [];
+        const rejectedActor = { automation: { schedulePickup: () => false } };
+        const rejectedSession = { actor: rejectedActor, dataSendToMe(packet) { rejectedPackets.push(packet[0]); } };
+        World.fetchItem = async () => ({});
+        let rejectedComplete = 0;
+        pickupExec(rejectedSession, rejectedActor, { id: 7 }, () => { rejectedComplete++; });
+        await Promise.resolve();
+        assert.deepStrictEqual(rejectedPackets, [0x25], 'rejected approach must also release client Action');
+        assert.strictEqual(rejectedComplete, 1);
         assert.strictEqual(purchaseItem({ actor: null }, 57, 1), false);
         let finishWrite;
         let updated = 0, sent = 0;
         Database.updateItemAmount = () => new Promise(resolve => { finishWrite = resolve; });
-        const actor = { fetchId: () => 1, backpack: {
+        const actor = { fetchId: () => 1, fetchLocX: () => 0, fetchLocY: () => 0, fetchLocZ: () => 0, fetchHead: () => 0, backpack: {
             stackableExists: () => Promise.resolve({ fetchId: () => 2, fetchAmount: () => 10 }),
             updateAmount(_id, amount) { updated = amount; }
         } };
