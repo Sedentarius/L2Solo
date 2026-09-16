@@ -303,8 +303,8 @@ for (let i = 0; i < enchantBuyListPacket.readInt16LE(9); i++) {
 }
 
 assert.strictEqual(AdminSetLevel.normalizeLevel('1'), 1, 'admin level should accept level 1');
-assert.strictEqual(AdminSetLevel.normalizeLevel('80'), 80, 'admin level should accept the configured max level');
-assert.strictEqual(AdminSetLevel.normalizeLevel('999'), 80, 'admin level should clamp to max level');
+assert.strictEqual(AdminSetLevel.normalizeLevel('78'), 78, 'admin level should accept the configured max level');
+assert.strictEqual(AdminSetLevel.normalizeLevel('999'), 78, 'admin level should clamp to max level');
 assert.strictEqual(AdminSetLevel.normalizeLevel('0'), 1, 'admin level should clamp to level 1');
 assert.strictEqual(AdminSetLevel.normalizeLevel('abc'), null, 'admin level should reject non-numeric input');
 assert.strictEqual(AdminSetLevel.expForLevel(1), DataCache.experience[0], 'level 1 exp should use the first threshold');

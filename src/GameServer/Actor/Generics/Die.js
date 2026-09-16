@@ -23,12 +23,13 @@ function die(session, actor, context = {}) {
     }
 
     const victimSession = actor.session || session;
-    const ArenaCombatRules = invoke('GameServer/World/ArenaCombatRules');
+    const ArenaDuelService = invoke('GameServer/World/ArenaDuelService');
     if (typeof actor.fetchExp === 'function' && typeof actor.setExpSp === 'function' && !actor.fetchKind) {
         const source = context.source || context.killer || session?.actor;
         invoke('GameServer/Progression/DeathExperience').applyDeathPenalty(victimSession, actor, {
             timestamp: context.timestamp,
-            arena: ArenaCombatRules.isArenaParticipant(actor),
+            arena: victimSession?.arenaEphemeral === true || !!victimSession?.arenaDuelId
+                || !!ArenaDuelService.duelForActor?.(actor),
             killerPlayable: !!source && !source.fetchKind,
             clanWar: context.clanWar === true,
             festival: context.festival === true,
@@ -52,7 +53,6 @@ function die(session, actor, context = {}) {
     actor.state.setDead(true);
     session.dataSendToMeAndOthers(ServerResponse.die(actor.fetchId()), actor);
     invoke('GameServer/Clan/ClanAllianceService').onDeath(victimSession);
-    const ArenaDuelService = invoke('GameServer/World/ArenaDuelService');
     // ReceivedHit is invoked with the attacker's session, while the actor
     // being killed owns the authoritative victim session. Arena death must
     // therefore be routed through actor.session or the player death branch
