@@ -3,8 +3,12 @@ const Backpack = invoke('GameServer/Actor/Backpack');
 const QuestService = invoke('GameServer/Quest/QuestService');
 const LifeState = invoke('GameServer/Bot/Population/BotLifeState');
 const InventorySummary = invoke('GameServer/Bot/Population/InventorySummary');
+const Shared = invoke('GameServer/Network/Shared');
+const BotSession = invoke('GameServer/Bot/BotSession');
+const CharacterWriteQueue = invoke('GameServer/Persistence/CharacterWriteQueue');
 const Bridge = require('./BotQuestBridge');
 const KillPlanner = require('./BotQuestKillPlanner');
+const TalkPlanner = require('./BotQuestTalkPlanner');
 
 const RECEIPT_VERSION = 1;
 const MAX_RECEIPTS = 96;
@@ -73,13 +77,16 @@ function adenaFromInventory(inventory = {}, fallback = 0) {
 
 async function characterRow(characterId) {
     const rows = await Database.execute([
-        `SELECT id, name, race, classId, level, exp, sp, locX, locY, locZ
+        `SELECT id, username, name, race, classId, level, exp, sp, locX, locY, locZ
          FROM characters WHERE id = ? LIMIT 1`,
         [Number(characterId)]
     ]);
     return rows?.[0] || null;
 }
 
+// Kill callbacks are frequent in cold simulation. Keep this adapter deliberately
+// light: QuestService receives the real Backpack and durable quest state without
+// materializing a full hot Actor for every defeated NPC.
 async function coldSessionFor(state) {
     const characterId = Number(state?.characterId || 0);
     if (!characterId) throw new Error('cold quest session requires characterId');
@@ -117,8 +124,65 @@ async function coldSessionFor(state) {
     return session;
 }
 
+// Talking/hand-in is rare but may award EXP, level-ups, items or eventually a
+// profession transfer. Materialize the normal BotSession/Actor contract here so
+// QuestService and the existing reward code remain the sole gameplay authority.
+async function coldFullSessionFor(state) {
+    const characterId = Number(state?.characterId || 0);
+    if (!characterId) throw new Error('cold quest full session requires characterId');
+    const row = await characterRow(characterId);
+    if (!row?.username) throw new Error(`missing character ${characterId} for cold quest hand-in`);
+    const characters = await Shared.fetchCharacters(row.username);
+    const character = characters.find((candidate) => Number(candidate.id) === characterId);
+    if (!character) throw new Error(`missing materialized character ${characterId} for cold quest hand-in`);
+    const classInfo = await Shared.fetchClassInformation(Number(character.classId));
+    const session = new BotSession(row.username);
+    session.populationStaging = true;
+    session.coldQuestBridge = true;
+    session.setActor({ ...character, ...utils.crushOb(classInfo) });
+    await QuestService.ensureLoaded(session);
+    return session;
+}
+
+async function reconcileColdSession(state, session, timestamp = Date.now()) {
+    const characterId = Number(state?.characterId || session?.actor?.fetchId?.() || 0);
+    if (!characterId || !session?.actor) return state;
+    await CharacterWriteQueue.flushCharacter(characterId);
+    const row = await characterRow(characterId);
+    const inventory = InventorySummary.fromItems(session.actor.backpack.fetchItems());
+    const actor = session.actor;
+    const next = {
+        ...state,
+        classId: Number(actor.fetchClassId?.() ?? row?.classId ?? state.classId ?? 0),
+        level: Number(actor.fetchLevel?.() ?? row?.level ?? state.level ?? 1),
+        exp: Number(actor.fetchExp?.() ?? row?.exp ?? state.exp ?? 0),
+        sp: Number(actor.fetchSp?.() ?? row?.sp ?? state.sp ?? 0),
+        inventory,
+        adena: adenaFromInventory(inventory, state.adena),
+        updatedAt: timestamp
+    };
+    const hp = Number(actor.fetchHp?.());
+    const maxHp = Number(actor.fetchMaxHp?.());
+    const mp = Number(actor.fetchMp?.());
+    const maxMp = Number(actor.fetchMaxMp?.());
+    if ([hp, maxHp, mp, maxMp].every(Number.isFinite)) {
+        next.vitals = { ...(state.vitals || {}), hp, maxHp, mp, maxMp };
+    }
+    return next;
+}
+
+function disposeFullSession(session) {
+    if (!session?.actor) return;
+    try { session.actor.destructor?.(); } catch (_) {}
+    session.actor = null;
+}
+
 function killActionKey(intent, killKey) {
     return Bridge.actionKey(intent, `kill:${String(killKey)}`);
+}
+
+function talkActionKey(intent, talkKey) {
+    return Bridge.actionKey(intent, `talk:${String(talkKey)}`);
 }
 
 async function resolveColdKill(state, npcSelfId, killKey, options = {}) {
@@ -174,6 +238,80 @@ async function resolveColdKill(state, npcSelfId, killKey, options = {}) {
     };
 }
 
+async function resolveColdTalk(state, npcSelfId, talkKey, options = {}) {
+    const characterId = Number(state?.characterId || 0);
+    const latest = LifeState.snapshot(characterId) || state;
+    const intent = Bridge.intentFrom(latest);
+    if (!intent) return { ok: false, reason: 'missing_intent', state: latest };
+    if (!TalkPlanner.isTalkTarget(intent, npcSelfId)) {
+        return { ok: false, reason: 'not_quest_talk_target', state: latest };
+    }
+    if (!talkKey) return { ok: false, reason: 'missing_talk_key', state: latest };
+
+    const key = talkActionKey(intent, talkKey);
+    const claim = withClaim(latest, key, intent, npcSelfId, options.timestamp || Date.now());
+    if (claim.replayed) return { ok: true, replayed: true, actionKey: key, state: latest };
+    const claimed = await LifeState.upsertState(claim.state, 'quest_bridge_talk_claim');
+    const claimedState = claimed || claim.state;
+
+    let session = null;
+    try {
+        session = await coldFullSessionFor(claimedState);
+        const questStateBefore = session.questStates?.get(Number(intent.questId));
+        const wasStarted = questStateBefore?.isStarted?.() === true;
+        const npc = {
+            fetchSelfId: () => Number(npcSelfId),
+            fetchId: () => Number(options.objectId || 0)
+        };
+        session.activeNpcTalk = { objectId: npc.fetchId(), selfId: npc.fetchSelfId() };
+        const handled = await QuestService.onTalk(session, npc);
+        if (handled === false) throw new Error('quest_talk_rejected');
+        if (options.eventName) {
+            const eventHandled = await QuestService.onEvent(session, {
+                questId: Number(intent.questId),
+                name: String(options.eventName)
+            });
+            if (eventHandled === false) throw new Error('quest_event_rejected');
+        }
+        const questStateAfter = session.questStates?.get(Number(intent.questId));
+        const finished = wasStarted && questStateAfter?.isStarted?.() !== true;
+        const authoritative = LifeState.snapshot(characterId) || claimedState;
+        let completed = await reconcileColdSession(authoritative, session, options.timestamp || Date.now());
+        completed = withCompletion(completed, key, options.timestamp || Date.now());
+        if (finished) {
+            completed = {
+                ...completed,
+                stats: { ...(completed.stats || {}), questBridge: null }
+            };
+        }
+        const saved = await LifeState.upsertState(completed,
+            finished ? 'quest_bridge_complete' : 'quest_bridge_talk_complete');
+        return {
+            ok: true,
+            replayed: false,
+            handled: true,
+            finished,
+            actionKey: key,
+            questId: Number(intent.questId),
+            npcSelfId: Number(npcSelfId),
+            state: saved || completed
+        };
+    } catch (error) {
+        utils.infoWarn('BotQuest', 'cold quest talk failed closed character=%s quest=%s npc=%s key=%s: %s',
+            characterId, intent.questId, npcSelfId, key, error?.message || error);
+        return {
+            ok: false,
+            claimed: true,
+            failClosed: true,
+            reason: error?.message || 'quest_talk_failed',
+            actionKey: key,
+            state: claimedState
+        };
+    } finally {
+        disposeFullSession(session);
+    }
+}
+
 function commitRevision(entry, state) {
     return Number(entry?.result?.revision
         ?? state?.simulation?.revision
@@ -211,13 +349,19 @@ module.exports = {
     MAX_RECEIPTS,
     RECEIPT_VERSION,
     adenaFromInventory,
+    characterRow,
+    coldFullSessionFor,
     coldSessionFor,
     commitRevision,
+    disposeFullSession,
     hasReceipt,
     killActionKey,
     normalizedReceipts,
     processCommittedKills,
+    reconcileColdSession,
     resolveColdKill,
+    resolveColdTalk,
+    talkActionKey,
     withClaim,
     withCompletion
 };
