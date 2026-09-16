@@ -1,0 +1,166 @@
+const DataCache = invoke('GameServer/DataCache');
+const SpotProfiles = invoke('GameServer/Bot/Population/SpotProfiles');
+
+const DARK_ELF_CLASS_IDS = new Set(Array.from({ length: 13 }, (_, index) => 31 + index));
+const QUEST_BUCKETS = 8;
+
+const QUESTS = Object.freeze({
+    165: Object.freeze({
+        questId: 165,
+        name: "Shilen's Hunt",
+        race: 2,
+        minLevel: 3,
+        startNpcId: 7348,
+        returnNpcId: 7348,
+        startEvent: 'start',
+        collectItemId: 1160,
+        collectAmount: 13,
+        priority: 50
+    })
+});
+
+function classRace(state = {}) {
+    const classId = Number(state.stats?.classId ?? state.classId ?? 0);
+    if (DARK_ELF_CLASS_IDS.has(classId)) return 2;
+    return null;
+}
+
+function completedAt(state = {}, questId) {
+    return Number(state.stats?.questAutomation?.completed?.[String(questId)] || 0);
+}
+
+function admissionBucket(characterId) {
+    return Math.abs(Number(characterId || 0)) % QUEST_BUCKETS;
+}
+
+function bucketFor(timestamp = Date.now()) {
+    return Math.floor(Number(timestamp) / 60000) % QUEST_BUCKETS;
+}
+
+function eligible(state, spec, timestamp = Date.now(), options = {}) {
+    if (!state?.characterId || !spec || state.phase === 'hot') return false;
+    if (completedAt(state, spec.questId)) return false;
+    if (Number(state.stats?.karma || 0) > 0) return false;
+    if (state.party?.partyId || state.partyId) return false;
+    if (!['hunting', 'resting', 'traveling'].includes(String(state.activity || ''))) return false;
+    if (Number(state.level || 1) < Number(spec.minLevel || 1)) return false;
+    if (spec.race !== null && spec.race !== undefined && classRace(state) !== Number(spec.race)) return false;
+    if (Number(state.stats?.questBridge?.questId || 0) === Number(spec.questId)) return true;
+    if (options.ignoreStagger === true) return true;
+    return admissionBucket(state.characterId) === bucketFor(timestamp);
+}
+
+function candidateFor(state = {}, options = {}) {
+    const timestamp = Number(options.timestamp || options.now) || Date.now();
+    for (const spec of Object.values(QUESTS)) {
+        if (!eligible(state, spec, timestamp, options)) continue;
+        return {
+            type: 'complete_quest',
+            priority: Number(spec.priority || 50),
+            target: { questId: spec.questId, questName: spec.name },
+            plan: {
+                kind: 'quest',
+                questId: spec.questId,
+                expectedBenefit: 'quest_reward_and_progression'
+            },
+            blockers: [],
+            nextReviewAt: timestamp + 30 * 60 * 1000
+        };
+    }
+    return null;
+}
+
+function specFor(questId) {
+    return QUESTS[Number(questId)] || null;
+}
+
+function inventoryAmount(state = {}, selfId) {
+    return Math.max(0, Number(state.inventory?.[String(selfId)]?.amount || 0));
+}
+
+function collectComplete(state = {}, spec) {
+    return !!spec && inventoryAmount(state, spec.collectItemId) >= Number(spec.collectAmount || 0);
+}
+
+function coordinate(value) {
+    if (!value || typeof value !== 'object') return null;
+    const locX = Number(value.locX);
+    const locY = Number(value.locY);
+    const locZ = Number(value.locZ);
+    if ([locX, locY, locZ].every(Number.isFinite)) return { locX, locY, locZ };
+    return null;
+}
+
+function firstCoordinate(value, seen = new Set()) {
+    if (!value || typeof value !== 'object' || seen.has(value)) return null;
+    seen.add(value);
+    const own = coordinate(value);
+    if (own) return own;
+    for (const child of Object.values(value)) {
+        if (!child || typeof child !== 'object') continue;
+        const found = firstCoordinate(child, seen);
+        if (found) return found;
+    }
+    return null;
+}
+
+function findNpcNode(value, npcSelfId, seen = new Set()) {
+    if (!value || typeof value !== 'object' || seen.has(value)) return null;
+    seen.add(value);
+    if (Number(value.selfId) === Number(npcSelfId)) {
+        const loc = firstCoordinate(value);
+        if (loc) return loc;
+    }
+    for (const child of Object.values(value)) {
+        if (!child || typeof child !== 'object') continue;
+        const found = findNpcNode(child, npcSelfId, seen);
+        if (found) return found;
+    }
+    return null;
+}
+
+function npcLocation(npcSelfId) {
+    return findNpcNode(DataCache.npcSpawns || [], Number(npcSelfId));
+}
+
+function killSpot(spec, state = {}) {
+    if (!spec) return null;
+    const quest = require('../../Quest/QuestRegistry').activeQuests()
+        .find((entry) => Number(entry.id) === Number(spec.questId));
+    const targets = new Set((quest?.killNpcs || []).map(Number));
+    if (!targets.size) return null;
+    const profiles = SpotProfiles.ensure() || [];
+    const matching = profiles.filter((spot) => (spot.npcEntries || []).some((entry) => targets.has(Number(entry.selfId))));
+    if (!matching.length) return null;
+    matching.sort((left, right) => {
+        const leftLevel = Math.abs(Number(left.avgLevel || left.minLevel || state.level || 1) - Number(state.level || 1));
+        const rightLevel = Math.abs(Number(right.avgLevel || right.minLevel || state.level || 1) - Number(state.level || 1));
+        return leftLevel - rightLevel || String(left.id).localeCompare(String(right.id));
+    });
+    return matching[0];
+}
+
+function killTargetForSpot(spec, spot) {
+    if (!spec || !spot) return 0;
+    const quest = require('../../Quest/QuestRegistry').activeQuests()
+        .find((entry) => Number(entry.id) === Number(spec.questId));
+    const targets = new Set((quest?.killNpcs || []).map(Number));
+    return Number((spot.npcEntries || []).find((entry) => targets.has(Number(entry.selfId)))?.selfId || 0);
+}
+
+module.exports = {
+    QUESTS,
+    QUEST_BUCKETS,
+    admissionBucket,
+    bucketFor,
+    candidateFor,
+    classRace,
+    collectComplete,
+    completedAt,
+    eligible,
+    inventoryAmount,
+    killSpot,
+    killTargetForSpot,
+    npcLocation,
+    specFor
+};
