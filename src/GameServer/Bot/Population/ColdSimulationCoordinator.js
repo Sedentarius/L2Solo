@@ -1266,6 +1266,13 @@ class ColdSimulationCoordinator {
 
     async afterCommit(entry) {
         const state = LifeState.cachedState(entry.nextState.characterId) || entry.nextState;
+        if (entry.nextState.stats?.deathItemDrop?.deathKey) {
+            await invoke('GameServer/Progression/DeathItemDrop').restoreWorldDrops();
+            const drop = entry.nextState.stats.deathItemDrop;
+            utils.infoSuccess('DeathDrop', 'character=%s mode=cold key=%s reason=%s karma=%s pk=%s candidates=%s selected=%s',
+                entry.nextState.characterId, drop.deathKey, drop.reason, drop.karma, drop.pkCount,
+                drop.candidateCount, drop.selected?.length || 0);
+        }
         await LifeEvents.recordMany(state.characterId, entry.proposal.result?.events || []);
         await LifeState.enqueueEquipmentGoalAdvanceForState(state)
             .catch((error) => {

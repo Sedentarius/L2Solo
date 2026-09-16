@@ -161,7 +161,7 @@ function resolve({ sides, roles, timestamp, rng, personaFor, step = null, openin
             enemies.push(updated);
         }
         enemies.sort((a, b) => Number(b.kills || 0) - Number(a.kills || 0) || Number(b.lastSeenAt || 0) - Number(a.lastSeenAt || 0));
-        return [f.id, { ...f.state, activity: dead ? 'dead' : 'resting', vitals: f.vitals,
+        let updated = { ...f.state, activity: dead ? 'dead' : 'resting', vitals: f.vitals,
             stats: { ...f.state.stats, deaths: Number(f.state.stats?.deaths || 0) + Number(dead),
                 restUntil: until, pvpEnemies: enemies.slice(0, 3),
                 coldPvp: { at: timestamp, until: step ? step.until : until, outcome: ongoing ? 'fighting' : outcome,
@@ -172,7 +172,18 @@ function resolve({ sides, roles, timestamp, rng, personaFor, step = null, openin
                 coldCombat: { ...(f.state.stats?.coldCombat || f.profile), cp: dead ? 0 : f.cp, cpAt: step ? step.until : until,
                     cooldowns: dead ? {} : f.cooldowns,
                     charges: dead ? 0 : f.charges, chargeExpiresAt: dead ? null : f.chargeExpiresAt,
-                    ...(dead ? { effects: [], charges: 0, chargeExpiresAt: null, summon: null } : {}) } } }];
+                    ...(dead ? { effects: [], charges: 0, chargeExpiresAt: null, summon: null } : {}) } } };
+        if (dead) {
+            const deathCount = Number(updated.stats.deaths || 0);
+            updated = invoke('GameServer/Progression/DeathItemDrop').applyColdDeath(updated, {
+                timestamp,
+                cold: true,
+                killerPlayable: true,
+                deathCount,
+                deathKey: `cold:${f.id}:${deathCount}`
+            }, rng).state;
+        }
+        return [f.id, updated];
     }));
     return { started: true, ongoing, outcome: ongoing ? 'fighting' : outcome, durationMs, until: step ? step.until : until, losingSide, updates,
         incidents: [...incidents.values()], help: [...help.values()], opponentAid: [...opponentAid.values()], fighters: fighters.map(f => ({ id: f.id, side: f.side,

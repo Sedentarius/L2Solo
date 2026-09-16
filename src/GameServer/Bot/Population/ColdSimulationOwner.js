@@ -327,7 +327,10 @@ function commitAndReleaseBatch(entries = [], options = {}) {
                     skills: entry.proposal.durable.skills || []
                 } : {}),
                 ...(entry.proposal?.durable?.pvpKills ? { pvpKills: entry.proposal.durable.pvpKills } : {}),
-                ...(inventoryChanged ? { inventory: canonicalInventory } : {})
+                ...(inventoryChanged ? { inventory: canonicalInventory } : {}),
+                ...(nextState.stats?.deathItemDrop?.deathKey ? {
+                    deathItemDrop: nextState.stats.deathItemDrop
+                } : {})
             },
             allowParty: entry.options?.allowParty === true || options.allowParty === true,
             allowLifecycle: entry.options?.allowLifecycle === true || options.allowLifecycle === true,

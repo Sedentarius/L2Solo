@@ -16,6 +16,7 @@ const originalSyncInventorySummary = Database.syncInventorySummary;
 const originalUpdateCharacterLocation = Database.updateCharacterLocation;
 const originalUpdateCharacterExperience = Database.updateCharacterExperience;
 const originalApplyCharacterDeathExperience = Database.applyCharacterDeathExperience;
+const originalApplyCharacterDeathItemDrop = Database.applyCharacterDeathItemDrop;
 const originalRestoreCharacterDeathExperience = Database.restoreCharacterDeathExperience;
 const originalClearCharacterDeathExperience = Database.clearCharacterDeathExperience;
 const originalUpdateCharacterVitals = Database.updateCharacterVitals;
@@ -56,6 +57,7 @@ try {
     Database.updateCharacterLocation = () => Promise.resolve();
     Database.updateCharacterExperience = () => Promise.resolve();
     Database.applyCharacterDeathExperience = () => Promise.resolve({ applied: true });
+    Database.applyCharacterDeathItemDrop = () => Promise.resolve({ drops: [] });
     Database.restoreCharacterDeathExperience = () => Promise.resolve({ restored: 0 });
     Database.clearCharacterDeathExperience = () => Promise.resolve({ cleared: true });
     Database.updateCharacterVitals = () => Promise.resolve();
@@ -524,6 +526,7 @@ try {
         Database.updateCharacterLocation = originalUpdateCharacterLocation;
         Database.updateCharacterExperience = originalUpdateCharacterExperience;
         Database.applyCharacterDeathExperience = originalApplyCharacterDeathExperience;
+        Database.applyCharacterDeathItemDrop = originalApplyCharacterDeathItemDrop;
         Database.restoreCharacterDeathExperience = originalRestoreCharacterDeathExperience;
         Database.clearCharacterDeathExperience = originalClearCharacterDeathExperience;
         Database.updateCharacterVitals = originalUpdateCharacterVitals;
@@ -540,6 +543,7 @@ try {
     Database.updateCharacterLocation = originalUpdateCharacterLocation;
     Database.updateCharacterExperience = originalUpdateCharacterExperience;
     Database.applyCharacterDeathExperience = originalApplyCharacterDeathExperience;
+    Database.applyCharacterDeathItemDrop = originalApplyCharacterDeathItemDrop;
     Database.restoreCharacterDeathExperience = originalRestoreCharacterDeathExperience;
     Database.clearCharacterDeathExperience = originalClearCharacterDeathExperience;
     Database.updateCharacterVitals = originalUpdateCharacterVitals;

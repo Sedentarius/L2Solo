@@ -26,19 +26,30 @@ function die(session, actor, context = {}) {
     const ArenaDuelService = invoke('GameServer/World/ArenaDuelService');
     if (typeof actor.fetchExp === 'function' && typeof actor.setExpSp === 'function' && !actor.fetchKind) {
         const source = context.source || context.killer || session?.actor;
-        invoke('GameServer/Progression/DeathExperience').applyDeathPenalty(victimSession, actor, {
-            timestamp: context.timestamp,
+        const deathContext = {
+            timestamp: Number(context.timestamp || Date.now()),
             arena: victimSession?.arenaEphemeral === true || !!victimSession?.arenaDuelId
                 || !!ArenaDuelService.duelForActor?.(actor),
             killerPlayable: !!source && !source.fetchKind,
             clanWar: context.clanWar === true,
             festival: context.festival === true,
             event: context.event === true,
+            duel: context.duel === true,
+            olympiad: context.olympiad === true,
+            lucky: context.lucky === true,
             pvpZone: context.pvpZone === true,
             siegeZone: context.siegeZone === true,
             siegeParticipant: context.siegeParticipant === true,
-            killerSiegeNpc: context.killerSiegeNpc === true
-        });
+            killerSiegeNpc: context.killerSiegeNpc === true,
+            ...(context.deathKey ? { deathKey: context.deathKey } : {})
+        };
+        invoke('GameServer/Progression/DeathExperience').applyDeathPenalty(victimSession, actor, deathContext);
+        invoke('GameServer/Progression/DeathItemDrop').applyHotDeath(
+            victimSession,
+            actor,
+            deathContext,
+            typeof context.rng === 'function' ? context.rng : Math.random
+        );
     }
 
     if ((actor.fetchMounted?.() || actor.mounted) && actor.pet?.petData) invoke('GameServer/Pets/PetRuntime').die(actor.pet);
