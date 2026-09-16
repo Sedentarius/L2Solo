@@ -54,8 +54,9 @@ async function createCharacter(username, name) {
 }
 
 async function run() {
-    // Official-era documentation protects chaotic characters through five PKs;
-    // both C4 reference packs use the 5/70 overall and 70/25/5 vs 50/40/10 item bands.
+    // C4 reference packs provide the 5/70 overall and 70/25/5 vs 50/40/10
+    // probability bands. Historical C4-era behavior additionally protects the
+    // equipped weapon until the character is chaotic with at least six PKs.
     const armor = item({ id: 101, selfId: 23, equipped: true, slot: 10, kind: 'Armor.Light' });
     const weapon = item({ id: 102, selfId: 1, enchant: 7, equipped: true, slot: 7, kind: 'Weapon.Sword' });
     const jewelry = item({ id: 103, selfId: 114, equipped: true, slot: 9, kind: 'Armor.Jewelry' });
@@ -66,14 +67,31 @@ async function run() {
     const inventory = [armor, weapon, jewelry, inventoryGear, shots, quest, adena];
 
     assert.strictEqual(DeathItemDrop.rulesFor(actor(inventory), { killerPlayable: true }).reason,
-        'ordinary_world_pvp', 'white characters do not drop in ordinary player PvP');
-    assert.strictEqual(DeathItemDrop.rulesFor(actor(inventory, { karma: 100, pk: 5 }), {}).reason,
-        'chaotic_pk_protected');
-    assert.strictEqual(DeathItemDrop.rulesFor(actor(inventory, { karma: 100, pk: 6 }), {}).eligible, true);
+        'ordinary_world_pvp', 'white characters do not drop in direct player PvP');
+    assert.strictEqual(DeathItemDrop.rulesFor(actor(inventory), { playerControlledKiller: true }).reason,
+        'ordinary_world_pvp', 'white characters do not drop when killed by a player-owned pet/servitor');
+
+    const lowPkPve = DeathItemDrop.rulesFor(actor(inventory, { karma: 100, pk: 5 }), {});
+    assert.strictEqual(lowPkPve.eligible, true,
+        'a low-PK chaotic character killed by an NPC remains exposed to ordinary PvE loss');
+    assert.strictEqual(lowPkPve.reason, 'chaotic_low_pk_pve_risk');
+    assert.strictEqual(lowPkPve.allowWeaponDrop, false);
+    assert.strictEqual(lowPkPve.rates, DeathItemDrop.NORMAL_RATES);
+    assert.strictEqual(DeathItemDrop.rulesFor(actor(inventory, { karma: 100, pk: 5 }),
+        { killerPlayable: true }).reason, 'chaotic_low_pk_pvp_protected');
+    assert.strictEqual(DeathItemDrop.rulesFor(actor(inventory, { karma: 100, pk: 5 }),
+        { playerControlledKiller: true }).reason, 'chaotic_low_pk_pvp_protected');
+
+    const highPk = DeathItemDrop.rulesFor(actor(inventory, { karma: 100, pk: 6 }), {});
+    assert.strictEqual(highPk.eligible, true);
+    assert.strictEqual(highPk.allowWeaponDrop, true);
+    assert.strictEqual(highPk.rates, DeathItemDrop.CHAOTIC_RATES);
     assert.strictEqual(DeathItemDrop.rulesFor(actor(inventory, { karma: 0, pk: 99 }), {}).reason,
-        'ordinary_pve_risk', 'cleared karma does not preserve chaotic rules');
+        'ordinary_pve_risk', 'cleared karma does not preserve chaotic rates or equipped-weapon risk');
+
     for (const context of [{ arena: true }, { festival: true }, { duel: true }, { olympiad: true },
         { event: true }, { lucky: true }, { pvpZone: true, killerPlayable: true },
+        { pvpZone: true, playerControlledKiller: true },
         { siegeZone: true, siegeParticipant: true, killerPlayable: true }]) {
         assert.strictEqual(DeathItemDrop.rulesFor(actor(inventory), context).eligible, false);
     }
@@ -93,11 +111,19 @@ async function run() {
     assert.strictEqual(armorHit.selected.length, 1);
     const armorMiss = DeathItemDrop.calculateDropPlan(actor([armor]), {}, sequence(0.049, 0.25));
     assert.strictEqual(armorMiss.selected.length, 0);
-    const weaponHit = DeathItemDrop.calculateDropPlan(actor([weapon]), {}, sequence(0, 0.049));
-    assert.strictEqual(weaponHit.selected[0].selfId, weapon.selfId,
-        'an equipped weapon remains eligible in ordinary C4 PvE death');
-    const weaponMiss = DeathItemDrop.calculateDropPlan(actor([weapon]), {}, sequence(0, 0.05));
-    assert.strictEqual(weaponMiss.selected.length, 0);
+
+    const whiteWeapon = DeathItemDrop.calculateDropPlan(actor([weapon]), {}, () => 0);
+    assert.strictEqual(whiteWeapon.selected.length, 0,
+        'equipped weapons are protected on ordinary/white PvE deaths');
+    assert.strictEqual(whiteWeapon.candidates.length, 0);
+    const lowPkWeapon = DeathItemDrop.calculateDropPlan(
+        actor([weapon], { karma: 100, pk: 5 }), {}, () => 0);
+    assert.strictEqual(lowPkWeapon.selected.length, 0,
+        'equipped weapons remain protected while chaotic PK count is below six');
+    const highPkWeapon = DeathItemDrop.calculateDropPlan(
+        actor([weapon], { karma: 100, pk: 6 }), {}, sequence(0, 0.099));
+    assert.strictEqual(highPkWeapon.selected[0].selfId, weapon.selfId,
+        'equipped weapons become eligible at chaotic PK count six or higher');
 
     const six = Array.from({ length: 6 }, (_, index) => item({
         id: 200 + index, selfId: 1000 + index, kind: 'Other.Material'
@@ -122,11 +148,14 @@ async function run() {
     assert.deepStrictEqual(coldPlan.selected.map((entry) => [entry.id, entry.selfId, entry.amount]),
         hotPlan.selected.map((entry) => [entry.id, entry.selfId, entry.amount]),
         'equivalent hot and cold states select the same economic objects');
+    assert(!hotPlan.selected.some((entry) => entry.selfId === weapon.selfId),
+        'white hot/cold plans both preserve the equipped weapon');
     const coldApplied = DeathItemDrop.applyColdDeath(cold,
         { cold: true, timestamp: 1, deathCount: 1, deathKey: 'cold:1:1' }, () => 0);
-    assert.strictEqual(Object.keys(coldApplied.state.inventory).length, 0,
-        'a selected stack transfers as the whole stack and equipped instances leave cold ownership');
-    assert.strictEqual(coldApplied.state.stats.equipment.length, 0);
+    assert.deepStrictEqual(Object.keys(coldApplied.state.inventory), ['1'],
+        'ordinary PvE loss can remove armor/stackables while preserving the equipped weapon');
+    assert.strictEqual(coldApplied.state.stats.equipment.length, 1);
+    assert.strictEqual(coldApplied.state.stats.equipment[0].selfId, weapon.selfId);
     const coldDuplicate = DeathItemDrop.applyColdDeath(coldApplied.state,
         { cold: true, timestamp: 1, deathCount: 1, deathKey: 'cold:1:1' }, () => {
             throw new Error('duplicate cold death must not consume RNG');
