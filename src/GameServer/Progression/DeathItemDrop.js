@@ -29,7 +29,12 @@ function hasLucky(subject, level) {
     return skills.some((skill) => Number(skill?.fetchSelfId?.() ?? skill?.selfId) === LUCKY_SKILL_ID);
 }
 
+function playerCaused(context = {}) {
+    return context.killerPlayable === true || context.playerControlledKiller === true;
+}
+
 function protectedContext(subject, context, chaotic) {
+    const killedByPlayer = playerCaused(context);
     if (context.noPenalty) return context.reason || 'explicit_no_penalty';
     if (context.arena || context.event || context.duel || context.olympiad) {
         return context.arena ? 'arena' : context.event ? 'event' : context.duel ? 'duel' : 'olympiad';
@@ -37,9 +42,9 @@ function protectedContext(subject, context, chaotic) {
     if (context.festival) return 'festival';
     const level = Math.max(1, numberValue(subject, 'fetchLevel', 'level'));
     if (context.lucky || hasLucky(subject, level)) return 'lucky';
-    if (context.pvpZone && context.killerPlayable && !context.siegeZone) return 'pvp_zone';
+    if (context.pvpZone && killedByPlayer && !context.siegeZone) return 'pvp_zone';
     if (context.siegeZone && context.siegeParticipant
-        && (context.killerPlayable || context.killerSiegeNpc)) return 'siege_participant';
+        && (killedByPlayer || context.killerSiegeNpc)) return 'siege_participant';
     if (context.clanWar && !chaotic) return 'clan_war';
     return null;
 }
@@ -48,25 +53,38 @@ function rulesFor(subject, context = {}) {
     const karma = Math.max(0, numberValue(subject, 'fetchKarma', 'karma', 'stats.karma'));
     const pkCount = Math.max(0, numberValue(subject, 'fetchPk', 'pk', 'pkCount', 'stats.pkCount', 'stats.pk'));
     const chaotic = karma > 0;
+    const killedByPlayer = playerCaused(context);
     const protectedReason = protectedContext(subject, context, chaotic);
     if (protectedReason) return { eligible: false, reason: protectedReason, karma, pkCount, chaotic };
-    if (chaotic && pkCount < CHAOTIC_PK_THRESHOLD) {
-        return { eligible: false, reason: 'chaotic_pk_protected', karma, pkCount, chaotic };
+
+    // The C3/C4 low-PK protection is a PvP protection. A chaotic character
+    // below the six-PK threshold can still suffer the ordinary PvE item-loss
+    // rule when killed by an NPC/monster.
+    if (chaotic && pkCount < CHAOTIC_PK_THRESHOLD && killedByPlayer) {
+        return { eligible: false, reason: 'chaotic_low_pk_pvp_protected', karma, pkCount, chaotic };
     }
-    if (!chaotic && context.killerPlayable) {
+    if (!chaotic && killedByPlayer) {
         return { eligible: false, reason: 'ordinary_world_pvp', karma, pkCount, chaotic };
     }
+
     const level = Math.max(1, numberValue(subject, 'fetchLevel', 'level'));
     if (!chaotic && level <= 4) {
         return { eligible: false, reason: 'new_character', karma, pkCount, chaotic };
     }
+
+    const fullChaoticRisk = chaotic && pkCount >= CHAOTIC_PK_THRESHOLD;
     return {
         eligible: true,
-        reason: chaotic ? 'chaotic_pk_risk' : 'ordinary_pve_risk',
+        reason: fullChaoticRisk ? 'chaotic_pk_risk'
+            : chaotic ? 'chaotic_low_pk_pve_risk' : 'ordinary_pve_risk',
         karma,
         pkCount,
         chaotic,
-        rates: chaotic ? CHAOTIC_RATES : NORMAL_RATES,
+        rates: fullChaoticRisk ? CHAOTIC_RATES : NORMAL_RATES,
+        // Equipped weapons are protected for ordinary/white deaths and for
+        // chaotic characters below six PKs. Only the full chaotic-risk state
+        // may place the equipped weapon in the death-drop pool.
+        allowWeaponDrop: fullChaoticRisk,
         maxDrops: MAX_DROPS
     };
 }
@@ -131,7 +149,10 @@ function rollPercent(rng, percent) {
 
 function calculateDropPlan(subject, context = {}, rng = Math.random) {
     const rules = rulesFor(subject, context);
-    const candidates = buildEligiblePool(subject);
+    const allCandidates = buildEligiblePool(subject);
+    const candidates = rules.allowWeaponDrop === false
+        ? allCandidates.filter((item) => item.category !== 'weapon')
+        : allCandidates;
     if (!rules.eligible) return { ...rules, candidates, selected: [] };
     if (!candidates.length) return { ...rules, eligible: false, reason: 'no_candidates', candidates, selected: [] };
     if (!rollPercent(rng, rules.rates.overall)) {
