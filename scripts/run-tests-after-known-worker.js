@@ -14,6 +14,8 @@ if (index < 0) {
 }
 
 const remaining = tests.slice(index + 1);
+const failures = [];
+
 console.log(`Known baseline failure recorded at ${knownFailure}.`);
 console.log(`Continuing canonical suite with ${remaining.length} test(s) after it.`);
 
@@ -25,9 +27,17 @@ for (const testFile of remaining) {
     });
 
     if (result.status !== 0) {
-        console.error(`\nPost-baseline suite stopped at ${testFile} (exit ${result.status || 1}).`);
-        process.exit(result.status || 1);
+        failures.push({ testFile, status: result.status || 1 });
+        console.error(`\nRecorded post-baseline failure: ${testFile} (exit ${result.status || 1}). Continuing...`);
     }
 }
 
-console.log('\nAll tests after the known companion pathfinding worker baseline failure passed.');
+if (failures.length) {
+    console.error('\nPost-baseline failures:');
+    for (const failure of failures) {
+        console.error(`- ${failure.testFile} (exit ${failure.status})`);
+    }
+    process.exitCode = 1;
+} else {
+    console.log('\nAll tests after the known companion pathfinding worker baseline failure passed.');
+}
