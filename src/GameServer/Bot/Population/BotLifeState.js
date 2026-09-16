@@ -2228,6 +2228,9 @@ const BotLifeState = {
                 restoreExpPercent: result.patch.restoreExpPercent,
                 timestamp
             }).state;
+        } else if (result.patch?.clearDeathExperience) {
+            progressionState = invoke('GameServer/Progression/DeathExperience')
+                .clearCold(progressionState, result.patch.clearDeathExperience);
         }
         const exp = progressionState.exp;
         const sp = Number(state.sp || 0) + Number(result.materialize?.sp || 0);
@@ -2416,9 +2419,32 @@ const BotLifeState = {
                 }
                 const row = rowFromState(profiledState);
                 return save(row)
-                    .then(() => Number(state.stats?.karma || 0) > 0
-                        ? Database.updateColdCharacterExperience(row.characterId, row.level, row.exp, row.sp)
-                        : Database.updateCharacterExperience(row.characterId, row.level, row.exp, row.sp))
+                    .then(() => {
+                        const deathRecord = profiledState.stats?.deathExperience;
+                        if (newDeath && deathRecord?.pendingRestoration) {
+                            return Database.applyCharacterDeathExperience({
+                                characterId: row.characterId,
+                                level: row.level,
+                                expBeforeDeath: deathRecord.expBeforeDeath,
+                                expLost: deathRecord.expLost,
+                                expAfterDeath: row.exp,
+                                deathContext: deathRecord.deathContext,
+                                penaltyAppliedAt: deathRecord.penaltyAppliedAt,
+                                karma: profiledState.stats?.karma
+                            });
+                        }
+                        if (result.patch?.restoreExpPercent !== undefined) {
+                            return Database.restoreCharacterDeathExperience(row.characterId, result.patch.restoreExpPercent, timestamp)
+                                .then((restored) => restored || Database.updateCharacterExperience(row.characterId, row.level, row.exp, row.sp));
+                        }
+                        if (result.patch?.clearDeathExperience) {
+                            return Database.clearCharacterDeathExperience(row.characterId, result.patch.clearDeathExperience, timestamp)
+                                .then(() => Database.updateCharacterExperience(row.characterId, row.level, row.exp, row.sp));
+                        }
+                        return Number(state.stats?.karma || 0) > 0
+                            ? Database.updateColdCharacterExperience(row.characterId, row.level, row.exp, row.sp)
+                            : Database.updateCharacterExperience(row.characterId, row.level, row.exp, row.sp);
+                    })
                     .then(() => Database.updateCharacterVitals(row.characterId, row.hp, row.maxHp, row.mp, row.maxMp))
                     .then(() => syncInventorySummary(row.characterId, profiledState.inventory))
                     .then(() => {

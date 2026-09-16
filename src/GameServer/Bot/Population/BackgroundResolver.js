@@ -311,6 +311,7 @@ function resolveDeathRecovery(state, timestamp = Date.now()) {
     return {
         patch: {
             activity: 'resting',
+            clearDeathExperience: 'restart_to_town',
             vitals: {
                 hp: combat.maxHp,
                 maxHp: combat.maxHp,

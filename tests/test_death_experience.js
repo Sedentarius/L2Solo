@@ -7,6 +7,7 @@ require('../src/Global');
 const Database = invoke('Database');
 const DataCache = invoke('GameServer/DataCache');
 const DeathExperience = invoke('GameServer/Progression/DeathExperience');
+const BotLifeState = invoke('GameServer/Bot/Population/BotLifeState');
 const databasePath = path.join(process.cwd(), 'tmp', 'test-death-experience.sqlite');
 
 fs.rmSync(databasePath, { force: true });
@@ -91,6 +92,13 @@ async function run() {
     assert.strictEqual(Number(storedCharacter.exp), ordinary.expAfterDeath, 'death EXP must persist immediately');
     assert.strictEqual(Number(storedDeath.pendingRestoration), 1);
 
+    const restartedCorpse = actorAt(id, level, ordinary.expAfterDeath);
+    const retriedDeath = DeathExperience.applyDeathPenalty(null, restartedCorpse, { timestamp: 101 });
+    const retryPersistence = await retriedDeath.persistence;
+    assert.strictEqual(retryPersistence.duplicate, true);
+    assert.strictEqual(restartedCorpse.snapshot().exp, ordinary.expAfterDeath,
+        'server restart retry must reconcile without duplicating the loss');
+
     persistentActor.deathExperience = null;
     const afterRestart = DeathExperience.restoreFromResurrection(null, persistentActor, { restoreExpPercent: 40, timestamp: 200 });
     const persistedRestore = await afterRestart.persistence;
@@ -99,6 +107,32 @@ async function run() {
     assert.strictEqual(Number(storedDeath.pendingRestoration), 0);
     assert.strictEqual(await Database.restoreCharacterDeathExperience(id, 40), null,
         'persistent restoration must not be reusable');
+
+    await Database.updateCharacterExperience(id, level, exp, 77);
+    const coldBase = {
+        characterId: id, accountName: 'death_exp', name: 'DeathExp', level, exp, sp: 77, adena: 0,
+        phase: 'cold', activity: 'hunting', currentRegion: 'test', spotId: null,
+        loc: { locX: 0, locY: 0, locZ: 0 },
+        vitals: { hp: 100, maxHp: 100, mp: 100, maxMp: 100 }, timing: {}, party: {}, inventory: {},
+        stats: { classId: 0, classProgressionLevel: level, classProgressionClassId: 0, karma: 0, deaths: 0 }
+    };
+    const coldDead = await BotLifeState.prepareResolve(coldBase, {
+        patch: { activity: 'dead', deathCount: 1, vitals: { ...coldBase.vitals, hp: 0 } },
+        events: [], materialize: { exp: 0, sp: 0, adena: 0, items: [] },
+        nextResolveAt: 400, debug: { fights: 1, wins: 0, died: true }
+    }, { timestamp: 400, persist: true, projectClassProgression: true });
+    assert.strictEqual(coldDead.exp, ordinary.expAfterDeath);
+    storedDeath = await Database.fetchCharacterDeathExperience(id);
+    assert.strictEqual(Number(storedDeath.pendingRestoration), 1,
+        'cold death must persist the same handoff-safe entitlement');
+    const coldRevived = await BotLifeState.prepareResolve(coldDead, {
+        patch: { activity: 'resting', restoreExpPercent: 40, vitals: { ...coldDead.vitals, hp: 1 } },
+        events: [], materialize: { exp: 0, sp: 0, adena: 0, items: [] },
+        nextResolveAt: 500, debug: { fights: 0, wins: 0 }
+    }, { timestamp: 500, persist: true, projectClassProgression: true });
+    assert.strictEqual(coldRevived.exp, ordinary.expAfterDeath + Math.round(expectedLoss * 0.4));
+    storedDeath = await Database.fetchCharacterDeathExperience(id);
+    assert.strictEqual(Number(storedDeath.pendingRestoration), 0);
 
     await Database.updateCharacterExperience(id, level, exp, 77);
     persistentActor.deathExperience = null;

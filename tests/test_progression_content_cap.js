@@ -9,6 +9,9 @@ const CharacterWriteQueue = invoke('GameServer/Persistence/CharacterWriteQueue')
 const ServerResponse = invoke('GameServer/Network/Response');
 const NeedsEvaluator = invoke('GameServer/Bot/Goals/NeedsEvaluator');
 const BotLifeState = invoke('GameServer/Bot/Population/BotLifeState');
+const DeathExperience = invoke('GameServer/Progression/DeathExperience');
+const QuestService = invoke('GameServer/Quest/QuestService');
+const NpcDied = invoke('GameServer/Actor/Generics/NpcDied');
 
 DataCache.init();
 
@@ -31,6 +34,7 @@ function actorAt(level, exp, karma = 0) {
         fetchPvp: () => 0,
         fetchPk: () => 0,
         setExpSp: (nextExp, nextSp) => { currentExp = nextExp; currentSp = nextSp; },
+        setLevel: (nextLevel) => { currentLevel = nextLevel; },
         setKarma: (value) => { currentKarma = value; },
         snapshot: () => ({ level: currentLevel, exp: currentExp, sp: currentSp, karma: currentKarma })
     };
@@ -74,6 +78,15 @@ async function run() {
         });
         assert.deepStrictEqual(actor.snapshot(), { level: 40, exp: level40Maximum, sp: 10, karma: 1000 });
         assert.deepStrictEqual(persisted, { id: 101, level: 40, exp: level40Maximum, sp: 10 });
+
+        const questActor = actorAt(40, level40Maximum);
+        QuestService.rewardExpSp({ ...session, actor: questActor }, 1000, 10);
+        assert.strictEqual(questActor.snapshot().exp, level40Maximum, 'quest EXP must not bank above the content cap');
+
+        const partyActor = actorAt(40, level40Maximum);
+        const [partyShare] = NpcDied.partyRewardShares([{ actor: partyActor }], 1000, 10);
+        ExperienceReward(session, partyActor, partyShare.exp, partyShare.sp);
+        assert.strictEqual(partyActor.snapshot().exp, level40Maximum, 'party EXP must not bank above the content cap');
     } finally {
         ServerResponse.userInfo = originalResponse.userInfo;
         ServerResponse.consoleText = originalResponse.consoleText;
@@ -126,6 +139,14 @@ async function run() {
         level40Maximum, config(78, 40));
     assert.strictEqual(belowCap.totalExp, level40Maximum);
     assert.strictEqual(ProgressionCap.levelForExperience(belowCap.totalExp), 40);
+
+    const level40Threshold = Number(DataCache.experience[39]);
+    const deathAtCap = actorAt(40, level40Threshold);
+    const death = DeathExperience.applyDeathPenalty(null, deathAtCap, { timestamp: 1 });
+    assert.strictEqual(deathAtCap.snapshot().level, 39, 'death must be able to cross below the content-cap level');
+    const recovered = ProgressionCap.applyAward(deathAtCap.snapshot().exp, death.expLost);
+    assert.strictEqual(ProgressionCap.levelForExperience(recovered.totalExp), 40,
+        'normal progression must recover back to the cap after death');
 
     console.log('progression content cap ok');
 }

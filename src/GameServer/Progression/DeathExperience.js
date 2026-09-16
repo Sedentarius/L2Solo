@@ -130,7 +130,14 @@ function applyDeathPenalty(session, actor, context = {}) {
     };
     actor.deathExperience = record;
     synchronizeActor(session, actor, record.expAfterDeath, level);
-    const persistence = queue(characterId, () => Database.applyCharacterDeathExperience(record));
+    const persistence = queue(characterId, () => Database.applyCharacterDeathExperience(record)).then((stored) => {
+        if (stored?.duplicate) {
+            actor.deathExperience = { ...stored, pendingRestoration: true };
+            synchronizeActor(session, actor, Number(stored.expAfterDeath),
+                ProgressionCap.levelForExperience(Number(stored.expAfterDeath), result.level));
+        }
+        return stored;
+    });
     return { ...result, levelAfterDeath: level, duplicate: false, deathRecord: record, persistence };
 }
 
@@ -211,6 +218,17 @@ function restoreCold(state, context = {}) {
     };
 }
 
+function clearCold(state, reason = 'restart_to_town') {
+    const record = state?.stats?.deathExperience;
+    if (!record?.pendingRestoration) return state;
+    return {
+        ...state,
+        stats: { ...(state.stats || {}), deathExperience: {
+            ...record, pendingRestoration: false, resolutionReason: reason
+        } }
+    };
+}
+
 function flush(characterId) {
     return pendingWrites.get(Number(characterId)) || Promise.resolve(null);
 }
@@ -223,6 +241,7 @@ module.exports = {
     clearPendingRestoration,
     applyColdDeath,
     restoreCold,
+    clearCold,
     levelInterval,
     flush
 };
