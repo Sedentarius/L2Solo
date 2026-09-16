@@ -6645,8 +6645,11 @@ const Database = {
                 return { ...existing, duplicate: true };
             }
             const sequence = Number(existing?.deathSequence || 0) + 1;
-            write('UPDATE characters SET level = ?, exp = ?, karma = COALESCE(?, karma) WHERE id = ?',
-                [record.level, record.expAfterDeath, Number.isFinite(Number(record.karma)) ? Number(record.karma) : null, id]);
+            write(`UPDATE characters SET level = ?, exp = ?,
+                sp = COALESCE(?, sp), karma = COALESCE(?, karma) WHERE id = ?`,
+            [record.level, record.expAfterDeath,
+                Number.isFinite(Number(record.sp)) ? Number(record.sp) : null,
+                Number.isFinite(Number(record.karma)) ? Number(record.karma) : null, id]);
             write(`INSERT INTO character_death_experience
                 (characterId, deathSequence, expBeforeDeath, expLost, expAfterDeath, deathContext,
                  penaltyAppliedAt, pendingRestoration, resolvedAt, resolutionReason)

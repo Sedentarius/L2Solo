@@ -2430,7 +2430,8 @@ const BotLifeState = {
                                 expAfterDeath: row.exp,
                                 deathContext: deathRecord.deathContext,
                                 penaltyAppliedAt: deathRecord.penaltyAppliedAt,
-                                karma: profiledState.stats?.karma
+                                karma: profiledState.stats?.karma,
+                                sp: row.sp
                             });
                         }
                         if (result.patch?.restoreExpPercent !== undefined) {
