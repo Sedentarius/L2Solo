@@ -53,6 +53,40 @@ for (const npcId of [8256, 8300]) {
     };
     assert.strictEqual(await QuestService.hasTalk(session, { fetchSelfId: () => 7006 }), true, 'Roxxy must expose the quest branch when Step into the Future can start');
     assert.strictEqual(await QuestService.hasTalk(session, { fetchSelfId: () => 7059 }), false, 'a gatekeeper without a relevant quest must stay teleport-only');
+    // Siff/Ciffon at the entrance uses the free C4 route, not Roxxy's paid town route.
+    const destination = { locX: 48736, locY: 248463, locZ: -6162, price: 0 };
+    assert.deepStrictEqual(GatekeeperTeleports.destination(7427, 30), destination);
+    assert.strictEqual(GatekeeperTeleports.destination(7006, 30), null);
+    assert.strictEqual(GatekeeperTeleports.destination(7427, 462), null);
+    const NpcTalk = invoke('GameServer/World/Generics/NpcTalk');
+    const Teleport = invoke('GameServer/World/Generics/NpcBypasses/GatekeeperTeleport');
+    const Generics = invoke(path.actor);
+    const originalTeleport = Generics.teleportTo;
+    const packets = [];
+    const arrivals = [];
+    const entranceSession = {
+        actor: { fetchLevel: () => 20, fetchRace: () => 0, backpack: {
+            fetchItemFromSelfId: () => null,
+            deleteItem: () => assert.fail('Entrance teleport must not charge Adena')
+        } },
+        questStatesLoaded: true, questStates: new Map(),
+        dataSendToMe: packet => packets.push(packet)
+    };
+    try {
+        Generics.teleportTo = (session, actor, coords) => arrivals.push(coords);
+        NpcTalk(entranceSession, {
+            fetchSelfId: () => 7427, fetchId: () => 1007427,
+            fetchName: () => 'Siff', fetchTitle: () => 'Gatekeeper'
+        });
+        await new Promise(resolve => setImmediate(resolve));
+        assert(packets.some(packet => packet[0] === 0x0f && packet.toString('utf16le', 5).includes('gatekeeper-teleport')),
+            'Talking to Siff at level 20 must offer teleport');
+        packets.length = 0;
+        Teleport(entranceSession, ['gatekeeper-teleport']);
+        assert(packets[0].toString('utf16le', 5).includes('gatekeeper-teleport 30'));
+        Teleport(entranceSession, ['gatekeeper-teleport', '30']);
+        assert.deepStrictEqual(arrivals, [destination], 'Level 20 with no Adena must enter the ruins');
+    } finally { Generics.teleportTo = originalTeleport; }
     console.log('gatekeeper teleport checks passed');
 })().catch((error) => {
     console.error(error);
