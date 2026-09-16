@@ -118,10 +118,14 @@ async function run() {
     };
     const coldDead = await BotLifeState.prepareResolve(coldBase, {
         patch: { activity: 'dead', deathCount: 1, vitals: { ...coldBase.vitals, hp: 0 } },
-        events: [], materialize: { exp: 0, sp: 0, adena: 0, items: [] },
+        events: [], materialize: { exp: 0, sp: 23, adena: 0, items: [] },
         nextResolveAt: 400, debug: { fights: 1, wins: 0, died: true }
     }, { timestamp: 400, persist: true, projectClassProgression: true });
     assert.strictEqual(coldDead.exp, ordinary.expAfterDeath);
+    assert.strictEqual(coldDead.sp, 100);
+    [storedCharacter] = await Database.execute(['SELECT level, exp, sp FROM characters WHERE id = ?', [id]]);
+    assert.strictEqual(Number(storedCharacter.sp), 100,
+        'cold death must persist the same SP to characters and bot_life_state');
     storedDeath = await Database.fetchCharacterDeathExperience(id);
     assert.strictEqual(Number(storedDeath.pendingRestoration), 1,
         'cold death must persist the same handoff-safe entitlement');
