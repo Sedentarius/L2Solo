@@ -18,6 +18,7 @@ const ColdCombatProfile = invoke('GameServer/Bot/Population/ColdCombatProfile');
 const InventorySummary = invoke('GameServer/Bot/Population/InventorySummary');
 const SpotRiskPolicy = invoke('GameServer/Bot/Population/SpotRiskPolicy');
 const WorldAreaCatalog = invoke('GameServer/World/WorldAreaCatalog');
+const ProgressionCap = invoke('GameServer/Progression/ProgressionCap');
 const cache = new LifeStateCache();
 const pendingWrites = new Map();
 const changeListeners = new Set();
@@ -104,17 +105,6 @@ function levelBand(level) {
 function targetLevelBandForSession(session, level) {
     if (session.newbieAnchor) return `1-${Config.newbieAnchorMaxLevel}`;
     return levelBand(level);
-}
-
-function levelForExp(exp, fallback = 1) {
-    const value = Number(exp || 0);
-    const table = DataCache.experience || [];
-    for (let i = 0; i < table.length - 1; i++) {
-        if (value >= table[i] && value < table[i + 1]) {
-            return i + 1;
-        }
-    }
-    return fallback;
 }
 
 function itemTemplate(selfId) {
@@ -2222,9 +2212,10 @@ const BotLifeState = {
         if (!state || !result) return Promise.resolve(null);
 
         const timestamp = Number(options.timestamp || now());
-        const exp = Number(state.exp || 0) + Number(result.materialize?.exp || 0);
+        const experienceAward = ProgressionCap.applyAward(state.exp, result.materialize?.exp);
+        const exp = experienceAward.totalExp;
         const sp = Number(state.sp || 0) + Number(result.materialize?.sp || 0);
-        const level = levelForExp(exp, Number(state.level || 1));
+        const level = ProgressionCap.levelForExperience(exp, Number(state.level || 1));
         const materializedItems = result.materialize?.items || [];
         const materializedAdenaItems = materializedItems
             .filter((item) => Number(item.selfId) === 57)
@@ -2258,15 +2249,20 @@ const BotLifeState = {
         const stats = {
             ...patchedStats,
             karma: Math.max(0, Number(state.stats?.karma || 0) - Math.floor(
-                Math.max(0, Number(result.materialize?.exp || 0)) / invoke('GameServer/Karma').XP_DIVIDER)),
+                experienceAward.accepted / invoke('GameServer/Karma').XP_DIVIDER)),
             fightsWon: Number(state.stats?.fightsWon || 0) + Number(result.debug?.wins || 0),
             fightsResolved: Number(state.stats?.fightsResolved || 0) + Number(result.debug?.fights || 0),
             deaths: Number(result.patch?.deathCount ?? state.stats?.deaths ?? 0),
-            expEarned: Number(state.stats?.expEarned || 0) + Number(result.materialize?.exp || 0),
+            expEarned: Number(state.stats?.expEarned || 0) + experienceAward.accepted,
             spEarned: Number(state.stats?.spEarned || 0) + Number(result.materialize?.sp || 0),
             adenaEarned: Number(state.stats?.adenaEarned || 0) + Number(result.materialize?.adena || 0) + materializedAdenaItems,
             route: result.debug?.route || state.stats?.route || null,
             lastResolveDebug: compactResolveDebug(result.debug),
+            lastExperienceAward: {
+                requested: experienceAward.requested,
+                accepted: experienceAward.accepted,
+                discarded: experienceAward.discarded
+            },
             ...(targetCombat ? { targetCombat } : {})
         };
         const inventory = { ...(state.inventory || {}) };

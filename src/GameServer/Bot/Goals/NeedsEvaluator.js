@@ -4,6 +4,7 @@ const ItemDisposition = invoke('GameServer/Bot/Economy/ItemDisposition');
 const GearLifecycle = invoke('GameServer/Bot/AI/GearLifecycle');
 const PersonaEconomicPolicy = invoke('GameServer/Bot/Economy/PersonaEconomicPolicy');
 const WealthInvestmentPolicy = invoke('GameServer/Bot/Economy/WealthInvestmentPolicy');
+const ProgressionCap = invoke('GameServer/Progression/ProgressionCap');
 
 const RANK_ORDER = ['none', 'd', 'c', 'b', 'a', 's'];
 const NPC_GEAR_PRIORITY = {
@@ -313,14 +314,16 @@ function evaluate(state = {}, options = {}) {
         });
     }
 
-    candidates.push({
-        type: 'progress_level',
-        priority: 35,
-        target: { level: level + 1 },
-        plan: routePlan(state, spot),
-        blockers: spot ? [] : ['missing_spot'],
-        nextReviewAt: timestamp + 12 * 60 * 1000
-    });
+    if (level < ProgressionCap.effectiveLevelCap()) {
+        candidates.push({
+            type: 'progress_level',
+            priority: 35,
+            target: { level: level + 1 },
+            plan: routePlan(state, spot),
+            blockers: spot ? [] : ['missing_spot'],
+            nextReviewAt: timestamp + 12 * 60 * 1000
+        });
+    }
 
     return candidates;
 }
