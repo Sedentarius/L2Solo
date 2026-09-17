@@ -31,6 +31,7 @@ function eligible(state) {
 
 function proposalFromStates(states = [], options = {}) {
     const timestamp = Number(options.timestamp || Date.now());
+    const priorityClans = new Set((options.priorityClanIds || []).map(Number).filter(id => id > 0));
     const candidateLimit = Math.max(2, Math.min(64, Number(options.candidateLimit) || 12));
     const defaultMinSize = Math.max(2, Number(options.minSize) || 2);
     const defaultMaxSize = Math.max(defaultMinSize, Number(options.maxSize) || 5);
@@ -51,19 +52,22 @@ function proposalFromStates(states = [], options = {}) {
         if (!objective) return;
         const spotId = spotFor(state, objective);
         if (!spotId) return;
-        if (!groups.has(spotId)) groups.set(spotId, []);
-        groups.get(spotId).push({ state, objective });
+        const key = objective.clanGoalKey ? `${spotId}:${objective.clanGoalKey}` : spotId;
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key).push({ state, objective });
     });
     const requiredCount = [...groups.values()].reduce((sum, group) => sum + group.length, 0);
-    const ordered = [...groups.entries()].map(([spotId, group]) => ({
-        spotId,
+    const ordered = [...groups.values()].map(group => ({
+        spotId: spotFor(group[0].state, group[0].objective),
+        playerClan: group.some(({ objective }) => objective.clanGoalKey && priorityClans.has(Number(objective.clanId))),
         group,
         oldestAt: Math.min(...group.map(({ state, objective }) => Number(
             objective.requestedAt || state.timing?.activityStartedAt || state.updatedAt || timestamp
         ))),
-        activeParties: Number(activePartyIdsBySpot.get(spotId)?.size || 0)
+        activeParties: Number(activePartyIdsBySpot.get(spotFor(group[0].state, group[0].objective))?.size || 0)
     })).sort((left, right) => (
-        (right.group.length / (1 + right.activeParties)) - (left.group.length / (1 + left.activeParties))
+        Number(right.playerClan) - Number(left.playerClan)
+        || (right.group.length / (1 + right.activeParties)) - (left.group.length / (1 + left.activeParties))
         || left.oldestAt - right.oldestAt
         || left.spotId.localeCompare(right.spotId)
     ));

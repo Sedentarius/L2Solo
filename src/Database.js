@@ -2589,7 +2589,7 @@ const Database = {
     },
 
     commitBackgroundPartyMembership({ party, members = [], event = null, review = false, expectedPartyUpdatedAt = null,
-        expectedPhase = 'cold', canCommitHot = null } = {}) {
+        expectedPhase = 'cold', canCommitHot = null, preserveClanOperations = false } = {}) {
         const batch = Array.isArray(members) ? members.slice(0, 40) : [];
         const characterIds = [...new Set(batch.map((entry) => Number(entry?.row?.characterId)).filter((id) => (
             Number.isSafeInteger(id) && id > 0
@@ -2644,7 +2644,7 @@ const Database = {
             const reserved = all(`SELECT characterId FROM clan_operation_members
                 WHERE characterId IN (${placeholders}) AND status = 'active'`, characterIds)
                 .map((row) => Number(row.characterId));
-            if (reserved.length && !review) return { ok: false, reason: 'clan_operation_reserved', conflicts: reserved };
+            if (reserved.length && (!review || preserveClanOperations)) return { ok: false, reason: 'clan_operation_reserved', conflicts: reserved };
 
             write(`INSERT INTO bot_background_parties (
                 partyId, leaderId, memberIdsJson, spotId, startedAt, nextResolveAt,

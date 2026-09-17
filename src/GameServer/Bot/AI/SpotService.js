@@ -398,6 +398,20 @@ const SpotService = {
         return null;
     },
 
+    arrivalPointsForParty(members, spot) {
+        const anchor = this.arrivalPointForState(members[0], spot);
+        if (!anchor) return null;
+        const shared = { ...spot, arrivalPoints: [anchor] };
+        const result = {};
+        for (const member of members) {
+            const point = this.arrivalPointForState(member, shared);
+            if (!point || Math.hypot(point.locX - anchor.locX, point.locY - anchor.locY) > 400
+                || Math.abs(point.locZ - anchor.locZ) > 100) return null;
+            result[String(member.characterId)] = point;
+        }
+        return result;
+    },
+
     describe(spot) {
         if (!spot) return 'unknown spot';
         return `${spot.name} (Lv ${spot.minLevel}-${spot.maxLevel}, density ${spot.density})`;

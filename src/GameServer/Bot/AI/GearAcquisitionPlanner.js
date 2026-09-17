@@ -970,6 +970,7 @@ function clanGoalPlanLocked(state = {}, plan = state?.stats?.equipmentPlan) {
     const npcId = Number(plan?.next?.npcId || 0);
     return isClanOwnedPlan(plan)
         && !equipmentTargetFulfilled(state, plan)
+        && !require('./EquipmentAcquisitionProgress').componentAcquired(state, plan)
         && (
             plan?.status === 'blocked' && plan?.reason === 'equipment_effort_limit'
             || plan?.status !== 'blocked' && (!npcId || isBotEligibleSourceNpcId(npcId))

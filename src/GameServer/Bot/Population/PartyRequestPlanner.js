@@ -49,7 +49,7 @@ function partyRequestForPlan(state, plan, timestamp = Date.now()) {
         && plan?.status === 'active' && previous.spotId === plan.next?.spotId
         && Number(previous.npcId) === Number(plan.next?.npcId || plan.targetNpcId)
         ? { ...previous, status: 'open' } : null;
-    const objective = partyObjectiveForPlan(plan) || clanPartyObjectiveForState(state) || sharedTarget;
+    const objective = clanPartyObjectiveForState(state) || partyObjectiveForPlan(plan) || sharedTarget;
     if (!objective) return null;
     const sameRequest = ['open', 'deferred'].includes(previous?.status)
         && previous.objectiveKey === objective.objectiveKey

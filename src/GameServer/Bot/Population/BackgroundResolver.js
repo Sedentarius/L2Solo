@@ -1,3 +1,4 @@
+const PveEncounter = require('./ColdPveEncounter');
 const ProgressionRates = invoke('GameServer/ProgressionRates');
 const BackgroundDropResolver = invoke('GameServer/Bot/Population/BackgroundDropResolver');
 const DataCache = invoke('GameServer/DataCache');
@@ -618,7 +619,9 @@ function summonDamage(fighter, mob, rng) {
 function resolveFight({ state, spot, pressure, targetNpcId = 0, rng, timestamp = Date.now(), fightLimitMs = 12000, maxActions = 48 }) {
     const fightState = mutableCombatState(state);
     let bot = botCombatStats(fightState, timestamp);
-    const mob = ColdCombatProfile.npcForSpot(spot, rng, { preferredNpcId: targetNpcId,
+    const encounterKey = PveEncounter.key([state], spot, targetNpcId);
+    const pending = PveEncounter.read(state.stats?.pveEncounter, encounterKey, timestamp);
+    const mob = pending?.mob || ColdCombatProfile.npcForSpot(spot, rng, { preferredNpcId: targetNpcId,
         matchupProfiles: TargetMatchup.coldProfiles(bot, fightState, timestamp) }) || {
         level: Number(spot.avgLevel || bot.level), maxHp: Math.max(1, Number(spot.mob?.hp || 1)),
         pAtk: Math.max(1, Number(spot.mob?.damage || 1)), pAtkRnd: 0, pDef: 1, mDef: 1,
@@ -644,10 +647,10 @@ function resolveFight({ state, spot, pressure, targetNpcId = 0, rng, timestamp =
         potionsUsed: 0,
         potionHot: null
     };
-    let botReadyAt = 0;
-    let mobReadyAt = 0;
+    let botReadyAt = Number(pending?.botReadyAt || 0);
+    let mobReadyAt = Number(pending?.mobReadyAt || 0);
     let time = 0;
-    let mobHp = mob.maxHp;
+    let mobHp = pending?.hp ?? mob.maxHp;
     let actions = 0;
     let skillUses = 0;
     let heals = 0;
@@ -799,6 +802,9 @@ function resolveFight({ state, spot, pressure, targetNpcId = 0, rng, timestamp =
     if (!won) {
         return {
             won: false,
+            encounter: !died ? PveEncounter.save(pending, encounterKey, mob, mobHp, timestamp, {
+                botReadyAt: Math.max(0, botReadyAt - time), mobReadyAt: Math.max(0, mobReadyAt - time)
+            }) : null,
             died,
             hp: Math.max(0, Math.round(vitals.hp)),
             maxHp: Math.max(1, Math.round(vitals.maxHp)),
@@ -892,7 +898,9 @@ function applyAllyHeal(caster, allies, heal) {
     return helped;
 }
 
-function resolvePartyFight({ members, spot, targetNpcId = 0, rng = Math.random, timestamp = Date.now() }) {
+function resolvePartyFight({ members, spot, targetNpcId = 0, rng = Math.random, timestamp = Date.now(), encounter = null, partyId = '' }) {
+    const encounterKey = PveEncounter.key(members, spot, targetNpcId, partyId);
+    const pending = PveEncounter.read(encounter, encounterKey, timestamp);
     const fighters = members.map((state) => {
         const fighterState = mutableCombatState(state);
         const profile = botCombatStats(fighterState, timestamp);
@@ -908,7 +916,7 @@ function resolvePartyFight({ members, spot, targetNpcId = 0, rng = Math.random, 
                 maxMp: profile.maxMp
             },
             cooldowns: { ...(state.stats?.coldCombat?.cooldowns || {}) },
-            readyAt: 0,
+            readyAt: Number(pending?.readyAt?.[state.characterId] || 0),
             actions: 0,
             skillUses: 0,
             heals: 0,
@@ -923,16 +931,16 @@ function resolvePartyFight({ members, spot, targetNpcId = 0, rng = Math.random, 
             now: timestamp
         };
     });
-    const matchupProfiles = fighters.filter(f => f.vitals.hp > 0)
+    const matchupProfiles = pending ? [] : fighters.filter(f => f.vitals.hp > 0)
         .flatMap(f => TargetMatchup.coldProfiles(f.profile, f.state, timestamp));
-    const mob = ColdCombatProfile.npcForSpot(spot, rng, { preferredNpcId: targetNpcId, matchupProfiles }) || {
+    const mob = pending?.mob || ColdCombatProfile.npcForSpot(spot, rng, { preferredNpcId: targetNpcId, matchupProfiles }) || {
         level: Number(spot.avgLevel || 1), maxHp: Math.max(1, Number(spot.mob?.hp || 1)),
         pAtk: Math.max(1, Number(spot.mob?.damage || 1)), pAtkRnd: 0, pDef: 1, mDef: 1,
         accur: 1, evasion: 0, critical: 0, atkSpd: 253
     };
     if (mob.avoided) return { avoided: true, reason: mob.reason, members: fighters, won: false };
-    let mobHp = mob.maxHp;
-    let mobReadyAt = 0;
+    let mobHp = pending?.hp ?? mob.maxHp;
+    let mobReadyAt = Number(pending?.mobReadyAt || 0);
     let time = 0;
     let actions = 0;
     const fightLimitMs = 15000;
@@ -958,7 +966,7 @@ function resolvePartyFight({ members, spot, targetNpcId = 0, rng = Math.random, 
         const summonActs = nextSummon && summonReadyAt <= ownerReadyAt && summonReadyAt <= mobReadyAt;
         const botActs = !summonActs && next && ownerReadyAt <= mobReadyAt;
         time = summonActs ? summonReadyAt : botActs ? ownerReadyAt : mobReadyAt;
-        if (time >= fightLimitMs) break;
+        if (time >= fightLimitMs) { time = fightLimitMs; break; }
         fighters.forEach((fighter) => applyColdPotionTicks(fighter, time));
         actions += 1;
 
@@ -1079,6 +1087,11 @@ function resolvePartyFight({ members, spot, targetNpcId = 0, rng = Math.random, 
     return {
         won: mobHp <= 0,
         timedOut: mobHp > 0 && fighters.some((fighter) => fighter.vitals.hp > 0),
+        encounter: mobHp > 0 && fighters.every(fighter => fighter.vitals.hp > 0)
+            ? PveEncounter.save(pending, encounterKey, mob, mobHp, timestamp, {
+                mobReadyAt: Math.max(0, mobReadyAt - time),
+                readyAt: Object.fromEntries(fighters.map(f => [f.state.characterId, Math.max(0, f.readyAt - time)]))
+            }) : null,
         members: fighters,
         help: [...help.values()],
         debug: {
@@ -1215,6 +1228,8 @@ const BackgroundResolver = {
             return resolveRest(state, elapsedMs, timestamp);
         }
 
+        if (require('./ClanPartyDuty').waiting(state)) return require('./ClanPartyDuty').hold(state, timestamp);
+
         if (!spot) {
             return {
                 patch: {},
@@ -1264,12 +1279,13 @@ const BackgroundResolver = {
         const actionBudget = fights * 48;
         const events = [];
         const materialize = { exp: 0, sp: 0, adena: 0, items: [] };
+        const continuing = PveEncounter.read(state.stats?.pveEncounter, PveEncounter.key([state], spot, targetNpcId), timestamp);
         const patch = {
-            vitals: applyStandingRegen(state, state.vitals, elapsedMs, timestamp),
+            vitals: continuing ? { ...state.vitals } : applyStandingRegen(state, state.vitals, elapsedMs, timestamp),
             activity: 'hunting',
             // A prior recovery deadline must not reschedule a new hunt in the
             // past. A fight that needs recovery below assigns a fresh deadline.
-            stats: { ...(state.stats || {}), restUntil: null },
+            stats: { ...(state.stats || {}), restUntil: null, pveEncounter: continuing },
             spotId: spot.id
         };
 
@@ -1285,6 +1301,7 @@ const BackgroundResolver = {
         let combatMs = 0;
         const foughtNpcIds = [];
         let attemptedFights = 0;
+        let completedFights = 0;
 
         for (let i = 0; i < fights; i++) {
             if (combatMs >= combatBudgetMs || combatActions >= actionBudget) break;
@@ -1302,6 +1319,8 @@ const BackgroundResolver = {
                 break;
             }
             attemptedFights += 1;
+            if (result.won || result.died) completedFights += 1;
+            patch.stats.pveEncounter = result.encounter || null;
             patch.vitals.hp = result.hp;
             patch.vitals.maxHp = result.maxHp;
             patch.vitals.mp = result.mp;
@@ -1352,6 +1371,8 @@ const BackgroundResolver = {
             const hpPct = patch.vitals.hp / Math.max(1, patch.vitals.maxHp || patch.vitals.hp);
             const mpPct = patch.vitals.mp / Math.max(1, patch.vitals.maxMp || patch.vitals.mp || 1);
             if (needsRest(fightState, patch.vitals)) {
+                if (patch.stats.pveEncounter) completedFights += 1;
+                patch.stats.pveEncounter = null;
                 patch.activity = 'resting';
                 patch.stats = {
                     ...(patch.stats || state.stats || {}),
@@ -1363,6 +1384,14 @@ const BackgroundResolver = {
                     weight: 2,
                     meta: { spotId: spot.id, hpPct, mpPct }
                 });
+                break;
+            }
+            if (result.debug?.timedOut) {
+                if (patch.stats.pveEncounter?.slices >= PveEncounter.MAX_SLICES) {
+                    patch.stats.pveEncounter = null;
+                    patch.stats.lastReason = 'pve_encounter_stalled';
+                    completedFights += 1;
+                }
                 break;
             }
         }
@@ -1387,7 +1416,9 @@ const BackgroundResolver = {
             nextResolveAt: patch.stats?.restUntil || timestamp + 30000 + Math.round(rng() * 90000),
             debug: {
                 elapsedMs,
-                fights: attemptedFights,
+                fights: completedFights,
+                attemptedFights,
+                pendingFight: !!patch.stats.pveEncounter,
                 wins,
                 died,
                 dropsRolled: materialize.items.length,
@@ -1415,12 +1446,15 @@ BackgroundResolver.resolveSolo = (options = {}) => {
     const timestamp = options.timestamp ?? Date.now();
     const competition = require('./ColdCompetitionWait').consume(options.state, options.elapsedMs ?? 60000, timestamp);
     const competitionReason = options.state?.stats?.coldCompetition?.action === 'contest' ? 'competition_contest' : 'competition_yield';
-    if (competition.waiting) return { patch: {}, events: [], materialize: { exp: 0, sp: 0, adena: 0, items: [] },
+    if (competition.waiting) return { patch: { stats: { ...options.state?.stats, pveEncounter: null } }, events: [], materialize: { exp: 0, sp: 0, adena: 0, items: [] },
         nextResolveAt: competition.until, debug: { reason: competitionReason, fights: 0, wins: 0 } };
     const result = options.state?.stats?.coldCompetition?.wait && competition.state && competition.elapsedMs === 0
         ? { patch: { stats: competition.state.stats }, events: [], materialize: { exp: 0, sp: 0, adena: 0, items: [] },
             nextResolveAt: timestamp + 1000, debug: { reason: competitionReason, fights: 0, wins: 0 } }
         : resolveSolo({ ...options, state: competition.state, elapsedMs: competition.elapsedMs, timestamp });
+    if (options.state?.stats?.pveEncounter && !Object.hasOwn(result.debug || {}, 'pendingFight')) {
+        result.patch = { ...result.patch, stats: { ...(result.patch?.stats || options.state.stats), pveEncounter: null } };
+    }
     if (options.state?.stats?.coldCompetition?.wait) {
         result.patch = { ...result.patch, stats: { ...(result.patch?.stats || competition.state.stats),
             coldCompetition: { ...competition.state.stats.coldCompetition, wait: null } } };

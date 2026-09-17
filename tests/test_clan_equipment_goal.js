@@ -56,6 +56,14 @@ async function main() {
     Database.init();
     await LifeState.init();
 
+    // This fixture supplies deterministic local plans; account inference
+    // configuration and worker catalogs must not bypass that test double.
+    const config = invoke('GameServer/Clan/ClanSimulationConfig');
+    const planning = require('../src/GameServer/Clan/ClanPlanningCoordinator');
+    const originalLlm = config.llmGoalManagementEnabled;
+    const originalWorkerEnabled = planning.enabled;
+    config.llmGoalManagementEnabled = false;
+    planning.enabled = () => false;
     const originalPlanFor = GearAcquisitionPlanner.planFor;
     const originalSpotEnsure = SpotProfiles.ensure;
     GearAcquisitionPlanner.planFor = (state) => {
@@ -184,6 +192,8 @@ async function main() {
 
         console.log('Clan equipment goal checks passed');
     } finally {
+        config.llmGoalManagementEnabled = originalLlm;
+        planning.enabled = originalWorkerEnabled;
         GearAcquisitionPlanner.planFor = originalPlanFor;
         SpotProfiles.ensure = originalSpotEnsure;
         await Database.close();

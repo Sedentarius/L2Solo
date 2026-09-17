@@ -363,12 +363,10 @@ async function assignPartyObjective(member, clan, goal, plan, priority = 'prefer
     }
     if (stateHasSameClanObjective(current, objective)) return { ok: true, changed: false, memberId: id };
     const nextObjective = { ...objective, clanId: number(clan.id) };
-    const currentRequest = current.stats?.partyRequest;
-    const partyRequest = currentRequest?.priority === 'required' && !currentRequest?.clanGoalKey
-        ? currentRequest
-        : nextObjective;
+    const partyRequest = nextObjective;
     const saved = await LifeState.upsertState({
         ...current,
+        activity: current.phase === 'cold' && current.activity === 'hunting' ? 'party_wait' : current.activity,
         stats: {
             ...(current.stats || {}),
             clanId: number(clan.id),

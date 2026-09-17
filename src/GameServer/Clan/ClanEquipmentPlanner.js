@@ -136,6 +136,9 @@ function planForMember(member, spots = [], warehouseRows = [], options = {}) {
                 ])]
             });
         }
+        if (existing && require('../Bot/AI/EquipmentAcquisitionProgress').componentAcquired(state, existing)) {
+            return GearAcquisitionPlanner.planFor(state, plannerOptions);
+        }
         if (existing && GearAcquisitionPlanner.clanGoalPlanLocked(planningMember, existing)) return existing;
         if (existing && existing.strategy !== 'craft') return existing;
         const initial = existing || GearAcquisitionPlanner.planFor(state, plannerOptions);
