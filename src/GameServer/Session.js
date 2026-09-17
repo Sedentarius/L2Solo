@@ -200,7 +200,13 @@ class Session {
         // Weird, sometimes the packet is sent twofold/duplicated. I had to limit it based on the header size...
         const packet = data.slice(2, data.readInt16LE());
         this.tracePacket('in', packet, packetName(CLIENT_PACKET_NAMES, packetOpcode(packet)));
-        Opcodes.table[packet[0]](this, packet);
+        if (this.enterWorldReady) {
+            const actor = this.actor;
+            return this.enterWorldReady.then(() => {
+                if (this.actor === actor) return Opcodes.table[packet[0]](this, packet);
+            }).catch(error => utils.infoWarn('Character', 'login packet deferred: %s', error.message));
+        }
+        return Opcodes.table[packet[0]](this, packet);
     }
 
     dataSendToMe(data) {

@@ -170,9 +170,12 @@ function restoreFromResurrection(session, actor, context = {}) {
 function clearPendingRestoration(characterOrId, reason = 'invalidated', timestamp = Date.now()) {
     const actor = typeof characterOrId === 'object' ? characterOrId : null;
     const characterId = Number(actor?.fetchId?.() || actor?.characterId || characterOrId || 0);
-    if (actor?.deathExperience) {
-        actor.deathExperience.pendingRestoration = false;
-        actor.deathExperience.resolutionReason = reason;
+    if (actor) {
+        // Invalidate an unloaded record too, without manufacturing a death
+        // snapshot that has no EXP values or death timestamp.
+        actor.deathExperienceRevision = Number(actor.deathExperienceRevision || 0) + 1;
+        actor.deathExperience = actor.deathExperience
+            ? { ...actor.deathExperience, pendingRestoration: false, resolutionReason: reason } : null;
     }
     return queue(characterId, () => Database.clearCharacterDeathExperience(characterId, reason, timestamp));
 }
@@ -237,9 +240,10 @@ function load(actor) {
     const characterId = Number(actor?.fetchId?.() || 0);
     if (!characterId || !databaseReady()) return Promise.resolve(null);
     const previous = actor.deathExperience;
+    const revision = Number(actor.deathExperienceRevision || 0);
     return queue(characterId, () => Database.fetchCharacterDeathExperience(characterId)).then((record) => {
         // An in-flight login read must not replace a newer death or revival.
-        if (actor.deathExperience !== previous) return actor.deathExperience;
+        if (actor.deathExperience !== previous || Number(actor.deathExperienceRevision || 0) !== revision) return actor.deathExperience;
         actor.deathExperience = record ? {
             ...record,
             pendingRestoration: Number(record.pendingRestoration) === 1,

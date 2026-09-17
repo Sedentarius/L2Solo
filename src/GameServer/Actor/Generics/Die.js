@@ -25,12 +25,12 @@ function die(session, actor, context = {}) {
     const victimSession = actor.session || session;
     const ArenaDuelService = invoke('GameServer/World/ArenaDuelService');
     if (typeof actor.fetchExp === 'function' && typeof actor.setExpSp === 'function' && !actor.fetchKind) {
-        const source = context.source || context.killer || session?.actor;
+        const killer = context.killer ?? context.source;
         invoke('GameServer/Progression/DeathExperience').applyDeathPenalty(victimSession, actor, {
             timestamp: context.timestamp,
             arena: victimSession?.arenaEphemeral === true || !!victimSession?.arenaDuelId
                 || !!ArenaDuelService.duelForActor?.(actor),
-            killerPlayable: !!source && !source.fetchKind,
+            killerPlayable: !!killer && killer !== actor && !killer.fetchKind,
             clanWar: context.clanWar === true,
             festival: context.festival === true,
             event: context.event === true,

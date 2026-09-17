@@ -36,6 +36,11 @@ function experienceReward(session, actor, exp, sp) {
     const resolvedLevel = ProgressionCap.levelForExperience(totalExp, actor.fetchLevel());
     if (resolvedLevel && resolvedLevel > actor.fetchLevel()) {
         invoke(path.actor).levelUp(session, actor, resolvedLevel);
+    } else if (resolvedLevel && resolvedLevel < actor.fetchLevel()) {
+        actor.setLevel(resolvedLevel);
+        invoke(path.actor).calculateStats(session, actor);
+        actor.refreshVitalsRegeneration?.();
+        session.dataSendToOthers?.(ServerResponse.charInfo(actor), actor);
     }
 
     // Update stats

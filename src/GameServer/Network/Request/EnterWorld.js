@@ -14,7 +14,7 @@ function sendClanWindow(session) {
 }
 
 function enterWorld(session, buffer) {
-    const continueEnter = () => {
+    const continueEnter = async () => {
         session.dataSendToMe(ServerResponse.itemsList(session.actor.backpack.fetchItems()));
         const shortcutsReady = Database.fetchMacros(session.actor.fetchId()).then((macros) => {
             const revision = (session.macroRevision || 0) + 1;
@@ -30,6 +30,7 @@ function enterWorld(session, buffer) {
             session.dataSendToMe(ServerResponse.shortcutInit(shortcuts, session.actor.skillset));
             session.dataSendToMe(ServerResponse.skillCoolTime(session.actor));
         }).catch(error => utils.infoWarn('Character', 'shortcut login initialization failed: %s', error.message));
+        await skillsReady;
         session.dataSendToMe(GameTime.isNight() ? ServerResponse.sunset() : ServerResponse.sunrise());
         sendClanWindow(session);
         const questActor = session.actor;
@@ -48,12 +49,16 @@ function enterWorld(session, buffer) {
             .catch((error) => utils.infoWarn('AfkTrade', 'notification delivery failed: %s', error.message));
     };
 
-    ShotStock.ensureActorStock(session.actor, { targetAmount: ShotStock.DEFAULT_TARGET_AMOUNT })
-        .then(continueEnter)
+    const ready = ShotStock.ensureActorStock(session.actor, { targetAmount: ShotStock.DEFAULT_TARGET_AMOUNT })
         .catch((err) => {
             utils.infoWarn('Character', 'starter shot stock failed for %s: %s', session.actor.fetchName(), err.message);
-            continueEnter();
-        });
+        }).then(continueEnter);
+    const tracked = ready.finally(() => {
+        if (session.enterWorldReady === tracked) session.enterWorldReady = null;
+    });
+    session.enterWorldReady = tracked;
+    tracked.catch(error => utils.infoWarn('Character', 'world entry failed: %s', error.message));
+    return tracked;
 }
 
 module.exports = enterWorld;

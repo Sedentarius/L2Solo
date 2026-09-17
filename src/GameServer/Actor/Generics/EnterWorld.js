@@ -18,9 +18,9 @@ function refreshLoadedSkillState(session, actor, Generics, response = ServerResp
     session.dataSendToOthers?.(response.charInfo(actor), actor);
 }
 
-function enterWorld(session, actor) {
+async function enterWorld(session, actor) {
     const Generics = invoke(path.actor);
-    const deathReady = invoke('GameServer/Progression/DeathExperience').load(actor);
+    await invoke('GameServer/Progression/DeathExperience').load(actor);
 
     // Set character as online
     actor.setIsOnline(true);
@@ -75,7 +75,7 @@ function enterWorld(session, actor) {
     // Default welcome
     ConsoleText.transmit(session, ConsoleText.caption.welcome);
 
-    return Promise.all([skillReady, deathReady]);
+    return skillReady;
 }
 
 module.exports = enterWorld;

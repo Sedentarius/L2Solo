@@ -307,16 +307,20 @@ function ensureCharacter(username, index, base = baseForIndex(index), seedProfil
         if (characters[0]) {
             const character = characters[0];
             const profile = profileForIndex(index, base, seedProfile);
-            const level = base.serviceCrafter ? profile.level : Number(character.level || profile.level);
+            const level = base.serviceCrafter ? profile.level : ProgressionCap.clampLevel(character.level || profile.level);
+            const exp = ProgressionCap.clampTotalExperience(character.exp || expForLevel(level));
+            const lowered = !base.serviceCrafter && Number(character.level) > level;
             const adena = Number(character.adena || Math.round(level * 85));
             const classId = base.serviceCrafter ? base.classId : character.classId;
             const classChanged = Number(character.classId) !== Number(classId);
-            const classReady = classChanged
+            const classReady = classChanged || lowered
                 ? Database.deleteSkills(character.id).then(() => Database.updateCharacterClassId(character.id, classId))
                 : Promise.resolve();
             const levelReady = base.serviceCrafter
                 ? classReady.then(() => Database.updateCharacterExperience(character.id, level, expForLevel(level), Math.round(level * level * 3)))
-                : classReady;
+                : level !== Number(character.level) || exp !== Number(character.exp)
+                    ? classReady.then(() => Database.updateCharacterExperience(character.id, level, exp, Number(character.sp || 0)))
+                    : classReady;
             return levelReady
                 .then(() => ensureBaseLoadout(character.id, classId, adena, level))
                 .then(() => Database.fetchCharacters(username))
