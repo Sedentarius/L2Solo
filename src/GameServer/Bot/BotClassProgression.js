@@ -41,6 +41,9 @@ function plan({ classId, level, seed } = {}) {
     const transitions = [];
     if (!Number.isFinite(resolvedClassId)) return { classId: resolvedClassId, transitions };
     for (let target = nextClass(resolvedClassId, level, seed); target; target = nextClass(resolvedClassId, level, seed)) {
+        // Workers cannot manufacture a first profession from projected levels.
+        // The database-backed reconcile path owns proof consumption.
+        if (ClassProgression.firstProfMap[resolvedClassId]) break;
         resolvedClassId = target;
         transitions.push(target);
     }
@@ -62,7 +65,10 @@ async function reconcile({ characterId, classId, level, seed = characterId } = {
         await skillset.awardSkills(id, ancestor, level);
     }
     for (let target = nextClass(resolvedClassId, level, seed); target; target = nextClass(resolvedClassId, level, seed)) {
-        await Database.updateCharacterClassId(id, target);
+        if (ClassProgression.firstProfMap[resolvedClassId]) {
+            const result = await invoke('GameServer/ClassTransfer').transferPersisted(id, target);
+            if (!result.ok) break;
+        } else await Database.updateCharacterClassId(id, target);
         resolvedClassId = target;
         transitions.push(target);
         await skillset.awardSkills(id, resolvedClassId, level);
