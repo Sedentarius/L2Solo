@@ -2,10 +2,12 @@ function pickupRequest(session, actor, data) {
     const Generics = invoke(path.actor);
 
     if (actor.isDead()) {
+        session.dataSendToMe(invoke('GameServer/Network/Response').actionFailed());
         return;
     }
 
     if (actor.isBlocked()) {
+        session.dataSendToMe(invoke('GameServer/Network/Response').actionFailed());
         Generics.queueRequest(session, actor, 'pickup', data);
         return;
     }

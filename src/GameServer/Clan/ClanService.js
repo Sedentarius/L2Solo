@@ -65,7 +65,11 @@ function actorMember(actor) {
 
 function onlineObjectId(member) {
     const session = onlineSessionByActorId(member.id);
-    return session?.actor?.fetchIsOnline?.() ? member.id : 0;
+    if (session?.actor?.fetchIsOnline?.()) return Number(member.id);
+    // Cold bots remain socially online; their simulation does not require a
+    // world session. This is a clan UI status, not an actor lookup for actions.
+    const bot = invoke('GameServer/Bot/Population/BotLifeState').cachedState(member.id);
+    return bot ? Number(member.id) : 0;
 }
 
 function onlineSessionByActorId(id) {
@@ -92,7 +96,15 @@ function broadcastClanAppearance(clan) {
 
 function liveMember(member) {
     const session = onlineSessionByActorId(member.id);
-    if (!session?.actor) return normalizeMember(member);
+    if (!session?.actor) {
+        const bot = invoke('GameServer/Bot/Population/BotLifeState').cachedState(member.id);
+        return normalizeMember({
+            ...member,
+            level: bot?.level ?? member.level,
+            classId: bot?.stats?.classId ?? member.classId,
+            isOnline: Boolean(bot)
+        });
+    }
 
     return normalizeMember({
         ...member,
@@ -476,6 +488,33 @@ const ClanService = {
 
     SMALL_CREST_MAX_BYTES,
     onlineObjectId,
+    syncColdMember(bot) {
+        if (!bot || onlineSessionByActorId(bot.characterId)?.actor?.fetchIsOnline?.()) return;
+        if (bot.stats?.clanId !== undefined && Number(bot.stats.clanId) === 0) return;
+        const clan = state.clans.get(Number(bot.stats?.clanId))
+            || [...state.clans.values()].find(c => c.members.some(m => m.id === Number(bot.characterId)));
+        const member = clan?.members.find(m => m.id === Number(bot.characterId));
+        if (!member) return;
+        const level = Number(bot.level ?? member.level);
+        const classId = Number(bot.stats?.classId ?? member.classId);
+        if (member.level === level && member.classId === classId) return;
+        Object.assign(member, { level, classId, online: true });
+        const recipients = clanOnlineSessions(clan).filter(s => s.actor?.fetchIsOnline?.());
+        if (!recipients.length) return;
+        const packet = invoke('GameServer/Network/Response').pledgeShowMemberListUpdate(member);
+        recipients.forEach(s => s.dataSendToMe(packet));
+    },
+    broadcastMemberPresence(actor) {
+        const clanId = Number(actor?.fetchClanId?.() || 0);
+        if (!clanId) return;
+        const Response = invoke('GameServer/Network/Response');
+        const recipients = clanOnlineSessions({ id: clanId }).filter(session =>
+            session.actor !== actor && session.actor?.fetchIsOnline?.()
+        );
+        if (!recipients.length) return;
+        const packet = Response.pledgeShowMemberListUpdate(actor);
+        recipients.forEach(session => session.dataSendToMe(packet));
+    },
     liveMember,
     membersForDisplay(clan) {
         return (clan?.members || []).map(liveMember);
@@ -484,11 +523,7 @@ const ClanService = {
     refreshOnlineMembers(clan) {
         if (!clan) return null;
 
-        clanOnlineSessions(clan).forEach((session) => {
-            if (session.actor) {
-                replaceMember(clan, actorMember(session.actor));
-            }
-        });
+        clan.members = this.membersForDisplay(clan);
 
         return clan;
     },

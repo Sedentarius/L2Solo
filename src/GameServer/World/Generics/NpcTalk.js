@@ -62,7 +62,9 @@ function npcTalk(session, npc) {
     // quest service can still render the stateful branch on demand.
     const QuestService = invoke('GameServer/Quest/QuestService');
     const NpcShopBuyLists = invoke('GameServer/World/Generics/NpcShopBuyLists');
-    const hasNpcShop = NpcShopBuyLists.fetchForNpc(npc.fetchSelfId()).length > 0;
+    const NpcExchangeShopLists = invoke('GameServer/World/Generics/NpcExchangeShopLists');
+    const hasNpcShop = NpcShopBuyLists.fetchForNpc(npc.fetchSelfId()).length > 0
+        || NpcExchangeShopLists.fetchForNpc(npc.fetchSelfId()).length > 0;
     if (!QuestService.handlesNpc(npc) || hasNpcShop) {
         showDefaultTalk(session, npc, {
             questLink: hasNpcShop && QuestService.handlesNpc(npc)

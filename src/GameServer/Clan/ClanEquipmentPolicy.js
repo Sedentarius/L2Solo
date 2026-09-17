@@ -123,6 +123,11 @@ function targetFulfilled(member, goal, equippedSlotsFor, itemRankFor = null) {
     const slot = number(goal?.target?.slot);
     const item = member?.inventory?.[String(itemId)];
     if (!itemId || !slot || typeof equippedSlotsFor !== 'function') return false;
+    const acquired = member?.stats?.clanEquipmentAcquisition;
+    const recorded = acquired?.goalKey && acquired.goalKey === goal.goalKey && Number(acquired.itemId) === itemId ? acquired : null;
+    const component = goal.target.componentRequirement || recorded
+        || require('../Bot/AI/EquipmentAcquisitionProgress').componentRequirement(member?.stats?.equipmentPlan, itemId);
+    if (component && Number(item?.amount || 0) >= Number(component.amount)) return true;
     if (item?.equipped && equippedSlotsFor(item, item.slot).some((equippedSlot) => (
         slotMatches(equippedSlot, slot)
     ))) return true;
@@ -212,7 +217,9 @@ function buildGoal(clan, selection, previousGoal = null, timestamp = Date.now(),
             itemName: String(plan.target?.name || `Item ${itemId}`),
             slot: number(plan.target?.slot),
             grade: String(plan.grade || 'none'),
-            strategy: String(plan.strategy || 'unknown')
+            strategy: String(plan.strategy || 'unknown'),
+            ...(require('../Bot/AI/EquipmentAcquisitionProgress').componentRequirement(plan)
+                ? { componentRequirement: require('../Bot/AI/EquipmentAcquisitionProgress').componentRequirement(plan) } : {})
         },
         required: 1,
         progress: 0,

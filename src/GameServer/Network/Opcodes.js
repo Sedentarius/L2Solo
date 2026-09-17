@@ -94,7 +94,7 @@ const Opcodes = {
         table[0xcd] = ClientRequest.showMap;
 
         table[0x57] = (session) => { invoke(path.actor).adminPanel(session, session.actor); }; // Board
-        table[0x9d] = () => {}; // Skill Cool Time, not needed?
+        table[0x9d] = ClientRequest.skillCoolTime;
         table[0xb9] = () => {}; // Recommend button
         table[0x4a] = () => {}; // StartRotating
         table[0x4b] = () => {}; // FinishRotating

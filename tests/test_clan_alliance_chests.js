@@ -10,6 +10,7 @@ const world = { npc: { nextId: 1000000, spawns: [] }, user: { sessions: [] }, ad
 const kills = [];
 const mocks = {
     'GameServer/Progression/OverhitReward': { capture() {} },
+    'GameServer/Effects/EffectStore': { hasDebuff: () => false },
     'GameServer/Pets/PetRuntime': { recordDamage() {} },
     'GameServer/Quest/QuestService': { onAttack: async () => {} },
     'GameServer/Bot/AI/BotSocialMemory': { recordCombatHelp() {} },

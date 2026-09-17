@@ -3,6 +3,7 @@
     "version": "0.0.7",
     "description": "L2 C4 protocol server emulator in NodeJS",
     "author": "Dennis Koluris",
+    "license": "SEE LICENSE IN LICENSE",
     "engines": {
         "node": ">=22.5.0"
     },

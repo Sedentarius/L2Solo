@@ -16,7 +16,8 @@ const ABNORMAL_MASKS = {
     sleep: 0x0080,
     silence: 0x0100,
     root: 0x0200,
-    paralyze: 0x0400
+    paralyze: 0x0400,
+    petrification: 0x0800
 };
 
 function now() {
@@ -53,6 +54,7 @@ function normalize(effect = {}) {
         toggle: effect.toggle === true,
         requires: effect.requires || null,
         stats: effect.stats || {},
+        conditionalStats: effect.conditionalStats || [],
         situationalStats: effect.situationalStats || [],
         dot: effect.dot || null,
         healthDot: effect.healthDot || null,

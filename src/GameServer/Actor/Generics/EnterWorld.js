@@ -20,9 +20,13 @@ function refreshLoadedSkillState(session, actor, Generics, response = ServerResp
 
 function enterWorld(session, actor) {
     const Generics = invoke(path.actor);
+    const deathReady = invoke('GameServer/Progression/DeathExperience').load(actor);
 
     // Set character as online
     actor.setIsOnline(true);
+    // Prepared bot actors also load their skills here before joining the world.
+    if (invoke('GameServer/World/World').user?.sessions?.includes(session))
+        invoke('GameServer/Clan/ClanService').broadcastMemberPresence(actor);
 
     // Effects must be available before the stat calculation; e.g. a max-HP
     // buff affects the cap used when the persisted HP is restored.
@@ -40,9 +44,10 @@ function enterWorld(session, actor) {
     // Calculate accumulated statistics
     Generics.calculateStats(session, actor);
     CharacterStatus.restoreVitals(actor, vitals);
-    for (const [skillId, until] of Object.entries(session.coldLifeState?.stats?.coldCombat?.cooldowns || {})) {
-        if (until > Date.now()) actor.skillReuseUntil?.set(Number(skillId), until);
-    }
+    const coldCooldowns = session.coldLifeState?.stats?.coldCombat?.cooldowns;
+    invoke('GameServer/Skills/SkillReuse').restore(actor, coldCooldowns
+        ? Object.entries(coldCooldowns).map(([id, until]) => ({ id: Number(id), until }))
+        : actor.model.skillCooldowns);
     session.pvpActionReadyAt = Number(session.coldLifeState?.stats?.coldPvp?.readyAt || 0);
     const flagRemaining = Number(session.coldLifeState?.stats?.coldPvp?.flagUntil || 0) - Date.now();
     if (flagRemaining > 0) invoke('GameServer/Actor/PvpFlag').restore(session, actor, session.coldLifeState.stats.coldPvp.flagUntil);
@@ -70,7 +75,7 @@ function enterWorld(session, actor) {
     // Default welcome
     ConsoleText.transmit(session, ConsoleText.caption.welcome);
 
-    return Promise.resolve(skillReady);
+    return Promise.all([skillReady, deathReady]);
 }
 
 module.exports = enterWorld;

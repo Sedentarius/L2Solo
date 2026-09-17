@@ -227,6 +227,14 @@ async function cancelLegacyBloodMarkDemand(clan, context) {
 }
 
 async function resolveClan(clan, options = {}) {
+    try { return await resolveClanInternal(clan, options); }
+    catch (error) {
+        if (error.code !== 'clan_planning_deferred') throw error;
+        return { ok: true, skipped: true, retryable: true, reason: 'clan_planning_deferred' };
+    }
+}
+
+async function resolveClanInternal(clan, options = {}) {
     if (!clan) return { ok: true, skipped: true, reason: 'target_not_autonomous' };
     const stateGoal = clan.state?.goal || null;
     if (String(clan.state?.mode || '') === 'player_managed'
@@ -264,6 +272,7 @@ async function resolveClan(clan, options = {}) {
     if (number(clan.level) >= 3) {
         const previous = automaticPrevious;
         const candidateSnapshot = await ClanGoalCandidateService.snapshotFor(clan, previous, options);
+        await ClanEquipmentService.validatePlanning(clan, candidateSnapshot.planning);
         const brain = candidateSnapshot.decisionNeeded
             ? ClanBrain.choose(clan, candidateSnapshot, options)
             : null;

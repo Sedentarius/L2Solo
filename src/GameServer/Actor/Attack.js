@@ -113,9 +113,7 @@ class Attack {
             return;
         }
         const rangedAttack = AttackRange.weaponKind(actor) === 'Weapon.Bow';
-        if (rangedAttack && !this.consumeNormalAttackMp(session, actor)) {
-            return;
-        }
+        if (rangedAttack && !invoke('GameServer/Actor/BowResources').consume(session, actor)) return;
 
         // Soulshots are only reloaded after the player enables their hotbar toggle.
         const autoSoulshotId = actor.backpack?.fetchAutoShot?.(actor, 'soulshot');
@@ -216,28 +214,6 @@ class Attack {
             this.meleeHit(session, creature);
 
         }, speed); // Until end of combat move
-    }
-
-    normalAttackMpCost(actor) {
-        if (AttackRange.weaponKind(actor) !== 'Weapon.Bow') return 0;
-        const weapon = actor?.backpack?.fetchEquippedWeapon?.();
-        return Math.max(0, Number(weapon?.fetchConsumedMp?.()) || 0);
-    }
-
-    consumeNormalAttackMp(session, actor) {
-        const mpCost = this.normalAttackMpCost(actor);
-        if (mpCost <= 0) return true;
-        if (Number(actor.fetchMp?.() || 0) < mpCost) {
-            this.resetQueuedEvent();
-            actor.state?.setHits?.(false);
-            invoke(path.actor).abortCombatState(session, actor);
-            ConsoleText.transmit(session, ConsoleText.caption.depletedMp);
-            session.dataSendToMe?.(ServerResponse.actionFailed());
-            return false;
-        }
-        actor.setMp(actor.fetchMp() - mpCost);
-        actor.statusUpdateVitals?.(actor);
-        return true;
     }
 
     remoteHit(session, creature, skill) {

@@ -319,7 +319,118 @@ assert.strictEqual(benedictionTarget.fetchHp(), 1000, 'Benediction should clamp 
 });
 
 const revival = skill({ selfId: 181, name: 'Revival', spell: false, power: 1685, level: 1, distance: -1 });
+for (let level = 1; level <= 6; level++) {
+    const target = statActor();
+    target.statusUpdateVitals = () => calculateStats({}, target);
+    calculateStats({}, target);
+    const baseHp = target.fetchMaxHp();
+    target.hp = 1;
+    const roar = skill({ selfId: 121, name: 'Battle Roar', level, buff: 600000 });
+    const result = SkillEffects.execute(session(), target, target, roar);
+    const multiplier = [1.1, 1.15, 1.2, 1.25, 1.3, 1.35][level - 1];
+    assert.strictEqual(target.fetchMaxHp(), baseHp * multiplier, 'Battle Roar must increase actual maximum HP');
+    assert.strictEqual(result.heal, Math.round(target.fetchMaxHp() * [9.1, 13, 16.6, 20, 23, 25.7][level - 1] / 100), 'Battle Roar must heal using the increased maximum HP');
+    assert(result.effect.expiresAt - Date.now() > 599000);
+    const body = skill({ selfId: 1045, name: 'Blessed Body', level: 6, buff: 1200000 });
+    SkillEffects.execute(session(), target, target, body);
+    assert.strictEqual(target.fetchMaxHp(), baseHp * 1.35, 'Blessed Body must replace, not multiply, Battle Roar');
+    SkillEffects.execute(session(), target, target, roar);
+    assert.strictEqual(target.fetchMaxHp(), baseHp * 1.35, 'Weaker Battle Roar must not replace a stronger HP buff');
+    const hpEffects = EffectStore.list(target).filter(effect => effect.stackFamily === 'MaxHPUp');
+    assert.strictEqual(hpEffects.length, 1);
+    hpEffects[0].expiresAt = Date.now() - 1;
+    calculateStats({}, target);
+    assert.strictEqual(target.fetchMaxHp(), baseHp, 'Maximum HP must return to normal after expiry');
+}
 const revivalAttack = new Attack();
+const totemIds = [76, 83, 109, 282, 292, 298];
+const ogreActor = statActor();
+ogreActor.statusUpdateVitals = () => calculateStats({}, ogreActor);
+calculateStats({}, ogreActor);
+const ogreBase = { hp: ogreActor.fetchMaxHp(), atk: ogreActor.collectivePAtk, def: ogreActor.collectivePDef, accuracy: ogreActor.collectiveAccur, evasion: ogreActor.collectiveEvasion, speed: ogreActor.collectiveRunSpd };
+ogreActor.hp = 1;
+const ogreSkill = skill({ selfId: 109, name: 'Spirit of Ogre', level: 1, buff: 120000 });
+const ogreResult = SkillEffects.execute(session(), ogreActor, ogreActor, ogreSkill);
+assert.strictEqual(ogreActor.fetchMaxHp(), ogreBase.hp * 1.2);
+assert.strictEqual(ogreResult.heal, Math.round(ogreActor.fetchMaxHp() * 0.2));
+assert.strictEqual(ogreActor.collectivePAtk, Math.round(ogreBase.atk * 1.07));
+assert.strictEqual(ogreActor.collectivePDef, Math.round(ogreBase.def * 1.15));
+assert.strictEqual(ogreActor.collectiveAccur, ogreBase.accuracy + 3);
+assert.strictEqual(ogreActor.collectiveEvasion, ogreBase.evasion - 10);
+assert.strictEqual(ogreActor.collectiveRunSpd, Math.round(ogreBase.speed * 0.7));
+assert(ogreResult.effect.expiresAt - Date.now() > 119000);
+SkillEffects.execute(session(), ogreActor, ogreActor, skill({ selfId: 83, name: 'Totem Spirit Wolf', buff: 120000 }));
+assert.strictEqual(ogreActor.fetchMaxHp(), ogreBase.hp, 'Replacing Ogre must remove its HP bonus');
+assert.strictEqual(ogreActor.collectivePAtk, ogreBase.atk);
+assert.strictEqual(ogreActor.collectiveEvasion, ogreBase.evasion);
+EffectStore.remove(ogreActor, 'totem_spirit_wolf');
+
+const totemWorld = invoke('GameServer/World/World');
+const savedTotemNpc = totemWorld.npc;
+const savedTotemFetch = totemWorld.fetchNpcsInRadius;
+try {
+    totemWorld.npc = { grid: {} };
+    for (const [id, points] of [[109, 438], [292, 624], [298, 582]]) {
+        const target = creature();
+        const events = [];
+        totemWorld.fetchNpcsInRadius = () => [{ fetchAttackable: () => true, state: { fetchCombats: () => true }, fetchDestId: () => target.fetchId(), fetchLevel: () => 20, addDamageHate: (_, source, damage, hate) => { events.push({ source, damage, hate }); return true; } }];
+        const data = activeSkills.find(entry => entry.selfId === id);
+        const cast = skill({ selfId: id, name: data.template.name, level: 1, buff: 120000 });
+        const result = SkillEffects.execute(session(), target, target, cast);
+        assert.deepStrictEqual(events, [{ source: target, damage: 0, hate: Math.floor(150 * points / 27) }]);
+        assert.strictEqual(result.aggroPointsApplied, events[0].hate);
+        EffectStore.remove(target, result.effect.key);
+    }
+} finally {
+    totemWorld.npc = savedTotemNpc;
+    totemWorld.fetchNpcsInRadius = savedTotemFetch;
+}
+const bisonActor = statActor();
+bisonActor.statusUpdateVitals = () => calculateStats({}, bisonActor);
+calculateStats({}, bisonActor);
+bisonActor.hp = bisonActor.fetchMaxHp();
+const bisonSkill = skill({ selfId: 292, name: 'Totem Spirit Bison', level: 1, buff: 120000 });
+assert.strictEqual(new Attack().skillUseConditionFailure(bisonActor, bisonSkill), null, 'Bison must be castable at full HP');
+const bisonBaseAtk = bisonActor.collectivePAtk;
+const bisonEffect = SkillEffects.execute(session(), bisonActor, bisonActor, bisonSkill).effect;
+assert.strictEqual(bisonActor.fetchHp(), bisonActor.fetchMaxHp(), 'Bison must not consume HP');
+for (const percent of [100, 60.01, 60, 30, 61, 50, 100]) {
+    bisonActor.hp = bisonActor.fetchMaxHp() * percent / 100;
+    bisonActor.statusUpdateVitals();
+    const active = percent <= 60;
+    assert.strictEqual(EffectStats.multiplier(bisonActor, 'pAtkMul'), active ? 1.125 : 1);
+    assert.strictEqual(EffectStats.add(bisonActor, 'pCritRateAdd'), active ? 200 : 0);
+    assert.strictEqual(bisonActor.collectivePAtk, Math.round(bisonBaseAtk * (active ? 1.125 : 1)), 'Actual attack stat must follow HP changes without recasting');
+    assert.strictEqual(EffectStore.list(bisonActor)[0], bisonEffect, 'HP changes must retain the totem itself');
+}
+bisonActor.hp = bisonActor.fetchMaxHp() / 2;
+SkillEffects.execute(session(), bisonActor, bisonActor, skill({ selfId: 83, name: 'Totem Spirit Wolf', buff: 120000 }));
+assert.strictEqual(EffectStats.add(bisonActor, 'pCritRateAdd'), 0, 'Replacing Bison must remove its conditional bonuses');
+EffectStore.remove(bisonActor, 'totem_spirit_wolf');
+for (const firstId of totemIds) {
+    for (const secondId of totemIds) {
+        const target = statActor();
+        const castTotem = (id) => {
+            const data = activeSkills.find(entry => entry.selfId === id);
+            const totem = skill({ selfId: id, name: data.template.name, level: 1, buff: 120000 });
+            return SkillEffects.execute(session(), target, target, totem).effect;
+        };
+        EffectStore.apply(target, { id: 1204, key: 'wind_walk', stats: { runSpdAdd: 20 }, durationMs: 120000 });
+        const first = castTotem(firstId);
+        const latest = castTotem(secondId);
+        assert(first && latest);
+        const activeTotems = EffectStore.list(target).filter(effect => totemIds.includes(effect.id));
+        assert.deepStrictEqual(activeTotems.map(effect => effect.id), [secondId], 'Only the most recently cast totem may remain active');
+        assert.strictEqual(EffectStore.packetEffects(target).filter(effect => totemIds.includes(effect.id)).length, 1, 'Client must receive only one totem icon');
+        for (const stat of ['pAtkMul', 'pDefMul', 'runSpdMul', 'pAtkSpdMul']) {
+            assert.strictEqual(EffectStats.multiplier(target, stat), latest.stats[stat] ?? 1, 'Previous totem modifiers must be removed');
+        }
+        assert.strictEqual(EffectStats.add(target, 'runSpdAdd'), 20, 'Switching totems must preserve unrelated buffs');
+        EffectStore.remove(target, latest.key);
+        assert.strictEqual(EffectStore.list(target).filter(effect => totemIds.includes(effect.id)).length, 0, 'Displaced totems must not return after cancellation');
+        EffectStore.remove(target, 'wind_walk');
+    }
+}
 assert(
     revivalAttack.skillUseConditionFailure(creature({ hp: 101, maxHp: 1000 }), revival),
     'Revival should be blocked above the sourced 10% HP condition'
@@ -4379,6 +4490,23 @@ assert.strictEqual(poisonBladeOutcome.effect.dot.count, 10, 'Poison Blade Dance 
 assert.strictEqual(poisonBladeOutcome.effect.dot.intervalMs, 3000, 'Poison Blade Dance should tick every sourced 3 seconds');
 EffectStore.remove(poisonBladeTarget, 'poison');
 
+for (const [level, magicLevel] of [[1, 55], [2, 60], [3, 72]]) {
+    assert.strictEqual(skill({ selfId: 84, level }).fetchSemantic().magicLevel, magicLevel, 'Poison Blade Dance must use its sourced magic level');
+}
+for (const resisted of [false, true]) {
+    const target = statActor();
+    const hateEvents = [];
+    target.fetchAttackable = () => true;
+    target.addDamageHate = (castSession, source, damage, hate) => hateEvents.push({ source, damage, hate });
+    const outcome = SkillEffects.execute(session(), caster, target, poisonBladeDance, {
+        magicSkill: false, rng: () => resisted ? 1 : 0, attack: { clearLoadedShot() {} }
+    });
+    assert.strictEqual(outcome.effectResisted, resisted);
+    assert.deepStrictEqual(hateEvents, [{ source: caster, damage: 0, hate: 1 }], 'Successful and resisted poison casts must immediately provoke the target without dealing direct damage');
+    assert.strictEqual(EffectStore.hasDebuff(target, 'poison'), !resisted);
+    EffectStore.remove(target, 'poison');
+}
+
 const poisonCloudData = activeSkills.find((entry) => entry.selfId === 1167);
 assert(poisonCloudData, 'Poisonous Cloud should be present in active skills data');
 assert.strictEqual(poisonCloudData.levels.length, 6, 'Poisonous Cloud should preserve sourced 6 base levels');
@@ -6606,14 +6734,34 @@ const sleepAgainstShield = SkillEffects.execute(session(), caster, mentallyProte
 assert.strictEqual(sleepAgainstShield.effect, null, 'Mental Shield sleepResist should lower Sleep land chance below the roll');
 assert.strictEqual(sleepAgainstShield.effectResisted, true, 'Sleep blocked by Mental Shield should report effect resistance');
 
+// Entangle slows movement; it must not inherit root restrictions or resistance.
+for (let level = 1; level <= 16; level++) {
+    const target = statActor();
+    SkillEffects.execute(session(), caster, target, mentalShield, {
+        magicSkill: true, rng: () => 0, attack: { clearLoadedShot() {} }
+    });
+    const entangle = skill({ selfId: 102, name: 'Entangle', spell: true, power: level, level, buff: 120000 });
+    const outcome = SkillEffects.execute(session(), caster, target, entangle, {
+        magicSkill: true, rng: () => 0, attack: { clearLoadedShot() {} }
+    });
+    assert.strictEqual(outcome.effect.key, 'entangle');
+    assert.strictEqual(EffectStats.multiplier(target, 'runSpdMul'), level === 1 ? 0.3 : 0.5);
+    assert.strictEqual(EffectStore.impairments(target).rooted, false, 'Entangle must not root');
+    assert.strictEqual(EffectRestrictions.canMove(target), true, 'Entangle permits slower movement');
+    assert.strictEqual(EffectRestrictions.canAttack(target), true);
+    assert.strictEqual(EffectRestrictions.canCast(target), true);
+}
 const entangle = skill({ selfId: 102, name: 'Entangle', spell: true, power: 1, level: 1, buff: 120000 });
 const entangleAgainstShield = SkillEffects.execute(session(), caster, mentallyProtected, entangle, {
-    magicSkill: true,
-    rng: () => 0.5,
-    attack: { clearLoadedShot() {} }
+    magicSkill: true, rng: () => 0.5, attack: { clearLoadedShot() {} }
 });
-assert.strictEqual(entangleAgainstShield.effect, null, 'Mental Shield rootResist should lower Entangle land chance below the roll');
-assert.strictEqual(entangleAgainstShield.effectResisted, true, 'Entangle blocked by Mental Shield should report effect resistance');
+assert(entangleAgainstShield.effect, 'Mental Shield root resistance must not resist Entangle');
+const shieldTestRoot = skill({ selfId: 1201, name: 'Dryad Root', spell: true, power: 1, level: 1, buff: 30000 });
+const rootAgainstShield = SkillEffects.execute(session(), caster, mentallyProtected, shieldTestRoot, {
+    magicSkill: true, rng: () => 0.5, attack: { clearLoadedShot() {} }
+});
+assert.strictEqual(rootAgainstShield.effect, null, 'Mental Shield must still resist actual roots');
+assert.strictEqual(rootAgainstShield.effectResisted, true);
 
 const holdUndeadData = activeSkills.find((entry) => entry.selfId === 1042);
 assert(holdUndeadData, 'Hold Undead should be present in active skills data');
@@ -7385,6 +7533,17 @@ assert.strictEqual(quiverA.skillType, C4SkillRules.CREATE_ITEM, 'Quiver of Arrow
 assert.deepStrictEqual([quiverA.itemConsumeId, quiverA.itemConsumeCount, quiverA.createItemId, quiverA.createItemCount], [1461, 1, 1344, 450], 'Quiver A must retain sourced material and arrow batch');
 
 const restrictedSkillAttack = new Attack();
+// Power Strike uses the C4 sword/blunt/two-handed sword mask at every level.
+const powerStrikeUser = creature({ id: 2000311 });
+for (let level = 1; level <= 9; level++) {
+    const strike = skill({ selfId: 3, name: 'Power Strike', spell: false, level, power: 30, distance: 40 });
+    for (const kind of ['Weapon.Sword', 'Weapon.Blunt', 'Weapon.GreatSword', 'Weapon.Fist', 'Weapon.DualFist', 'Weapon.Bow', 'Weapon.Knife', 'Weapon.Pole', 'Weapon.Dual', '']) {
+        powerStrikeUser.backpack.fetchTotalWeaponKind = () => kind;
+        const allowed = ['Weapon.Sword', 'Weapon.Blunt', 'Weapon.GreatSword'].includes(kind);
+        assert.strictEqual(restrictedSkillAttack.skillUseConditionFailure(powerStrikeUser, strike),
+            allowed ? null : 'Incorrect weapon.', `Power Strike level ${level}, weapon ${kind || 'unarmed'}`);
+    }
+}
 const bowUser = creature({ id: 2000306 });
 bowUser.backpack.fetchTotalWeaponKind = () => 'Weapon.Bow';
 const fatalCounter = skill({ selfId: 314, name: 'Fatal Counter', spell: false, level: 1, power: 2908, distance: 900 });

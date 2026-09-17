@@ -25,7 +25,14 @@ function item(id, amount) {
     return new Item(id, { ...DataCache.items[0], amount, equipped: false, slot: 0 });
 }
 
+const questItem = new Item(88, { selfId: 1252, kind: 'Other.Quest', name: 'Iron Heart',
+    class1: 4, class2: 3, amount: 1, stackable: true });
 const packetItem = item(77, 12);
+for (const type of [1, 2]) {
+    const filtered = ServerResponse.wareHouseDepositList([questItem, packetItem], 345, type);
+    assert.equal(filtered.readInt16LE(7), 1, 'quest items are absent from deposit offers');
+    assert.equal(filtered.readInt32LE(11), 77);
+}
 const depositList = ServerResponse.wareHouseDepositList([packetItem], 345);
 const withdrawList = ServerResponse.wareHouseWithdrawalList([packetItem], 345);
 assert.strictEqual(depositList[0], 0x41, 'C4 warehouse deposit list must use opcode 0x41');
@@ -84,7 +91,16 @@ World.npc.spawns.push({
     fetchLocY: () => 0
 });
 
-Warehouse.deposit(session, [{ objectId: 10, amount: 7 }]).then(async () => {
+(async () => {
+    session.actor.backpack.items.push(questItem);
+    await assert.rejects(Warehouse.deposit(session, [
+        { objectId: 10, amount: 1 }, { objectId: 88, amount: 1 }
+    ]), /invalid warehouse deposit/);
+    assert.deepStrictEqual(calls, [], 'mixed quest-item batches must not partially transfer');
+    assert.equal(source.fetchAmount(), 7);
+    session.actor.backpack.items.pop();
+    await Warehouse.deposit(session, [{ objectId: 10, amount: 7 }]);
+})().then(async () => {
     assert.deepStrictEqual(calls, ['warehouse-insert', 'inventory-delete'], 'deposit must persist warehouse before removing the inventory item');
     assert.strictEqual(session.actor.backpack.items.length, 0, 'deposit should remove transferred inventory items only after persistence');
     assert.strictEqual(persistedWarehouse[0].amount, 7, 'deposit must persist the warehouse amount immediately');
@@ -102,6 +118,13 @@ Warehouse.deposit(session, [{ objectId: 10, amount: 7 }]).then(async () => {
     await Warehouse.withdraw(session, [{ objectId: 501, amount: 1 }]);
     const restoredAspis = session.actor.backpack.items.find((entry) => entry.fetchSelfId() === 627);
     assert.strictEqual(restoredAspis.fetchSlot(), 8, 'warehouse withdrawal should materialize a shield in the shield slot');
+
+    DataCache.items.push({ selfId: 1252, kind: 'Other.Quest', name: 'Iron Heart',
+        class1: 4, class2: 3, mass: 0, stackable: true });
+    persistedWarehouse.push({ id: 502, selfId: 1252, amount: 1 });
+    await Warehouse.withdraw(session, [{ objectId: 502, amount: 1 }]);
+    assert(session.actor.backpack.items.some(item => item.fetchSelfId() === 1252),
+        'quest items already stored by older versions remain withdrawable');
 
     session.activeNpcTalk.objectId = 999999;
     await assert.rejects(

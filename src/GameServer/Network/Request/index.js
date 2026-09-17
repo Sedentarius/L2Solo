@@ -1,4 +1,5 @@
 module.exports = {
+    skillCoolTime: require('./SkillCoolTime'),
                action: require('./Action'),
             actionUse: require('./ActionUse'),
         autoSoulShot: require('./AutoSoulShot'),

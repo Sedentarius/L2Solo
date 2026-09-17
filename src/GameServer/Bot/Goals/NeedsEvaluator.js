@@ -244,9 +244,15 @@ function evaluate(state = {}, options = {}) {
     }
 
     const craftPlan = state.stats?.equipmentPlan;
-    const wantedMaterial = craftPlan?.marketFallback && craftPlan?.next?.itemId
+    const plannedMaterial = craftPlan?.marketFallback && craftPlan?.next?.itemId
         ? craftPlan.materials?.find((material) => Number(material.selfId) === Number(craftPlan.next.itemId))
+            || { selfId: Number(craftPlan.next.itemId), amount: Number(craftPlan.next.requiredTotal || craftPlan.next.amount || 1) }
         : null;
+    const wantedMaterial = plannedMaterial ? {
+        ...plannedMaterial,
+        missing: plannedMaterial.amount === undefined ? Number(plannedMaterial.missing || 0)
+            : Math.max(0, Number(plannedMaterial.amount) - Number(state.inventory?.[plannedMaterial.selfId]?.amount || 0))
+    } : null;
     if (wantedMaterial?.missing > 0 && Number(state.stats?.marketRetryAfter || 0) <= timestamp) {
         candidates.push({
             type: 'buy_craft_material',

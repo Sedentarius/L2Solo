@@ -3,6 +3,7 @@ const ServerResponse = invoke('GameServer/Network/Response');
 const ConsoleText = {
     caption: {
         depletedMp        :  24,
+        depletedArrows    : 112,
         pickupAdenaAmount :  28,
         pickupAmountOf    :  29,
         pickup            :  30,

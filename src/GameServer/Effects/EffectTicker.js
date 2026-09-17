@@ -100,7 +100,7 @@ function scheduleExpiry(session, target, effect) {
         if (target.activeBuffs?.[effect.key] && target.activeBuffs[effect.key] <= Date.now()) {
             delete target.activeBuffs[effect.key];
         }
-        if (Object.keys(effect.stats || {}).length > 0) {
+        if (Object.keys(effect.stats || {}).length > 0 || effect.conditionalStats?.length > 0) {
             refreshStats(target.session || session, target);
         }
         refreshEffects(session, target);
@@ -306,6 +306,7 @@ function applyManaHot(session, source, target, effect) {
 }
 
 function applyDamage(session, source, target, damage) {
+    if (invoke('GameServer/Effects/EffectStore').hasDebuff(target, 'petrification')) return;
     if (session && source && target?.fetchId && source !== target) {
         if (target.fetchId() >= 2000000) {
             invoke(path.actor).receivedHit(session, target, damage, { wakeSleep: true, source });

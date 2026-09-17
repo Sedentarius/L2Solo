@@ -296,14 +296,18 @@ function resetColdStores() {
     coldStoreIndexHydrated = false;
 }
 
-function findOffers(selfId, options = {}) {
+function sellOfferCandidates(selfId, options = {}) {
     const town = options.town || null;
     return [
         ...AfkTrade.offers(selfId, 1, { town, characterId: options.buyerCharacterId }),
         ...privateOffers(selfId, town),
         ...coldOffers(selfId, town, options.buyerCharacterId, options.now ?? Date.now()),
         ...(town ? npcOffers(selfId, town) : [])
-    ].filter((offer) => offer.available)
+    ].filter((offer) => offer.available);
+}
+
+function findOffers(selfId, options = {}) {
+    return sellOfferCandidates(selfId, options)
         .sort((a, b) => a.price - b.price
             || Number(b.playerPriority === true || b.sellerKind === 'player') - Number(a.playerPriority === true || a.sellerKind === 'player')
             || (a.sourceType === 'npc' ? 1 : -1));
@@ -507,6 +511,7 @@ function release(offer, qty = 1) {
 }
 
 module.exports = {
+    sellOfferCandidates,
     bestOffer,
     bestBuyOffer,
     activeBuyDemandSelfIds,

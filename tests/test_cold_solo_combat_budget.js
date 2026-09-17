@@ -35,7 +35,9 @@ try {
         pDef: 200, mDef: 100, accur: 1, evasion: 0, critical: 0, atkSpd: 253 });
     const unkillable = run(60000);
     assert.strictEqual(unkillable.debug.wins, 0);
-    assert.strictEqual(unkillable.debug.fights, 1, 'a timeout must consume the cycle instead of resetting the mob five times');
+    assert.strictEqual(unkillable.debug.fights, 0, 'a pending fight is not a completed encounter');
+    assert.strictEqual(unkillable.debug.attemptedFights, 1, 'a timeout must consume the cycle instead of resetting the mob five times');
+    assert(unkillable.patch.stats.pveEncounter, 'unfinished damage must persist');
     assert.strictEqual(unkillable.materialize.exp, 0);
 } finally {
     Cold.npcForSpot = originalNpc;

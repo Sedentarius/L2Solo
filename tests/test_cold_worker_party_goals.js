@@ -103,6 +103,27 @@ const originals = {
     assert.deepStrictEqual(savedParty.memberIds, [1, 3], 'the durable party roster must drop the market-break member');
     assert.strictEqual(savedParty.leaderId, 1);
     assert.strictEqual(savedParty.stats.lastMarketBreakAt, now);
+    party.stats.objective = { status: 'open', priority: 'required', clanGoalKey: 'clan:1:gear',
+        clanId: 1, minPartySize: 3 };
+    departed.length = 0;
+    savedParty = null;
+    await PopulationService.reconcileWorkerPartyGoals(party, now);
+    assert.strictEqual(departed.length, 0, 'stale sell goal cannot interrupt clan duty without current capacity pressure');
+    ItemDisposition.inventoryCleanupNeed = member => member.characterId === 2
+        ? { reason: 'npc_only_inventory', slots: 10, limit: 80 } : null;
+    await PopulationService.reconcileWorkerPartyGoals(party, now);
+    assert.strictEqual(departed.length, 0, 'NPC junk is optional while farming for the clan');
+    ItemDisposition.inventoryCleanupNeed = member => member.characterId === 2
+        ? { reason: 'inventory_capacity', slots: 81, limit: 80 } : null;
+    const emergency = await PopulationService.reconcileWorkerPartyGoals(party, now);
+    assert.strictEqual(emergency.departed.stats.partyMarketReturn.partyId, party.partyId);
+    assert.strictEqual(emergency.departed.stats.lastPartyMarketBreak.slots, 81);
+    assert.strictEqual(savedParty.stats.marketAbsences[2].objective.clanGoalKey, 'clan:1:gear');
+    assert.deepStrictEqual(savedParty.memberIds, [1, 3]);
+    assert.strictEqual(PopulationService.partySessionExpired(savedParty, now), false,
+        'a short essential errand must not expire the shared hunt');
+    assert.strictEqual(require('../src/GameServer/Bot/Population/PartyMarketBreak').pending(savedParty, now + 16 * 60000).length, 0,
+        'a missing bot cannot reserve a slot forever');
     console.log('Cold worker party goal reconciliation checks passed');
 })().catch((error) => {
     console.error(error);

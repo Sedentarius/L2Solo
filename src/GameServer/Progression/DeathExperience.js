@@ -12,7 +12,7 @@ function subjectValue(subject, getter, key, fallback = 0) {
 
 function hasLuckyProtection(actor, level) {
     if (level > 4) return false;
-    const skills = actor?.skillset?.fetchSkills?.() || actor?.skills || [];
+    const skills = actor?.skillset?.fetchSkills?.() || actor?.skills || actor?.stats?.coldCombat?.skills || [];
     return skills.some((skill) => Number(skill?.fetchSelfId?.() ?? skill?.selfId) === LUCKY_SKILL_ID);
 }
 
@@ -233,6 +233,22 @@ function flush(characterId) {
     return pendingWrites.get(Number(characterId)) || Promise.resolve(null);
 }
 
+function load(actor) {
+    const characterId = Number(actor?.fetchId?.() || 0);
+    if (!characterId || !databaseReady()) return Promise.resolve(null);
+    const previous = actor.deathExperience;
+    return queue(characterId, () => Database.fetchCharacterDeathExperience(characterId)).then((record) => {
+        // An in-flight login read must not replace a newer death or revival.
+        if (actor.deathExperience !== previous) return actor.deathExperience;
+        actor.deathExperience = record ? {
+            ...record,
+            pendingRestoration: Number(record.pendingRestoration) === 1,
+            deathContext: typeof record.deathContext === 'string' ? JSON.parse(record.deathContext) : record.deathContext
+        } : null;
+        return actor.deathExperience;
+    });
+}
+
 module.exports = {
     calculateLoss,
     calculateRestoration,
@@ -243,5 +259,6 @@ module.exports = {
     restoreCold,
     clearCold,
     levelInterval,
+    load,
     flush
 };

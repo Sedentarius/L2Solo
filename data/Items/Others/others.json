@@ -14131,6 +14131,10 @@
     "template": { "kind": "Other.None", "name": "Deluxe Chest Key - Grade 2", "class1": 4, "class2": 5, "mass": 10, "price": 200 },
     "etc": { "stackable": true, "consumable": true }
 },{
+    "selfId": 7126,
+    "template": { "kind": "Other.Scroll", "name": "Scroll of Escape: Giran Castle Town", "class1": 4, "class2": 5, "mass": 30, "price": 35000 },
+    "etc": { "stackable": true, "consumable": true }
+},{
     "selfId": 7559,
     "template": { "kind": "Other.Scroll", "name": "Scroll of Escape: Giran Castle Town", "class1": 4, "class2": 5, "mass": 0, "price": 400 },
     "etc": { "stackable": false, "consumable": true }
@@ -14150,4 +14154,48 @@
     "selfId": 7573,
     "template": { "kind": "Other.Quest", "name": "Roselyn's Note", "class1": 4, "class2": 3, "mass": 0, "price": 0 },
     "etc": { "stackable": true, "consumable": false }
+},{
+    "selfId": 7554,
+    "template": {"kind": "Other.Scroll", "name": "Scroll of Escape to Talking Island", "class1": 4, "class2": 5, "mass": 30, "price": 400},
+    "etc": {"stackable": true, "consumable": true}
+},{
+    "selfId": 7555,
+    "template": {"kind": "Other.Scroll", "name": "Scroll of Escape to Elven Village", "class1": 4, "class2": 5, "mass": 30, "price": 400},
+    "etc": {"stackable": true, "consumable": true}
+},{
+    "selfId": 7556,
+    "template": {"kind": "Other.Scroll", "name": "Scroll of Escape to Dark Elven Village", "class1": 4, "class2": 5, "mass": 30, "price": 400},
+    "etc": {"stackable": true, "consumable": true}
+},{
+    "selfId": 7557,
+    "template": {"kind": "Other.Scroll", "name": "Scroll of Escape to Orc Village", "class1": 4, "class2": 5, "mass": 30, "price": 400},
+    "etc": {"stackable": true, "consumable": true}
+},{
+    "selfId": 7558,
+    "template": {"kind": "Other.Scroll", "name": "Scroll of Escape to Dwarven Village", "class1": 4, "class2": 5, "mass": 30, "price": 400},
+    "etc": {"stackable": true, "consumable": true}
+},{
+    "selfId": 7563,
+    "template": {"kind": "Other.Quest", "name": "Galladucci's Order Document", "class1": 4, "class2": 3, "mass": 0, "price": 0},
+    "etc": {"stackable": true, "consumable": false}
+},{
+    "selfId": 7564,
+    "template": {"kind": "Other.Quest", "name": "Galladucci's Order Document", "class1": 4, "class2": 3, "mass": 0, "price": 0},
+    "etc": {"stackable": true, "consumable": false}
+},{
+    "selfId": 7565,
+    "template": {"kind": "Other.Quest", "name": "Galladucci's Order Document", "class1": 4, "class2": 3, "mass": 0, "price": 0},
+    "etc": {"stackable": true, "consumable": false}
+},{
+    "selfId": 7566,
+    "template": {"kind": "Other.Quest", "name": "Purified Magic Necklace", "class1": 4, "class2": 3, "mass": 0, "price": 0},
+    "etc": {"stackable": true, "consumable": false}
+},{
+    "selfId": 7567,
+    "template": {"kind": "Other.Quest", "name": "Gemstone Powder", "class1": 4, "class2": 3, "mass": 0, "price": 0},
+    "etc": {"stackable": true, "consumable": false}
+},{
+    "selfId": 7568,
+    "template": {"kind": "Other.Quest", "name": "Magic Sword Hilt", "class1": 4, "class2": 3, "mass": 0, "price": 0},
+    "etc": {"stackable": true, "consumable": false}
 }]

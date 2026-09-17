@@ -555,6 +555,14 @@ const voices = {
         ['weary', 'Getting tired of dying. Could really use a leveling party.'],
         ['reserved', 'Rough time leveling. Died a few times. Any room in a party?']
     ],
+    'clan.party_help': [
+        ['warm', 'Of course, {name}. Come along, we have room for you.'],
+        ['social', '{name}, come join us. Let us level together.'],
+        ['careful', 'Come along, {name}. We will take it steady together.'],
+        ['driven', '{name}, you are with us now. Let us get some leveling done.'],
+        ['calm', 'Sure, {name}. Come along for a few runs together.'],
+        ['reserved', '{name}, join us. There is room for you.']
+    ],
     'clan.struggling_group': [
         ['warm', 'I keep dying on these runs. Could someone help us out?'],
         ['social', 'Having a rough time even in a group. Anyone able to lend a hand?'],

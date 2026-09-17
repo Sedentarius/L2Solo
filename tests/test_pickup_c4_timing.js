@@ -38,7 +38,8 @@ async function main() {
         setLocXYZ(loc) { this.x = loc.locX; }, isDead: () => false,
         isBlocked() { return this.state.isBlocked(); }, fetchIsOnline: () => true,
         fetchCollectiveRunSpd: () => 100, fetchCollectiveWalkSpd: () => 50 };
-    const session = { actor, dataSendToMeAndOthers() {}, dataSendToMe() {} };
+    const packets = [];
+    const session = { actor, dataSendToMeAndOthers(packet) { packets.push(packet[0]); }, dataSendToMe(packet) { packets.push(packet[0]); } };
     actor.session = session;
     try {
         replace(Date, 'now', () => now);
@@ -54,6 +55,7 @@ async function main() {
         Generics.pickupRequest(session, actor, { id: 10 }); await flush();
         Generics.pickupRequest(session, actor, { id: 11 }); await flush();
         assert.deepStrictEqual(awards, [[10, 0], [11, 0]], 'nearby loot needs no movement, cooldown or ValidatePosition');
+        assert.deepStrictEqual(packets.slice(-3), [0x25, 0x47, 0x0d], 'ActionFailed and final StopMove must precede GetItem');
         assert.strictEqual(actor.state.isBlocked(), false);
         assert.strictEqual(timers.size, 0);
 
@@ -70,6 +72,7 @@ async function main() {
         await advance(1);
         assert.deepStrictEqual(awards[2], [13, 1200], 'switching starts from current position and stops 20 units short');
         assert.strictEqual(actor.x, -80);
+        assert.deepStrictEqual(packets.slice(-3), [0x25, 0x47, 0x0d], 'approaching loot must release client action at arrival');
         await advance(3000);
         assert.strictEqual(awards.length, 3, 'cancelled approach must never award its old target');
 

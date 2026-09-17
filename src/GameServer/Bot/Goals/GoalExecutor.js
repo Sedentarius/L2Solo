@@ -17,6 +17,7 @@ function marketTown(name = 'Giran') {
 function beginMarketTravel(state, goal, timestamp = Date.now()) {
     if (Number(state?.stats?.karma || 0) > 0) return null;
     if (!state || !goal || ['traveling', 'shopping', 'merchant', 'crafting'].includes(state.activity)) return null;
+    if (state.stats?.partyMarketReturn) return null;
     const buyingGear = goal.type === 'upgrade_gear'
         && ['market_search_for_weapon', 'market_search_for_gear'].includes(goal.plan?.expectedBenefit);
     const buyingMaterial = goal.type === 'buy_craft_material' && goal.plan?.expectedBenefit === 'market_buy_craft_material';
@@ -68,7 +69,14 @@ function beginMarketTravel(state, goal, timestamp = Date.now()) {
 
 function finishMarketVisit(state, timestamp = Date.now()) {
     if (!state || !['shopping', 'merchant'].includes(state.activity)) return null;
-    const destination = state.stats?.marketReturn;
+    let destination = state.stats?.marketReturn;
+    const returningParty = state.stats?.partyMarketReturn
+        ? invoke('GameServer/Bot/Population/BackgroundPartyState').find(state.stats.partyMarketReturn.partyId) : null;
+    const clanReturn = !!state.stats?.partyMarketReturn;
+    if (returningParty?.status === 'active') {
+        const leader = invoke('GameServer/Bot/Population/BotLifeState').cachedState(returningParty.leaderId);
+        if (leader?.loc) destination = { loc: leader.loc, spotId: returningParty.spotId, regionName: leader.currentRegion };
+    }
     if (!destination?.loc) return null;
 
     const from = { ...state.loc };
@@ -82,10 +90,10 @@ function finishMarketVisit(state, timestamp = Date.now()) {
             spotId: destination.spotId
         }
         : null;
-    const spotBackoff = returnState
+    const spotBackoff = returnState && !clanReturn
         ? SpotRiskPolicy.backoffForStates([returnState], destination.spotId, timestamp)
         : null;
-    const selectedSpot = returnState
+    const selectedSpot = clanReturn ? savedSpot : returnState
         ? invoke('GameServer/Bot/Population/SpotProfiles').findForState(returnState, { timestamp })
             || (spotBackoff ? null : savedSpot)
         : null;
@@ -93,7 +101,7 @@ function finishMarketVisit(state, timestamp = Date.now()) {
     // already over the death threshold. A later lifecycle pass can retry
     // once another suitable route becomes available.
     if (spotBackoff && !selectedSpot) return null;
-    const to = selectedSpot
+    const to = clanReturn ? { ...destination.loc } : selectedSpot
         ? SpotService.arrivalPointForState(state, selectedSpot) || { ...destination.loc }
         : { ...destination.loc };
     const regionName = selectedSpot?.name || destination.regionName;
@@ -116,7 +124,7 @@ function finishMarketVisit(state, timestamp = Date.now()) {
                 townName: destinationTown?.name || regionName || 'Hunting Ground',
                 viaTown: destinationTown?.name || null,
                 method: 'gatekeeper_spot',
-                arrivalActivity: 'hunting',
+                arrivalActivity: clanReturn ? 'party_wait' : 'hunting',
                 arrivalEvent: spotBackoff ? 'arrived_hunting_ground' : 'returned_to_spot',
                 ...(spotBackoff ? { cause: 'death_pressure' } : {}),
                 clearMarketReturn: true,
