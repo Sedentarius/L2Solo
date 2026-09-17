@@ -8,7 +8,7 @@ const QuestService = invoke("GameServer/Quest/QuestService");
 assert.deepStrictEqual(
   QuestService.quests().map((quest) => quest.id),
   [
-    ...require('../src/GameServer/Quest/LowLevelDefinitions').map(d => d.id),
+    ...require('../src/GameServer/Quest/LowLevelDefinitions').filter(d=>!d.blocked).map(d => d.id),
     1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 34, 36, 42, 43, 44, 45, 46, 47, 48, 49, 101, 102, 103,
     104, 105, 106, 107, 108, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160,
     161, 162, 163, 164, 165, 166, 167, 168, 169, 170,

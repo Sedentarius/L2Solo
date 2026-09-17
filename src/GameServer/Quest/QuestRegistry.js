@@ -18,7 +18,7 @@ const disabledReasons = new Map([
 ]);
 
 const entries = [
-  ...require('./LowLevelDefinitions').map(d => ({ id: d.id, definitionId: d.id, status: 'active' })),
+  ...require('./LowLevelDefinitions').map(d => ({ id: d.id, definitionId: d.id, status: d.blocked ? 'disabled' : 'active', ...(d.blocked ? {reason:d.blocked} : {}) })),
   ...[
     [1, "Q001_LettersOfLove"],
     [2, "Q002_WhatWomenWant"],

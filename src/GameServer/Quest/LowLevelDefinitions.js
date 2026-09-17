@@ -6,6 +6,21 @@ const collect = (id, name, minLevel, startNpc, item, count, drops, reward, extra
         { type: 'COMPLETE', npc: startNpc, takes: [[item,count]] }], reward
 });
 const definitions = [
+    { id:259,name:"Rancher's Plea",minLevel:15,startNpc:7497,repeatable:true,
+        stages:[{type:'COLLECT',npc:7497,prices:[[1495,25]],bonusAt:10,bonusAdena:250,
+            drops:[103,106,108].map(npc=>({npc,item:1495,chance:1}))}],
+        exchanges:[{event:'potion',npc:7405,cond:1,label:'Exchange ten skins for a healing potion',takes:[[1495,10]],gives:[[1061,1]]},
+            {event:'arrows',npc:7405,cond:1,label:'Exchange ten skins for fifty wooden arrows',takes:[[1495,10]],gives:[[17,50]]}] },
+    { id:316,name:'Destroy Plague Carriers',minLevel:18,race:1,startNpc:7155,repeatable:true,
+        stages:[{type:'COLLECT',npc:7155,prices:[[1042,30],[1043,10000]],bonusAt:10,bonusItems:[1042],bonusAdena:5000,
+            drops:[{npc:40,item:1042,chance:.4},{npc:47,item:1042,chance:.4},{npc:5020,item:1043,chance:.2,cap:1}]}] },
+    { id:274,name:'Skirmish with the Werewolves',minLevel:9,race:3,startNpc:7569,repeatable:true,requiredAny:[1506,1507],
+        stages:[{type:'KILL_COLLECT',item:1477,count:40,drops:[363,364].map(npc=>({npc,chance:1})),sideDrops:[{item:1501,chance:.06}]},
+            {type:'COMPLETE',npc:7569,takes:[[1477,40]],consumeAll:[1501]}],reward:{adena:3500,perItemAdena:[[1501,600]]} },
+    { id:379,name:'Fantasy Wine',minLevel:20,startNpc:7074,repeatable:true,blocked:'MISSING_ITEM_TEMPLATES: 5893,5894,5956,5957,5958',
+        stages:[{type:'KILL_COLLECT',objectives:[[5893,80],[5894,100]],drops:[{npc:291,item:5893,chance:1},{npc:292,item:5894,chance:1}]},
+            {type:'COMPLETE',npc:7074,takes:[[5893,80],[5894,100]]}],
+        reward:{choices:[{weight:3,items:[[5956,1]]},{weight:6,items:[[5957,1]]},{weight:1,items:[[5958,1]]}]} },
     { id:263,name:'Orc Subjugation',minLevel:8,race:2,startNpc:7346,repeatable:true,
         stages:[{type:'COLLECT',npc:7346,prices:[[1116,20],[1117,30]],bonusAt:10,bonusAdena:1000,
             drops:[385,386,387,388].map(npc=>({npc,item:npc===385?1116:1117,chance:.5}))}] },

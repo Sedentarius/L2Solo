@@ -12,6 +12,10 @@ Each Q00NNN directory's Java handler was read for factual mechanics.
 | 291 | 40 guaranteed pelts; reward weights 3/18/25/54, last outcome grants both hairpin 1505 and escape scroll 736. |
 | 294 | Dwarf level 10; 100 bat fangs with species-dependent 1–4 amounts; 600 SP plus ring 1508 if absent, otherwise 2400 Adena. |
 | 263/306/317 | Continuous collection with unit payouts and a bonus at ten items: 20/30 + 1000, 60 + 5000, and 40 + 2988 Adena respectively. Uses the reference's ordinary reward mode, not its optional alternate village reward setting. Leaving the quest removes remaining quest items. |
+| 259 | Guaranteed spider skins; Edmond pays 25 each + 250 at ten. Marius exchanges ten for one potion 1061 or fifty arrows 17. Both choices require the correct NPC and atomically consume the skins. |
+| 274 | Requires either Q271 necklace, retained; 40 heads plus independent 6% totem drops; 3500 Adena + 600 per totem. |
+| 316 | Elf level 18; 40% rat fang drops; Varool trophy 20%, maximum one. Payout 30 per rat fang + 10000 trophy, +5000 only for ten rat fangs. Varool already has an authored spawn; no new encounter primitive. |
+| 379 | Reviewed two-objective definition exists but is disabled: item templates 5893/5894/5956/5957/5958 are absent. Multi-objective atomic collection is tested with existing templates; that test does not certify Q379. |
 | 258 | Guaranteed pelts; 40 required; equipment lottery weights 1/5/3/4/3 out of 16. |
 | 264 | Goblin claws 2 or 4; wolf claws 1 or 2; seven reward outcomes, including equipment and Adena. Inventory's 50 Adena is only one conditional award. |
 | 271 | Orc restriction; fangs 1 (75%) or 2 (25%); necklace 1507 (10%) or 1506 (90%). |

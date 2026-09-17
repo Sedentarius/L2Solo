@@ -20,8 +20,8 @@ const QUESTS = Object.freeze({
         preferredKillNpcIds: [456],
         priority: 50
     }),
-    ...Object.fromEntries(require('../../Quest/LowLevelDefinitions').filter(d=>d.stages[0].type==='KILL_COLLECT').map(d => [d.id, Object.freeze({
-        questId: d.id, name: d.name, race: d.race ?? null, minLevel: d.minLevel,
+    ...Object.fromEntries(require('../../Quest/LowLevelDefinitions').filter(d=>d.stages[0].type==='KILL_COLLECT' && d.stages[0].item).map(d => [d.id, Object.freeze({
+        questId: d.id, name: d.name, race: d.race ?? null, minLevel: d.minLevel, requiredAny:d.requiredAny,
         startNpcId: d.startNpc, returnNpcId: d.startNpc, startEvent: 'start',
         collectItemId: d.stages[0].item, collectAmount: d.stages[0].count,
         preferredKillNpcIds: d.stages[0].drops.map(drop => drop.npc), priority: 45
@@ -57,6 +57,7 @@ function eligible(state, spec, timestamp = Date.now(), options = {}) {
     if (state.party?.partyId || state.partyId) return false;
     if (!['hunting', 'resting', 'traveling'].includes(String(state.activity || ''))) return false;
     if (Number(state.level || 1) < Number(spec.minLevel || 1)) return false;
+    if(spec.requiredAny && !spec.requiredAny.some(id=>inventoryAmount(state,id)>0)) return false;
     if (spec.race !== null && spec.race !== undefined && classRace(state) !== Number(spec.race)) return false;
     if(spec.fromClassId !== undefined) {
         const current=Number(state.stats?.classId ?? state.classId);

@@ -8,7 +8,7 @@ const Database = invoke('Database');
 const DataCache = invoke('GameServer/DataCache');
 const Backpack = invoke('GameServer/Actor/Backpack');
 const Service = invoke('GameServer/Quest/QuestService');
-const Definitions = [...require('../src/GameServer/Quest/LowLevelDefinitions'), ...require('../src/GameServer/Quest/RecoveredLowLevelDefinitions')];
+const Definitions = [...require('../src/GameServer/Quest/LowLevelDefinitions').filter(d=>!d.blocked), ...require('../src/GameServer/Quest/RecoveredLowLevelDefinitions')];
 const Catalog = require('../src/GameServer/Bot/Quest/AutonomousQuestCatalog');
 const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'l2-c4-definitions-'));
 options.default.Database.path = path.join(directory, 'test.sqlite');
@@ -44,6 +44,10 @@ async function main() {
             assert.equal(await Service.onEvent(s,{questId:d.id,name:'start'}),false,`Q${d.id} race gate`);
             s.actor.race=d.race;
         }
+        if(d.requiredAny) {
+            assert.equal(await Service.onEvent(s,{questId:d.id,name:'start'}),false,'prerequisite item gate');
+            await Service.giveItem(s,d.requiredAny[0],1);
+        }
         await Service.onEvent(s,{questId:d.id,name:'start'});
         let state=s.questStates.get(d.id);
         assert.equal(state.state,'started');
@@ -52,12 +56,12 @@ async function main() {
         if(objective.type==='COLLECT') {
             try {
                 Math.random=()=>.999;
-                await quest.onKill(state,{fetchSelfId:()=>objective.drops[0].npc});
+                if(objective.drops[0].chance<1) await quest.onKill(state,{fetchSelfId:()=>objective.drops[0].npc});
                 assert.equal(await amount(d.id,objective.drops[0].item),0);
                 Math.random=()=>0;
                 for(let n=0;n<9;n++) await quest.onKill(state,{fetchSelfId:()=>objective.drops[0].npc});
                 await quest.onTalk(state,{fetchSelfId:()=>d.startNpc});
-                const first={263:180,306:540,317:360}[d.id];
+                const first={259:225,263:180,306:540,316:270,317:360}[d.id];
                 assert.equal(await amount(d.id,57),first,'below-threshold unit payout');
                 assert.equal(state.state,'started');
                 for(let n=0;n<10;n++) {
@@ -69,11 +73,30 @@ async function main() {
                 await quest.onTalk(state,{fetchSelfId:()=>999999});
                 assert.equal(await amount(d.id,57),first);
                 await quest.onTalk(state,{fetchSelfId:()=>d.startNpc});
-                assert.equal(await amount(d.id,57),first+({263:1250,306:5600,317:3388}[d.id]),'mixed-item threshold payout');
+                assert.equal(await amount(d.id,57),first+({259:500,263:1250,306:5600,316:5300,317:3388}[d.id]),'mixed-item threshold payout');
                 await assert.rejects(quest.onTalk(clone.questStates.get(d.id),{fetchSelfId:()=>d.startNpc}),/step changed/);
                 const before=await amount(d.id,57);
                 await quest.onTalk(state,{fetchSelfId:()=>d.startNpc});
                 assert.equal(await amount(d.id,57),before,'empty hand-in cannot repeat bonus');
+                if(d.id===316) {
+                    for(let n=0;n<20;n++) await quest.onKill(state,{fetchSelfId:()=>5020});
+                    assert.equal(await amount(d.id,1043),1,'unique boss trophy cap');
+                    await quest.onTalk(state,{fetchSelfId:()=>d.startNpc});
+                    assert.equal(await amount(d.id,57),before+10000,'boss trophy alone does not earn rat threshold bonus');
+                }
+                if(d.id===259) {
+                    s.activeNpcTalk={selfId:7405,objectId:1};
+                    assert.equal(await Service.onEvent(s,{questId:259,name:'potion'}),false,'empty exchange denied');
+                    for(let n=0;n<20;n++) await quest.onKill(state,{fetchSelfId:()=>103});
+                    s.activeNpcTalk.selfId=7497;
+                    assert.equal(await Service.onEvent(s,{questId:259,name:'potion'}),false,'wrong NPC exchange denied');
+                    s.activeNpcTalk.selfId=7405;
+                    await Service.onEvent(s,{questId:259,name:'potion'});
+                    await Service.onEvent(s,{questId:259,name:'arrows'});
+                    assert.equal(await amount(d.id,1061),1);assert.equal(await amount(d.id,17),50);
+                    assert.equal(await amount(d.id,1495),0);
+                    assert.equal(await Service.onEvent(s,{questId:259,name:'arrows'}),false,'exchanges cannot spend the same skins twice');
+                }
                 await quest.onKill(state,{fetchSelfId:()=>objective.drops[0].npc});
                 s.activeNpcTalk={selfId:d.startNpc+1,objectId:1};
                 assert.equal(await Service.onEvent(s,{questId:d.id,name:'quit'}),false);
@@ -81,8 +104,27 @@ async function main() {
                 await Service.onEvent(s,{questId:d.id,name:'quit'});
                 assert.equal(state.state,'created');
                 assert.equal(await amount(d.id,objective.drops[0].item),0,'quit removes pending quest items');
-                assert.equal(state.getInt('cashouts'),2);
+                assert.equal(state.getInt('cashouts'),d.id===316?3:2);
                 await quest.onEvent(state,'start');assert.equal(state.state,'started');
+            } finally {Math.random=random;}
+            continue;
+        }
+        if(objective.objectives) {
+            try {
+                Math.random=()=>0;
+                for(const [item,needed] of objective.objectives) {
+                    const drop=objective.drops.find(x=>x.item===item);
+                    for(let n=0;n<needed+2;n++) await quest.onKill(state,{fetchSelfId:()=>drop.npc});
+                    assert.equal(await amount(d.id,item),needed,'independent objective cap');
+                    await Database.close();Database.init();s=await sessionFor(d.id);state=s.questStates.get(d.id);
+                }
+                assert.equal(state.getInt('cond'),2);
+                const stale=await sessionFor(d.id);
+                await quest.onTalk(state,{fetchSelfId:()=>d.startNpc});
+                assert.equal(await amount(d.id,5956),1);
+                await assert.rejects(quest.onTalk(stale.questStates.get(d.id),{fetchSelfId:()=>d.startNpc}),/step changed/);
+                for(const [item] of objective.objectives) assert.equal(await amount(d.id,item),0);
+                assert.equal(state.state,'created');
             } finally {Math.random=random;}
             continue;
         }
@@ -131,6 +173,11 @@ async function main() {
         } finally {Math.random=random;}
         assert.equal(state.state,d.repeatable?'created':'completed','authored completion policy');
         assert.equal(state.getInt('completions'),1);
+        if(d.id===274) {
+            assert.equal(await amount(d.id,57),27500,'forty bonus totems paid once with base reward');
+            assert.equal(await amount(d.id,1501),0);
+            assert.equal(await amount(d.id,1506),1,'prerequisite necklace is retained');
+        }
         for(const [item] of d.stages.at(-1).takes||[]) assert.equal(await amount(d.id,item),0);
         const rewards=JSON.stringify(await Database.fetchItems(d.id));
         await assert.rejects(quest.onTalk(clone.questStates.get(d.id),{fetchSelfId:()=>d.startNpc}),/step changed/,'stale session cannot duplicate reward');
@@ -180,6 +227,24 @@ async function main() {
         assert.equal((await Runtime.resolveColdTalk(life,7150,'return')).reason,'missing_intent');
         assert.equal(await amount(313,57),before+3500);
     } finally {Object.assign(Life,original);Math.random=random;}
+    // Focused multiple-objective test uses known local item templates. Q379
+    // itself stays disabled until its five missing templates are restored.
+    const multi=require('../src/GameServer/Quest/DeclarativeQuest').create({id:313,name:'Multi-objective fixture',minLevel:1,startNpc:7150,repeatable:true,
+        stages:[{type:'KILL_COLLECT',objectives:[[1118,2],[1045,3]],drops:[{npc:509,item:1118,chance:1},{npc:15,item:1045,chance:1}]},
+            {type:'COMPLETE',npc:7150,takes:[[1118,2],[1045,3]]}],reward:{items:[[1060,1]]}});
+    let multiSession=await sessionFor(313),multiState=multiSession.questStates.get(313);
+    await multi.onEvent(multiState,'start');
+    for(let n=0;n<5;n++) await multi.onKill(multiState,{fetchSelfId:()=>509});
+    assert.equal(multiState.getInt('cond'),1);
+    assert.equal(await amount(313,1118),2);
+    await multi.onTalk(multiState,{fetchSelfId:()=>7150});
+    assert.equal(multiState.state,'started','one objective is insufficient');
+    await Database.close();Database.init();multiSession=await sessionFor(313);multiState=multiSession.questStates.get(313);
+    for(let n=0;n<5;n++) await multi.onKill(multiState,{fetchSelfId:()=>15});
+    assert.equal(await amount(313,1045),3);assert.equal(multiState.getInt('cond'),2);
+    await multi.onTalk(multiState,{fetchSelfId:()=>7150});
+    assert.equal(multiState.state,'created');assert.equal(await amount(313,1060),1);
+    assert.equal(await amount(313,1118),0);assert.equal(await amount(313,1045),0);
     console.log(`${Definitions.length} declarative quests: eligibility, NPC guards, kills, caps, restart, atomic rewards, stale-session rejection and reset passed`);
 }
 main().catch(e=>{console.error(e);process.exitCode=1;}).finally(async()=>{await Database.close();fs.rmSync(directory,{recursive:true,force:true});});
