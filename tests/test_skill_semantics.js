@@ -319,6 +319,29 @@ assert.strictEqual(benedictionTarget.fetchHp(), 1000, 'Benediction should clamp 
 });
 
 const revival = skill({ selfId: 181, name: 'Revival', spell: false, power: 1685, level: 1, distance: -1 });
+for (let level = 1; level <= 6; level++) {
+    const target = statActor();
+    target.statusUpdateVitals = () => calculateStats({}, target);
+    calculateStats({}, target);
+    const baseHp = target.fetchMaxHp();
+    target.hp = 1;
+    const roar = skill({ selfId: 121, name: 'Battle Roar', level, buff: 600000 });
+    const result = SkillEffects.execute(session(), target, target, roar);
+    const multiplier = [1.1, 1.15, 1.2, 1.25, 1.3, 1.35][level - 1];
+    assert.strictEqual(target.fetchMaxHp(), baseHp * multiplier, 'Battle Roar must increase actual maximum HP');
+    assert.strictEqual(result.heal, Math.round(target.fetchMaxHp() * [9.1, 13, 16.6, 20, 23, 25.7][level - 1] / 100), 'Battle Roar must heal using the increased maximum HP');
+    assert(result.effect.expiresAt - Date.now() > 599000);
+    const body = skill({ selfId: 1045, name: 'Blessed Body', level: 6, buff: 1200000 });
+    SkillEffects.execute(session(), target, target, body);
+    assert.strictEqual(target.fetchMaxHp(), baseHp * 1.35, 'Blessed Body must replace, not multiply, Battle Roar');
+    SkillEffects.execute(session(), target, target, roar);
+    assert.strictEqual(target.fetchMaxHp(), baseHp * 1.35, 'Weaker Battle Roar must not replace a stronger HP buff');
+    const hpEffects = EffectStore.list(target).filter(effect => effect.stackFamily === 'MaxHPUp');
+    assert.strictEqual(hpEffects.length, 1);
+    hpEffects[0].expiresAt = Date.now() - 1;
+    calculateStats({}, target);
+    assert.strictEqual(target.fetchMaxHp(), baseHp, 'Maximum HP must return to normal after expiry');
+}
 const revivalAttack = new Attack();
 assert(
     revivalAttack.skillUseConditionFailure(creature({ hp: 101, maxHp: 1000 }), revival),

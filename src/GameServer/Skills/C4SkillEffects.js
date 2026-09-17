@@ -99,11 +99,16 @@ function execute(session, actor, target, skill, context = {}) {
     }
 
     if (semantic.skillType === C4SkillRules.HEAL_PERCENT) {
+        // Battle Roar raises maximum HP before computing its percentage heal.
+        const effectBeforeHeal = Number(skill.fetchSelfId()) === 121;
+        if (effectBeforeHeal && semantic.effect) {
+            result.effect = applyEffect(session, target, skill, semantic, actor);
+        }
         result.heal = applyHealPercent(session, actor, target, skill, semantic, magicSkill, context.attack);
         if (semantic.manaHealPercent) {
             result.mpRestore = applyManaHealPercent(session, actor, target, skill, semantic, magicSkill, context.attack);
         }
-        if (semantic.effect) {
+        if (semantic.effect && !effectBeforeHeal) {
             result.effect = applyEffect(session, target, skill, semantic, actor);
         }
         return finish();
