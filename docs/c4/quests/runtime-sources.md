@@ -7,6 +7,10 @@ Each Q00NNN directory's Java handler was read for factual mechanics.
 
 | Quest | Resolution of missing or incomplete inventory facts |
 |---|---|
+| 261/262 | Eight guaranteed spider legs for 1000 Adena + 2000 EXP; ten fungus sacs with 40%/30% species chances for 3000 Adena. |
+| 272 | Orc level 5; 50 guaranteed heads for 1500 Adena. Goblin Tomb Raider Leader is a normal kill target: no new boss primitive is required. |
+| 291 | 40 guaranteed pelts; reward weights 3/18/25/54, last outcome grants both hairpin 1505 and escape scroll 736. |
+| 294 | Dwarf level 10; 100 bat fangs with species-dependent 1–4 amounts; 600 SP plus ring 1508 if absent, otherwise 2400 Adena. |
 | 258 | Guaranteed pelts; 40 required; equipment lottery weights 1/5/3/4/3 out of 16. |
 | 264 | Goblin claws 2 or 4; wolf claws 1 or 2; seven reward outcomes, including equipment and Adena. Inventory's 50 Adena is only one conditional award. |
 | 271 | Orc restriction; fangs 1 (75%) or 2 (25%); necklace 1507 (10%) or 1506 (90%). |

@@ -6,6 +6,17 @@ const collect = (id, name, minLevel, startNpc, item, count, drops, reward, extra
         { type: 'COMPLETE', npc: startNpc, takes: [[item,count]] }], reward
 });
 const definitions = [
+    collect(261, "Collector's Dream", 15, 7222, 1087, 8, [[308,1],[460,1],[466,1]], {adena:1000,exp:2000}),
+    collect(262, 'Trade with the Ivory Tower', 8, 7137, 707, 10, [[400,.4],[7,.3]], {adena:3000}),
+    collect(272, 'Wrath of Ancestors', 5, 7572, 1474, 50, [[319,1],[320,1]], {adena:1500}, {race:3}),
+    collect(291, 'Revenge of the Redbonnet', 4, 7553, 1482, 40, [[317,1]], {
+        choices:[{weight:3,items:[[1502,1]]},{weight:18,items:[[1503,1]]},
+            {weight:25,items:[[1504,1]]},{weight:54,items:[[1505,1],[736,1]]}]
+    }),
+    collect(294, 'Covert Business', 10, 7534, 1491, 100, [
+        [370,1,[{amount:2,chance:.3},{amount:3,chance:.2},{amount:4,chance:.2},{amount:1,chance:.3}]],
+        [480,1,[{amount:2,chance:.3},{amount:3,chance:.3},{amount:1,chance:.4}]]
+    ], {sp:600,ifOwned:{item:1508,yes:{adena:2400},no:{items:[[1508,1]]}}}, {race:4}),
     collect(258, 'Bring Wolf Pelts', 3, 7001, 702, 40, [[120,1],[442,1]], {
         choices: [[1,390],[5,29],[3,22],[4,1119],[3,426]].map(([weight,id]) => ({weight,items:[[id,1]]}))
     }),
