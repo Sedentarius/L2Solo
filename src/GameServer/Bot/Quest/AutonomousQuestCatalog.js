@@ -18,12 +18,22 @@ const QUESTS = Object.freeze({
         collectAmount: 13,
         preferredKillNpcIds: [456],
         priority: 50
-    })
+    }),
+    ...Object.fromEntries(require('../../Quest/LowLevelDefinitions').map(d => [d.id, Object.freeze({
+        questId: d.id, name: d.name, race: d.race ?? null, minLevel: d.minLevel,
+        startNpcId: d.startNpc, returnNpcId: d.startNpc, startEvent: 'start',
+        collectItemId: d.stages[0].item, collectAmount: d.stages[0].count,
+        preferredKillNpcIds: d.stages[0].drops.map(drop => drop.npc), priority: 45
+    })]))
 });
 
 function classRace(state = {}) {
     const classId = Number(state.stats?.classId ?? state.classId ?? 0);
     if (DARK_ELF_CLASS_IDS.has(classId)) return 2;
+    if (classId >= 0 && classId <= 17) return 0;
+    if (classId >= 18 && classId <= 30) return 1;
+    if (classId >= 44 && classId <= 52) return 3;
+    if (classId >= 53 && classId <= 57) return 4;
     return null;
 }
 

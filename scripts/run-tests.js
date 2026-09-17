@@ -1,6 +1,8 @@
 const { spawnSync } = require('child_process');
 
 const tests = [
+    'tests/test_first_profession_proof.js',
+    'tests/test_c4_declarative_quests.js',
     'tests/test_npc_passive_retaliation.js',
     'tests/test_player_transition_recovery.js',
     'tests/test_heine_npcs.js',
@@ -509,7 +511,10 @@ const tests = [
     'tests/test_ui_test_window.js'
 ];
 
-for (const testFile of tests) {
+const fromArgument = process.argv.indexOf('--from');
+const fromTest = fromArgument >= 0 ? process.argv[fromArgument + 1] : null;
+if (fromTest && !tests.includes(fromTest)) throw new Error(`Unknown regression start: ${fromTest}`);
+for (const testFile of fromTest ? tests.slice(tests.indexOf(fromTest)) : tests) {
     console.log(`\n> node ${testFile}`);
     const result = spawnSync(process.execPath, [testFile], {
         cwd: process.cwd(),

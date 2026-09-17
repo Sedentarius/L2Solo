@@ -214,7 +214,9 @@ async function advanceReturn(state, spec, intent, timestamp) {
     const talk = await ColdQuestRuntime.resolveColdTalk(state, spec.returnNpcId, `auto-return:${intent.attempt}`, { timestamp });
     const after = talk.state || state;
     const persisted = await questRow(state.characterId, spec.questId);
-    return isCompletedRow(persisted) ? markComplete(after, spec, timestamp) : after;
+    // Repeatable quests return to CREATED. A successful server hand-in still
+    // completes this autonomous goal; admission deliberately runs it once.
+    return isCompletedRow(persisted) || talk.finished ? markComplete(after, spec, timestamp) : after;
 }
 
 async function advance(state, options = {}) {

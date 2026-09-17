@@ -180,7 +180,7 @@ async function main() {
         assert.equal(Number(lifecycle.stats.questAutomation.completed['165']), 170000);
         assert.equal(GoalService.snapshot(1).current.status, 'completed',
             'completion must mark the autonomous quest goal completed');
-        assert.equal(Catalog.candidateFor(lifecycle, { timestamp: 540000, ignoreStagger: true }), null,
+        assert.notEqual(Catalog.candidateFor(lifecycle, { timestamp: 540000, ignoreStagger: true })?.target.questId, 165,
             'a completed one-shot quest must not be selected again');
 
         const rewardBeforeReplay = await amountOf(1, 1060);

@@ -18,6 +18,7 @@ const disabledReasons = new Map([
 ]);
 
 const entries = [
+  ...require('./LowLevelDefinitions').map(d => ({ id: d.id, definitionId: d.id, status: 'active' })),
   ...[
     [1, "Q001_LettersOfLove"],
     [2, "Q002_WhatWomenWant"],
@@ -119,7 +120,9 @@ const entries = [
 function activeQuests() {
   return entries
     .filter((entry) => entry.status === "active")
-    .map((entry) => require(entry.modulePath));
+    .map((entry) => entry.definitionId
+      ? require('./DeclarativeQuest').create(require('./LowLevelDefinitions').find(d => d.id === entry.definitionId))
+      : require(entry.modulePath));
 }
 
 module.exports = { entries, activeQuests };

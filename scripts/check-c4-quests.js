@@ -13,6 +13,12 @@ function audit() {
         if (!Number.isInteger(q.quest_id) || ids.has(q.quest_id)) errors.push(`Invalid/duplicate inventory ID ${q.quest_id}`);
         ids.add(q.quest_id);
     }
+    for (const spec of require('../src/GameServer/Quest/FirstProfessionProof').paths) {
+        const q = inventory.find(q => q.quest_id === spec.questId);
+        if (!q || JSON.stringify(q.from_class_ids) !== JSON.stringify([spec.fromClassId]) ||
+            JSON.stringify(q.to_class_ids) !== JSON.stringify([spec.toClassId]) || q.class_transfer_proof?.item_id !== spec.itemId)
+            errors.push(`Profession contract differs from inventory: Q${spec.questId}`);
+    }
     const scripts = fs.readdirSync(path.join(root, 'src/GameServer/Quest/quests')).filter(f => /^Q\d+_.*\.js$/.test(f));
     for (const f of scripts) if (!ids.has(Number(f.match(/^Q(\d+)/)[1]))) errors.push(`Script absent from inventory: ${f}`);
     for (const e of registry.entries.filter(e => e.id)) if (!ids.has(e.id)) errors.push(`Registry ID absent from inventory: ${e.id}`);
@@ -28,13 +34,14 @@ function audit() {
         const status = entry?.status === 'disabled' || ev.blocker ? 'PARTIAL/BLOCKED' : ev.certified && entry?.status === 'active' ? 'VERIFIED' : entry?.status === 'active' ? 'IMPLEMENTED' : script ? 'PARTIAL/BLOCKED' : 'MISSING';
         const drift = [];
         if (!!script !== q.l2solo_script_exists) drift.push('script_existence');
+        if (entry?.definitionId) drift.push('implemented_as_reviewed_definition');
         if ((entry?.status === 'active') !== q.l2solo_registered) drift.push('registration');
         if (status !== q.l2solo_runtime_status) drift.push(`status:${q.l2solo_runtime_status}->${status}`);
         for (const t of q.l2solo_tests || []) if (!fs.existsSync(path.join(root, t))) drift.push(`missing_historical_test:${t}`);
         const obsolete = (q.bridge_missing_capabilities || []).filter(c => c === 'GENERIC_QUEST_GOAL_AND_RESOLVER');
         if (obsolete.length) drift.push('generic_bridge_already_exists');
         return { questId: q.quest_id, name: q.name, inScope: q.chronicle_status === 'CONFIRMED_C4' && q.level_min >= 1 && q.level_min <= 20,
-            quarantined: [255, 999].includes(q.quest_id), status, script: script || null, registered: entry?.status === 'active',
+            quarantined: [255, 999].includes(q.quest_id), status, script: script || null, definitionId: entry?.definitionId || null, registered: entry?.status === 'active',
             tests: [...new Set([...knownTests, ...(ev.tests || [])])], blocker: ev.blocker || entry?.reason || null,
             bridge: { genericResolver: 'PRESENT', questAdapter: ev.bridge || 'NOT_CERTIFIED', requirementsNeedingReview: (q.bridge_missing_capabilities || []).filter(c => !obsolete.includes(c)) }, drift };
     });
