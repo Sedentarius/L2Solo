@@ -343,6 +343,31 @@ for (let level = 1; level <= 6; level++) {
     assert.strictEqual(target.fetchMaxHp(), baseHp, 'Maximum HP must return to normal after expiry');
 }
 const revivalAttack = new Attack();
+const totemIds = [76, 83, 109, 282, 292, 298];
+for (const firstId of totemIds) {
+    for (const secondId of totemIds) {
+        const target = statActor();
+        const castTotem = (id) => {
+            const data = activeSkills.find(entry => entry.selfId === id);
+            const totem = skill({ selfId: id, name: data.template.name, level: 1, buff: 120000 });
+            return SkillEffects.execute(session(), target, target, totem).effect;
+        };
+        EffectStore.apply(target, { id: 1204, key: 'wind_walk', stats: { runSpdAdd: 20 }, durationMs: 120000 });
+        const first = castTotem(firstId);
+        const latest = castTotem(secondId);
+        assert(first && latest);
+        const activeTotems = EffectStore.list(target).filter(effect => totemIds.includes(effect.id));
+        assert.deepStrictEqual(activeTotems.map(effect => effect.id), [secondId], 'Only the most recently cast totem may remain active');
+        assert.strictEqual(EffectStore.packetEffects(target).filter(effect => totemIds.includes(effect.id)).length, 1, 'Client must receive only one totem icon');
+        for (const stat of ['pAtkMul', 'pDefMul', 'runSpdMul', 'pAtkSpdMul']) {
+            assert.strictEqual(EffectStats.multiplier(target, stat), latest.stats[stat] ?? 1, 'Previous totem modifiers must be removed');
+        }
+        assert.strictEqual(EffectStats.add(target, 'runSpdAdd'), 20, 'Switching totems must preserve unrelated buffs');
+        EffectStore.remove(target, latest.key);
+        assert.strictEqual(EffectStore.list(target).filter(effect => totemIds.includes(effect.id)).length, 0, 'Displaced totems must not return after cancellation');
+        EffectStore.remove(target, 'wind_walk');
+    }
+}
 assert(
     revivalAttack.skillUseConditionFailure(creature({ hp: 101, maxHp: 1000 }), revival),
     'Revival should be blocked above the sourced 10% HP condition'

@@ -65,6 +65,8 @@ const DUAL_SWORD_DANCE = Object.freeze({
 // separate from the local effect key preserves source stack families without
 // collapsing unrelated multi-stat buffs such as Prophecies and Chant of Victory.
 const STACK_FAMILY_BY_SKILL_ID = Object.freeze({
+    76: 'possession', 83: 'possession', 109: 'possession',
+    282: 'possession', 292: 'possession', 298: 'possession',
     77: 'pAtk', 91: 'pDef',
     230: 'SpeedUp',
     1002: 'mAtkSpeedUp', 1003: 'pAtk', 1004: 'mAtkSpeedUp', 1005: 'pDef',
@@ -1266,6 +1268,7 @@ function resolve(skill = {}) {
 
 function stackOrderFromStats(stackFamily, stats = {}, level = 1) {
     switch (stackFamily) {
+        case 'possession': return 1;
         case 'SpeedUp': return Number(stats.runSpdAdd) || Number(level) || 1;
         case 'pAtk': return Number(stats.pAtkMul) || Number(level) || 1;
         case 'pDef': return Number(stats.pDefMul) || Number(level) || 1;
