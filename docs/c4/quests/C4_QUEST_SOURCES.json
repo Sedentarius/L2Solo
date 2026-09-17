@@ -1,0 +1,77 @@
+[
+  {
+    "source_id": "L2SOLO",
+    "name": "Sedentarius/L2Solo current repository snapshot",
+    "type": "repository",
+    "chronicle": "Current implementation (C4-targeting)",
+    "URL/repository": "https://github.com/pmbstyle/L2Solo",
+    "commit/snapshot/date": "local connected snapshot inspected 2026-09-16; commit metadata unavailable in mirror",
+    "usage": "Quest scripts, QuestService registration, tests, class progression hooks, runtime reachability, and existing bespoke clan-alliance automation.",
+    "limitations": "Authority only for current L2Solo state, not retail Chronicle 4 behavior."
+  },
+  {
+    "source_id": "CLIENT_C4",
+    "name": "User-provided Chronicle 4 questname-e.dat",
+    "type": "client data",
+    "chronicle": "Chronicle 4 / Lineage2Ver413",
+    "URL/repository": "local user-provided file audit_workspace/client-dat/C4/system/questname-e.dat",
+    "commit/snapshot/date": "SHA-256 26C4E5304CD291708E093E1628071CFBF4C2D8DECF5F4A21FD6ED6191C12007F; decoded record count 1816",
+    "usage": "Client-visible quest names, journal stages, objective text, item references, coordinates, and race metadata where populated.",
+    "limitations": "Client-facing metadata is not canonical server logic; some quests or fields may be absent or incomplete."
+  },
+  {
+    "source_id": "CLIENT_SCHEMA_C4",
+    "name": "L2FileEdit Chronicle 4 questname DDF and open-l2encdec",
+    "type": "tooling/schema",
+    "chronicle": "Chronicle 4 / protocol 413",
+    "URL/repository": "https://github.com/L2Miko/L2FileEdit ; https://github.com/ritsuwastaken/open-l2encdec",
+    "commit/snapshot/date": "public repositories accessed 2026-09-16; open-l2encdec 0.0.21",
+    "usage": "Technical decoding and structured parsing of the user-provided client DAT.",
+    "limitations": "Used only as parsing tooling/schema evidence; no proprietary server code copied."
+  },
+  {
+    "source_id": "L2JLISVUS_C4",
+    "name": "L2JLisvus Chronicle 4",
+    "type": "open-source server reference",
+    "chronicle": "Chronicle 4",
+    "URL/repository": "https://gitlab.com/TheDnR/l2j-lisvus",
+    "commit/snapshot/date": "fdc7e33af5d69067b41a6ee7cc7c07fe7aa35975",
+    "usage": "Primary server-side quest universe and behavior cross-check.",
+    "limitations": "Open-source reconstruction, not official retail server code; GPL-3.0 source used as evidence only."
+  },
+  {
+    "source_id": "MOBIUS_C4",
+    "name": "L2J Mobius C4 Scions of Destiny",
+    "type": "open-source server reference",
+    "chronicle": "Chronicle 4",
+    "URL/repository": "https://github.com/tichopad/L2J_Mobius/tree/6674a607727e342d42bb7ce3bf81fe7513067611/L2J_Mobius_C4_ScionsOfDestiny",
+    "commit/snapshot/date": "6674a607727e342d42bb7ce3bf81fe7513067611",
+    "usage": "Secondary quest universe, NPC/item hooks, rewards, prerequisites, profession proofs, and exceptional mechanic detection.",
+    "limitations": "Open-source reconstruction and may include backports or branch-specific content; no server code copied."
+  },
+  {
+    "source_id": "L2HUB_C4",
+    "name": "L2Hub Chronicle 4 quest database",
+    "type": "structured community database",
+    "chronicle": "Chronicle 4",
+    "URL/repository": "https://l2hub.info/c4/quests",
+    "commit/snapshot/date": "live index retrieved 2026-09-16; 294 entries",
+    "usage": "Structured names, levels, race/class restrictions, starting NPC labels, and starting locations.",
+    "limitations": "Community-maintained and not an official technical source; blank fields are common."
+  },
+  {
+    "source_id": "NC_C4",
+    "name": "Archived official Chronicle 4 feature documentation",
+    "type": "historical official documentation",
+    "chronicle": "Chronicle 4",
+    "URL/repository": [
+      "https://legacy-lineage2.com/news/chronicle4_10.html",
+      "https://legacy-lineage2.com/Knowledge/fishing.html",
+      "https://legacy-lineage2.com/news/chronicle4_16.html",
+      "https://legacy-lineage2.com/news/chronicle4_17.html"
+    ],
+    "commit/snapshot/date": "Chronicle 4-era pages; archived URLs accessed/reconciled 2026-09-16",
+    "usage": "Chronicle-level confirmation for fishing, third class transfer, Noblesse, and Goddard-era system content.",
+    "limitations": "Feature documentation is not a complete quest script specification and archived availability may vary."
+  }
+]
