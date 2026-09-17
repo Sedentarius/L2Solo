@@ -483,9 +483,14 @@
   },
   "296": {
     "certified": false,
-    "blocker": {
-      "code": "BRANCH_DEFINITION_PENDING",
-      "detail": "No absent generic resolver demonstrated. Retail exchanges, branches or source details need reviewed definitions and tests."
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ],
+    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "reviewedRequirements": [],
+    "runtimeBlocker": {
+      "code": "OPTIONAL_KILL_TARGET_UNSPAWNED",
+      "detail": "The reference lists Crimson Tarantula 20394 (native 394), but it has no local world spawn and is absent from the reviewed DwarvenStarting.xml. Active handlers support the two authored, spawned alternatives 403 and 508; all payment/extraction paths pass. No location has been invented."
     }
   },
   "297": {
@@ -505,12 +510,16 @@
     "reviewedRequirements": []
   },
   "306": {
-    "certified": true,
+    "certified": false,
     "tests": [
       "tests/test_c4_declarative_quests.js"
     ],
     "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
-    "reviewedRequirements": []
+    "reviewedRequirements": [],
+    "runtimeBlocker": {
+      "code": "OPTIONAL_KILL_TARGETS_UNSPAWNED",
+      "detail": "Reference targets 20112–20115 (native 112–115) have templates but no authored local world spawns. Both quest items remain obtainable from active targets 109/110 with their supported 30% chances; higher-variant content is explicitly incomplete."
+    }
   },
   "313": {
     "certified": true,
@@ -897,7 +906,7 @@
     }
   },
   "_certification": {
-    "generatedAt": "2026-09-17T18:12:21.178Z",
+    "generatedAt": "2026-09-17T22:56:20.882Z",
     "sourceHashes": {
       "config/default.ini": "b34385217a93dacbfb4d402af40c81c878d6715c770dc3ed2ff9d2e1cd01ec1b",
       "config/local.example.ini": "cb13f57c7e72f2b6f55e342378bb9acc974e7f7c0ab6708a6ed8f5d0dc8f8fa0",
@@ -1158,6 +1167,7 @@
       "database/sql/sqlite.sql": "15753058753aa50408eedc68de4b2178080e123b2f2ff5c66dbcc3a5221b53cf",
       "scripts/benchmark-interaction-memory.js": "d196e3f8dfb3fb49554d5081f339228a16a01c5ee606c2eca3f2987f45d3327b",
       "scripts/benchmark-town-navigation.js": "a03ca379db4ea4d1f55a50a4eea637962970f240c4557c7903ae925d5ea4d211",
+      "scripts/certify-c4-quests.js": "74e6eceb3ffb13aab90e204c871c6cd4ac1154d59edc7f7620cce4aea372a96f",
       "scripts/check-c4-quests.js": "094eec7789f23d33445e3d00452eb7d2640c7fdbc3d342d38997f25db218c0b2",
       "scripts/check-quest-registry.js": "a05ecd2fe1e6f62d6c7eed1629dad48be13a2023682a11201c2a89d07ed46da2",
       "scripts/check-syntax.js": "f18315645fba6bbdb1b80b103fc5006970e56f804f9c72759be6dea1f067b9b5",
@@ -1864,9 +1874,9 @@
       "src/GameServer/Progression/OverhitReward.js": "e4f12e67f88f9c23c67263c8b03e65a20e7619e31085ac7794f896444f1f876e",
       "src/GameServer/Progression/ProgressionCap.js": "efdcf417d1af764e5a997906211fec7f95c4d2da98313746c894065aedbc2744",
       "src/GameServer/ProgressionRates.js": "95d06283ab218b645938906b708d59bbcfbae6c715aad37532a469a47bfafdf8",
-      "src/GameServer/Quest/DeclarativeQuest.js": "881390e94a1ae6b740fc22c38b4941156243c273ee0b6bf91036585dbbb52993",
+      "src/GameServer/Quest/DeclarativeQuest.js": "cf014647c533a6bf5fe4dfadb967a456d37e6a56adfb56cc9b0b3d132e4e0ff1",
       "src/GameServer/Quest/FirstProfessionProof.js": "836445225f11c0b25f3b30e1549adfdaecf1c3ee750a087b5442d786f4ecef2a",
-      "src/GameServer/Quest/LowLevelDefinitions.js": "4ec14f28a05cd9983e72ac8cfa77137d5393f4afeeb48d960adf559ca514d597",
+      "src/GameServer/Quest/LowLevelDefinitions.js": "c3632631f730b4508e033c8f9883c989e0381e364f22e1abbe2ac58d77b57089",
       "src/GameServer/Quest/QuestRegistry.js": "620d5e7083fe46b9463ff19881fbfc7de80ecc3f4e4be889c86de702c93f22ee",
       "src/GameServer/Quest/QuestService.js": "593e3b0f8bd3a7214173201a6234027e11cbf16036d237edaaf940db376d42de",
       "src/GameServer/Quest/QuestState.js": "d764e7fac7367002c151fd44e0006e6e8b27556d8586af4f40b73e4703d69e46",
@@ -3134,7 +3144,7 @@
       "tests/test_c4_catacomb_of_the_heretics.js": "8c7518910d0d7a6b51bff87d1b74eece6bfa537d4185349340a7732dfc1b3077",
       "tests/test_c4_catacomb_of_the_witch.js": "c1d38225c2ae603c9b4a3ca37e59dc96609dafd4e0a26578097f24feea9d0664",
       "tests/test_c4_cruma_tower_teleports.js": "27b6d1098baf149e0206a829d735a1737b5d509cebf56e2e859d286362b6458a",
-      "tests/test_c4_declarative_quests.js": "66f8ccee6cc6be4f4b6f344355610efba1c3fae3c548982a987872635381323a",
+      "tests/test_c4_declarative_quests.js": "627d93d0a1327ff62981b8e7914958fc7ece8fcd5081643c9dca2c788741e3c9",
       "tests/test_c4_devastated_castle.js": "c9925f0981f023e72456b26336cc7cfa67fb788ab46f3722ceec06f2bfa134f1",
       "tests/test_c4_devils_isle.js": "d786c8b8afda6d8ff79f1b941f0eb6182f1a37daee062b2d37fcab3491e360fa",
       "tests/test_c4_elmore_northeast_coast.js": "6cb6fdaf4644fd21f740bd80fcefdaff345c30f17bf6963021e58fee65be0559",
@@ -3145,6 +3155,7 @@
       "tests/test_c4_heathen_camp.js": "462cafad225c89d300144bb5c1393878e8262a15f040466dfde182104b4038df",
       "tests/test_c4_hot_springs.js": "6bd5f6240928fc85c728b279ded7816bf539a26edd7e2cb1f8cdf9d4e26d3cfc",
       "tests/test_c4_imperial_tomb.js": "0af7a60048e1adff74445c136559200c904202333d79af6bf1e5a6a96c026149",
+      "tests/test_c4_inventory_validation.js": "e978d2e61c2fcf5eff958290c99b9e73459e16de5435aba21098e39317cee21b",
       "tests/test_c4_ketra_orc_outpost.js": "e3015a14a38d5fd6352aa1a0c5608e9cee1709322adca5a776d618b97bdc9e40",
       "tests/test_c4_legacy_monsters.js": "5bc09953f7def55c9379b25ad868631ed1f440dd811d0fe20bfdf60abf416325",
       "tests/test_c4_low_level_raid_bosses.js": "2f3ad1b0bae9d218f626c2882cf9c315d4d6c2244ba878dab956b6fdc86cb457",
@@ -3478,9 +3489,7 @@
       "tests/test_world_observer_world_state.js": "1694e9a8d888d7495da71f79d1ac6fc0f27b69a28b33e5f73753529cacce9c78",
       "tests/test_world_visible_users.js": "53949729f44132946b001ebe4ace8644ffac482aea9953a0ffa80829dac74aab",
       "tests/test_world_wipe.js": "d7f3aa5197dc8359c9542250394fc0ccd96010402be9c83b0576696ec47cf89c",
-      "tests/test_c4_inventory_validation.js": "e978d2e61c2fcf5eff958290c99b9e73459e16de5435aba21098e39317cee21b",
-      "scripts/certify-c4-quests.js": "cd528700cd367131590d6fa69a9d8a48f3c9dfc3e366da27cf91b92906ca0a87",
-      "docs/c4/quests/runtime-review.json": "f843367961ab7dfc042675d496a6c0319d0f339c6f906f43908e81905585f463",
+      "docs/c4/quests/runtime-review.json": "8c2c0a0df57a6f64d3b8c8aa404513e58cfedd6e83dee326bab07c8e0e610ff6",
       "docs/c4/quests/C4_QUEST_MASTER_INVENTORY.jsonl": "9f63e96d5fe25e0ce21f81027b805d8a4cc556e25e8f17b74a179ff316befc86"
     },
     "tests": [
@@ -3498,6 +3507,10 @@
       },
       {
         "path": "tests/test_quest_registry_integrity.js",
+        "exitCode": 0
+      },
+      {
+        "path": "tests/test_quest_availability.js",
         "exitCode": 0
       },
       {

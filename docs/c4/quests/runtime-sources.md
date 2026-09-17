@@ -18,6 +18,7 @@ Each Q00NNN directory's Java handler was read for factual mechanics.
 | 379 | Reviewed two-objective definition exists but is disabled: item templates 5893/5894/5956/5957/5958 are absent. Multi-objective atomic collection is tested with existing templates; that test does not certify Q379. |
 | 347 | Consult Balanki (100 Adena) and Spiron in either order, then Silvera; ten crystals 4286 from mob 540 at 50%; calculator 4285 exchanged for calculator 4393 or 1000 Adena. Both orders and reward choices are tested, including restart, payment, NPC and replay guards. |
 | 296 | Requires either ring 1508/1509, retained. Exclusive per-kill outcomes: spinnerette 4%, silk 50%, nothing 46%. Nathan converts all spinnerettes to 15–24 silk each using one batch roll. Mion pays 20 per silk +2000 at ten; quit removes both quest items. |
+| 296/306 availability | Q296's reference target 394 and Q306's 112–115 have no local authored spawn. Q296's 394 is also absent from the pinned DwarvenStarting.xml. Active definitions retain only spawned alternatives (403/508 and 109/110). Their full payment paths pass, but both quests are PARTIAL/BLOCKED until those explicit content gaps are resolved. Coordinates are not fabricated. |
 | 258 | Guaranteed pelts; 40 required; equipment lottery weights 1/5/3/4/3 out of 16. |
 | 264 | Goblin claws 2 or 4; wolf claws 1 or 2; seven reward outcomes, including equipment and Adena. Inventory's 50 Adena is only one conditional award. |
 | 271 | Orc restriction; fangs 1 (75%) or 2 (25%); necklace 1507 (10%) or 1506 (90%). |

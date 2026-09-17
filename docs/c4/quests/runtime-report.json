@@ -2,10 +2,10 @@
   "errors": [],
   "confirmedInScope": 107,
   "counts": {
-    "VERIFIED": 30,
+    "VERIFIED": 29,
     "IMPLEMENTED": 53,
-    "PARTIAL/BLOCKED": 12,
-    "MISSING": 12
+    "PARTIAL/BLOCKED": 14,
+    "MISSING": 11
   },
   "capabilities": {
     "genericGoalResolver": "PRESENT",
@@ -14,7 +14,7 @@
     "partyQuestSharing": "NOT_CERTIFIED",
     "note": "Existing NPC spawns and script events do not certify cold encounter ownership, timers or party credit."
   },
-  "registeredInScope": 83,
+  "registeredInScope": 84,
   "proofContracts": 18,
   "driftCount": 296,
   "scopeDriftCount": 107,
@@ -4378,24 +4378,29 @@
       "name": "Tarantula's Spider Silk",
       "inScope": true,
       "quarantined": false,
-      "status": "MISSING",
+      "status": "PARTIAL/BLOCKED",
       "script": null,
-      "definitionId": null,
-      "registered": false,
-      "tests": [],
+      "definitionId": 296,
+      "registered": true,
+      "tests": [
+        "tests/test_c4_declarative_quests.js"
+      ],
       "blocker": {
-        "code": "BRANCH_DEFINITION_PENDING",
-        "detail": "No absent generic resolver demonstrated. Retail exchanges, branches or source details need reviewed definitions and tests."
+        "code": "OPTIONAL_KILL_TARGET_UNSPAWNED",
+        "detail": "The reference lists Crimson Tarantula 20394 (native 394), but it has no local world spawn and is absent from the reviewed DwarvenStarting.xml. Active handlers support the two authored, spawned alternatives 403 and 508; all payment/extraction paths pass. No location has been invented."
       },
       "certificationBlocker": null,
       "professionProofContract": null,
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "NOT_CERTIFIED",
-        "reviewedRequirements": null,
+        "questAdapter": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+        "reviewedRequirements": [],
         "requirementsNeedingReview": []
       },
       "drift": [
+        "implemented_as_reviewed_definition",
+        "registration",
+        "status:MISSING->PARTIAL/BLOCKED",
         "generic_bridge_already_exists"
       ]
     },
@@ -4535,14 +4540,17 @@
       "name": "Crystals of Fire and Ice",
       "inScope": true,
       "quarantined": false,
-      "status": "VERIFIED",
+      "status": "PARTIAL/BLOCKED",
       "script": null,
       "definitionId": 306,
       "registered": true,
       "tests": [
         "tests/test_c4_declarative_quests.js"
       ],
-      "blocker": null,
+      "blocker": {
+        "code": "OPTIONAL_KILL_TARGETS_UNSPAWNED",
+        "detail": "Reference targets 20112–20115 (native 112–115) have templates but no authored local world spawns. Both quest items remain obtainable from active targets 109/110 with their supported 30% chances; higher-variant content is explicitly incomplete."
+      },
       "certificationBlocker": null,
       "professionProofContract": null,
       "bridge": {
@@ -4554,7 +4562,7 @@
       "drift": [
         "implemented_as_reviewed_definition",
         "registration",
-        "status:MISSING->VERIFIED",
+        "status:MISSING->PARTIAL/BLOCKED",
         "generic_bridge_already_exists"
       ]
     },

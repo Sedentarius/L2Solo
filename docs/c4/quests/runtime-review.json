@@ -482,12 +482,16 @@
     "reviewedRequirements": []
   },
   "296": {
-    "certified": true,
+    "certified": false,
     "tests": [
       "tests/test_c4_declarative_quests.js"
     ],
     "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
-    "reviewedRequirements": []
+    "reviewedRequirements": [],
+    "runtimeBlocker": {
+      "code": "OPTIONAL_KILL_TARGET_UNSPAWNED",
+      "detail": "The reference lists Crimson Tarantula 20394 (native 394), but it has no local world spawn and is absent from the reviewed DwarvenStarting.xml. Active handlers support the two authored, spawned alternatives 403 and 508; all payment/extraction paths pass. No location has been invented."
+    }
   },
   "297": {
     "certified": true,
@@ -506,12 +510,16 @@
     "reviewedRequirements": []
   },
   "306": {
-    "certified": true,
+    "certified": false,
     "tests": [
       "tests/test_c4_declarative_quests.js"
     ],
     "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
-    "reviewedRequirements": []
+    "reviewedRequirements": [],
+    "runtimeBlocker": {
+      "code": "OPTIONAL_KILL_TARGETS_UNSPAWNED",
+      "detail": "Reference targets 20112–20115 (native 112–115) have templates but no authored local world spawns. Both quest items remain obtainable from active targets 109/110 with their supported 30% chances; higher-variant content is explicitly incomplete."
+    }
   },
   "313": {
     "certified": true,

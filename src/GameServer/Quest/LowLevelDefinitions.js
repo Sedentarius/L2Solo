@@ -7,8 +7,10 @@ const collect = (id, name, minLevel, startNpc, item, count, drops, reward, extra
 });
 const definitions = [
     {id:296,name:"Tarantula's Spider Silk",minLevel:15,startNpc:7519,repeatable:true,requiredAny:[1508,1509],
+        // Reference also names 394, but neither the local world nor reviewed
+        // DwarvenStarting.xml spawns it. Keep that content gap in runtime-review.
         stages:[{type:'COLLECT',npc:7519,prices:[[1493,20]],bonusAt:10,bonusAdena:2000,
-            drops:[394,403,508].map(npc=>({npc,chance:1,outcomes:[{item:1494,chance:.04},{item:1493,chance:.5}]}))}],
+            drops:[403,508].map(npc=>({npc,chance:1,outcomes:[{item:1494,chance:.04},{item:1493,chance:.5}]}))}],
         exchanges:[{npc:7548,event:'spin_silk',cond:1,label:'Extract silk from all spinnerettes',convertAll:{from:1494,to:1493,min:15,max:24}}]},
     {id:347,name:'Go Get the Calculator',minLevel:12,startNpc:7526,repeatable:true,
         stages:[
@@ -42,7 +44,8 @@ const definitions = [
             drops:[385,386,387,388].map(npc=>({npc,item:npc===385?1116:1117,chance:.5}))}] },
     { id:306,name:'Crystals of Fire and Ice',minLevel:17,startNpc:7004,repeatable:true,
         stages:[{type:'COLLECT',npc:7004,prices:[[1020,60],[1021,60]],bonusAt:10,bonusAdena:5000,
-            drops:[[109,1020,.3],[110,1021,.3],[112,1020,.4],[113,1021,.4],[114,1020,.5],[115,1021,.5]]
+            // Higher variants 112–115 have templates but no authored world spawns.
+            drops:[[109,1020,.3],[110,1021,.3]]
                 .map(([npc,item,chance])=>({npc,item,chance}))}] },
     { id:317,name:'Catch the Wind',minLevel:18,startNpc:7361,repeatable:true,
         stages:[{type:'COLLECT',npc:7361,prices:[[1078,40]],bonusAt:10,bonusAdena:2988,

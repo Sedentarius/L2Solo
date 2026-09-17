@@ -56,7 +56,7 @@ async function main() {
         if(d.id===296) {
             try {
                 Math.random=()=>.99;
-                await quest.onKill(state,{fetchSelfId:()=>394});
+                await quest.onKill(state,{fetchSelfId:()=>403});
                 assert.equal(await amount(d.id,1493),0);assert.equal(await amount(d.id,1494),0);
                 Math.random=()=>.2;
                 for(let n=0;n<9;n++) await quest.onKill(state,{fetchSelfId:()=>403});
@@ -74,7 +74,7 @@ async function main() {
                 await assert.rejects(quest.onEvent(stale.questStates.get(d.id),'spin_silk'),/step changed/);
                 await quest.onTalk(state,{fetchSelfId:()=>7519});
                 assert.equal(await amount(d.id,57),2780,'extracted silk earns ordinary threshold payout');
-                await quest.onKill(state,{fetchSelfId:()=>394});
+                await quest.onKill(state,{fetchSelfId:()=>403});
                 Math.random=()=>.999;
                 await Service.onEvent(s,{questId:d.id,name:'spin_silk'});
                 assert.equal(await amount(d.id,1493),24,'maximum extraction amount');
