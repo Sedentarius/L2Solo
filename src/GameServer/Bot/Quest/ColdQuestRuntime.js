@@ -93,6 +93,15 @@ async function coldSessionFor(state) {
     const row = await characterRow(characterId);
     if (!row) throw new Error(`missing character ${characterId} for cold quest callback`);
     const items = await Database.fetchItems(characterId);
+    // Equipment-dependent quest kills obey the same persisted paperdoll as
+    // materialization. Prefer the newest equipped instance in each slot.
+    const paperdoll = utils.tupleAlloc(16, {});
+    for (const item of [...items].sort((a,b) => Number(a.id)-Number(b.id))) {
+        if (Number(item.equipped) !== 1 || item.slot < 0 || item.slot > 15) continue;
+        paperdoll[item.slot] = { id:item.id, selfId:item.selfId };
+        if (item.slot === 15) paperdoll[10] = paperdoll[15];
+    }
+    if (paperdoll[14].id) paperdoll[8] = {};
     const actor = {
         exp: Number(row.exp || 0),
         sp: Number(row.sp || 0),
@@ -110,7 +119,7 @@ async function coldSessionFor(state) {
         fetchExp() { return this.exp; },
         fetchSp() { return this.sp; },
         setExpSp(exp, sp) { this.exp = Number(exp || 0); this.sp = Number(sp || 0); },
-        backpack: new Backpack({ items, paperdoll: {} })
+        backpack: new Backpack({ items, paperdoll })
     };
     const session = {
         coldQuestBridge: true,

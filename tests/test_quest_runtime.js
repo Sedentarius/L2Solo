@@ -237,6 +237,8 @@ async function main() {
   const originalGive = QuestService.giveItem;
   const originalRewardAdena = QuestService.rewardAdena;
   const originalAwardFirstProfession = QuestService.awardFirstProfession;
+  const QuestStep = require('../src/GameServer/Quest/QuestStep');
+  const originalStep = QuestStep.apply;
   const calls = [];
   QuestService.takeItem = async (session, itemId) => {
     assert.ok(session.actor, "takeItem requires the player session, not QuestState");
@@ -339,6 +341,12 @@ async function main() {
       return true;
     };
     let awardedClassId = null;
+    QuestStep.apply = async (state, {takes=[],gives=[],variables}) => {
+      for(const [id,amount] of takes) assert(await QuestService.takeItem(state.session,id,amount));
+      for(const [id,amount] of gives) await QuestService.giveItem(state.session,id,amount);
+      await state.setState('started');
+      for(const [key,value] of Object.entries(variables)) await state.set(key,value);
+    };
     QuestService.awardFirstProfession = async (state, targetClassId, takes, cleanup = []) => {
       awardedClassId = targetClassId;
       for (const [id, amount] of takes) assert(await QuestService.takeItem(state.session, id, amount));
@@ -841,6 +849,7 @@ async function main() {
     QuestService.giveItem = originalGive;
     QuestService.rewardAdena = originalRewardAdena;
     QuestService.awardFirstProfession = originalAwardFirstProfession;
+    QuestStep.apply = originalStep;
   }
 
   const deleted = [];

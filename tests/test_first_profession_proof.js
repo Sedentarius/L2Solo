@@ -39,7 +39,7 @@ async function main() {
     assert.equal(await Service.onEvent(session, { questId: 401, name: 'start' }), false);
     session.actor.level = 19;
     await Service.onEvent(session, { questId: 401, name: 'start' });
-    const state = session.questStates.get(401);
+    let state = session.questStates.get(401);
     assert.equal(state.getInt('cond'), 1);
     session.activeNpcTalk.selfId = 7010;
     assert.equal(await Service.onEvent(session, { questId: 401, name: 'guild' }), false, 'wrong NPC cannot advance');
@@ -59,7 +59,25 @@ async function main() {
     await Q401.onKill(state, { fetchSelfId: () => 38 });
     assert.equal(session.actor.backpack.fetchItemFromSelfId(1144), undefined, 'trial weapon required');
     session.actor.backpack.fetchPaperdollSelfId = () => 1142;
-    for (let n = 0; n < 20; n++) await Q401.onKill(state, { fetchSelfId: () => 38 });
+    for (let n = 0; n < 10; n++) await Q401.onKill(state, { fetchSelfId: () => 38 });
+    const sword=session.actor.backpack.fetchItemFromSelfId(1142);
+    await Database.updateItemEquipState(1,sword.fetchId(),true,7);
+    await Database.close();Database.init();
+    const Cold=require('../src/GameServer/Bot/Quest/ColdQuestRuntime');
+    const Bridge=require('../src/GameServer/Bot/Quest/BotQuestBridge');
+    const Life=invoke('GameServer/Bot/Population/BotLifeState');
+    const savedLife={snapshot:Life.snapshot,upsertState:Life.upsertState};
+    let life={characterId:1,classId:0,level:19,phase:'cold',activity:'hunting',
+        stats:{questBridge:Bridge.normalizeIntent({questId:401,step:'collect',targetNpcId:38,attempt:1},1000)}};
+    try {
+        Life.snapshot=()=>life;Life.upsertState=async next=>(life=next);
+        const cold=await Cold.coldSessionFor(life);
+        assert.equal(cold.actor.backpack.fetchPaperdollSelfId(7),1142,'cold kills retain trial equipment');
+        for(let n=0;n<10;n++) assert.equal((await Cold.resolveColdKill(life,38,`q401-spider-${n}`)).ok,true);
+        assert.equal((await Cold.resolveColdKill(life,38,'q401-spider-9')).replayed,true);
+    } finally {Object.assign(Life,savedLife);}
+    session=await sessionFor(1);state=session.questStates.get(401);
+    assert.equal(state.getInt('cond'),6,'hot/cold progress and condition survive restart');
     await Q401.onTalk(state, { fetchSelfId: () => 7010 });
     assert.equal(state.state, 'completed');
     assert.equal(session.actor.fetchClassId(), 0, 'quest never mutates class');
