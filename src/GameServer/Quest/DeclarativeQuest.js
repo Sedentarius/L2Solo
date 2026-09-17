@@ -68,8 +68,15 @@ function create(definition) {
             }
             const exchange=exchanges.find(e=>e.event===event);
             if(exchange && state.isStarted() && state.getInt('cond')===exchange.cond) {
-                if(!exchange.takes.every(([id,n])=>count(state,id)>=n)) return null;
-                await step(state,{takes:exchange.takes,gives:exchange.gives});
+                let takes=exchange.takes,gives=exchange.gives;
+                if(exchange.convertAll) {
+                    const {from,to,min,max}=exchange.convertAll;
+                    const amount=count(state,from);
+                    if(!amount) return null;
+                    takes=[[from,amount]];gives=[[to,amount*(min+Math.floor(Math.random()*(max-min+1)))]];
+                }
+                if(!takes.every(([id,n])=>count(state,id)>=n)) return null;
+                await step(state,{takes,gives});
                 return page(d.name,'Your exchange is complete.');
             }
             if (event === 'quit' && state.isStarted() && stageFor(state)?.type === 'COLLECT') {
@@ -122,7 +129,13 @@ function create(definition) {
             if (!['KILL_COLLECT','COLLECT'].includes(stage?.type)) return;
             const drop = stage.drops.find(d => d.npc === Number(npc.fetchSelfId()));
             if(!drop) return;
-            const item = drop.item || stage.item;
+            let item = drop.item || stage.item;
+            if(drop.outcomes) {
+                let roll=Math.random();
+                const outcome=drop.outcomes.find(o=>(roll-=o.chance)<0);
+                if(!outcome) return;
+                item=outcome.item;
+            }
             const cap=drop.cap || objectives(stage).find(([id])=>id===item)?.[1] || Infinity;
             if (count(state,item)>=cap || Math.random()>=drop.chance) return;
             let amount = drop.amount || 1;
@@ -140,7 +153,7 @@ function create(definition) {
             state.playSound(complete ? 'ItemSound.quest_middle' : 'ItemSound.quest_itemget');
         },
         async onAbort(state) {
-            const ids = [...new Set([...(d.startItems || []).map(x => x[0]), ...d.stages.flatMap(s => [s.item, ...(s.drops || []).map(x => x.item), ...(s.sideDrops||[]).map(x=>x.item), ...(s.gives || []).map(x => x[0]), ...(s.takes || []).map(x => x[0])]).filter(Boolean)])];
+            const ids = [...new Set([...(d.startItems || []).map(x => x[0]), ...d.stages.flatMap(s => [s.item, ...(s.drops || []).flatMap(x => [x.item,...(x.outcomes||[]).map(o=>o.item)]), ...(s.sideDrops||[]).map(x=>x.item), ...(s.gives || []).map(x => x[0]), ...(s.takes || []).map(x => x[0])]).filter(Boolean)])];
             await step(state, { status: 'created', variables: { completions: state.get('completions', '0'), cashouts:state.get('cashouts','0') },
                 takes: ids.map(id => [id, count(state, id)]).filter(([,n]) => n > 0) });
         }

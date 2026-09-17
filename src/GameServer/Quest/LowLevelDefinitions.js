@@ -6,6 +6,10 @@ const collect = (id, name, minLevel, startNpc, item, count, drops, reward, extra
         { type: 'COMPLETE', npc: startNpc, takes: [[item,count]] }], reward
 });
 const definitions = [
+    {id:296,name:"Tarantula's Spider Silk",minLevel:15,startNpc:7519,repeatable:true,requiredAny:[1508,1509],
+        stages:[{type:'COLLECT',npc:7519,prices:[[1493,20]],bonusAt:10,bonusAdena:2000,
+            drops:[394,403,508].map(npc=>({npc,chance:1,outcomes:[{item:1494,chance:.04},{item:1493,chance:.5}]}))}],
+        exchanges:[{npc:7548,event:'spin_silk',cond:1,label:'Extract silk from all spinnerettes',convertAll:{from:1494,to:1493,min:15,max:24}}]},
     {id:347,name:'Go Get the Calculator',minLevel:12,startNpc:7526,repeatable:true,
         stages:[
             {type:'CHOICE',choices:[{npc:7533,event:'balanki',label:'Pay 100 Adena for information',takes:[[57,100]],next:2},

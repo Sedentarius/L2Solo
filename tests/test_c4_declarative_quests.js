@@ -53,6 +53,37 @@ async function main() {
         assert.equal(state.state,'started');
         const objective=d.stages[0];
         const random=Math.random;
+        if(d.id===296) {
+            try {
+                Math.random=()=>.99;
+                await quest.onKill(state,{fetchSelfId:()=>394});
+                assert.equal(await amount(d.id,1493),0);assert.equal(await amount(d.id,1494),0);
+                Math.random=()=>.2;
+                for(let n=0;n<9;n++) await quest.onKill(state,{fetchSelfId:()=>403});
+                await quest.onTalk(state,{fetchSelfId:()=>7519});
+                assert.equal(await amount(d.id,57),180);
+                Math.random=()=>0;
+                for(let n=0;n<2;n++) await quest.onKill(state,{fetchSelfId:()=>508});
+                assert.equal(await amount(d.id,1494),2,'exclusive rare outcome');
+                await Database.close();Database.init();s=await sessionFor(d.id);state=s.questStates.get(d.id);
+                const stale=await sessionFor(d.id);
+                s.activeNpcTalk={selfId:7548,objectId:1};
+                await Service.onEvent(s,{questId:d.id,name:'spin_silk'});
+                assert.equal(await amount(d.id,1493),30,'minimum extraction amount');
+                assert.equal(await amount(d.id,1494),0);
+                await assert.rejects(quest.onEvent(stale.questStates.get(d.id),'spin_silk'),/step changed/);
+                await quest.onTalk(state,{fetchSelfId:()=>7519});
+                assert.equal(await amount(d.id,57),2780,'extracted silk earns ordinary threshold payout');
+                await quest.onKill(state,{fetchSelfId:()=>394});
+                Math.random=()=>.999;
+                await Service.onEvent(s,{questId:d.id,name:'spin_silk'});
+                assert.equal(await amount(d.id,1493),24,'maximum extraction amount');
+                await quest.onAbort(state);
+                assert.equal(await amount(d.id,1493),0);assert.equal(await amount(d.id,1494),0);
+                assert.equal(await amount(d.id,1508),1,'eligibility ring retained');
+            } finally {Math.random=random;}
+            continue;
+        }
         if(d.id===347) {
             try {
                 Math.random=()=>0;
