@@ -8,7 +8,7 @@ const Database = invoke('Database');
 const DataCache = invoke('GameServer/DataCache');
 const Backpack = invoke('GameServer/Actor/Backpack');
 const Service = invoke('GameServer/Quest/QuestService');
-const Definitions = require('../src/GameServer/Quest/LowLevelDefinitions');
+const Definitions = [...require('../src/GameServer/Quest/LowLevelDefinitions'), ...require('../src/GameServer/Quest/RecoveredLowLevelDefinitions')];
 const Catalog = require('../src/GameServer/Bot/Quest/AutonomousQuestCatalog');
 const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'l2-c4-definitions-'));
 options.default.Database.path = path.join(directory, 'test.sqlite');
@@ -48,9 +48,10 @@ async function main() {
         let state=s.questStates.get(d.id);
         assert.equal(state.state,'started');
         const objective=d.stages[0];
+        const random=Math.random;
+        if(objective.type==='KILL_COLLECT') {
         await quest.onKill(state,{fetchSelfId:()=>999999});
         assert.equal(await amount(d.id,objective.item),0);
-        const random=Math.random;
         try {
             Math.random=()=>.9999;
             if(objective.drops[0].chance<1) {
@@ -68,9 +69,21 @@ async function main() {
             for(let n=0;n<objective.count+3;n++) await quest.onKill(state,{fetchSelfId:()=>objective.drops[0].npc});
         } finally {Math.random=random;}
         assert.equal(await amount(d.id,objective.item),objective.count,'bounded collection');
+        }
+        if(d.repeatable) {
         const spec=Catalog.specFor(d.id);
         assert(spec && Catalog.npcLocation(d.startNpc),`Q${d.id} has authored start location`);
         assert(Catalog.killSpot(spec,{level:20}),`Q${d.id} has a real hunting spot`);
+        }
+        for(const stage of d.stages.filter(x=>['TALK','DELIVER'].includes(x.type))) {
+            await quest.onTalk(state,{fetchSelfId:()=>d.startNpc});
+            const cond=state.getInt('cond');
+            const stale=await sessionFor(d.id);
+            await quest.onTalk(state,{fetchSelfId:()=>stage.npc});
+            assert.equal(state.getInt('cond'),cond+1);
+            await assert.rejects(quest.onTalk(stale.questStates.get(d.id),{fetchSelfId:()=>stage.npc}),/step changed/);
+            await Database.close();Database.init();s=await sessionFor(d.id);state=s.questStates.get(d.id);
+        }
         const clone=await sessionFor(d.id);
         const before=(await Database.execute(['SELECT exp,sp FROM characters WHERE id=?',[d.id]]))[0];
         await quest.onTalk(state,{fetchSelfId:()=>d.startNpc+100000});
@@ -79,9 +92,9 @@ async function main() {
             Math.random=()=>0;
             await quest.onTalk(state,{fetchSelfId:()=>d.startNpc});
         } finally {Math.random=random;}
-        assert.equal(state.state,'created','repeatable quest resets');
+        assert.equal(state.state,d.repeatable?'created':'completed','authored completion policy');
         assert.equal(state.getInt('completions'),1);
-        assert.equal(await amount(d.id,objective.item),0);
+        for(const [item] of d.stages.at(-1).takes||[]) assert.equal(await amount(d.id,item),0);
         const rewards=JSON.stringify(await Database.fetchItems(d.id));
         await assert.rejects(quest.onTalk(clone.questStates.get(d.id),{fetchSelfId:()=>d.startNpc}),/step changed/,'stale session cannot duplicate reward');
         await quest.onTalk(state,{fetchSelfId:()=>d.startNpc});
@@ -90,6 +103,7 @@ async function main() {
         assert.equal(after.exp-before.exp,d.reward.exp||0,'quest EXP commits once');
         assert.equal(after.sp-before.sp,d.reward.sp||0,'quest SP commits once');
         await quest.onEvent(state,'start');
+        if(!d.repeatable) {assert.equal(state.state,'completed','one-time quest cannot restart');continue;}
         assert.equal(state.state,'started');
         await quest.onAbort(state);
         assert.equal(state.state,'created');
