@@ -53,6 +53,50 @@ async function main() {
         assert.equal(state.state,'started');
         const objective=d.stages[0];
         const random=Math.random;
+        if(d.id===292) {
+            const kill=async(npc,roll)=>{Math.random=()=>roll;await quest.onKill(state,{fetchSelfId:()=>npc});};
+            const talk=npc=>quest.onTalk(state,{fetchSelfId:()=>npc});
+            const event=async(npc,name)=>{s.activeNpcTalk={selfId:npc,objectId:1};return Service.onEvent(s,{questId:d.id,name});};
+            const reopen=async()=>{await Database.close();Database.init();s=await sessionFor(d.id);state=s.questStates.get(d.id);};
+            try {
+                await kill(322,.99);assert.equal(await amount(d.id,1483),0,'no-drop outcome');
+                await kill(999999,0);assert.equal(await amount(d.id,1483),0,'unrelated kills');
+                await kill(322,.45);await kill(324,.45);
+                assert.equal(await amount(d.id,1486),2);
+                await reopen();
+                const beforeConversion=await sessionFor(d.id);
+                await kill(327,.45);
+                assert.equal(await amount(d.id,1486),0,'three memos consumed together');
+                assert.equal(await amount(d.id,1487),1);assert.equal(state.getInt('cond'),2);
+                await assert.rejects(quest.onKill(beforeConversion.questStates.get(d.id),{fetchSelfId:()=>322}),/step changed/);
+                await kill(322,.45);assert.equal(await amount(d.id,1486),0,'no further memos while holding contract');
+                await talk(7532);assert.equal(await amount(d.id,57),0,'Spiron requires normal trophies with contract');
+                assert.equal(await event(7532,'sell_contract'),false,'contract buyer NPC guard');
+                await reopen();
+                const beforeSale=await sessionFor(d.id);
+                await event(7533,'sell_contract');
+                assert.equal(await amount(d.id,57),1500);assert.equal(state.getInt('cond'),1);
+                assert.equal(await amount(d.id,1487),0);
+                await assert.rejects(quest.onEvent(beforeSale.questStates.get(d.id),'sell_contract'),/step changed/);
+                assert.equal(await event(7533,'sell_contract'),false,'contract cannot be sold twice');
+                for(let n=0;n<3;n++) await kill(322,.45);
+                for(const npc of [322,323,324,327,528]) await kill(npc,0);
+                await talk(7532);
+                assert.equal(await amount(d.id,57),2725,'Spiron: 3*12 +36 +33 +1120, no threshold');
+                assert.equal(state.getInt('cond'),1);assert.equal(await amount(d.id,1487),0);
+                for(let n=0;n<10;n++) await kill(322,0);
+                const beforePayment=await sessionFor(d.id);
+                await talk(7532);
+                assert.equal(await amount(d.id,57),3845,'ten necklaces: 120 plus 1000');
+                await assert.rejects(quest.onTalk(beforePayment.questStates.get(d.id),{fetchSelfId:()=>7532}),/step changed/);
+                await talk(7532);assert.equal(await amount(d.id,57),3845,'no empty-hand bonus');
+                await kill(322,.45);await kill(323,0);
+                await event(7532,'quit');assert.equal(state.state,'created');
+                for(const item of d.questItems) assert.equal(await amount(d.id,item),0,'quit cleanup');
+                await event(7532,'start');assert.equal(state.getInt('cond'),1,'repeatable reset');
+            } finally {Math.random=random;}
+            continue;
+        }
         if(d.id===296) {
             try {
                 Math.random=()=>.99;

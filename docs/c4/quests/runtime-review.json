@@ -452,11 +452,12 @@
     "reviewedRequirements": []
   },
   "292": {
-    "certified": false,
-    "blocker": {
-      "code": "BRANCH_DEFINITION_PENDING",
-      "detail": "No absent generic resolver demonstrated. Retail exchanges, branches or source details need reviewed definitions and tests."
-    }
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ],
+    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "reviewedRequirements": []
   },
   "293": {
     "certified": false,

@@ -76,7 +76,9 @@ function create(definition) {
                     takes=[[from,amount]];gives=[[to,amount*(min+Math.floor(Math.random()*(max-min+1)))]];
                 }
                 if(!takes.every(([id,n])=>count(state,id)>=n)) return null;
-                await step(state,{takes,gives});
+                const reward=exchange.reward ? rewards(state,exchange.reward) : {gives};
+                await step(state,{takes,...reward,
+                    ...(exchange.next ? {variables:{...state.variables,cond:String(exchange.next)}} : {})});
                 return page(d.name,'Your exchange is complete.');
             }
             if (event === 'quit' && state.isStarted() && stageFor(state)?.type === 'COLLECT') {
@@ -106,9 +108,14 @@ function create(definition) {
                 const takes=stage.prices.map(([item])=>[item,count(state,item)]).filter(([,n])=>n>0);
                 if(takes.length) {
                     const total=takes.filter(([id])=>!stage.bonusItems||stage.bonusItems.includes(id)).reduce((n,[,amount])=>n+amount,0);
-                    const adena=takes.reduce((n,[item,amount])=>n+amount*stage.prices.find(p=>p[0]===item)[1],0)
+                    let adena=takes.reduce((n,[item,amount])=>n+amount*stage.prices.find(p=>p[0]===item)[1],0)
                         +(total >= stage.bonusAt ? stage.bonusAdena : 0);
-                    await step(state,{takes,...rewards(state,{adena}),variables:{...state.variables,cashouts:String(state.getInt('cashouts')+1)}});
+                    let next=state.getInt('cond');
+                    for(const extra of stage.handInExtras||[]) {
+                        const amount=count(state,extra.item);
+                        if(amount>0) {takes.push([extra.item,amount]);adena+=extra.adena;next=extra.next||next;}
+                    }
+                    await step(state,{takes,...rewards(state,{adena}),variables:{...state.variables,cond:String(next),cashouts:String(state.getInt('cashouts')+1)}});
                 }
                 return page(d.name, `${describe(stage)}<br>Continue hunting, or <a action="bypass -h quest ${d.id} quit">end this task</a>.`);
             }
@@ -147,13 +154,25 @@ function create(definition) {
             const goals=objectives(stage);
             const complete = goals.length>0 && goals.every(([id,n])=>count(state,id)+(id===item?amount:0)>=n);
             const extra=(stage.sideDrops||[]).filter(d=>Math.random()<d.chance).map(d=>[d.item,1]);
-            await step(state, { gives: [[item, amount],...extra], variables: {
-                ...state.variables, cond: String(state.getInt('cond') + (complete ? 1 : 0))
+            let gives=[[item,amount],...extra],next=state.getInt('cond')+(complete?1:0);
+            const takes=[];
+            for(const rule of stage.transforms||[]) {
+                const incoming=gives.filter(([id])=>id===rule.from).reduce((sum,[,n])=>sum+n,0);
+                const held=count(state,rule.from);
+                if(incoming && held+incoming>=rule.count) {
+                    if(held) takes.push([rule.from,held]);
+                    gives=gives.filter(([id])=>id!==rule.from);
+                    if(!rule.consumeAll && held+incoming>rule.count) gives.push([rule.from,held+incoming-rule.count]);
+                    gives.push([rule.to,rule.amount||1]);next=rule.next||next;
+                }
+            }
+            await step(state, { takes, gives, variables: {
+                ...state.variables, cond: String(next)
             } });
             state.playSound(complete ? 'ItemSound.quest_middle' : 'ItemSound.quest_itemget');
         },
         async onAbort(state) {
-            const ids = [...new Set([...(d.startItems || []).map(x => x[0]), ...d.stages.flatMap(s => [s.item, ...(s.drops || []).flatMap(x => [x.item,...(x.outcomes||[]).map(o=>o.item)]), ...(s.sideDrops||[]).map(x=>x.item), ...(s.gives || []).map(x => x[0]), ...(s.takes || []).map(x => x[0])]).filter(Boolean)])];
+            const ids = [...new Set([...(d.questItems||[]), ...(d.startItems || []).map(x => x[0]), ...d.stages.flatMap(s => [s.item, ...(s.drops || []).flatMap(x => [x.item,...(x.outcomes||[]).map(o=>o.item)]), ...(s.transforms||[]).map(x=>x.to), ...(s.sideDrops||[]).map(x=>x.item), ...(s.gives || []).map(x => x[0]), ...(s.takes || []).map(x => x[0])]).filter(Boolean)])];
             await step(state, { status: 'created', variables: { completions: state.get('completions', '0'), cashouts:state.get('cashouts','0') },
                 takes: ids.map(id => [id, count(state, id)]).filter(([,n]) => n > 0) });
         }

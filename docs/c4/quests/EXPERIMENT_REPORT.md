@@ -5,24 +5,24 @@ Baseline inspected: prewipe-c4-p0-b at aed7d6bf. The five supplied files remain 
 | Repository-derived measure | Result |
 |---|---:|
 | Confirmed quests, minimum level 1–20 | 107 |
-| VERIFIED | 29 |
+| VERIFIED | 30 |
 | IMPLEMENTED, full certification pending | 53 |
 | PARTIAL/BLOCKED | 14 |
-| MISSING | 11 |
-| Active quests in scope | 84 |
-| Newly registered active quests | 25 |
+| MISSING | 10 |
+| Active quests in scope | 85 |
+| Newly registered active quests | 26 |
 | New per-quest script classes | 0 |
 | Existing script implementations replaced by reviewed definitions | 4 |
-| Active declarative definitions | 29 |
+| Active declarative definitions | 30 |
 | Disabled declarative definitions | 1 (Q379) |
 | New focused test files | 3 |
 | New Quest Bridge primitives | 0 |
 | Shared profession proof contracts passing | 18 / 18 |
 | Entire first-profession quest and transfer passing end-to-end | 1 / 18 (Q401) |
 
-The four recovered modules are Q151, Q155, Q156 and Q161. Their old paths remain as compatibility entry points. Six shared runtime modules were added: FirstProfessionProof, QuestStep, DeclarativeQuest, LowLevelDefinitions, RecoveredLowLevelDefinitions and ReviewedQuestRoutes. New commands are check-c4-quests and certify-c4-quests. Twenty-five ordinary quests were added without twenty-five bespoke classes:
+The four recovered modules are Q151, Q155, Q156 and Q161. Their old paths remain as compatibility entry points. Six shared runtime modules were added: FirstProfessionProof, QuestStep, DeclarativeQuest, LowLevelDefinitions, RecoveredLowLevelDefinitions and ReviewedQuestRoutes. New commands are check-c4-quests and certify-c4-quests. Twenty-six ordinary quests were added without twenty-six bespoke classes:
 
-Q258, Q259, Q261, Q262, Q263, Q264, Q271, Q272, Q274, Q277, Q291, Q294, Q295, Q296, Q297, Q303, Q306, Q313, Q316, Q317, Q319, Q320, Q324, Q341, Q347.
+Q258, Q259, Q261, Q262, Q263, Q264, Q271, Q272, Q274, Q277, Q291, Q292, Q294, Q295, Q296, Q297, Q303, Q306, Q313, Q316, Q317, Q319, Q320, Q324, Q341, Q347.
 
 ## What now works
 
@@ -40,7 +40,7 @@ The other seventeen profession routes are not full end-to-end certifications. Th
 
 Blocked/partial IDs: Q38, Q39, Q266, Q267, Q296, Q306, Q362, Q363, Q364, Q379, Q385, Q422, Q634, Q635.
 
-Missing implementation IDs: Q257, Q260, Q265, Q273, Q275, Q276, Q292, Q293, Q325, Q340, Q378.
+Missing implementation IDs: Q257, Q260, Q265, Q273, Q275, Q276, Q293, Q325, Q340, Q378.
 
 The remaining ordinary gaps include shared once-per-character beginner-shot eligibility/receipts and several exchange/branch definitions. Exceptional gaps include encounter ownership across hot/cold handoff, party/Seven Signs integration, Sin Eater progression and Dimension Rift instance lifecycle. Music NPC templates and Q379's item templates are absent; Murika/Bremec IDs have unresolved mappings. These are explicitly recorded instead of approximated. Q255/Q999 remain quarantined outside the 107-quest denominator.
 
@@ -60,4 +60,4 @@ The integration regression executed 509 files: 508 passed, with one availability
 
 ## Scaling conclusion
 
-This supports scaling the same reviewed-definition architecture: 25 newly playable quests plus four recovered quests use shared transactions and existing QuestService/Bridge, with no new Bridge primitive. It covers more than simple collection: variable rewards, ongoing bounty payments, barter and explicit choices also fit. It does not support blindly executing the inventory or claiming that all remaining catalogue mechanics fit this pattern. Datapack completeness, ambiguous evidence, account-wide reward flags, scripted encounters and party/instance systems remain separate engineering work. Eleven missing implementations and seventeen uncertified profession routes are concrete remaining scope, not hidden behind the VERIFIED count.
+This supports scaling the same reviewed-definition architecture: 26 newly playable quests plus four recovered quests use shared transactions and existing QuestService/Bridge, with no new Bridge primitive. It covers more than simple collection: variable rewards, ongoing bounty payments, barter and explicit choices also fit. It does not support blindly executing the inventory or claiming that all remaining catalogue mechanics fit this pattern. Datapack completeness, ambiguous evidence, account-wide reward flags, scripted encounters and party/instance systems remain separate engineering work. Ten missing implementations and seventeen uncertified profession routes are concrete remaining scope, not hidden behind the VERIFIED count.

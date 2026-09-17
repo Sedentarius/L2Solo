@@ -6,6 +6,13 @@ const collect = (id, name, minLevel, startNpc, item, count, drops, reward, extra
         { type: 'COMPLETE', npc: startNpc, takes: [[item,count]] }], reward
 });
 const definitions = [
+    {id:292,name:'Brigands Sweep',minLevel:5,race:4,startNpc:7532,repeatable:true,questItems:[1483,1484,1485,1486,1487],
+        stages:[false,true].map(hasContract=>({type:'COLLECT',npc:7532,prices:[[1483,12],[1484,36],[1485,33]],bonusAt:10,bonusAdena:1000,
+            handInExtras:[{item:1487,adena:1120,next:1}],
+            drops:[322,323,324,327,528].map(npc=>({npc,chance:1,outcomes:[
+                {item:npc===323?1484:npc===528?1485:1483,chance:.4},...(!hasContract?[{item:1486,chance:.1}]:[])]})),
+            ...(!hasContract?{transforms:[{from:1486,count:3,to:1487,consumeAll:true,next:2}]}:{})})),
+        exchanges:[{npc:7533,event:'sell_contract',cond:2,next:1,label:'Sell the suspicious contract for 1500 Adena',takes:[[1487,1]],reward:{adena:1500}}]},
     {id:296,name:"Tarantula's Spider Silk",minLevel:15,startNpc:7519,repeatable:true,requiredAny:[1508,1509],
         // Reference also names 394, but neither the local world nor reviewed
         // DwarvenStarting.xml spawns it. Keep that content gap in runtime-review.
