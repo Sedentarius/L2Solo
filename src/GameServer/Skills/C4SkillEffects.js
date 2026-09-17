@@ -99,8 +99,8 @@ function execute(session, actor, target, skill, context = {}) {
     }
 
     if (semantic.skillType === C4SkillRules.HEAL_PERCENT) {
-        // Battle Roar raises maximum HP before computing its percentage heal.
-        const effectBeforeHeal = Number(skill.fetchSelfId()) === 121;
+        // Battle Roar and Spirit of Ogre raise maximum HP before their percentage heal.
+        const effectBeforeHeal = [109, 121].includes(Number(skill.fetchSelfId()));
         if (effectBeforeHeal && semantic.effect) {
             result.effect = applyEffect(session, target, skill, semantic, actor);
         }

@@ -344,6 +344,47 @@ for (let level = 1; level <= 6; level++) {
 }
 const revivalAttack = new Attack();
 const totemIds = [76, 83, 109, 282, 292, 298];
+const ogreActor = statActor();
+ogreActor.statusUpdateVitals = () => calculateStats({}, ogreActor);
+calculateStats({}, ogreActor);
+const ogreBase = { hp: ogreActor.fetchMaxHp(), atk: ogreActor.collectivePAtk, def: ogreActor.collectivePDef, accuracy: ogreActor.collectiveAccur, evasion: ogreActor.collectiveEvasion, speed: ogreActor.collectiveRunSpd };
+ogreActor.hp = 1;
+const ogreSkill = skill({ selfId: 109, name: 'Spirit of Ogre', level: 1, buff: 120000 });
+const ogreResult = SkillEffects.execute(session(), ogreActor, ogreActor, ogreSkill);
+assert.strictEqual(ogreActor.fetchMaxHp(), ogreBase.hp * 1.2);
+assert.strictEqual(ogreResult.heal, Math.round(ogreActor.fetchMaxHp() * 0.2));
+assert.strictEqual(ogreActor.collectivePAtk, Math.round(ogreBase.atk * 1.07));
+assert.strictEqual(ogreActor.collectivePDef, Math.round(ogreBase.def * 1.15));
+assert.strictEqual(ogreActor.collectiveAccur, ogreBase.accuracy + 3);
+assert.strictEqual(ogreActor.collectiveEvasion, ogreBase.evasion - 10);
+assert.strictEqual(ogreActor.collectiveRunSpd, Math.round(ogreBase.speed * 0.7));
+assert(ogreResult.effect.expiresAt - Date.now() > 119000);
+SkillEffects.execute(session(), ogreActor, ogreActor, skill({ selfId: 83, name: 'Totem Spirit Wolf', buff: 120000 }));
+assert.strictEqual(ogreActor.fetchMaxHp(), ogreBase.hp, 'Replacing Ogre must remove its HP bonus');
+assert.strictEqual(ogreActor.collectivePAtk, ogreBase.atk);
+assert.strictEqual(ogreActor.collectiveEvasion, ogreBase.evasion);
+EffectStore.remove(ogreActor, 'totem_spirit_wolf');
+
+const totemWorld = invoke('GameServer/World/World');
+const savedTotemNpc = totemWorld.npc;
+const savedTotemFetch = totemWorld.fetchNpcsInRadius;
+try {
+    totemWorld.npc = { grid: {} };
+    for (const [id, points] of [[109, 438], [292, 624], [298, 582]]) {
+        const target = creature();
+        const events = [];
+        totemWorld.fetchNpcsInRadius = () => [{ fetchAttackable: () => true, state: { fetchCombats: () => true }, fetchDestId: () => target.fetchId(), fetchLevel: () => 20, addDamageHate: (_, source, damage, hate) => { events.push({ source, damage, hate }); return true; } }];
+        const data = activeSkills.find(entry => entry.selfId === id);
+        const cast = skill({ selfId: id, name: data.template.name, level: 1, buff: 120000 });
+        const result = SkillEffects.execute(session(), target, target, cast);
+        assert.deepStrictEqual(events, [{ source: target, damage: 0, hate: Math.floor(150 * points / 27) }]);
+        assert.strictEqual(result.aggroPointsApplied, events[0].hate);
+        EffectStore.remove(target, result.effect.key);
+    }
+} finally {
+    totemWorld.npc = savedTotemNpc;
+    totemWorld.fetchNpcsInRadius = savedTotemFetch;
+}
 const bisonActor = statActor();
 bisonActor.statusUpdateVitals = () => calculateStats({}, bisonActor);
 calculateStats({}, bisonActor);
