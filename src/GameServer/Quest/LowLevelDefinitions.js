@@ -6,6 +6,16 @@ const collect = (id, name, minLevel, startNpc, item, count, drops, reward, extra
         { type: 'COMPLETE', npc: startNpc, takes: [[item,count]] }], reward
 });
 const definitions = [
+    { id:263,name:'Orc Subjugation',minLevel:8,race:2,startNpc:7346,repeatable:true,
+        stages:[{type:'COLLECT',npc:7346,prices:[[1116,20],[1117,30]],bonusAt:10,bonusAdena:1000,
+            drops:[385,386,387,388].map(npc=>({npc,item:npc===385?1116:1117,chance:.5}))}] },
+    { id:306,name:'Crystals of Fire and Ice',minLevel:17,startNpc:7004,repeatable:true,
+        stages:[{type:'COLLECT',npc:7004,prices:[[1020,60],[1021,60]],bonusAt:10,bonusAdena:5000,
+            drops:[[109,1020,.3],[110,1021,.3],[112,1020,.4],[113,1021,.4],[114,1020,.5],[115,1021,.5]]
+                .map(([npc,item,chance])=>({npc,item,chance}))}] },
+    { id:317,name:'Catch the Wind',minLevel:18,startNpc:7361,repeatable:true,
+        stages:[{type:'COLLECT',npc:7361,prices:[[1078,40]],bonusAt:10,bonusAdena:2988,
+            drops:[36,44].map(npc=>({npc,item:1078,chance:.5}))}] },
     collect(261, "Collector's Dream", 15, 7222, 1087, 8, [[308,1],[460,1],[466,1]], {adena:1000,exp:2000}),
     collect(262, 'Trade with the Ivory Tower', 8, 7137, 707, 10, [[400,.4],[7,.3]], {adena:3000}),
     collect(272, 'Wrath of Ancestors', 5, 7572, 1474, 50, [[319,1],[320,1]], {adena:1500}, {race:3}),

@@ -3,13 +3,14 @@
 const page = (name, text) => `<html><body>${name}:<br>${text}</body></html>`;
 const count = (state, id) => state.session.actor.backpack.fetchItems()
     .filter(item => item.fetchSelfId() === id).reduce((sum,item) => sum + item.fetchAmount(), 0);
-const TYPES = new Set(['TALK', 'DELIVER', 'KILL_COLLECT', 'COMPLETE']);
+const TYPES = new Set(['TALK', 'DELIVER', 'KILL_COLLECT', 'COLLECT', 'COMPLETE']);
 
 function validate(definition) {
     if (!Number.isInteger(definition.id) || !definition.name || !Number.isInteger(definition.startNpc) || !definition.stages?.length) throw new Error('Invalid quest definition');
     for (const stage of definition.stages) {
         if (!TYPES.has(stage.type)) throw new Error(`Unsupported quest stage ${stage.type}`);
         if (stage.type === 'KILL_COLLECT' && (!stage.drops?.length || !Number.isInteger(stage.count) || stage.count < 1)) throw new Error('Unresolved collection mechanic');
+        if (stage.type === 'COLLECT' && (!stage.drops?.length || !stage.prices?.length || !stage.npc)) throw new Error('Unresolved bounty mechanic');
         for (const drop of stage.drops || []) {
             if (!Number.isInteger(drop.npc) || !Number.isFinite(drop.chance) || drop.chance <= 0 || drop.chance > 1) throw new Error('Unresolved quest drop');
         }
@@ -42,9 +43,13 @@ function create(definition) {
     const quest = {
         id: d.id, name: d.name, definition: d, npcs, startNpcs: [d.startNpc],
         killNpcs: [...new Set(d.stages.flatMap(s => (s.drops || []).map(x => x.npc)))],
-        eventNpc: event => event === 'start' ? d.startNpc : null,
+        eventNpc: event => event === 'start' || (event === 'quit' && d.stages.some(s=>s.type==='COLLECT')) ? d.startNpc : null,
         canTalk: state => state.isStarted() || state.isCompleted() || allowed(state),
         async onEvent(state, event) {
+            if (event === 'quit' && state.isStarted() && stageFor(state)?.type === 'COLLECT') {
+                await quest.onAbort(state);
+                return page(d.name, 'Your task has ended.');
+            }
             if (event !== 'start' || state.isStarted() || state.isCompleted() || !allowed(state)) return null;
             await step(state, { variables: { ...state.variables, cond: '1' }, gives: d.startItems || [] });
             state.playSound('ItemSound.quest_accept');
@@ -60,6 +65,16 @@ function create(definition) {
             if (!stage) return null;
             if (stage.type === 'KILL_COLLECT') return page(d.name, `${stage.text || 'Quest items'}: ${count(state, stage.item)}/${stage.count}.`);
             if (id !== stage.npc) return page(d.name, stage.text || 'Continue your task.');
+            if (stage.type === 'COLLECT') {
+                const takes=stage.prices.map(([item])=>[item,count(state,item)]).filter(([,n])=>n>0);
+                if(takes.length) {
+                    const total=takes.reduce((n,[,amount])=>n+amount,0);
+                    const adena=takes.reduce((n,[item,amount])=>n+amount*stage.prices.find(p=>p[0]===item)[1],0)
+                        +(total >= stage.bonusAt ? stage.bonusAdena : 0);
+                    await step(state,{takes,...rewards(state,{adena}),variables:{...state.variables,cashouts:String(state.getInt('cashouts')+1)}});
+                }
+                return page(d.name, `Continue hunting, or <a action="bypass -h quest ${d.id} quit">end this task</a>.`);
+            }
             const takes = stage.takes || [];
             if (!takes.every(([item, amount]) => count(state, item) >= amount)) return page(d.name, 'Bring all required quest items.');
             const finishing = stage.type === 'COMPLETE';
@@ -74,24 +89,25 @@ function create(definition) {
         async onKill(state, npc) {
             if (!state.isStarted()) return;
             const stage = stageFor(state);
-            if (stage?.type !== 'KILL_COLLECT') return;
+            if (!['KILL_COLLECT','COLLECT'].includes(stage?.type)) return;
             const drop = stage.drops.find(d => d.npc === Number(npc.fetchSelfId()));
-            if (!drop || count(state, stage.item) >= stage.count || Math.random() >= drop.chance) return;
+            if (!drop || count(state, drop.item || stage.item) >= (stage.count || Infinity) || Math.random() >= drop.chance) return;
+            const item = drop.item || stage.item;
             let amount = drop.amount || 1;
             if (drop.amounts) {
                 let roll = Math.random();
                 amount = (drop.amounts.find(a => (roll -= a.chance) < 0) || drop.amounts.at(-1)).amount;
             }
-            amount = Math.min(amount, stage.count - count(state, stage.item));
-            const complete = count(state, stage.item) + amount >= stage.count;
-            await step(state, { gives: [[stage.item, amount]], variables: {
+            amount = Math.min(amount, (stage.count || Infinity) - count(state, item));
+            const complete = count(state, item) + amount >= (stage.count || Infinity);
+            await step(state, { gives: [[item, amount]], variables: {
                 ...state.variables, cond: String(state.getInt('cond') + (complete ? 1 : 0))
             } });
             state.playSound(complete ? 'ItemSound.quest_middle' : 'ItemSound.quest_itemget');
         },
         async onAbort(state) {
-            const ids = [...new Set([...(d.startItems || []).map(x => x[0]), ...d.stages.flatMap(s => [s.item, ...(s.gives || []).map(x => x[0]), ...(s.takes || []).map(x => x[0])]).filter(Boolean)])];
-            await step(state, { status: 'created', variables: { completions: state.get('completions', '0') },
+            const ids = [...new Set([...(d.startItems || []).map(x => x[0]), ...d.stages.flatMap(s => [s.item, ...(s.drops || []).map(x => x.item), ...(s.gives || []).map(x => x[0]), ...(s.takes || []).map(x => x[0])]).filter(Boolean)])];
+            await step(state, { status: 'created', variables: { completions: state.get('completions', '0'), cashouts:state.get('cashouts','0') },
                 takes: ids.map(id => [id, count(state, id)]).filter(([,n]) => n > 0) });
         }
     };

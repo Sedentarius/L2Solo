@@ -19,7 +19,7 @@ const QUESTS = Object.freeze({
         preferredKillNpcIds: [456],
         priority: 50
     }),
-    ...Object.fromEntries(require('../../Quest/LowLevelDefinitions').map(d => [d.id, Object.freeze({
+    ...Object.fromEntries(require('../../Quest/LowLevelDefinitions').filter(d=>d.stages[0].type==='KILL_COLLECT').map(d => [d.id, Object.freeze({
         questId: d.id, name: d.name, race: d.race ?? null, minLevel: d.minLevel,
         startNpcId: d.startNpc, returnNpcId: d.startNpc, startEvent: 'start',
         collectItemId: d.stages[0].item, collectAmount: d.stages[0].count,

@@ -49,6 +49,43 @@ async function main() {
         assert.equal(state.state,'started');
         const objective=d.stages[0];
         const random=Math.random;
+        if(objective.type==='COLLECT') {
+            try {
+                Math.random=()=>.999;
+                await quest.onKill(state,{fetchSelfId:()=>objective.drops[0].npc});
+                assert.equal(await amount(d.id,objective.drops[0].item),0);
+                Math.random=()=>0;
+                for(let n=0;n<9;n++) await quest.onKill(state,{fetchSelfId:()=>objective.drops[0].npc});
+                await quest.onTalk(state,{fetchSelfId:()=>d.startNpc});
+                const first={263:180,306:540,317:360}[d.id];
+                assert.equal(await amount(d.id,57),first,'below-threshold unit payout');
+                assert.equal(state.state,'started');
+                for(let n=0;n<10;n++) {
+                    if(n===5) {await Database.close();Database.init();s=await sessionFor(d.id);state=s.questStates.get(d.id);}
+                    const drop=objective.drops[n%2];
+                    await quest.onKill(state,{fetchSelfId:()=>drop.npc});
+                }
+                const clone=await sessionFor(d.id);
+                await quest.onTalk(state,{fetchSelfId:()=>999999});
+                assert.equal(await amount(d.id,57),first);
+                await quest.onTalk(state,{fetchSelfId:()=>d.startNpc});
+                assert.equal(await amount(d.id,57),first+({263:1250,306:5600,317:3388}[d.id]),'mixed-item threshold payout');
+                await assert.rejects(quest.onTalk(clone.questStates.get(d.id),{fetchSelfId:()=>d.startNpc}),/step changed/);
+                const before=await amount(d.id,57);
+                await quest.onTalk(state,{fetchSelfId:()=>d.startNpc});
+                assert.equal(await amount(d.id,57),before,'empty hand-in cannot repeat bonus');
+                await quest.onKill(state,{fetchSelfId:()=>objective.drops[0].npc});
+                s.activeNpcTalk={selfId:d.startNpc+1,objectId:1};
+                assert.equal(await Service.onEvent(s,{questId:d.id,name:'quit'}),false);
+                s.activeNpcTalk.selfId=d.startNpc;
+                await Service.onEvent(s,{questId:d.id,name:'quit'});
+                assert.equal(state.state,'created');
+                assert.equal(await amount(d.id,objective.drops[0].item),0,'quit removes pending quest items');
+                assert.equal(state.getInt('cashouts'),2);
+                await quest.onEvent(state,'start');assert.equal(state.state,'started');
+            } finally {Math.random=random;}
+            continue;
+        }
         if(objective.type==='KILL_COLLECT') {
         await quest.onKill(state,{fetchSelfId:()=>999999});
         assert.equal(await amount(d.id,objective.item),0);

@@ -11,6 +11,7 @@ Each Q00NNN directory's Java handler was read for factual mechanics.
 | 272 | Orc level 5; 50 guaranteed heads for 1500 Adena. Goblin Tomb Raider Leader is a normal kill target: no new boss primitive is required. |
 | 291 | 40 guaranteed pelts; reward weights 3/18/25/54, last outcome grants both hairpin 1505 and escape scroll 736. |
 | 294 | Dwarf level 10; 100 bat fangs with species-dependent 1–4 amounts; 600 SP plus ring 1508 if absent, otherwise 2400 Adena. |
+| 263/306/317 | Continuous collection with unit payouts and a bonus at ten items: 20/30 + 1000, 60 + 5000, and 40 + 2988 Adena respectively. Uses the reference's ordinary reward mode, not its optional alternate village reward setting. Leaving the quest removes remaining quest items. |
 | 258 | Guaranteed pelts; 40 required; equipment lottery weights 1/5/3/4/3 out of 16. |
 | 264 | Goblin claws 2 or 4; wolf claws 1 or 2; seven reward outcomes, including equipment and Adena. Inventory's 50 Adena is only one conditional award. |
 | 271 | Orc restriction; fangs 1 (75%) or 2 (25%); necklace 1507 (10%) or 1506 (90%). |
@@ -26,6 +27,8 @@ Each Q00NNN directory's Java handler was read for factual mechanics.
 These quests are repeatable in the technical reference. Bot autonomous goals
 perform one completion, then retain their completion marker; humans may restart.
 This is a deliberate scheduling abstraction, not a different reward rule.
+Continuous bounties expose their normal talk/kill/quit handlers to Quest Bridge;
+automatic selection of when to cash out remains uncertified.
 
 Profession completion uses the inventory's 3200 EXP and per-quest SP values.
 Proof and quest completion are atomic; transfer at level 20 consumes the proof
