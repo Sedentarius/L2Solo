@@ -1,0 +1,4 @@
+# Generated canonical JSON is hashed byte-for-byte by its regression tests.
+data/KnowledgeBase/*.json text eol=lf
+# Preserve the supplied historical evidence package byte-for-byte.
+docs/c4/quests/C4_QUEST_* -text
