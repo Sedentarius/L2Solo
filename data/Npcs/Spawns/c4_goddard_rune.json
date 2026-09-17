@@ -833,8 +833,8 @@
         "name": "Borodin",
         "coords": [
           {
-            "locX": 146580,
-            "locY": -58752,
+            "locX": 146648,
+            "locY": -58712,
             "locZ": -2976,
             "head": 45000
           }
@@ -1013,8 +1013,8 @@
         "name": "Liesel",
         "coords": [
           {
-            "locX": 149312,
-            "locY": -57360,
+            "locX": 149240,
+            "locY": -57400,
             "locZ": -2968,
             "head": 40000
           }

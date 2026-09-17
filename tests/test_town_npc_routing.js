@@ -70,7 +70,10 @@ assert(nearestGenericToCooper && Number(nearestGenericToCooper.npcSelfId) !== 78
     'a generic errand beside Cooper must select an ordinary merchant instead');
 
 const specializedPetManagers = rows.filter((row) => row.title === 'Pet Manager');
-assert.strictEqual(specializedPetManagers.length, 7, 'the datapack pet shop network must remain visible');
+assert.strictEqual(specializedPetManagers.length, 9, 'the datapack pet shop network must include Goddard and Rune');
+for (const town of ['Goddard', 'Rune']) {
+    assert(specializedPetManagers.some(row => row.town === town), `${town} must expose its pet shop`);
+}
 specializedPetManagers.forEach((row) => assert(
     !row.roles.includes(TownServiceCatalog.ROLES.GENERIC_MERCHANT),
     `${row.name} must stay specialized`

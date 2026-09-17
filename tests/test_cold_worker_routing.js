@@ -450,17 +450,28 @@ try {
             }
         }
     ];
-    const pressuredPartyRoute = coordinator.routeFor(
+    const personalPressureRoute = coordinator.routeFor(
         pressuredMembers[0],
         currentSpot,
         party,
         pressuredMembers,
         { occupancy: {}, timestamp: 5000 }
     );
+    assert(!personalPressureRoute.spotBackoff,
+        'a member solo death history must not force the whole party to retreat');
+    const partyRisk = require('../src/GameServer/Bot/Population/PartySpotRiskPolicy');
+    const failedGroup = partyRisk.record(party, {
+        debug: { fights: 5, wins: 3, spotId: currentSpot.id },
+        partyPatch: { stats: { deaths: 2 } }
+    }, 5000);
+    const pressuredParty = { ...party, ...failedGroup.partyPatch };
+    const pressuredPartyRoute = coordinator.routeFor(
+        members[0], currentSpot, pressuredParty, members, { occupancy: {}, timestamp: 5000 }
+    );
     assert.strictEqual(pressuredPartyRoute.reason, 'party_spot_replan');
     assert.strictEqual(pressuredPartyRoute.cause, 'death_pressure');
     assert.strictEqual(pressuredPartyRoute.spotBackoff.spotId, currentSpot.id,
-        'one member hitting the death threshold must move the whole party without splitting it');
+        'group deaths must move the whole party without splitting it');
     assert.strictEqual(pressuredPartyRoute.spotBackoff.until, 5000 + 60 * 60 * 1000);
 
     const requestPlan = {

@@ -560055,6 +560055,31 @@
   },
   {
     "grade": "none",
+    "id": 7126,
+    "kind": "Other.Scroll",
+    "name": "Scroll of Escape: Giran Castle Town",
+    "sources": {
+      "drops": [],
+      "spoils": []
+    },
+    "template": {
+      "etc": {
+        "consumable": true,
+        "stackable": true
+      },
+      "selfId": 7126,
+      "template": {
+        "class1": 4,
+        "class2": 5,
+        "kind": "Other.Scroll",
+        "mass": 30,
+        "name": "Scroll of Escape: Giran Castle Town",
+        "price": 35000
+      }
+    }
+  },
+  {
+    "grade": "none",
     "id": 7548,
     "kind": "Other.Quest",
     "name": "Map Piece",
@@ -560205,6 +560230,131 @@
   },
   {
     "grade": "none",
+    "id": 7554,
+    "kind": "Other.Scroll",
+    "name": "Scroll of Escape to Talking Island",
+    "sources": {
+      "drops": [],
+      "spoils": []
+    },
+    "template": {
+      "etc": {
+        "consumable": true,
+        "stackable": true
+      },
+      "selfId": 7554,
+      "template": {
+        "class1": 4,
+        "class2": 5,
+        "kind": "Other.Scroll",
+        "mass": 30,
+        "name": "Scroll of Escape to Talking Island",
+        "price": 400
+      }
+    }
+  },
+  {
+    "grade": "none",
+    "id": 7555,
+    "kind": "Other.Scroll",
+    "name": "Scroll of Escape to Elven Village",
+    "sources": {
+      "drops": [],
+      "spoils": []
+    },
+    "template": {
+      "etc": {
+        "consumable": true,
+        "stackable": true
+      },
+      "selfId": 7555,
+      "template": {
+        "class1": 4,
+        "class2": 5,
+        "kind": "Other.Scroll",
+        "mass": 30,
+        "name": "Scroll of Escape to Elven Village",
+        "price": 400
+      }
+    }
+  },
+  {
+    "grade": "none",
+    "id": 7556,
+    "kind": "Other.Scroll",
+    "name": "Scroll of Escape to Dark Elven Village",
+    "sources": {
+      "drops": [],
+      "spoils": []
+    },
+    "template": {
+      "etc": {
+        "consumable": true,
+        "stackable": true
+      },
+      "selfId": 7556,
+      "template": {
+        "class1": 4,
+        "class2": 5,
+        "kind": "Other.Scroll",
+        "mass": 30,
+        "name": "Scroll of Escape to Dark Elven Village",
+        "price": 400
+      }
+    }
+  },
+  {
+    "grade": "none",
+    "id": 7557,
+    "kind": "Other.Scroll",
+    "name": "Scroll of Escape to Orc Village",
+    "sources": {
+      "drops": [],
+      "spoils": []
+    },
+    "template": {
+      "etc": {
+        "consumable": true,
+        "stackable": true
+      },
+      "selfId": 7557,
+      "template": {
+        "class1": 4,
+        "class2": 5,
+        "kind": "Other.Scroll",
+        "mass": 30,
+        "name": "Scroll of Escape to Orc Village",
+        "price": 400
+      }
+    }
+  },
+  {
+    "grade": "none",
+    "id": 7558,
+    "kind": "Other.Scroll",
+    "name": "Scroll of Escape to Dwarven Village",
+    "sources": {
+      "drops": [],
+      "spoils": []
+    },
+    "template": {
+      "etc": {
+        "consumable": true,
+        "stackable": true
+      },
+      "selfId": 7558,
+      "template": {
+        "class1": 4,
+        "class2": 5,
+        "kind": "Other.Scroll",
+        "mass": 30,
+        "name": "Scroll of Escape to Dwarven Village",
+        "price": 400
+      }
+    }
+  },
+  {
+    "grade": "none",
     "id": 7559,
     "kind": "Other.Scroll",
     "name": "Scroll of Escape: Giran Castle Town",
@@ -560225,6 +560375,156 @@
         "mass": 0,
         "name": "Scroll of Escape: Giran Castle Town",
         "price": 400
+      }
+    }
+  },
+  {
+    "grade": "none",
+    "id": 7563,
+    "kind": "Other.Quest",
+    "name": "Galladucci's Order Document",
+    "sources": {
+      "drops": [],
+      "spoils": []
+    },
+    "template": {
+      "etc": {
+        "consumable": false,
+        "stackable": true
+      },
+      "selfId": 7563,
+      "template": {
+        "class1": 4,
+        "class2": 3,
+        "kind": "Other.Quest",
+        "mass": 0,
+        "name": "Galladucci's Order Document",
+        "price": 0
+      }
+    }
+  },
+  {
+    "grade": "none",
+    "id": 7564,
+    "kind": "Other.Quest",
+    "name": "Galladucci's Order Document",
+    "sources": {
+      "drops": [],
+      "spoils": []
+    },
+    "template": {
+      "etc": {
+        "consumable": false,
+        "stackable": true
+      },
+      "selfId": 7564,
+      "template": {
+        "class1": 4,
+        "class2": 3,
+        "kind": "Other.Quest",
+        "mass": 0,
+        "name": "Galladucci's Order Document",
+        "price": 0
+      }
+    }
+  },
+  {
+    "grade": "none",
+    "id": 7565,
+    "kind": "Other.Quest",
+    "name": "Galladucci's Order Document",
+    "sources": {
+      "drops": [],
+      "spoils": []
+    },
+    "template": {
+      "etc": {
+        "consumable": false,
+        "stackable": true
+      },
+      "selfId": 7565,
+      "template": {
+        "class1": 4,
+        "class2": 3,
+        "kind": "Other.Quest",
+        "mass": 0,
+        "name": "Galladucci's Order Document",
+        "price": 0
+      }
+    }
+  },
+  {
+    "grade": "none",
+    "id": 7566,
+    "kind": "Other.Quest",
+    "name": "Purified Magic Necklace",
+    "sources": {
+      "drops": [],
+      "spoils": []
+    },
+    "template": {
+      "etc": {
+        "consumable": false,
+        "stackable": true
+      },
+      "selfId": 7566,
+      "template": {
+        "class1": 4,
+        "class2": 3,
+        "kind": "Other.Quest",
+        "mass": 0,
+        "name": "Purified Magic Necklace",
+        "price": 0
+      }
+    }
+  },
+  {
+    "grade": "none",
+    "id": 7567,
+    "kind": "Other.Quest",
+    "name": "Gemstone Powder",
+    "sources": {
+      "drops": [],
+      "spoils": []
+    },
+    "template": {
+      "etc": {
+        "consumable": false,
+        "stackable": true
+      },
+      "selfId": 7567,
+      "template": {
+        "class1": 4,
+        "class2": 3,
+        "kind": "Other.Quest",
+        "mass": 0,
+        "name": "Gemstone Powder",
+        "price": 0
+      }
+    }
+  },
+  {
+    "grade": "none",
+    "id": 7568,
+    "kind": "Other.Quest",
+    "name": "Magic Sword Hilt",
+    "sources": {
+      "drops": [],
+      "spoils": []
+    },
+    "template": {
+      "etc": {
+        "consumable": false,
+        "stackable": true
+      },
+      "selfId": 7568,
+      "template": {
+        "class1": 4,
+        "class2": 3,
+        "kind": "Other.Quest",
+        "mass": 0,
+        "name": "Magic Sword Hilt",
+        "price": 0
       }
     }
   },
