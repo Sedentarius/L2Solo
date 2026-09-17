@@ -121,8 +121,52 @@ function findNpcNode(value, npcSelfId, seen = new Set()) {
     return null;
 }
 
+function boundsCenter(bounds = []) {
+    const points = (Array.isArray(bounds) ? bounds : Object.values(bounds || {}))
+        .map((bound) => {
+            const locX = Number(bound?.locX);
+            const locY = Number(bound?.locY);
+            if (![locX, locY].every(Number.isFinite)) return null;
+            const minZ = Number(bound?.minZ);
+            const maxZ = Number(bound?.maxZ);
+            let locZ = Number(bound?.locZ);
+            if (!Number.isFinite(locZ) && Number.isFinite(minZ) && Number.isFinite(maxZ)) {
+                locZ = (minZ + maxZ) / 2;
+            } else if (!Number.isFinite(locZ) && Number.isFinite(minZ)) {
+                locZ = minZ;
+            } else if (!Number.isFinite(locZ) && Number.isFinite(maxZ)) {
+                locZ = maxZ;
+            }
+            return { locX, locY, locZ: Number.isFinite(locZ) ? locZ : 0 };
+        })
+        .filter(Boolean);
+    if (!points.length) return null;
+    return {
+        locX: Math.round(points.reduce((sum, point) => sum + point.locX, 0) / points.length),
+        locY: Math.round(points.reduce((sum, point) => sum + point.locY, 0) / points.length),
+        locZ: Math.round(points.reduce((sum, point) => sum + point.locZ, 0) / points.length)
+    };
+}
+
+function spawnGroupLocation(npcSelfId) {
+    const groups = Array.isArray(DataCache.npcSpawns)
+        ? DataCache.npcSpawns
+        : Object.values(DataCache.npcSpawns || {});
+    for (const group of groups) {
+        const spawns = Array.isArray(group?.spawns) ? group.spawns : Object.values(group?.spawns || {});
+        const spawn = spawns.find((entry) => Number(entry?.selfId) === Number(npcSelfId));
+        if (!spawn) continue;
+        const direct = firstCoordinate(spawn.coords || spawn);
+        if (direct) return direct;
+        const center = boundsCenter(group?.bounds || []);
+        if (center) return center;
+    }
+    return null;
+}
+
 function npcLocation(npcSelfId) {
-    return findNpcNode(DataCache.npcSpawns || [], Number(npcSelfId));
+    return findNpcNode(DataCache.npcSpawns || [], Number(npcSelfId))
+        || spawnGroupLocation(Number(npcSelfId));
 }
 
 function questKillTargets(spec) {
