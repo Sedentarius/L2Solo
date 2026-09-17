@@ -596,7 +596,7 @@ function applyResurrection(session, target, recovery = 0, helper = session?.acto
     if (!target?.state?.fetchDead?.()) return false;
     const targetSession = target.session;
     if (!targetSession) return false;
-    invoke(path.actor).revive(targetSession, target, { helper });
+    invoke(path.actor).revive(targetSession, target, { helper, restoreExpPercent: recovery });
     return true;
 }
 

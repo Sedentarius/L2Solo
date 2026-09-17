@@ -184,7 +184,7 @@ function receivedHit(session, actor, hit, options = {}) {
             tauntAfterPkKill(attackerSession, victim, attacker);
         }
 
-        Generics.die(session, actor);
+        Generics.die(session, actor, { source, killer });
         return;
     }
 

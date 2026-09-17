@@ -312,6 +312,7 @@ function resolveDeathRecovery(state, timestamp = Date.now()) {
     return {
         patch: {
             activity: 'resting',
+            clearDeathExperience: 'restart_to_town',
             vitals: {
                 hp: combat.maxHp,
                 maxHp: combat.maxHp,
@@ -657,6 +658,7 @@ function resolveFight({ state, spot, pressure, targetNpcId = 0, rng, timestamp =
     let musicUses = 0;
     let summonUses = 0;
     let summonActions = 0;
+    let overhitContext = null;
     const chargeState = coldChargeState(state, timestamp);
     let charges = chargeState.charges;
     let chargeExpiresAt = chargeState.chargeExpiresAt;
@@ -774,7 +776,19 @@ function resolveFight({ state, spot, pressure, targetNpcId = 0, rng, timestamp =
                 cooldowns[skill.selfId] = timestamp + time + Math.max(0, Number(skill.reuse || 0));
                 skillUses += 1;
             }
+            const targetHpBeforeHit = mobHp;
             mobHp -= Math.max(0, damage);
+            if (mobHp <= 0) {
+                overhitContext = invoke('GameServer/Progression/OverhitReward').contextForHit({
+                    attacker: { characterId: state.characterId },
+                    skill,
+                    targetHpBeforeHit,
+                    targetMaxHp: mob.maxHp,
+                    finalDamage: damage,
+                    encounterId: mob.selfId || targetNpcId,
+                    timestamp: timestamp + time
+                });
+            }
             botReadyAt += actionDelayMs(bot, skill);
             if (mobHp <= 0) {
                 soloFighter.readyAt = botReadyAt;
@@ -825,6 +839,7 @@ function resolveFight({ state, spot, pressure, targetNpcId = 0, rng, timestamp =
     }
 
     const rewards = BackgroundDropResolver.progressionForFight({ spot, npcSelfId: mob.selfId, rng });
+    const overhit = invoke('GameServer/Progression/OverhitReward').resolveContext(overhitContext, rewards.exp);
     const expMultiplier = pressure?.expMultiplier || 1;
     const rates = ProgressionRates.profile();
     const rolledRewards = BackgroundDropResolver.rollRewardsForFight({
@@ -853,7 +868,7 @@ function resolveFight({ state, spot, pressure, targetNpcId = 0, rng, timestamp =
         maxHp: Math.max(1, Math.round(vitals.maxHp)),
         mp: Math.max(0, Math.round(vitals.mp)),
         maxMp: Math.max(1, Math.round(vitals.maxMp)),
-        exp: Math.round(rewards.exp * expMultiplier * rates.exp
+        exp: Math.round(overhit.adjustedExp * expMultiplier * rates.exp
             * ColdCombatProfile.statMultiplier(bot, 'expMul', timestamp)),
         sp: Math.round(rewards.sp * expMultiplier * rates.sp),
         adena,
@@ -864,7 +879,8 @@ function resolveFight({ state, spot, pressure, targetNpcId = 0, rng, timestamp =
         effects: soloFighter.profile.effects,
         inventory: fightState.inventory,
         summon: soloFighter.summon || null,
-        debug: { actions, durationMs: time, skillUses, heals, musicUses, summonUses, summonActions, potionsUsed: soloFighter.potionsUsed, mobSelfId: mob.selfId || null, timedOut: false }
+        debug: { actions, durationMs: time, skillUses, heals, musicUses, summonUses, summonActions, potionsUsed: soloFighter.potionsUsed,
+            mobSelfId: mob.selfId || null, timedOut: false, overhit }
     };
 }
 
@@ -943,6 +959,7 @@ function resolvePartyFight({ members, spot, targetNpcId = 0, rng = Math.random, 
     let mobReadyAt = Number(pending?.mobReadyAt || 0);
     let time = 0;
     let actions = 0;
+    let overhitContext = null;
     const fightLimitMs = 15000;
     const Help = require('../../Social/CombatHelpPolicy');
     const help = new Map();
@@ -1051,7 +1068,19 @@ function resolvePartyFight({ members, spot, targetNpcId = 0, rng = Math.random, 
                 next.cooldowns[skill.selfId] = timestamp + time + Math.max(0, Number(skill.reuse || 0));
                 next.skillUses += 1;
             }
+            const targetHpBeforeHit = mobHp;
             mobHp -= Math.max(0, damage);
+            if (mobHp <= 0) {
+                overhitContext = invoke('GameServer/Progression/OverhitReward').contextForHit({
+                    attacker: { characterId: next.state.characterId },
+                    skill,
+                    targetHpBeforeHit,
+                    targetMaxHp: mob.maxHp,
+                    finalDamage: damage,
+                    encounterId: mob.selfId || targetNpcId,
+                    timestamp: timestamp + time
+                });
+            }
             next.readyAt += actionDelayMs(next.profile, skill);
             if (mobHp <= 0) {
                 rescued(next);
@@ -1101,7 +1130,8 @@ function resolvePartyFight({ members, spot, targetNpcId = 0, rng = Math.random, 
             summonUses: fighters.reduce((sum, fighter) => sum + Number(fighter.summonUses || 0), 0),
             summonActions: fighters.reduce((sum, fighter) => sum + Number(fighter.summonActions || 0), 0),
             potionsUsed: fighters.reduce((sum, fighter) => sum + Number(fighter.potionsUsed || 0), 0),
-            mobSelfId: mob.selfId || null
+            mobSelfId: mob.selfId || null,
+            overhitContext
         }
     };
 }

@@ -67,6 +67,11 @@ const mocks = {
     'GameServer/Actor/Generics/CalculateStats': () => {},
     'GameServer/Skills/ChargeLifecycle': { clear() {} },
     'GameServer/World/ArenaDuelService': { onPlayerDeath: () => false },
+    'GameServer/Progression/DeathExperience': {
+        applyDeathPenalty: () => ({ applied: false, persistence: Promise.resolve() }),
+        clearPendingRestoration: () => Promise.resolve({ cleared: false }),
+        restoreFromResurrection: () => ({ restored: 0, persistence: Promise.resolve() })
+    },
     'GameServer/Bot/AI/BotEventJournal': { record: async () => {} },
     'GameServer/Pets/PetTravel': { begin: () => [], finish() {} },
     'GameServer/Actor/Generics': { updatePosition(s, a, p) { a.x = p.locX; a.y = p.locY; a.z = p.locZ; } },

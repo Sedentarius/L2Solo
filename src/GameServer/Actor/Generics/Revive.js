@@ -25,7 +25,17 @@ function finishRevive(session, actor, helper) {
     }
 }
 
-function revive(session, actor, { delayMs = 2500, restoreFullVitals = false, helper = null } = {}) {
+function revive(session, actor, {
+    delayMs = 2500,
+    restoreFullVitals = false,
+    helper = null,
+    restoreExpPercent = null,
+    recoveryReason = 'non_resurrection_recovery'
+} = {}) {
+    const DeathExperience = invoke('GameServer/Progression/DeathExperience');
+    const experience = restoreExpPercent === null
+        ? { persistence: DeathExperience.clearPendingRestoration(actor, recoveryReason) }
+        : DeathExperience.restoreFromResurrection(session, actor, { restoreExpPercent });
     if (restoreFullVitals) {
         actor.automation.stopReplenish();
         actor.fillupVitals();
@@ -37,7 +47,7 @@ function revive(session, actor, { delayMs = 2500, restoreFullVitals = false, hel
         finishRevive(session, actor, helper);
         session.dataSendToMeAndOthers(ServerResponse.revive(actor.fetchId()), actor);
         session.dataSendToMeAndOthers(ServerResponse.socialAction(actor.fetchId(), 9), actor);
-        return;
+        return experience;
     }
 
     session.dataSendToMeAndOthers(ServerResponse.revive(actor.fetchId()), actor);
@@ -46,6 +56,7 @@ function revive(session, actor, { delayMs = 2500, restoreFullVitals = false, hel
         finishRevive(session, actor, helper);
         session.dataSendToMeAndOthers(ServerResponse.socialAction(actor.fetchId(), 9), actor); // SWAG stand-up
     }, delayMs);
+    return experience;
 }
 
 module.exports = revive;

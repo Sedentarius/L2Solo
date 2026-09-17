@@ -30,7 +30,11 @@ function consume(session, data) {
 
     // Town restart is a complete respawn, unlike a gradual resurrection skill.
     // Make the actor alive before TeleportTo checks HP/dead state.
-    Generics.revive(session, actor, { delayMs: 0, restoreFullVitals: true });
+    Generics.revive(session, actor, {
+        delayMs: 0,
+        restoreFullVitals: true,
+        recoveryReason: 'restart_to_town'
+    });
     session.dataSendToMe(ServerResponse.userInfo(actor));
 
     Generics.teleportTo(session, actor, townRespawn);

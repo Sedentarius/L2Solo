@@ -18,6 +18,7 @@ const ColdCombatProfile = invoke('GameServer/Bot/Population/ColdCombatProfile');
 const InventorySummary = invoke('GameServer/Bot/Population/InventorySummary');
 const SpotRiskPolicy = invoke('GameServer/Bot/Population/SpotRiskPolicy');
 const WorldAreaCatalog = invoke('GameServer/World/WorldAreaCatalog');
+const ProgressionCap = invoke('GameServer/Progression/ProgressionCap');
 const cache = new LifeStateCache();
 const pendingWrites = new Map();
 const changeListeners = new Set();
@@ -105,17 +106,6 @@ function levelBand(level) {
 function targetLevelBandForSession(session, level) {
     if (session.newbieAnchor) return `1-${Config.newbieAnchorMaxLevel}`;
     return levelBand(level);
-}
-
-function levelForExp(exp, fallback = 1) {
-    const value = Number(exp || 0);
-    const table = DataCache.experience || [];
-    for (let i = 0; i < table.length - 1; i++) {
-        if (value >= table[i] && value < table[i + 1]) {
-            return i + 1;
-        }
-    }
-    return fallback;
 }
 
 function itemTemplate(selfId) {
@@ -525,6 +515,7 @@ function recordFromSession(session, phase, reason = '') {
     const inventory = inventorySummaryFromItems(actor.backpack?.fetchItems ? actor.backpack.fetchItems() : []);
     const stats = {
         role: session.botStatus?.role || null,
+        deathExperience: actor.deathExperience ? { ...actor.deathExperience } : null,
         karma: Number(actor.fetchKarma?.() || 0),
         pvpEncounter: session.pvpEncounter || cache.get(characterId)?.stats?.pvpEncounter || null,
         coldPvp: { ...(cache.get(characterId)?.stats?.coldPvp || {}),
@@ -2233,9 +2224,29 @@ const BotLifeState = {
         if (!state || !result) return Promise.resolve(null);
 
         const timestamp = Number(options.timestamp || now());
-        const exp = Number(state.exp || 0) + Number(result.materialize?.exp || 0);
+        const experienceAward = ProgressionCap.applyAward(state.exp, result.materialize?.exp);
+        const progressionLevel = ProgressionCap.levelForExperience(experienceAward.totalExp, Number(state.level || 1));
+        let progressionState = { ...state, exp: experienceAward.totalExp, level: progressionLevel };
+        const nextDeathsForPenalty = Number(result.patch?.deathCount ?? state.stats?.deaths ?? 0);
+        const newDeath = (result.patch?.activity === 'dead' || result.debug?.died === true)
+            && nextDeathsForPenalty > Number(state.stats?.deaths || 0);
+        if (newDeath) {
+            progressionState = invoke('GameServer/Progression/DeathExperience').applyColdDeath(progressionState, {
+                timestamp,
+                cold: true
+            }).state;
+        } else if (result.patch?.restoreExpPercent !== undefined) {
+            progressionState = invoke('GameServer/Progression/DeathExperience').restoreCold(progressionState, {
+                restoreExpPercent: result.patch.restoreExpPercent,
+                timestamp
+            }).state;
+        } else if (result.patch?.clearDeathExperience) {
+            progressionState = invoke('GameServer/Progression/DeathExperience')
+                .clearCold(progressionState, result.patch.clearDeathExperience);
+        }
+        const exp = progressionState.exp;
         const sp = Number(state.sp || 0) + Number(result.materialize?.sp || 0);
-        const level = levelForExp(exp, Number(state.level || 1));
+        const level = progressionState.level;
         const materializedItems = result.materialize?.items || [];
         const materializedAdenaItems = materializedItems
             .filter((item) => Number(item.selfId) === 57)
@@ -2263,21 +2274,29 @@ const BotLifeState = {
         // this order silently restores the previous counters after every
         // solo/party fight (including deaths).
         const patchedStats = {
-            ...(state.stats || {}),
-            ...(result.patch?.stats || {})
+            ...(progressionState.stats || {}),
+            ...(result.patch?.stats || {}),
+            ...(progressionState.stats?.deathExperience
+                ? { deathExperience: progressionState.stats.deathExperience }
+                : {})
         };
         const stats = {
             ...patchedStats,
             karma: Math.max(0, Number(state.stats?.karma || 0) - Math.floor(
-                Math.max(0, Number(result.materialize?.exp || 0)) / invoke('GameServer/Karma').XP_DIVIDER)),
+                experienceAward.accepted / invoke('GameServer/Karma').XP_DIVIDER)),
             fightsWon: Number(state.stats?.fightsWon || 0) + Number(result.debug?.wins || 0),
             fightsResolved: Number(state.stats?.fightsResolved || 0) + Number(result.debug?.fights || 0),
             deaths: Number(result.patch?.deathCount ?? state.stats?.deaths ?? 0),
-            expEarned: Number(state.stats?.expEarned || 0) + Number(result.materialize?.exp || 0),
+            expEarned: Number(state.stats?.expEarned || 0) + experienceAward.accepted,
             spEarned: Number(state.stats?.spEarned || 0) + Number(result.materialize?.sp || 0),
             adenaEarned: Number(state.stats?.adenaEarned || 0) + Number(result.materialize?.adena || 0) + materializedAdenaItems,
             route: result.debug?.route || state.stats?.route || null,
             lastResolveDebug: compactResolveDebug(result.debug),
+            lastExperienceAward: {
+                requested: experienceAward.requested,
+                accepted: experienceAward.accepted,
+                discarded: experienceAward.discarded
+            },
             ...(targetCombat ? { targetCombat } : {})
         };
         const inventory = { ...(state.inventory || {}) };
@@ -2412,9 +2431,33 @@ const BotLifeState = {
                 }
                 const row = rowFromState(profiledState);
                 return save(row)
-                    .then(() => Number(state.stats?.karma || 0) > 0
-                        ? Database.updateColdCharacterExperience(row.characterId, row.level, row.exp, row.sp)
-                        : Database.updateCharacterExperience(row.characterId, row.level, row.exp, row.sp))
+                    .then(() => {
+                        const deathRecord = profiledState.stats?.deathExperience;
+                        if (newDeath && deathRecord?.pendingRestoration) {
+                            return Database.applyCharacterDeathExperience({
+                                characterId: row.characterId,
+                                level: row.level,
+                                expBeforeDeath: deathRecord.expBeforeDeath,
+                                expLost: deathRecord.expLost,
+                                expAfterDeath: row.exp,
+                                deathContext: deathRecord.deathContext,
+                                penaltyAppliedAt: deathRecord.penaltyAppliedAt,
+                                karma: profiledState.stats?.karma,
+                                sp: row.sp
+                            });
+                        }
+                        if (result.patch?.restoreExpPercent !== undefined) {
+                            return Database.restoreCharacterDeathExperience(row.characterId, result.patch.restoreExpPercent, timestamp)
+                                .then((restored) => restored || Database.updateCharacterExperience(row.characterId, row.level, row.exp, row.sp));
+                        }
+                        if (result.patch?.clearDeathExperience) {
+                            return Database.clearCharacterDeathExperience(row.characterId, result.patch.clearDeathExperience, timestamp)
+                                .then(() => Database.updateCharacterExperience(row.characterId, row.level, row.exp, row.sp));
+                        }
+                        return Number(state.stats?.karma || 0) > 0
+                            ? Database.updateColdCharacterExperience(row.characterId, row.level, row.exp, row.sp)
+                            : Database.updateCharacterExperience(row.characterId, row.level, row.exp, row.sp);
+                    })
                     .then(() => Database.updateCharacterVitals(row.characterId, row.hp, row.maxHp, row.mp, row.maxMp))
                     .then(() => syncInventorySummary(row.characterId, profiledState.inventory))
                     .then(() => {
@@ -2443,7 +2486,7 @@ const BotLifeState = {
     syncResolvedState(state) {
         if (!state?.characterId) return Promise.resolve(null);
         const row = rowFromState(state);
-        return Database.updateCharacterExperience(row.characterId, row.level, row.exp, row.sp)
+        return Database.updateColdCharacterProgression(row.characterId, state)
             .then(() => Database.updateCharacterVitals(row.characterId, row.hp, row.maxHp, row.mp, row.maxMp))
             .then(() => syncInventorySummary(row.characterId, state.inventory || {}))
             .then(() => enqueueEquipmentGoalAdvance(row.equipmentAdvance))

@@ -122,9 +122,9 @@ class Actor extends ActorModel {
         });
     }
 
-    revive() {
+    revive(options) {
         invoke(path.actor).revive(
-            this.session, this
+            this.session, this, options
         );
     }
 

@@ -521,7 +521,7 @@ const BotManager = {
     },
 
     applyProfileLevel(character, botData = {}) {
-        const level = Number(botData.level || 0);
+        const level = invoke('GameServer/Progression/ProgressionCap').clampLevel(botData.level || 1);
         if (!character?.id || level <= 1) return Promise.resolve(false);
         const exp = Number(DataCache.experience?.[level - 1] || 0);
         const sp = Math.round(level * level * 3);
@@ -530,7 +530,7 @@ const BotManager = {
     },
 
     awardProfileSkills(characterId, botData = {}, currentClassId = botData.classId) {
-        const level = Number(botData.level || 1);
+        const level = invoke('GameServer/Progression/ProgressionCap').clampLevel(botData.level || 1);
         if (level <= 1) return Promise.resolve();
         return BotClassProgression.reconcile({
             characterId,

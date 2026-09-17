@@ -1408,7 +1408,7 @@ class Backpack extends BackpackModel {
 
     applyResurrection(session, target, recovery = 0) {
         if (typeof target.revive === 'function') {
-            target.revive();
+            target.revive({ restoreExpPercent: recovery });
             return;
         }
 
@@ -1419,7 +1419,7 @@ class Backpack extends BackpackModel {
 
         const targetSession = target.session;
         if (targetSession) {
-            invoke(path.actor).revive(targetSession, target);
+            invoke(path.actor).revive(targetSession, target, { restoreExpPercent: recovery });
         }
     }
 
