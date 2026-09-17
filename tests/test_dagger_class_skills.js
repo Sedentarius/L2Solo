@@ -244,7 +244,13 @@ const bluffTarget = {
 };
 const bluffActor = { ...blowActor, fetchId: () => 2000001, fetchLevel: () => 77, fetchHead: () => 54321, fetchCollectiveMAtk: () => 100 };
 const bluff = skill(358, 'Bluff', 1, { distance: 40, power: 90, buff: 9000 });
-const bluffOutcome = C4SkillEffects.execute(session(bluffActor), bluffActor, bluffTarget, bluff, {
+const bluffSession = session(bluffActor);
+const rotationRecipients = [];
+bluffSession.dataSendToMeAndOthers = (packet, target) => {
+    bluffSession.packets.push(packet);
+    if ([0x62, 0x63].includes(packet[0])) rotationRecipients.push(target);
+};
+const bluffOutcome = C4SkillEffects.execute(bluffSession, bluffActor, bluffTarget, bluff, {
     magicSkill: false,
     rng: () => 0,
     attack: { clearLoadedShot() {} }
@@ -253,6 +259,23 @@ assert.strictEqual(bluffOutcome.aggroReduced, true, 'Bluff should drop the targe
 assert.strictEqual(bluffTarget.aborted, true, 'Bluff should disengage an NPC currently targeting the caster');
 assert.strictEqual(bluffTarget.fetchHead(), bluffActor.fetchHead(), 'Bluff should copy the caster heading');
 assert(EffectStore.hasDebuff(bluffTarget, 'stun'), 'Bluff should apply its sourced stun effect');
+const rotations = bluffSession.packets.filter(packet => [0x62, 0x63].includes(packet[0]));
+assert.deepStrictEqual(rotations.map(packet => packet[0]), [0x62, 0x63], 'Bluff must begin and stop the client rotation in order');
+assert.strictEqual(rotations[0].length, 24, 'BeginRotation includes transport padding');
+assert.deepStrictEqual([1, 5, 9, 13].map(offset => rotations[0].readInt32LE(offset)), [1000001, 1000, 1, 65535]);
+assert.strictEqual(rotations[1].length, 24, 'StopRotation includes transport padding');
+assert.deepStrictEqual([1, 5, 9].map(offset => rotations[1].readInt32LE(offset)), [1000001, 54321, 65535]);
+assert.strictEqual(rotations[1][13], 0, 'C4 StopRotation has a trailing zero byte');
+assert.deepStrictEqual(rotationRecipients, [bluffTarget, bluffTarget], 'Broadcast visibility must be centered on the rotated target');
+
+const resistedTarget = { ...bluffTarget, effects: {}, head: 1000, aborted: false };
+const resistedSession = session(bluffActor);
+const resistedBluff = C4SkillEffects.execute(resistedSession, bluffActor, resistedTarget, bluff, {
+    magicSkill: false, rng: () => 1, attack: { clearLoadedShot() {} }
+});
+assert.strictEqual(resistedBluff.effectResisted, true);
+assert.strictEqual(resistedTarget.fetchHead(), 1000, 'Resisted Bluff must preserve heading');
+assert(!resistedSession.packets.some(packet => [0x62, 0x63].includes(packet[0])), 'Resisted Bluff must not animate a rotation');
 
 const partyMob = {
     effects: {},

@@ -469,7 +469,7 @@
 },{
     "selfId": "17_22_103",
     "bounds": [{ "locX": -80436, "locY": 153020, "minZ": -3224, "maxZ": -3024 }, { "locX": -80236, "locY": 153020, "minZ": -3224, "maxZ": -3024 }, { "locX": -80236, "locY": 153220, "minZ": -3224, "maxZ": -3024 }, { "locX": -80436, "locY": 153220, "minZ": -3224, "maxZ": -3024 }],
-    "spawns": [{ "selfId": 7500, "name": "Osborn", "coords": [{ "locX": -80320, "locY": 153104, "locZ": -3176, "head": 25000 }], "total": 1, "respawn": 60, "bias": 0 }, { "selfId": 7502, "name": "Umos", "coords": [{ "locX": -80389, "locY": 153091, "locZ": -3176, "head": 25000 }], "total": 1, "respawn": 60, "bias": 0 }, { "selfId": 7501, "name": "Kasman", "coords": [{ "locX": -80303, "locY": 153180, "locZ": -3176, "head": 25000 }], "total": 1, "respawn": 60, "bias": 0 }]
+    "spawns": [{ "selfId": 7500, "name": "Osborn", "coords": [{ "locX": -80388, "locY": 153308, "locZ": -3176, "head": 33846 }], "total": 1, "respawn": 60, "bias": 0 }, { "selfId": 7502, "name": "Umos", "coords": [{ "locX": -80393, "locY": 153255, "locZ": -3176, "head": 31665 }], "total": 1, "respawn": 60, "bias": 0 }, { "selfId": 7501, "name": "Kasman", "coords": [{ "locX": -80368, "locY": 153356, "locZ": -3176, "head": 33489 }], "total": 1, "respawn": 60, "bias": 0 }]
 },{
     "selfId": "17_22_104",
     "bounds": [{ "locX": -82020, "locY": 153452, "minZ": -3320, "maxZ": -3120 }, { "locX": -81820, "locY": 153452, "minZ": -3320, "maxZ": -3120 }, { "locX": -81820, "locY": 153652, "minZ": -3320, "maxZ": -3120 }, { "locX": -82020, "locY": 153652, "minZ": -3320, "maxZ": -3120 }],
@@ -517,7 +517,7 @@
 },{
     "selfId": "17_22_NPC_0514_05",
     "bounds": [{ "locX": -12996, "locY": 124636, "minZ": -3210, "maxZ": -3010 }, { "locX": -12796, "locY": 124636, "minZ": -3210, "maxZ": -3010 }, { "locX": -12796, "locY": 124836, "minZ": -3210, "maxZ": -3010 }, { "locX": -12996, "locY": 124836, "minZ": -3210, "maxZ": -3010 }],
-    "spawns": [{ "selfId": 7505, "name": "Drikus", "coords": [{ "locX": -12874, "locY": 124726, "locZ": -3120, "head": 0 }], "total": 1, "respawn": 60, "bias": 0 }, { "selfId": 7507, "name": "Racoy", "coords": [{ "locX": -12896, "locY": 124773, "locZ": -3120, "head": 0 }], "total": 1, "respawn": 60, "bias": 0 }, { "selfId": 7506, "name": "Buka", "coords": [{ "locX": -12896, "locY": 124675, "locZ": -3120, "head": 0 }], "total": 1, "respawn": 60, "bias": 0 }]
+    "spawns": [{ "selfId": 7505, "name": "Drikus", "coords": [{ "locX": -12840, "locY": 124862, "locZ": -3120, "head": 2597 }], "total": 1, "respawn": 60, "bias": 0 }, { "selfId": 7507, "name": "Racoy", "coords": [{ "locX": -12843, "locY": 124917, "locZ": -3120, "head": 65351 }], "total": 1, "respawn": 60, "bias": 0 }, { "selfId": 7506, "name": "Buka", "coords": [{ "locX": -12842, "locY": 124822, "locZ": -3120, "head": 63236 }], "total": 1, "respawn": 60, "bias": 0 }]
 },{
     "selfId": "17_22_1129_NPC04",
     "bounds": [{ "locX": -79460, "locY": 153884, "minZ": -3306, "maxZ": -3106 }, { "locX": -79260, "locY": 153884, "minZ": -3306, "maxZ": -3106 }, { "locX": -79260, "locY": 154084, "minZ": -3306, "maxZ": -3106 }, { "locX": -79460, "locY": 154084, "minZ": -3306, "maxZ": -3106 }],
@@ -1141,7 +1141,7 @@
 },{
     "selfId": "NPC_t22_19_030917_04",
     "bounds": [{ "locX": 78992, "locY": 53548, "minZ": -1684, "maxZ": -1484 }, { "locX": 79192, "locY": 53548, "minZ": -1684, "maxZ": -1484 }, { "locX": 79192, "locY": 53748, "minZ": -1684, "maxZ": -1484 }, { "locX": 78992, "locY": 53748, "minZ": -1684, "maxZ": -1484 }],
-    "spawns": [{ "selfId": 7178, "name": "Zenkin", "coords": [{ "locX": 79088, "locY": 53695, "locZ": -1540, "head": 0 }], "total": 1, "respawn": 60, "bias": 0 }, { "selfId": 7179, "name": "Raudia", "coords": [{ "locX": 79088, "locY": 53597, "locZ": -1542, "head": 0 }], "total": 1, "respawn": 60, "bias": 0 }]
+    "spawns": [{ "selfId": 7178, "name": "Zenkin", "coords": [{ "locX": 79111, "locY": 53657, "locZ": -1544, "head": 0 }], "total": 1, "respawn": 60, "bias": 0 }, { "selfId": 7179, "name": "Raudia", "coords": [{ "locX": 79088, "locY": 53597, "locZ": -1542, "head": 0 }], "total": 1, "respawn": 60, "bias": 0 }]
 },{
     "selfId": "NPC_t22_19_030917_05",
     "bounds": [{ "locX": 79354, "locY": 54826, "minZ": -1696, "maxZ": -1496 }, { "locX": 79554, "locY": 54826, "minZ": -1696, "maxZ": -1496 }, { "locX": 79554, "locY": 55026, "minZ": -1696, "maxZ": -1496 }, { "locX": 79354, "locY": 55026, "minZ": -1696, "maxZ": -1496 }],
@@ -1601,7 +1601,7 @@
 },{
     "selfId": "20_22_NPC_103",
     "bounds": [{ "locX": 19724, "locY": 143467, "minZ": -3152, "maxZ": -2952 }, { "locX": 19924, "locY": 143467, "minZ": -3152, "maxZ": -2952 }, { "locX": 19924, "locY": 143667, "minZ": -3152, "maxZ": -2952 }, { "locX": 19724, "locY": 143667, "minZ": -3152, "maxZ": -2952 }],
-    "spawns": [{ "selfId": 7508, "name": "Castor", "coords": [{ "locX": 19856, "locY": 143568, "locZ": -3040, "head": 0 }], "total": 1, "respawn": 60, "bias": 0 }, { "selfId": 7510, "name": "Somak", "coords": [{ "locX": 19821, "locY": 143520, "locZ": -3040, "head": 0 }], "total": 1, "respawn": 60, "bias": 0 }, { "selfId": 7509, "name": "Dowki", "coords": [{ "locX": 19824, "locY": 143616, "locZ": -3040, "head": 0 }], "total": 1, "respawn": 60, "bias": 0 }]
+    "spawns": [{ "selfId": 7508, "name": "Castor", "coords": [{ "locX": 19931, "locY": 143228, "locZ": -3040, "head": 64132 }], "total": 1, "respawn": 60, "bias": 0 }, { "selfId": 7510, "name": "Somak", "coords": [{ "locX": 19950, "locY": 143156, "locZ": -3040, "head": 63709 }], "total": 1, "respawn": 60, "bias": 0 }, { "selfId": 7509, "name": "Dowki", "coords": [{ "locX": 19956, "locY": 143268, "locZ": -3040, "head": 62870 }], "total": 1, "respawn": 60, "bias": 0 }]
 },{
     "selfId": "20_22_NPC_104",
     "bounds": [{ "locX": 16188, "locY": 142134, "minZ": -2752, "maxZ": -2552 }, { "locX": 16463, "locY": 142068, "minZ": -2752, "maxZ": -2552 }, { "locX": 16497, "locY": 142488, "minZ": -2752, "maxZ": -2552 }, { "locX": 16226, "locY": 142491, "minZ": -2752, "maxZ": -2552 }],
@@ -1785,7 +1785,7 @@
 },{
     "selfId": "22_22_NPC_106",
     "bounds": [{ "locX": 80308, "locY": 144162, "minZ": -3633, "maxZ": -3433 }, { "locX": 80502, "locY": 144180, "minZ": -3633, "maxZ": -3433 }, { "locX": 80501, "locY": 144631, "minZ": -3633, "maxZ": -3433 }, { "locX": 80303, "locY": 144619, "minZ": -3633, "maxZ": -3433 }],
-    "spawns": [{ "selfId": 7513, "name": "Penatus", "coords": [{ "locX": 80444, "locY": 144368, "locZ": -3520, "head": 0 }], "total": 1, "respawn": 60, "bias": 0 }, { "selfId": 7515, "name": "Manakia", "coords": [{ "locX": 80399, "locY": 144496, "locZ": -3520, "head": 0 }], "total": 1, "respawn": 60, "bias": 0 }, { "selfId": 7514, "name": "Vokian", "coords": [{ "locX": 80399, "locY": 144254, "locZ": -3520, "head": 0 }], "total": 1, "respawn": 60, "bias": 0 }]
+    "spawns": [{ "selfId": 7513, "name": "Penatus", "coords": [{ "locX": 80423, "locY": 144481, "locZ": -3528, "head": 60699 }], "total": 1, "respawn": 60, "bias": 0 }, { "selfId": 7515, "name": "Manakia", "coords": [{ "locX": 80418, "locY": 144524, "locZ": -3528, "head": 65149 }], "total": 1, "respawn": 60, "bias": 0 }, { "selfId": 7514, "name": "Vokian", "coords": [{ "locX": 80419, "locY": 144436, "locZ": -3528, "head": 63660 }], "total": 1, "respawn": 60, "bias": 0 }]
 },{
     "selfId": "NPC_t22_22_030917_01",
     "bounds": [{ "locX": 84170, "locY": 143639, "minZ": -3499, "maxZ": -3299 }, { "locX": 84370, "locY": 143639, "minZ": -3499, "maxZ": -3299 }, { "locX": 84370, "locY": 143839, "minZ": -3499, "maxZ": -3299 }, { "locX": 84170, "locY": 143839, "minZ": -3499, "maxZ": -3299 }],
@@ -2037,7 +2037,7 @@
 },{
     "selfId": "24_18_NPC_031201_08",
     "bounds": [{ "locX": 148876, "locY": 26588, "minZ": -2281, "maxZ": -2081 }, { "locX": 149076, "locY": 26588, "minZ": -2281, "maxZ": -2081 }, { "locX": 149076, "locY": 26788, "minZ": -2281, "maxZ": -2081 }, { "locX": 148876, "locY": 26788, "minZ": -2281, "maxZ": -2081 }],
-    "spawns": [{ "selfId": 7845, "name": "Klump", "coords": [{ "locX": 148959, "locY": 26687, "locZ": -2189, "head": 32768 }], "total": 1, "respawn": 60, "bias": 0 }, { "selfId": 7843, "name": "Romp", "coords": [{ "locX": 148959, "locY": 26733, "locZ": -2189, "head": 32768 }], "total": 1, "respawn": 60, "bias": 0 }, { "selfId": 7844, "name": "Walderal", "coords": [{ "locX": 148959, "locY": 26641, "locZ": -2189, "head": 32768 }], "total": 1, "respawn": 60, "bias": 0 }]
+    "spawns": [{ "selfId": 7845, "name": "Klump", "coords": [{ "locX": 148960, "locY": 26145, "locZ": -2192, "head": 24576 }], "total": 1, "respawn": 60, "bias": 0 }, { "selfId": 7843, "name": "Romp", "coords": [{ "locX": 148859, "locY": 27258, "locZ": -2192, "head": 49152 }], "total": 1, "respawn": 60, "bias": 0 }, { "selfId": 7844, "name": "Walderal", "coords": [{ "locX": 148155, "locY": 26254, "locZ": -2192, "head": 0 }], "total": 1, "respawn": 60, "bias": 0 }]
 },{
     "selfId": "24_18_NPC_031201_09",
     "bounds": [{ "locX": 150268, "locY": 28284, "minZ": -2349, "maxZ": -2149 }, { "locX": 150468, "locY": 28284, "minZ": -2349, "maxZ": -2149 }, { "locX": 150468, "locY": 28484, "minZ": -2349, "maxZ": -2149 }, { "locX": 150268, "locY": 28484, "minZ": -2349, "maxZ": -2149 }],

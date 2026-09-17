@@ -22,6 +22,7 @@ async function checkLogin(skillsFirst) {
     };
     const response = new Proxy({
         shortcutInit,
+        skillCoolTime: invoke('GameServer/Network/Response/SkillCoolTime'),
         macroList: () => [],
         abnormalStatusUpdate: { fromActor: () => null },
         shortBuffStatusUpdate: { fromActor: () => null }
@@ -31,6 +32,7 @@ async function checkLogin(skillsFirst) {
         Database: { fetchMacros: async () => [], fetchShortcuts: () => rowsReady },
         'GameServer/Inventory/ShotStock': { ensureActorStock: async () => {} },
         'GameServer/Clan/ClanService': { clanForActor: () => null },
+        'GameServer/Quest/QuestService': { ensureLoaded: async () => {}, active: () => [] },
         'GameServer/World/GameTime': { isNight: () => false },
         'GameServer/AfkTrade/AfkTradeService': { deliverNotifications: async () => {} }
     };
@@ -46,7 +48,8 @@ async function checkLogin(skillsFirst) {
     assert.equal(packets.length, 0, 'login must await both shortcuts and the skillbook');
     (skillsFirst ? finishShortcuts : finishSkills)();
     await tick();
-    assert.equal(packets.length, 1);
+    assert.equal(packets.length, 2);
+    assert.equal(packets[1][0], 0xc1);
     assert.equal(packets[0][0], 0x45);
     assert.equal(packets[0].readInt32LE(17), 40, 'saved shortcut must use loaded level without re-registering');
 }

@@ -620,6 +620,8 @@ const GIRAN_PET_SUPPLY_BASE = [
 ];
 
 const LISTS = {
+    ...Object.fromEntries(Object.entries(require('../../../../data/Npcs/c4_goddard_rune_shops.json'))
+        .map(([npcId, entries]) => [`elmore${npcId}`, entries])),
     ...Object.fromEntries(Object.entries(require('../../../../data/Npcs/c4_heine_shops.json'))
         .map(([npcId, entries]) => [`heine${npcId}`, entries])),
     starterWeapons: [
@@ -1020,6 +1022,8 @@ const LISTS = {
 };
 
 const NPC_LISTS = {
+    ...Object.fromEntries(Object.keys(require('../../../../data/Npcs/c4_goddard_rune_shops.json'))
+        .map(npcId => [npcId, [`elmore${npcId}`]])),
     7890: ['heine7890'],
     7891: ['heine7891'],
     7892: ['heine7892'],

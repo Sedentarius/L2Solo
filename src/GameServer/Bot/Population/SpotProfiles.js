@@ -349,7 +349,7 @@ const SpotProfiles = {
         const targetLevel = LevelingRoutes.targetLevelForState(state);
         const timestamp = Number(options.timestamp || Date.now());
         const excludedSpotIds = new Set([
-            ...SpotRiskPolicy.excludedSpotIdsForStates([state], timestamp),
+            ...(options.mode === 'party' ? [] : SpotRiskPolicy.excludedSpotIdsForStates([state], timestamp)),
             ...((options.excludedSpotIds instanceof Set || Array.isArray(options.excludedSpotIds))
                 ? [...options.excludedSpotIds].map(String)
                 : [])

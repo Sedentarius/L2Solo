@@ -39,7 +39,7 @@ function releaseMember(state, timestamp = Date.now(), reason = 'party_session_ro
 
     const partyTravel = state.stats?.travel?.reason === 'party_spot_replan';
     const releasedFromObjective = [
-        'party_session_rotation',
+        'party_session_rotation', 'clan_priority',
         'party_min_size',
         'invalid_party_size',
         'party_membership_mismatch',

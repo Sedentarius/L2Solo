@@ -13,6 +13,12 @@ const materials = deluxe => deluxe ? [[1870,10],[1871,10],[2131,1],[1873,5],[187
 module.exports = {
     questItems:[3499,...Array.from({length:16},(_,i)=>3816+i)], onAbort:abort,
     id:420, name:'Little Wing', npcs:[7829,7610,7608,7711,7747,...dragons.map(d=>d.npc)], startNpcs:[7829],
+    // C4 keeps Maria's crafted stone at journal condition 2 until Cronos
+    // reviews it. Our persisted condition 3 is that extra internal step.
+    clientCondition: state => {
+        const condition = state.getInt('cond');
+        return condition >= 3 ? condition - 1 : condition;
+    },
     killNpcs:[231,...dragons.map(d=>d.mob),...fairyMobs],
     canTalk: state => state.isStarted() || state.session.actor.fetchLevel() >= 35,
     eventNpc: event => ({ start:7829, normal:7610, deluxe:7610, craft:7608, cronos:7610, byron:7711, fairy:7747, hatch:7747, dust:7747 })[event] ??

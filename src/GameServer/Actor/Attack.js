@@ -113,6 +113,7 @@ class Attack {
             return;
         }
         const rangedAttack = AttackRange.weaponKind(actor) === 'Weapon.Bow';
+        if (rangedAttack && !invoke('GameServer/Actor/BowResources').consume(session, actor)) return;
 
         // Soulshots are only reloaded after the player enables their hotbar toggle.
         const autoSoulshotId = actor.backpack?.fetchAutoShot?.(actor, 'soulshot');

@@ -18,7 +18,8 @@ function assess(party, members, timestamp, options = {}) {
     const attemptsSinceProgress = gained || progressAt > Number(previous.noProgressSince || 0) ? 0
         : Number(previous.attemptsSinceProgress || 0) + Math.max(0, fights - Number(previous.fights ?? fights));
     const profitable = (gained || progressAt > 0) && timestamp - noProgressSince < 2 * interval;
-    const paused = party.stats?.travel || Number(party.stats?.restUntil || 0) > timestamp;
+    const marketPaused = require('./PartyMarketBreak').pending(party, timestamp).length > 0;
+    const paused = marketPaused || party.stats?.travel || Number(party.stats?.restUntil || 0) > timestamp;
     const target = Number(party.stats?.objective?.npcId || party.stats?.acquisitionGoal?.next?.npcId || 0);
     const concerns = {}, decisions = [], experience = {};
     const eligible = new Set(Rewards.validMemberIndexes(members.map(m => Number(m.level || 1))));
@@ -43,7 +44,9 @@ function assess(party, members, timestamp, options = {}) {
         const clanObjective = member.stats?.clanPartyObjective;
         const sharedClan = clanObjective?.status === 'open' && !!clanObjective.clanGoalKey
             && clanObjective.clanGoalKey === party.stats?.objective?.clanGoalKey;
-        const helping = friendly && (empathy + commitment >= 1.2);
+        const clanHelp = Number(party.stats?.clanHelp?.until || 0) > timestamp
+            && party.stats.clanHelp.memberIds?.map(Number).includes(Number(member.characterId));
+        const helping = clanHelp || friendly && (empathy + commitment >= 1.2);
         const patience = (8 + commitment * 8 + (friendly ? social * 6 : 0) - caution * 2) * MINUTE;
         const stalled = attemptsSinceProgress >= 3 && timestamp - noProgressSince >= patience;
         // Group wins must not reset the patience of a member excluded from XP.
@@ -64,8 +67,8 @@ function assess(party, members, timestamp, options = {}) {
         }
         // Recovery alone proves nothing, but it must not hide repeated failed
         // fights already observed over the member's patience window.
-        if (noExperience) reason = 'party_no_experience';
-        else if (!reason && stalled) reason = 'party_no_progress';
+        if (!marketPaused && noExperience) reason = 'party_no_experience';
+        else if (!marketPaused && !reason && stalled) reason = 'party_no_progress';
         const prior = previous.concerns?.[member.characterId];
         const since = prior?.reason === reason ? Number(prior.since) : timestamp;
         // Suspend a goal/conflict grace period while recovering instead of

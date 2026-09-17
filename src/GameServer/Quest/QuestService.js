@@ -104,7 +104,12 @@ function mutate(session, work) {
 
 async function ensureLoaded(session) {
   if (session.questStatesLoaded) return;
-  const rows = await Database.fetchCharacterQuests(session.actor.fetchId());
+  const actor = session.actor;
+  const cache = states(session);
+  const rows = await Database.fetchCharacterQuests(actor.fetchId());
+  // A response for the previous character must not populate the new cache.
+  if (session.actor !== actor || states(session) !== cache) return;
+  cache.clear();
   rows.forEach((row) => {
     const quest = byId.get(Number(row.questId));
     if (quest)
@@ -440,7 +445,10 @@ function onAttack(session, npc, source, damage) {
 function active(session) {
   return [...states(session).values()]
     .filter((state) => state.isStarted())
-    .map((state) => ({ id: state.quest.id, condition: state.getInt("cond") }));
+    .map((state) => ({
+      id: state.quest.id,
+      condition: state.quest.clientCondition?.(state) ?? state.getInt("cond"),
+    }));
 }
 
 function questRates() {

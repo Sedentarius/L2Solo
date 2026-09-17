@@ -155,7 +155,7 @@ const DEFAULTS = {
     partyMaxSize: 5,
     // Shared safety ceiling for every background party. Admission never
     // depends on social/clan origin or opens extra slots for a backlog.
-    maxBackgroundParties: 60,
+    maxBackgroundParties: 72,
     partyRequestMaxAgeMs: 15 * 60 * 1000,
     partyPreferredMaxAgeMs: 5 * 60 * 1000,
     partyRequestCooldownMs: 5 * 60 * 1000,

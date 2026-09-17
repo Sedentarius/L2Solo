@@ -32,6 +32,7 @@ function isCriticalSnapshotReason(reason = '', state = null) {
 }
 
 function notifyColdSnapshot(state, reason = 'state_changed', options = {}) {
+    invoke('GameServer/Clan/ClanService').syncColdMember(state);
     changeListeners.forEach((listener) => {
         try {
             listener(state, reason);
@@ -240,6 +241,14 @@ function equipmentTargetFulfilled(stats = {}, inventory = {}) {
 }
 
 function reconcileFulfilledEquipmentPlan(state = {}) {
+    const progress = require('../AI/EquipmentAcquisitionProgress');
+    const plan = state.stats?.equipmentPlan;
+    if (plan?.clanGoal?.goalKey && progress.componentAcquired(state, plan)) {
+        state = { ...state, stats: { ...state.stats, clanEquipmentAcquisition: {
+            goalKey: plan.clanGoal.goalKey, itemId: Number(plan.target.selfId),
+            ...progress.componentRequirement(plan)
+        } } };
+    }
     if (!equipmentTargetFulfilled(state.stats, state.inventory)) return state;
     const stats = { ...(state.stats || {}) };
     delete stats.equipmentPlan;
@@ -286,7 +295,8 @@ function preserveClanOwnedEquipmentState(incoming = {}, reason = '', current = n
 function equipmentCompletionSignal(state = {}) {
     const clanGoal = state.stats?.equipmentPlan?.clanGoal;
     if (!clanGoal?.clanId || !clanGoal?.goalKey) return null;
-    if (!equipmentTargetFulfilled(state.stats, state.inventory)) return null;
+    if (!equipmentTargetFulfilled(state.stats, state.inventory)
+        && !require('../AI/EquipmentAcquisitionProgress').componentAcquired(state)) return null;
     return {
         clanId: Number(clanGoal.clanId),
         goalKey: String(clanGoal.goalKey)
@@ -1455,6 +1465,7 @@ const BotLifeState = {
     acceptLifecycleRow(row) {
         const snapshot = normalize(row);
         cache.set(snapshot.characterId, snapshot);
+        invoke('GameServer/Clan/ClanService').syncColdMember(snapshot);
         return snapshot;
     },
 
@@ -2235,7 +2246,7 @@ const BotLifeState = {
         const previousRisk = state.stats?.spotRisk;
         const previousDeaths = Number(state.stats?.deaths || 0);
         const nextDeaths = Number(result.patch?.deathCount ?? previousDeaths);
-        const spotRisk = SpotRiskPolicy.recordResolve(previousRisk, {
+        const spotRisk = state.party?.partyId || state.partyId ? previousRisk : SpotRiskPolicy.recordResolve(previousRisk, {
             spotId: nextSpotId || null,
             timestamp,
             totalDeaths: previousDeaths,
@@ -2639,12 +2650,12 @@ const BotLifeState = {
         const placeholders = ids.map(() => '?').join(', ');
         const ownerId = options.ownerId ? String(options.ownerId) : null;
         const ownerClause = ownerId ? 'AND simulationOwner = ?' : '';
-        const unassignedClause = options.unassigned ? `AND (partyId IS NULL OR partyId = '')
-            AND NOT EXISTS (
+        const unassignedClause = `${options.unassigned ? "AND (partyId IS NULL OR partyId = '')" : ''}
+            ${options.unassigned || options.excludeReserved ? `AND NOT EXISTS (
                 SELECT 1 FROM clan_operation_members reserved
                 WHERE reserved.characterId = bot_life_state.characterId
                 AND reserved.status = 'active'
-            )` : '';
+            )` : ''}`;
         const params = [...ids, ...(ownerId ? [ownerId] : [])];
 
         return Database.execute([
@@ -3486,6 +3497,7 @@ const BotLifeState = {
             }
         };
         cache.set(id, next);
+        invoke('GameServer/Clan/ClanService').syncColdMember(next);
         return next;
     },
 

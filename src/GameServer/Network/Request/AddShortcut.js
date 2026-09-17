@@ -38,6 +38,7 @@ function consume(session, data) {
                     level: data.kind === 2 ? session.actor.skillset.fetchSkill(data.id)?.fetchLevel() ?? 1 : undefined
                 })
             );
+            if (data.kind === 2) session.dataSendToMe(ServerResponse.skillCoolTime(session.actor));
         });
     });
 }

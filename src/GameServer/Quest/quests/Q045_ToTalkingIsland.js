@@ -29,6 +29,7 @@ module.exports = {
   name: "To Talking Island",
   npcs: [GALLADUCCI, GENTLER, SANDRA, DUSTIN],
   startNpcs: [GALLADUCCI],
+  canTalk: (s) => s.isStarted() || s.isCompleted() || Number(s.session.actor.fetchRace()) === 0,
   eventNpc: (e) =>
     ({
       start: GALLADUCCI,
@@ -42,16 +43,16 @@ module.exports = {
   async onEvent(s, e) {
     const q = Q(),
       a = s.session.actor;
-    if (e === "start" && !s.isStarted()) {
+    if (e === "start" && !s.isStarted() && !s.isCompleted()) {
       if (
         Number(a.fetchRace()) !== 0 ||
         Number(a.fetchLevel()) < 3 ||
         !has(s, MARK)
       )
         return null;
+      await q.giveItem(s.session, ORDER1, 1);
       await s.setState("started");
       await s.set("cond", 1);
-      await q.giveItem(s.session, ORDER1, 1);
       s.playSound(A);
       return p("Galladucci", "Take the order to Gentler.");
     }
@@ -100,6 +101,9 @@ module.exports = {
             "Galladucci",
             "This journey is for Humans with the Mark of Traveler.",
           );
+    // Recover starts saved before the missing order template was added.
+    if (id === GALLADUCCI && c === 1 && has(s, MARK) && !has(s, ORDER1) && !has(s, HILT))
+      await Q().giveItem(s.session, ORDER1, 1);
     const event =
       id === GENTLER
         ? "hilt"

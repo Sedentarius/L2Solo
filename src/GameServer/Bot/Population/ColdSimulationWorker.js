@@ -166,7 +166,7 @@ function startKernel(config = {}) {
             const npcPlanningOptions = planningNpcCatalog.plannerOptions;
             const replanContext = GearAcquisitionPlanner.replanContextFor(state, previousPlan, timestamp);
             const clanGoalLocked = GearAcquisitionPlanner.clanGoalPlanLocked(state, previousPlan);
-            const availabilitySource = previousPlan?.status === 'active'
+            const availabilitySource = !replanContext.failure && previousPlan?.status === 'active'
                 && ['direct_drop', 'craft'].includes(previousPlan.strategy)
                 ? GearAcquisitionPlanner.bestSourceForPlan(state, previousPlan, spots, { occupancy })
                 : null;
@@ -226,7 +226,7 @@ function startKernel(config = {}) {
             const acquisitionPlan = {
                 ...finalizedPlan,
                 marketFallback: finalizedPlan.status === 'active' && finalizedPlan.strategy === 'craft'
-                    && Number(finalizedPlan.startedAt || timestamp) + 20 * 60 * 1000 <= timestamp
+                    && Number(finalizedPlan.acquisitionProgress?.at || finalizedPlan.startedAt || timestamp) + 20 * 60 * 1000 <= timestamp
             };
             const reservedSpot = acquisitionPlan?.next?.spotId
                 ? spots.find((spot) => String(spot.id) === String(acquisitionPlan.next.spotId))

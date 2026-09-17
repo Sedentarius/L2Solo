@@ -900,24 +900,31 @@ function resolve(state, timestamp = Date.now()) {
             MarketOpportunity.indexColdStore(state);
             return Promise.resolve({ state, closed: false });
         }
+        const recovered = hasDemand
+            ? invoke('GameServer/Bot/AI/GearAcquisitionPlanner').abandonAcquisition(
+                state, store.items.find((item) => Number(item.count) > 0)?.selfId, timestamp)
+            : state;
         const cleared = {
-            ...state,
+            ...recovered,
             activity: 'shopping',
             stats: {
-                ...(state.stats || {}),
+                ...(recovered.stats || {}),
                 marketStore: null,
                 marketRetryAfter: hasDemand ? timestamp + SELL_RETRY_DELAY_MS : null,
-                marketWanted: hasDemand ? state.stats?.marketWanted || null : null
+                marketWanted: null
             },
             timing: { ...(state.timing || {}), nextResolveAt: timestamp }
         };
-        const returning = GoalExecutor.finishMarketVisit(cleared, timestamp) || cleared;
+        const returning = GoalExecutor.finishMarketVisit(cleared, timestamp) || { ...cleared, activity: 'hunting' };
         MarketOpportunity.removeColdStore(state.characterId);
-        return LifeState.upsertState(returning, hasDemand ? 'cold_market_buy_expired' : 'cold_market_buy_filled').then((saved) => ({
-            state: saved || returning,
-            closed: true,
-            reason: hasDemand ? 'buy_expired' : 'buy_filled'
-        }));
+        return LifeState.upsertState(returning, hasDemand ? 'cold_market_buy_expired' : 'cold_market_buy_filled').then(async (saved) => {
+            if (saved && hasDemand && recovered !== state) await invoke('GameServer/Bot/Goals/GoalState').clear(state.characterId, 'abandoned');
+            return {
+                state: saved || returning,
+                closed: true,
+                reason: hasDemand ? 'buy_expired' : 'buy_filled'
+            };
+        });
     }
     const hasStock = (store.items || []).some((item) => Number(item.count) > 0);
     const isActive = hasStock && Number(store.expiresAt || 0) > timestamp;

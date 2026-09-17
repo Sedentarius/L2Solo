@@ -99,11 +99,16 @@ function execute(session, actor, target, skill, context = {}) {
     }
 
     if (semantic.skillType === C4SkillRules.HEAL_PERCENT) {
+        // Battle Roar and Spirit of Ogre raise maximum HP before their percentage heal.
+        const effectBeforeHeal = [109, 121].includes(Number(skill.fetchSelfId?.()));
+        if (effectBeforeHeal && semantic.effect) {
+            result.effect = applyEffect(session, target, skill, semantic, actor);
+        }
         result.heal = applyHealPercent(session, actor, target, skill, semantic, magicSkill, context.attack);
         if (semantic.manaHealPercent) {
             result.mpRestore = applyManaHealPercent(session, actor, target, skill, semantic, magicSkill, context.attack);
         }
-        if (semantic.effect) {
+        if (semantic.effect && !effectBeforeHeal) {
             result.effect = applyEffect(session, target, skill, semantic, actor);
         }
         return finish();
@@ -289,7 +294,12 @@ function execute(session, actor, target, skill, context = {}) {
             }
             if (semantic.effect) result.effect = applyEffect(session, target, skill, semantic, actor);
             if (semantic.turnBack && typeof target?.fetchHead === 'function' && typeof target?.setHead === 'function') {
-                target.setHead(Number(actor?.fetchHead?.()) & 0xffff);
+                const oldHeading = Number(target.fetchHead()) & 0xffff;
+                const heading = Number(actor?.fetchHead?.()) & 0xffff;
+                target.setHead(heading);
+                // C4 Bluff rotates the visible target as well as its server heading.
+                session.dataSendToMeAndOthers?.(ServerResponse.beginRotation(target.fetchId(), oldHeading), target);
+                session.dataSendToMeAndOthers?.(ServerResponse.stopRotation(target.fetchId(), heading), target);
             }
         }
         clearLoadedShot(context.attack || actor.attack, actor, magicSkill);
@@ -382,6 +392,14 @@ function execute(session, actor, target, skill, context = {}) {
 }
 
 function finalizeSkillResult(result, session, actor, target, skill, semantic) {
+    // Poison Blade Dance is hostile on application, even when resisted.
+    // Waiting for its first DOT tick leaves a resisted cast without retaliation.
+    if (Number(skill.fetchSelfId?.()) === 84 && actor && target !== actor
+        && target?.fetchAttackable?.() === true && target.isDead?.() !== true
+        && target.state?.fetchDead?.() !== true) {
+        if (typeof target.addDamageHate === 'function') target.addDamageHate(session, actor, 0, 1);
+        else target.enterCombatState?.(session, actor);
+    }
     result.aggroPointsApplied = applyAggroPoints(session, actor, target, skill, semantic);
     return result;
 }
@@ -873,6 +891,7 @@ function applyEffect(session, target, skill, semantic, source = session?.actor) 
         stackOrder: semantic.stackOrder,
         dispellable: semantic.dispellable,
         stats: semantic.stats || {},
+        conditionalStats: semantic.conditionalStats || [],
         situationalStats: semantic.situationalStats || [],
         dot: dotFromSkill(skill, semantic),
         manaDot: manaDotFromSkill(skill, semantic),
@@ -1368,7 +1387,7 @@ function refreshStats(session, target) {
 }
 
 function hasStats(effect) {
-    return Object.keys(effect?.stats || {}).length > 0;
+    return Object.keys(effect?.stats || {}).length > 0 || effect?.conditionalStats?.length > 0;
 }
 
 function applyBalanceLife(session, actor) {

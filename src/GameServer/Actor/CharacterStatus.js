@@ -75,7 +75,8 @@ function persistenceRecord(actor) {
         hp: Number(actor.fetchHp()),
         mp: Number(actor.fetchMp()),
         cp: Number(actor.fetchCp?.()) || 0,
-        effects: serializeEffects(actor)
+        effects: serializeEffects(actor),
+        skillCooldowns: JSON.stringify(invoke('GameServer/Skills/SkillReuse').entries(actor))
     };
 }
 

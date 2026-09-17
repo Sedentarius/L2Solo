@@ -1,3 +1,4 @@
+const PartyMarketBreak = require('./PartyMarketBreak');
 const BackgroundCandidateQueue = require('./BackgroundCandidateQueue');
 const { PartyAdmission, priority: admissionPriority } = require('./PartyAdmission');
 const partyAdmission = new PartyAdmission();
@@ -116,11 +117,11 @@ function beginHuntingTravel(state, spot, timestamp = Date.now(), options = {}) {
     const physical = SpotService.findCurrentSpot(from);
     const currentId = physical?.id || options.currentSpotId || state.spotId || null;
     if (currentId === spot.id && !options.regroup) return null;
-    const destination = SpotService.arrivalPointForState(state, spot);
+    const destination = options.destination || SpotService.arrivalPointForState(state, spot);
     if (!destination) return null;
     const spotBackoff = options.spotBackoff
-        || SpotRiskPolicy.backoffForStates([state], currentId, timestamp);
-    const routedState = spotBackoff
+        || (!options.regroup && SpotRiskPolicy.backoffForStates([state], currentId, timestamp));
+    const routedState = spotBackoff && !options.regroup
         ? SpotRiskPolicy.withBackoff(state, spotBackoff, timestamp)
         : state;
 
@@ -134,6 +135,7 @@ function beginHuntingTravel(state, spot, timestamp = Date.now(), options = {}) {
         },
         stats: {
             ...(routedState.stats || {}),
+            pveEncounter: null,
             travel: {
                 from,
                 to: destination,
@@ -327,6 +329,7 @@ function partyObjectivesShareRoute(left, right) {
 }
 
 function partySessionExpired(party, timestamp = Date.now()) {
+    if (PartyMarketBreak.pending(party, timestamp).length) return false;
     return BackgroundPartyLifecycle.sessionExpired(party, timestamp, Config);
 }
 
@@ -429,6 +432,8 @@ function canResumeWarehouseMarketSale(state) {
 }
 
 function canTakePartyMarketBreak(party, members, member, timestamp = Date.now()) {
+    if (!PartyMarketBreak.allowed(party, member, timestamp)) return false;
+    if (PartyMarketBreak.clanDuty(party)) return members.length > 1;
     if (timestamp - Number(party.stats?.formedAt || party.startedAt || timestamp) < Config.partyMarketBreakMinSessionMs) return false;
     if (Number(party.stats?.fightsResolved || 0) < Config.partyMarketBreakMinFights) return false;
     if (timestamp - Number(party.stats?.lastMarketBreakAt || 0) < Config.partyMarketBreakCooldownMs) return false;
@@ -504,15 +509,18 @@ async function reconcileWorkerPartyGoals(party, timestamp = Date.now()) {
         // handoff fences that live token instead of an older cached snapshot.
         const currentMember = LifeState.cachedState(member.characterId) || member;
         if (String(currentMember.party?.partyId || currentMember.partyId || '') !== String(party.partyId)) continue;
-        const travel = GoalExecutor.beginMarketTravel(currentMember, goalSnapshot?.current, timestamp);
+        if (!canTakePartyMarketBreak(party, members, currentMember, timestamp)) continue;
+        const travel = GoalExecutor.beginMarketTravel(currentMember,
+            PartyMarketBreak.goal(party, currentMember, goalSnapshot?.current, timestamp), timestamp);
         if (!travel) continue;
-        const detached = await LifeState.leaveParty(travel, 'market_break', { ownerHandoff: true });
+        const detached = await LifeState.leaveParty(PartyMarketBreak.departure(party, currentMember, travel, timestamp),
+            'market_break', { ownerHandoff: true });
         if (detached) departed = detached;
     }
 
     if (!departed) return { party, reviewed, departed: null };
     const activeMembers = members.filter((member) => Number(member.characterId) !== Number(departed.characterId));
-    if (activeMembers.length < Config.partyMinSize) {
+    if (activeMembers.length < Config.partyMinSize && !departed.stats?.partyMarketReturn) {
         const dissolved = await dissolveBackgroundParty(party, 'market_break', activeMembers.length);
         return { party: dissolved.party || party, reviewed, departed, dissolved: true };
     }
@@ -527,11 +535,37 @@ async function reconcileWorkerPartyGoals(party, timestamp = Date.now()) {
         roleCoverage: PartyComposition.roleCoverage(activeMembers),
         stats: {
             ...(party.stats || {}),
-            lastMarketBreakAt: timestamp
+            lastMarketBreakAt: timestamp,
+            ...PartyMarketBreak.stats(party, departed)
         },
         updatedAt: timestamp
     });
     return { party: updatedParty || party, reviewed, departed, dissolved: false };
+}
+
+async function resumePartyMarketBreak(state, timestamp) {
+    const token = state.stats.partyMarketReturn;
+    const party = BackgroundPartyState.find(token.partyId);
+    const prepared = { ...state, activity: 'party_wait', stats: { ...state.stats,
+        partyMarketReturn: null, clanPartyObjective: token.objective, partyRequest: token.objective } };
+    if (party?.status === 'active' && party.stats?.objective?.clanGoalKey === token.objective.clanGoalKey
+        && party.memberIds.length < partyLimitsForObjective(party.stats.objective).maxSize) {
+        const members = await LifeState.statesForParty(party.partyId);
+        if (members.length !== party.memberIds.length) return { ok: false, state, reason: 'party_return_retry' };
+        const absences = { ...party.stats?.marketAbsences };
+        delete absences[state.characterId];
+        const roster = [...members, prepared];
+        const result = await commitPartyMembership({ ...party,
+            memberIds: roster.map(member => member.characterId),
+            roleCoverage: PartyComposition.roleCoverage(roster),
+            nextResolveAt: timestamp, stats: { ...party.stats, marketAbsences: absences,
+                memberNames: roster.map(member => member.name) } }, roster);
+        return { ok: !!result.party, state: LifeState.cachedState(state.characterId) || state,
+            reason: result.party ? 'returned_to_clan_party' : 'party_return_retry' };
+    }
+    // A dissolved or full party must not turn the clan assignment into solo combat.
+    const saved = await LifeState.upsertState(prepared, 'clan_party_return_wait');
+    return { ok: !!saved, state: saved || state, reason: 'clan_party_return_wait' };
 }
 
 function inventoryCleanupGoal(state, timestamp = Date.now()) {
@@ -714,8 +748,40 @@ function commitPartyMembership(party, members = [], event = null) {
     });
 }
 
+async function releaseForClanHelp(state) {
+    state = LifeState.cachedState(state.characterId) || state;
+    const partyId = state.party?.partyId;
+    if (!partyId) return state;
+    const previous = BackgroundPartyState.find(partyId);
+    if (!previous || previous.status !== 'active' || previous.stats?.objective?.clanGoalKey) return null;
+    const released = await LifeState.leaveParty(state, 'clan_rescue', { ownerHandoff: true });
+    if (!released) return null;
+    const remaining = await LifeState.statesForParty(partyId);
+    if (remaining.length < Config.partyMinSize) {
+        await dissolveBackgroundParty(previous, 'clan_rescue', remaining.length);
+    } else {
+        const leaderId = leaderIdForMembers(previous, remaining);
+        await commitPartyMembership({ ...previous, leaderId,
+            memberIds: remaining.map(member => member.characterId),
+            roleCoverage: PartyComposition.roleCoverage(remaining),
+            stats: { ...previous.stats, memberNames: remaining.map(member => member.name) }
+        }, remaining);
+    }
+    return LifeState.cachedState(state.characterId) || released;
+}
+
 async function createAndCommitBackgroundParty(members = [], objectiveOverride = null) {
-    const release = partyAdmission.reserve(BackgroundPartyState.admitted(), Config);
+    const Capacity = require('./ClanPartyCapacity');
+    const objective = objectiveOverride || members.map(partyObjectiveForState).find(Capacity.required);
+    let release = partyAdmission.reserve(BackgroundPartyState.admitted(), Config);
+    if (!release && Capacity.required(objective)) {
+        const limits = partyLimitsForObjective(objective);
+        if (PartyComposition.selectMembers(members, limits).length < limits.minSize) return null;
+        const reclaimed = await Capacity.reclaim(objective, {
+            parties: BackgroundPartyState, life: LifeState, database: Database, metrics: Metrics
+        });
+        if (reclaimed) release = partyAdmission.reserve(BackgroundPartyState.admitted(), Config);
+    }
     if (!release) return null;
     try { return await createBackgroundParty(members, objectiveOverride); }
     finally { release(); }
@@ -752,7 +818,9 @@ function createBackgroundParty(members = [], objectiveOverride = null) {
             ])),
             route: partySpot?.route || null,
             objective: objective || null,
-            acquisitionGoal: objectiveMember.stats?.equipmentPlan?.status === 'active'
+            clanHelp: objective?.reason === 'clan_help' || objective?.rescue
+                ? { until: timestamp + 10 * 60000, memberIds: members.map(member => member.characterId) } : null,
+            acquisitionGoal: objective?.reason !== 'clan_help' && objectiveMember.stats?.equipmentPlan?.status === 'active'
                 ? objectiveMember.stats.equipmentPlan
                 : null
         }
@@ -1011,7 +1079,9 @@ const PopulationService = {
             }
 
             this.protectedPartyFormationTimer = setInterval(() => {
-                this.formProtectedRequiredParty();
+                this.helpClanParty().then(() => this.formProtectedRequiredParty()).catch(error => {
+                    utils.infoWarn('BotPopulation', 'clan party help failed: %s', error.message);
+                });
             }, Math.max(1000, Number(Config.protectedPartyFormationPollMs) || 5000));
 
             if (typeof this.protectedPartyFormationTimer.unref === 'function') {
@@ -1883,6 +1953,22 @@ const PopulationService = {
         return Math.min(Math.max(base, delay), Math.max(base, Number(Config.protectedPartyFormationMaxBackoffMs) || 120000));
     },
 
+    async helpClanParty(timestamp = Date.now()) {
+        const Help = require('./ClanPartyHelp');
+        if (!Help.hasPending() || Config.enabled === false || Config.backgroundPartyEnabled === false
+            || this.partyFormationRunning || this.resolving || this.partyRequestCleanupRunning) return null;
+        const database = Database.stats();
+        const cold = ColdSimulationCoordinator.snapshot();
+        if (Number(Metrics.currentEventLoopLag()) >= Number(Config.protectedPartyFormationLagAbortMs || 40)
+            || Number(database.pending || 0) > 0 || database.checkpoint?.inFlight
+            || !cold.ready || !cold.snapshotsLoaded || Number(cold.queue?.depth || 0) > 0
+            || cold.queue?.flushing) return null;
+        this.partyFormationRunning = true;
+        try {
+            return await Help.processOne({ commit: commitPartyMembership, create: createAndCommitBackgroundParty, release: releaseForClanHelp }, timestamp);
+        } finally { this.partyFormationRunning = false; }
+    },
+
     formProtectedRequiredParty(timestamp = Date.now()) {
         if (Config.enabled === false || Config.backgroundPartyEnabled === false
             || this.partyFormationRunning || this.resolving
@@ -1915,8 +2001,13 @@ const PopulationService = {
         const mainBudgetMs = Math.max(1, Number(Config.protectedPartyFormationMainBudgetMs) || 25);
         let failed = false;
         let retrySoon = false;
+        const priorityClanIds = [...new Set((invoke('GameServer/World/World').user?.sessions || [])
+            .filter(session => session.accountId && !String(session.accountId).startsWith('bot_')
+                && session.socket && session.actor?.fetchIsOnline?.() !== false)
+            .map(session => Number(session.actor?.fetchClanId?.() || 0)).filter(id => id > 0))];
         return ColdSimulationCoordinator.requestRequiredPartyFormation({
             timestamp,
+            priorityClanIds,
             candidateLimit: Config.protectedPartyFormationCandidateLimit,
             minSize: Config.partyMinSize,
             maxSize: Config.partyMaxSize,
@@ -1928,9 +2019,6 @@ const PopulationService = {
             }
             const projections = proposal.candidates || [];
             if (!projections.length) return [];
-            const activeParties = occupiedPartySlots();
-            if (activeParties >= partyCapacityLimit()) return [];
-
             return hydratePartyCandidates(projections).then((states) => {
                 const required = states.filter((state) => {
                     const objective = partyObjectiveForState(state);
@@ -2095,12 +2183,13 @@ const PopulationService = {
             .then(({ states, partyRequestBacklog, requiredPartyRequestCount }) => {
                 const activeParties = occupiedPartySlots();
                 const slots = Math.max(0, partyCapacityLimit() - activeParties);
-                if (slots <= 0) return [];
+                const clanDemand = states.some(state => require('./ClanPartyCapacity').required(partyObjectiveForState(state)));
+                if (slots <= 0 && !clanDemand) return [];
                 // A live player keeps a small formation reserve, but that
                 // reserve must not turn into a burst of simultaneous party
                 // writes while the foreground session is active.
                 const maxNewParties = Math.min(
-                    slots,
+                    slots || (clanDemand ? 1 : 0),
                     Config.partyFormationBatchSize,
                     activity.protected ? 1 : Config.partyFormationBatchSize
                 );
@@ -2109,7 +2198,9 @@ const PopulationService = {
                     if (spotId) counts.set(spotId, Number(counts.get(spotId) || 0) + 1);
                     return counts;
                 }, new Map());
-                const groups = this.groupPartyCandidatesByObjective(states, { prioritizePartyWait: partyRequestBacklog, activePartiesBySpot });
+                const groups = this.groupPartyCandidatesByObjective(states, { prioritizePartyWait: partyRequestBacklog, activePartiesBySpot })
+                    .sort((a, b) => Number(b.some(state => require('./ClanPartyCapacity').required(partyObjectiveForState(state))))
+                        - Number(a.some(state => require('./ClanPartyCapacity').required(partyObjectiveForState(state)))));
                 const created = [];
 
                 return groups.reduce((chain, group) => chain.then(() => {
@@ -2385,7 +2476,7 @@ const PopulationService = {
         const parties = BackgroundPartyState.active()
             .filter((party) => {
                 const limits = partyLimitsForObjective(party?.stats?.objective || null);
-                return (party.memberIds || []).length < limits.maxSize;
+                return !PartyMarketBreak.pending(party).length && (party.memberIds || []).length < limits.maxSize;
             })
             .sort((a, b) => (a.memberIds || []).length - (b.memberIds || []).length);
 
@@ -2936,7 +3027,7 @@ const PopulationService = {
     resolveBackgroundParty(party) {
         const startedAt = Date.now();
         return LifeState.statesForParty(party.partyId).then((members) => {
-            if (members.length < Config.partyMinSize) {
+            if (members.length < Config.partyMinSize && !(members.length && PartyMarketBreak.pending(party).length)) {
                 const recordedIds = new Set((party.memberIds || []).map(Number));
                 const reason = recordedIds.size !== members.length ? 'state_mismatch' : 'too_few_members';
                 return dissolveBackgroundParty(party, reason, members.length);
@@ -2981,7 +3072,7 @@ const PopulationService = {
 
             const leader = members.find((state) => state.characterId === party.leaderId) || members[0];
             const objectiveSpotId = party.stats?.objective?.spotId || null;
-            const excludedSpotIds = SpotRiskPolicy.excludedSpotIdsForStates(members, startedAt);
+            const excludedSpotIds = require('./PartySpotRiskPolicy').excludedSpotIds(party, startedAt);
             const objectiveSpot = objectiveSpotId && !excludedSpotIds.has(String(objectiveSpotId))
                 ? SpotProfiles.findById(objectiveSpotId)
                 : null;
@@ -3005,10 +3096,7 @@ const PopulationService = {
                     ...(leader.stats || {}),
                     routeMode: 'party'
                 }
-            }, partyRouteOptions) || SpotProfiles.findForState(leader, {
-                excludedSpotIds,
-                timestamp: startedAt
-            });
+            }, partyRouteOptions) || SpotProfiles.findForState(leader, partyRouteOptions);
             if (!spot) {
                 Metrics.recordSkippedResolve('party_missing_spot');
                 return { ok: false, reason: 'missing_spot', party };
@@ -3026,12 +3114,13 @@ const PopulationService = {
                 && members.every(member => reservedKeys.has(String(member.characterId))))
                 || SpotProfiles.reserveCapacity(occupancy, spot, members));
             const needsTravel = (physicalSpotId && physicalSpotId !== spot.id && !assembling) || assemblyAdmitted;
-            const spotBackoff = needsTravel ? SpotRiskPolicy.backoffForStates(members, physicalSpotId, startedAt) : null;
-            const travellingMembers = needsTravel ? members.map((member) => beginPartySpotTravel(
+            const spotBackoff = needsTravel ? require('./PartySpotRiskPolicy').backoff(party, physicalSpotId, startedAt) : null;
+            const destinations = needsTravel ? SpotService.arrivalPointsForParty(members, spot) : null;
+            const travellingMembers = needsTravel && destinations ? members.map((member) => beginPartySpotTravel(
                     member,
                     spot,
                     startedAt,
-                    { currentSpotId: physicalSpotId, spotBackoff }
+                    { currentSpotId: physicalSpotId, spotBackoff, destination: destinations[String(member.characterId)] }
                 )) : null;
             if (travellingMembers?.every(Boolean)) {
                 const arrivalAt = startedAt + HUNTING_TRAVEL_MS;
@@ -3042,7 +3131,8 @@ const PopulationService = {
                     spotId: spot.id,
                     nextResolveAt: arrivalAt,
                     stats: {
-                        ...(party.stats || {}),
+                        ...(require('./PartySpotRiskPolicy').withBackoff(party, spotBackoff, startedAt).stats || {}),
+                        pveEncounter: null,
                         travel: {
                             reason: 'party_spot_replan',
                             ...(spotBackoff ? { cause: 'death_pressure' } : {}),
@@ -3082,21 +3172,25 @@ const PopulationService = {
                 ), Promise.resolve()).then(() => resolvedMembers.filter((member) => member.activity !== 'dead'));
             }).then((resolvedMembers) => {
                 let breakTaken = false;
+                let marketDeparture = null;
                 return resolvedMembers.reduce((chain, member) => (
                 chain.then((activeMembers) => GoalService.review(member, { spot }).then((goalSnapshot) => {
                     if (breakTaken || !canTakePartyMarketBreak(party, resolvedMembers, member)) {
                         return [...activeMembers, member];
                     }
-                    const travel = GoalExecutor.beginMarketTravel(member, goalSnapshot?.current);
+                    const travel = GoalExecutor.beginMarketTravel(member,
+                        PartyMarketBreak.goal(party, member, goalSnapshot?.current, Date.now()));
                     if (!travel) return [...activeMembers, member];
-                    return LifeState.leaveParty(travel, 'market_break').then((departed) => {
+                    return LifeState.leaveParty(PartyMarketBreak.departure(party, member, travel, Date.now()), 'market_break').then((departed) => {
+                        if (departed) marketDeparture = departed;
                         if (departed) breakTaken = true;
                         return departed ? activeMembers : [...activeMembers, member];
                     });
                 }))
-                ), Promise.resolve([]));
-            }).then((activeMembers) => {
-                if (activeMembers.length < Config.partyMinSize) {
+                ), Promise.resolve([])).then(activeMembers => ({ activeMembers, marketDeparture }));
+            }).then(({ activeMembers, marketDeparture }) => {
+                if (activeMembers.length < Config.partyMinSize && !marketDeparture?.stats?.partyMarketReturn
+                    && !(activeMembers.length && PartyMarketBreak.pending(party).length)) {
                     const reason = deadMemberIds.size > 0 ? 'death' : 'market_break';
                     return dissolveBackgroundParty(party, reason, activeMembers.length);
                 }
@@ -3112,6 +3206,7 @@ const PopulationService = {
                 stats: {
                     ...(party.stats || {}),
                     ...(result.partyPatch.stats || {}),
+                    ...PartyMarketBreak.stats(party, marketDeparture),
                     lastMarketBreakAt: activeMembers.length < members.length ? Date.now() : party.stats?.lastMarketBreakAt || null,
                     route: spot.route || party.stats?.route || null
                 }
@@ -3147,6 +3242,7 @@ const PopulationService = {
 
     resolveColdState(state, workerRequest = null) {
         const startedAt = Date.now();
+        if (PartyMarketBreak.ready(state)) return resumePartyMarketBreak(state, startedAt);
         const karmaPolicy = invoke('GameServer/Bot/Population/ColdKarmaPolicy');
         const karmaPlan = karmaPolicy.active(state) ? karmaPolicy.plan(state, SpotProfiles.ensure(), startedAt) : null;
         if (karmaPlan && !joinedBackgroundParty(state)) {
@@ -3295,7 +3391,7 @@ const PopulationService = {
             const previousFarmPlan = previousPlan?.status === 'active'
                 && ['direct_drop', 'craft'].includes(previousPlan.strategy)
                 && previousPlan.next?.spotId;
-            const previousAvailabilitySource = previousFarmPlan
+            const previousAvailabilitySource = previousFarmPlan && !replanContext.failure
                 ? GearAcquisitionPlanner.bestSourceForPlan(state, previousPlan, spots, { occupancy })
                 : null;
             const reusablePartyRequest = !state.party?.partyId
@@ -3324,7 +3420,7 @@ const PopulationService = {
             acquisitionPlan = {
                 ...finalizedPlan,
                 marketFallback: finalizedPlan.status === 'active' && finalizedPlan.strategy === 'craft'
-                    && Number(finalizedPlan.startedAt || startedAt) + 20 * 60 * 1000 <= Date.now()
+                    && Number(finalizedPlan.acquisitionProgress?.at || finalizedPlan.startedAt || startedAt) + 20 * 60 * 1000 <= Date.now()
             };
         }
         const partyRequest = partyRequestForPlan(state, acquisitionPlan, startedAt);

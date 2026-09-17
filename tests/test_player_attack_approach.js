@@ -7,6 +7,8 @@ const Timer = invoke('GameServer/Timer');
 const Attack = invoke('GameServer/Actor/Attack');
 const Request = invoke('GameServer/Actor/Generics/AttackRequest');
 const Range = invoke('GameServer/Actor/AttackRange');
+const Backpack = invoke('GameServer/Actor/Backpack');
+const Item = invoke('GameServer/Item/Item');
 const Formulas = invoke('GameServer/Formulas');
 
 (async () => {
@@ -23,6 +25,7 @@ const Formulas = invoke('GameServer/Formulas');
                 const packets = [], hits = [], damage = [];
                 const liveArcher = npc && kind === 'Weapon.DualFist';
                 const actor = { x: liveArcher ? -96531 : 0, y: liveArcher ? 106263 : 0, z: liveArcher ? -3368 : 0,
+                    mp: 20, fetchMp() { return this.mp; }, setMp(mp) { this.mp = mp; }, statusUpdateVitals() {},
                     effects: {}, state: new State(), automation: new Automation(), attack: new Attack(),
                     fetchId: () => 2000001, fetchLocX() { return this.x; }, fetchLocY() { return this.y; }, fetchLocZ() { return this.z; },
                     setLocXYZ(coords) { this.x = coords.locX; this.y = coords.locY; this.z = coords.locZ; },
@@ -30,12 +33,19 @@ const Formulas = invoke('GameServer/Formulas');
                     fetchCollectiveRunSpd: () => 148, fetchCollectiveAtkSpd: () => 333,
                     isDead: () => false, isBlocked() { return this.state.isBlocked(); },
                     backpack: { fetchTotalWeaponKind: () => kind } };
+                if (kind === 'Weapon.Bow') {
+                    actor.backpack = new Backpack({ items: [], paperdoll: {} });
+                    actor.backpack.items = [
+                        new Item(1, { selfId: 14, kind, rank: 'none', mp: 2, equipped: true, slot: 14 }),
+                        new Item(2, { selfId: 17, kind: 'Other.Arrow', amount: 20, stackable: true })
+                    ];
+                }
                 const target = { x: liveArcher ? -96020.55687530595 : 1000, state: new State(), effects: {},
                     fetchId: () => npc ? 1000001 : 2000002, fetchLocX() { return this.x; },
                     fetchLocY: () => liveArcher ? 105651.7626375404 : 0, fetchLocZ: () => liveArcher ? -3371 : 0,
                     fetchRadius: () => liveArcher ? 14 : 10, fetchAttackable: () => npc, fetchPvpFlag: () => 1, isDead: () => false };
                 if (npc) target.fetchKind = () => 'Monster';
-                const session = { actor, dataSendToMeAndOthers: packet => packets.push(packet) };
+                const session = { actor, persistenceMode: 'ephemeral', dataSendToMe() {}, dataSendToMeAndOthers: packet => packets.push(packet) };
                 actor.session = session;
                 actor.attack.resolveMeleeTargets = () => [target];
                 actor.attack.prepareMeleeHit = () => ({ damage: 10, flags: 0 });

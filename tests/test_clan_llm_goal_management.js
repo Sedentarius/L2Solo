@@ -11,6 +11,53 @@ const OpenRouterGateway = invoke('GameServer/Bot/AI/OpenRouterGateway');
 const BotInferenceBudget = invoke('GameServer/Bot/AI/BotInferenceBudget');
 const Database = invoke('Database');
 
+function checkDefaultEnablement() {
+    const Config = invoke('GameServer/Clan/ClanSimulationConfig');
+    const fs = require('fs');
+    const path = require('path');
+    const { execFileSync } = require('child_process');
+    const defaults = require('js-ini').parse(fs.readFileSync(path.join(__dirname, '../config/default.ini'), 'utf8'));
+    assert.strictEqual(defaults.ClanSimulation.llmGoalManagementEnabled, true);
+    // Exercise code defaults and explicit overrides independently of local.ini.
+    for (const [overrides, envOverride, expected] of [
+        [{}, undefined, true],
+        [{ llmGoalManagementEnabled: false }, undefined, false],
+        [{}, 'false', false],
+        [{ llmGoalManagementEnabled: false }, 'true', true]
+    ]) {
+        const env = { ...process.env };
+        delete env.CLAN_SIMULATION_LLM_GOALS_ENABLED;
+        if (envOverride !== undefined) env.CLAN_SIMULATION_LLM_GOALS_ENABLED = envOverride;
+        const source = `global.options = { default: { ClanSimulation: ${JSON.stringify(overrides)} } };
+            process.stdout.write(JSON.stringify(require(${JSON.stringify(require.resolve('../src/GameServer/Clan/ClanSimulationConfig'))}).llmGoalManagementEnabled));`;
+        assert.strictEqual(JSON.parse(execFileSync(process.execPath, ['-e', source], { env, encoding: 'utf8' })), expected);
+    }
+    const originalConfig = OpenRouterGateway.config;
+    const originalEnabled = Config.llmGoalManagementEnabled;
+    try {
+        Config.llmGoalManagementEnabled = true;
+        const base = { enabled: true, apiUrl: 'http://127.0.0.1:30000/v1/chat/completions', model: 'local-test', provider: 'custom' };
+        for (const [cfg, expected] of [
+            [base, true],
+            [{ ...base, enabled: false }, false],
+            [{ ...base, apiUrl: '' }, false],
+            [{ ...base, model: '' }, false],
+            [{ ...base, provider: 'openrouter', apiKey: '' }, false],
+            [{ ...base, provider: 'openrouter', apiKey: 'test-only' }, true]
+        ]) {
+            OpenRouterGateway.config = () => cfg;
+            assert.strictEqual(!!ClanBrain.configured(), expected,
+                'default LLM enablement must still require usable inference settings');
+        }
+        Config.llmGoalManagementEnabled = false;
+        OpenRouterGateway.config = () => base;
+        assert.strictEqual(ClanBrain.configured(), null, 'explicit opt-out must override configured inference');
+    } finally {
+        OpenRouterGateway.config = originalConfig;
+        Config.llmGoalManagementEnabled = originalEnabled;
+    }
+}
+
 function response(body, status = 200) {
     return {
         ok: status >= 200 && status < 300,
@@ -54,6 +101,7 @@ function candidate(id, memberId, itemId, route = 'farm') {
 }
 
 async function main() {
+    checkDefaultEnablement();
     const originalPlanningForClan = EquipmentService.planningForClan;
     const originalResolveEquipment = EquipmentService.resolveClan;
     const originalSnapshotFor = CandidateService.snapshotFor;

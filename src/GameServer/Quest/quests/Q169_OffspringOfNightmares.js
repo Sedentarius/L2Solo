@@ -18,6 +18,7 @@ module.exports = {
     if (
       e !== "start" ||
       s.isStarted() ||
+      s.isCompleted() ||
       a.fetchRace() !== 2 ||
       a.fetchLevel() < 15
     )
@@ -28,13 +29,13 @@ module.exports = {
     return p("Vlasty", "Bring me a perfect skull.");
   },
   async onTalk(s) {
-    const q = Q(),
-      a = s.session.actor;
+    const q = Q();
     if (s.isCompleted())
       return p("Quest", "You have already completed this quest.");
     if (!s.isStarted())
       return p("Vlasty", '<a action="bypass -h quest 169 start">Accept.</a>');
-    if (s.getInt("cond") !== 2)
+    // Inventory remains authoritative if saving the drop's condition failed.
+    if (n(s, P) < 1)
       return p("Vlasty", "The perfect skull is still missing.");
     await q.takeItem(s.session, P, -1);
     const cracked = n(s, C);

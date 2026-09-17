@@ -352,10 +352,10 @@ try {
     const superHaste = makeSkill(7029, 4);
     use(b, superHaste);
     b.markSkillReuse(spell, 1000);
-    near(b.skillReuseUntil.get(9997) - 1000, 10000 / 30 * 333 / b.fetchCollectiveCastSpd(), 'Super Haste applies sourced reuse division');
+    near(b.skillReuseUntil.get(9997) - 1000, Math.round(10000 / 30 * 333 / b.fetchCollectiveCastSpd()), 'Super Haste applies sourced reuse division in whole milliseconds');
     use(b, superHaste);
     b.markSkillReuse(spell, 1000);
-    near(b.skillReuseUntil.get(9997) - 1000, 10000 * 333 / b.fetchCollectiveCastSpd(), 'Super Haste OFF restores reuse');
+    near(b.skillReuseUntil.get(9997) - 1000, Math.round(10000 * 333 / b.fetchCollectiveCastSpd()), 'Super Haste OFF restores reuse in whole milliseconds');
 
     const shieldBase = b.attack.fetchShieldPDef(b);
     const fortress = makeSkill(322, 6);

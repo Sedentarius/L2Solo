@@ -415,6 +415,12 @@ async function withFastTimers(callback) {
     CubicControl.act(lifeCubicSession, lifeCubicSession.actor, lifeCubic);
     await new Promise((resolve) => setImmediate(resolve));
     assert(lifeCubicHp > 20, 'Life Cubic should periodically heal its owner with sourced Cubic Heal power');
+    const healAnimation = lifeCubicSession.packets.find((packet) => packet[0] === 0x48 && packet.readInt32LE(9) === 4051);
+    assert(healAnimation, 'Life Cubic must broadcast MagicSkillUse to animate its heal');
+    assert.strictEqual(healAnimation.readInt32LE(1), lifeCubicSession.actor.fetchId());
+    assert.strictEqual(healAnimation.readInt32LE(5), lifeCubicSession.actor.fetchId());
+    assert.strictEqual(healAnimation.readInt32LE(17), 0, 'Cubic effects cast instantly');
+    assert.strictEqual(healAnimation.readInt32LE(21), 0, 'Cubic proc must not show an owner skill cooldown');
     assert(lifeCubicSession.packets.some((packet) => packet[0] === 0x76), 'Life Cubic proc should broadcast MagicSkillLaunched');
     clearTimeout(lifeCubic.expireTimer);
     clearInterval(lifeCubic.actionTimer);
@@ -442,6 +448,30 @@ async function withFastTimers(callback) {
     cubicPvpTargetSession.actor.fetchPvpFlag = () => 1;
     World.user = { sessions: [cubicPvpSession, cubicPvpTargetSession] };
     assert.strictEqual(await CubicControl.selectedEnemy(cubicPvpSession, cubicPvpSession.actor), cubicPvpTargetSession.actor, 'offensive cubic should accept a flagged PvP target inside the sourced 900 range');
+    const originalExecute = SkillEffects.execute;
+    try {
+        SkillEffects.execute = () => ({ damage: 0 });
+        for (const [id, procId] of [[1, 4049], [2, 4050], [4, 4052], [5, 4053], [6, 4164], [7, 4165], [8, 4166]]) {
+            const cubic = { id, level: 1, activationChance: 100, power: 282 };
+            cubicPvpSession.actor.cubics = new Map([[id, cubic]]);
+            cubicPvpSession.packets.length = 0;
+            CubicControl.act(cubicPvpSession, cubicPvpSession.actor, cubic);
+            await new Promise((resolve) => setImmediate(resolve));
+            const [animation, launched] = cubicPvpSession.packets;
+            assert.strictEqual(animation[0], 0x48, `Cubic ${id} must start its animation before launch`);
+            assert.strictEqual(animation.readInt32LE(1), cubicPvpSession.actor.fetchId());
+            assert.strictEqual(animation.readInt32LE(5), cubicPvpTargetSession.actor.fetchId());
+            const actualProcId = animation.readInt32LE(9);
+            assert(id === 5 ? [4053, 4054, 4055].includes(actualProcId) : actualProcId === procId);
+            assert.strictEqual(animation.readInt32LE(13), 1);
+            assert.strictEqual(animation.readInt32LE(17), 0);
+            assert.strictEqual(animation.readInt32LE(21), 0);
+            assert.strictEqual(launched[0], 0x76);
+            assert.strictEqual(launched.readInt32LE(5), actualProcId);
+        }
+    } finally {
+        SkillEffects.execute = originalExecute;
+    }
     cubicPvpTargetSession.actor.setLocXYZ({ locX: 2500, locY: 2000, locZ: -50 });
     assert.strictEqual(await CubicControl.selectedEnemy(cubicPvpSession, cubicPvpSession.actor), null, 'offensive cubic should reject targets outside the sourced 900 range');
 

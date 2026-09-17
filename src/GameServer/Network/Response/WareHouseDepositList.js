@@ -1,3 +1,4 @@
+const { canDeposit } = require('../../Warehouse/WarehouseItemRules');
 const SendPacket = invoke('Packet/Send');
 const ItemSlot = invoke('GameServer/Item/ItemSlot');
 
@@ -7,6 +8,7 @@ function bodyPart(item) {
 
 // C4 0x41: warehouse type 1 is private, type 2 is clan.
 module.exports = function wareHouseDepositList(items, adena, type = 1) {
+    items = items.filter(canDeposit);
     const packet = new SendPacket(0x41);
     packet.writeH(type).writeD(adena).writeH(items.length);
     items.forEach((item) => {

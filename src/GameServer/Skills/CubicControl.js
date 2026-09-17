@@ -103,6 +103,7 @@ function act(session, actor, cubic) {
         const definition = definitions[Math.floor(Math.random() * definitions.length)];
         const skill = buildSkill(cubic, definition);
         const attack = actor.attack || new (invoke('GameServer/Actor/Attack'))();
+        session.dataSendToMeAndOthers?.(ServerResponse.skillStarted(actor, target.fetchId(), skill), actor);
         session.dataSendToMeAndOthers?.(ServerResponse.magicSkillLaunched(actor, skill, [target]), actor);
         const outcome = SkillEffects.execute(session, actor, target, skill, {
             attack,

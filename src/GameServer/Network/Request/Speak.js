@@ -58,6 +58,13 @@ function findOnlineUserByName(name) {
     )) || null;
 }
 
+function echoPrivateTell(session, data, recipientName) {
+    session.dataSendToMe(ServerResponse.speak({
+        fetchId: () => session.actor.fetchId(),
+        fetchName: () => `->${recipientName}`
+    }, data));
+}
+
 function handlePrivateTell(session, data) {
     const World = invoke('GameServer/World/World');
     const target = String(data.target || '').trim();
@@ -71,7 +78,7 @@ function handlePrivateTell(session, data) {
     const BotManager = invoke('GameServer/Bot/BotManager');
     const botSession = BotManager.findSessionByName(target);
     if (botSession) {
-        session.dataSendToMe(ServerResponse.speak(session.actor, data));
+        echoPrivateTell(session, data, botSession.actor.fetchName());
         return World.messageBotByName(session, session.actor, target, text, 'client_tell');
     }
 
@@ -79,7 +86,7 @@ function handlePrivateTell(session, data) {
     if (targetSession) {
         const packet = ServerResponse.speak(session.actor, data);
         targetSession.dataSendToMe(packet);
-        session.dataSendToMe(packet);
+        echoPrivateTell(session, data, targetSession.actor.fetchName());
         return Promise.resolve(true);
     }
 
@@ -92,7 +99,7 @@ function handlePrivateTell(session, data) {
             return World.messageBotByName(session, session.actor, target, text, 'client_tell');
         }
 
-        session.dataSendToMe(ServerResponse.speak(session.actor, data));
+        echoPrivateTell(session, data, state.name || target);
         return World.messageBotByName(session, session.actor, target, text, 'client_tell');
     });
 }

@@ -36,6 +36,7 @@ function assertWaiting(result) {
 async function main() {
     for (const [roster, overrides] of [
         [scattered, {}],
+        [[members[0], { ...members[1], loc: { ...point, locX: point.locX + 3100 } }], {}],
         [[members[0], { ...members[1], loc: { ...point, locZ: 160 } }], {}],
         [[members[0], { ...members[1], loc: null }], {}],
         [members, { party: { ...party, spotId: 'elsewhere' } }],
@@ -45,6 +46,20 @@ async function main() {
         assertWaiting(resolve(roster, { ...overrides, rng: () => { throw Error('assembly must precede combat'); } }));
         assert.strictEqual(JSON.stringify(roster), before);
     }
+    const service = invoke('GameServer/Bot/AI/SpotService');
+    const destinations = service.arrivalPointsForParty(members, { ...spot,
+        arrivalPoints: [point, { ...point, locX: point.locX + 3100 }] });
+    assert(destinations, 'a common arrival anchor is available');
+    const assembled = members.map(member => ({ ...member, loc: destinations[member.characterId] }));
+    assert(require('../src/GameServer/Bot/Population/PartyHuntingAssembly').ready(party, assembled, spot),
+        'party destinations form a compact group on the correct dungeon floor');
+
+    const understaffed = resolve(members, { party: { ...party, stats: { ...party.stats,
+        objective: { clanGoalKey: 'clan:1', minPartySize: 3 } } },
+        rng: () => { throw Error('understaffed clan party must not fight'); } });
+    assert.strictEqual(understaffed.debug.reason, 'clan_party_understaffed');
+    assert.strictEqual(understaffed.debug.fights, 0);
+
     const resting = scattered.map(s => ({ ...s, activity: 'resting',
         vitals: { ...s.vitals, hp: 100 }, stats: { ...s.stats, restUntil: at + 60000 } }));
     const recovery = resolve(resting);
@@ -73,6 +88,8 @@ async function main() {
     assert.deepStrictEqual(travelling[1].loc, scattered[1].loc, 'departure does not teleport');
     const arrived = travelling.map(s => finishPartyRouteTravelState(s, at + 25000));
     const hunt = resolve(arrived, { timestamp: at + 25000 });
+    assert(hunt.partyPatch.stats.partySpotRisk, 'actual party combat records a party-owned risk window');
+    assert.strictEqual(hunt.partyPatch.stats.partySpotRisk.partyId, party.partyId);
     assert(hunt.debug.wins > 0 && hunt.memberResults.some(e => e.result.materialize.exp > 0), 'arrived party resumes ordinary combat');
 
     const Population = invoke('GameServer/Bot/Population/PopulationService');

@@ -5,6 +5,11 @@ function activePlanTarget(plan) {
 // The shared objective wins; an ordinary hunting party follows its leader's
 // active plan. A randomly selected encounter representative cannot retarget it.
 function npcId(party, leader) {
+    // A help party agreed to level on its shared spot. The leader's old
+    // equipment target may not even spawn there.
+    if (party?.stats?.objective?.reason === 'clan_help') {
+        return Number(party.stats.objective.npcId || 0);
+    }
     return Number(party?.stats?.objective?.npcId || 0)
         || activePlanTarget(party?.stats?.acquisitionGoal)
         || activePlanTarget(leader?.stats?.equipmentPlan);

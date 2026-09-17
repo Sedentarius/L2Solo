@@ -93,6 +93,7 @@ const PopulationStatus = {
             .map((type) => `${type}:${clanSimulation.actions.stages?.[`execute:${type}`]?.p95Ms || 0}`)
             .join('|');
         const clanActionDeferP95 = clanSimulation.actions.stages?.defer?.p95Ms || 0;
+        const clanWorker = clanSimulation.goals.equipment?.worker || {};
         const clanFounderStages = stageP95(clanSimulation.founder.stages, ['candidate_projection', 'clan_projection', 'resolve_candidate', 'scan_loop', 'total']);
         const governorDeferrals = Object.entries(governor.deferralReasons || {})
             .map(([reason, count]) => `${reason}:${count}`)
@@ -204,6 +205,7 @@ const PopulationStatus = {
             .map(([job, value]) => `${job}:${value.progress.processed}/${value.progress.selected}/${value.progress.pending}/${value.progress.resumed}`)
             .join('|') || 'none';
         const delay = metrics.eventLoop.delay || {};
+        summary.line += ` clanPlannerWorker=${clanWorker.running ? 'ready' : 'idle'}/${clanWorker.pending || 0}/${clanWorker.completed || 0}/${clanWorker.failures || 0} clanPlannerRunMax=${Math.round(clanWorker.maxRunMs || 0)}ms`;
         summary.line += ` loopDelay=${delay.p95Ms || 0}/${delay.p99Ms || 0}/${delay.maxMs || 0}ms:${delay.windowMs || 0}ms bgProgress=${backgroundProgress}`;
         summary.line += ` bgGovernorJobs=${governorJobs} bgGoalP95=${goalMetadataStages} marketGoalCursor=${marketGoalCursor.updatedAt || 0}/${marketGoalCursor.characterId || 0} bgJobs=${backgroundJobs.registered || 0}/${backgroundJobs.inFlight || 0}/${backgroundJobs.tickMs || 0}ms bgJobFlow=${backgroundJobs.due || 0}/${backgroundJobs.started || 0}/${backgroundJobs.completed || 0}/${backgroundJobs.skipped || 0}/${backgroundJobs.deferred || 0}/${backgroundJobs.coalesced || 0}/${backgroundJobs.errors || 0}`;
         const coldWorker = invoke('GameServer/Bot/Population/ColdSimulationCoordinator').snapshot();
