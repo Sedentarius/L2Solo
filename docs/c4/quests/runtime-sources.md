@@ -16,6 +16,7 @@ Each Q00NNN directory's Java handler was read for factual mechanics.
 | 274 | Requires either Q271 necklace, retained; 40 heads plus independent 6% totem drops; 3500 Adena + 600 per totem. |
 | 316 | Elf level 18; 40% rat fang drops; Varool trophy 20%, maximum one. Payout 30 per rat fang + 10000 trophy, +5000 only for ten rat fangs. Varool already has an authored spawn; no new encounter primitive. |
 | 379 | Reviewed two-objective definition exists but is disabled: item templates 5893/5894/5956/5957/5958 are absent. Multi-objective atomic collection is tested with existing templates; that test does not certify Q379. |
+| 347 | Consult Balanki (100 Adena) and Spiron in either order, then Silvera; ten crystals 4286 from mob 540 at 50%; calculator 4285 exchanged for calculator 4393 or 1000 Adena. Both orders and reward choices are tested, including restart, payment, NPC and replay guards. |
 | 258 | Guaranteed pelts; 40 required; equipment lottery weights 1/5/3/4/3 out of 16. |
 | 264 | Goblin claws 2 or 4; wolf claws 1 or 2; seven reward outcomes, including equipment and Adena. Inventory's 50 Adena is only one conditional award. |
 | 271 | Orc restriction; fangs 1 (75%) or 2 (25%); necklace 1507 (10%) or 1506 (90%). |

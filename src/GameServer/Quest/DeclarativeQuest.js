@@ -3,13 +3,14 @@
 const page = (name, text) => `<html><body>${name}:<br>${text}</body></html>`;
 const count = (state, id) => state.session.actor.backpack.fetchItems()
     .filter(item => item.fetchSelfId() === id).reduce((sum,item) => sum + item.fetchAmount(), 0);
-const TYPES = new Set(['TALK', 'DELIVER', 'KILL_COLLECT', 'COLLECT', 'COMPLETE']);
+const TYPES = new Set(['TALK', 'DELIVER', 'KILL_COLLECT', 'COLLECT', 'COMPLETE', 'CHOICE']);
 const objectives = stage => stage.objectives || (stage.item ? [[stage.item,stage.count]] : []);
 
 function validate(definition) {
     if (!Number.isInteger(definition.id) || !definition.name || !Number.isInteger(definition.startNpc) || !definition.stages?.length) throw new Error('Invalid quest definition');
     for (const stage of definition.stages) {
         if (!TYPES.has(stage.type)) throw new Error(`Unsupported quest stage ${stage.type}`);
+        if(stage.type==='CHOICE' && (!stage.choices?.length || stage.choices.some(c=>!c.event||!Number.isInteger(c.npc)||(!c.finish&&(!Number.isInteger(c.next)||c.next<1||c.next>definition.stages.length))))) throw new Error('Unresolved quest choice');
         if (stage.type === 'KILL_COLLECT' && (!stage.drops?.length || !objectives(stage).length || objectives(stage).some(([id,n])=>!Number.isInteger(id)||!Number.isInteger(n)||n<1))) throw new Error('Unresolved collection mechanic');
         if (stage.type === 'COLLECT' && (!stage.drops?.length || !stage.prices?.length || !stage.npc)) throw new Error('Unresolved bounty mechanic');
         for (const drop of stage.drops || []) {
@@ -21,7 +22,8 @@ function create(definition) {
     validate(definition);
     const d = definition;
     const exchanges=d.exchanges||[];
-    const npcs = [...new Set([d.startNpc, ...exchanges.map(e=>e.npc), ...d.stages.map(s => s.npc).filter(Boolean)])];
+    const choices=d.stages.flatMap(s=>s.choices||[]);
+    const npcs = [...new Set([d.startNpc, ...exchanges.map(e=>e.npc), ...choices.map(c=>c.npc), ...d.stages.map(s => s.npc).filter(Boolean)])];
     const allowed = state => Number(state.session.actor.fetchLevel()) >= d.minLevel &&
         (d.race === undefined || Number(state.session.actor.fetchRace()) === d.race) &&
         (!d.classes || d.classes.includes(Number(state.session.actor.fetchClassId()))) &&
@@ -30,7 +32,7 @@ function create(definition) {
     const stageFor = state => d.stages[state.getInt('cond') - 1];
     const itemName=id=>invoke('GameServer/DataCache').items.find(x=>x.selfId===id)?.template?.name||`item ${id}`;
     const npcName=id=>invoke('GameServer/DataCache').npcs.find(x=>x.selfId===id)?.template?.name||`NPC ${id}`;
-    const describe=stage=>stage?.drops
+    const describe=stage=>stage?.choices ? `Consult ${[...new Set(stage.choices.map(c=>npcName(c.npc)))].join(' and ')}.` : stage?.drops
         ? `Hunt ${[...new Set(stage.drops.map(x=>npcName(x.npc)))].join(', ')}. ${objectives(stage).map(([id,n])=>`Collect ${n} ${itemName(id)}.`).join(' ')} Return to ${npcName(d.startNpc)}.`
         : `Visit ${npcName(stage?.npc||d.startNpc)}. ${(stage?.takes||[]).map(([id,n])=>`Bring ${n} ${itemName(id)}.`).join(' ')}`;
     const rewards = (state, authored = {}) => {
@@ -52,9 +54,18 @@ function create(definition) {
     const quest = {
         id: d.id, name: d.name, definition: d, npcs, startNpcs: [d.startNpc],
         killNpcs: [...new Set(d.stages.flatMap(s => (s.drops || []).map(x => x.npc)))],
-        eventNpc: event => exchanges.find(e=>e.event===event)?.npc ?? (event === 'start' || (event === 'quit' && d.stages.some(s=>s.type==='COLLECT')) ? d.startNpc : null),
+        eventNpc: event => choices.find(c=>c.event===event)?.npc ?? exchanges.find(e=>e.event===event)?.npc ?? (event === 'start' || (event === 'quit' && d.stages.some(s=>s.type==='COLLECT')) ? d.startNpc : null),
         canTalk: state => state.isStarted() || state.isCompleted() || allowed(state),
         async onEvent(state, event) {
+            const choice=state.isStarted() && stageFor(state)?.choices?.find(c=>c.event===event);
+            if(choice) {
+                if(!(choice.takes||[]).every(([id,n])=>count(state,id)>=n)) return null;
+                await step(state,{takes:choice.takes||[],...rewards(state,choice.reward),
+                    variables:{...state.variables,cond:String(choice.finish?0:choice.next),
+                        ...(choice.finish?{completions:String(state.getInt('completions')+1)}:{})},
+                    status:choice.finish?(d.repeatable?'created':'completed'):'started'});
+                return page(d.name,choice.finish?'Your chosen reward has been delivered.':describe(stageFor(state)));
+            }
             const exchange=exchanges.find(e=>e.event===event);
             if(exchange && state.isStarted() && state.getInt('cond')===exchange.cond) {
                 if(!exchange.takes.every(([id,n])=>count(state,id)>=n)) return null;
@@ -80,6 +91,8 @@ function create(definition) {
             if (!stage) return null;
             const offers=exchanges.filter(e=>e.npc===id && e.cond===state.getInt('cond'));
             if(offers.length) return page(d.name,offers.map(e=>`<a action="bypass -h quest ${d.id} ${e.event}">${e.label}</a>`).join('<br>'));
+            if(stage.type==='CHOICE') return page(d.name,stage.choices.filter(c=>c.npc===id)
+                .map(c=>`<a action="bypass -h quest ${d.id} ${c.event}">${c.label}</a>`).join('<br>')||'Consult the people involved in your task.');
             if (stage.type === 'KILL_COLLECT') return page(d.name, `${describe(stage)}<br>${objectives(stage).map(([id,n])=>`${itemName(id)}: ${count(state,id)}/${n}`).join('<br>')}`);
             if (id !== stage.npc) return page(d.name, stage.text || 'Continue your task.');
             if (stage.type === 'COLLECT') {

@@ -6,6 +6,18 @@ const collect = (id, name, minLevel, startNpc, item, count, drops, reward, extra
         { type: 'COMPLETE', npc: startNpc, takes: [[item,count]] }], reward
 });
 const definitions = [
+    {id:347,name:'Go Get the Calculator',minLevel:12,startNpc:7526,repeatable:true,
+        stages:[
+            {type:'CHOICE',choices:[{npc:7533,event:'balanki',label:'Pay 100 Adena for information',takes:[[57,100]],next:2},
+                {npc:7532,event:'spiron',label:'Ask about the calculator',next:3}]},
+            {type:'CHOICE',choices:[{npc:7532,event:'spiron',label:'Ask about the calculator',next:4}]},
+            {type:'CHOICE',choices:[{npc:7533,event:'balanki',label:'Pay 100 Adena for information',takes:[[57,100]],next:4}]},
+            {type:'TALK',npc:7527},
+            {type:'KILL_COLLECT',item:4286,count:10,drops:[{npc:540,chance:.5}]},
+            {type:'DELIVER',npc:7527,takes:[[4286,10]],gives:[[4285,1]]},
+            {type:'CHOICE',choices:[{npc:7526,event:'keep_calculator',label:'Keep the calculator',takes:[[4285,1]],finish:true,reward:{items:[[4393,1]]}},
+                {npc:7526,event:'sell_calculator',label:'Receive 1000 Adena',takes:[[4285,1]],finish:true,reward:{adena:1000}}]}
+        ]},
     { id:259,name:"Rancher's Plea",minLevel:15,startNpc:7497,repeatable:true,
         stages:[{type:'COLLECT',npc:7497,prices:[[1495,25]],bonusAt:10,bonusAdena:250,
             drops:[103,106,108].map(npc=>({npc,item:1495,chance:1}))}],

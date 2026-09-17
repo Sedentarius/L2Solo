@@ -53,6 +53,43 @@ async function main() {
         assert.equal(state.state,'started');
         const objective=d.stages[0];
         const random=Math.random;
+        if(d.id===347) {
+            try {
+                Math.random=()=>0;
+                const event=async(npc,name)=>{s.activeNpcTalk={selfId:npc,objectId:1};return Service.onEvent(s,{questId:347,name});};
+                assert.equal(await event(7526,'keep_calculator'),false,'reward event before progression denied');
+                assert.equal(await event(7533,'balanki'),false,'payment requires Adena');
+                await Service.giveItem(s,57,200);
+                for(const first of ['balanki','spiron']) {
+                    const firstNpc=first==='balanki'?7533:7532;
+                    assert.equal(await event(7526,first),false,'wrong NPC cannot select branch');
+                    await event(firstNpc,first);
+                    assert.equal(state.getInt('cond'),first==='balanki'?2:3);
+                    assert.equal(await event(firstNpc,first),false,'same adviser cannot satisfy both consultations');
+                    await Database.close();Database.init();s=await sessionFor(d.id);state=s.questStates.get(d.id);
+                    await event(first==='balanki'?7532:7533,first==='balanki'?'spiron':'balanki');
+                    assert.equal(state.getInt('cond'),4);
+                    await quest.onTalk(state,{fetchSelfId:()=>7527});
+                    assert.equal(state.getInt('cond'),5);
+                    for(let n=0;n<12;n++) await quest.onKill(state,{fetchSelfId:()=>540});
+                    assert.equal(await amount(d.id,4286),10);
+                    await quest.onTalk(state,{fetchSelfId:()=>7527});
+                    assert.equal(await amount(d.id,4285),1);
+                    assert.equal(state.getInt('cond'),7);
+                    const stale=await sessionFor(d.id);
+                    await event(7526,first==='balanki'?'keep_calculator':'sell_calculator');
+                    assert.equal(state.state,'created');
+                    await assert.rejects(quest.onEvent(stale.questStates.get(d.id),'keep_calculator'),/step changed/);
+                    assert.equal(await event(7526,'sell_calculator'),false,'reward cannot be reclaimed');
+                    if(first==='balanki') await event(7526,'start');
+                }
+                assert.equal(await amount(d.id,57),1000,'two exact fees and one cash reward');
+                assert.equal(await amount(d.id,4393),1,'one selected calculator reward');
+                assert.equal(await amount(d.id,4285),0);
+                assert.equal(state.getInt('completions'),2);
+            } finally {Math.random=random;}
+            continue;
+        }
         if(objective.type==='COLLECT') {
             try {
                 Math.random=()=>.999;
