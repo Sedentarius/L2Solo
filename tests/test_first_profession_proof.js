@@ -143,6 +143,45 @@ async function main() {
         assert.equal((await Transfer.transferPersisted(id,spec.toClassId)).ok,true);
         assert.equal((await Transfer.transferPersisted(id,spec.toClassId)).alreadyTransferred,true);
     }
+    // Autonomous reference vertical schedules real NPC travel, script events,
+    // trial equipment, credited kills and ClassTransfer through the same Bridge.
+    const Progress=invoke('GameServer/Bot/BotClassProgression');
+    const id=[22,23,24,25,26,27,28].find(id=>Progress.nextClass(0,20,id)===1);
+    assert(id);
+    await Database.execute(['UPDATE characters SET level=20,exp=? WHERE id=?',[DataCache.experience[19],id]]);
+    const Runtime=require('../src/GameServer/Bot/Quest/AutonomousQuestRuntime');
+    const Catalog=require('../src/GameServer/Bot/Quest/AutonomousQuestCatalog');
+    let auto={characterId:id,classId:0,level:20,phase:'cold',activity:'hunting',loc:{locX:0,locY:0,locZ:0},
+        inventory:{},stats:{classId:0},timing:{nextResolveAt:1000},simulation:{ownerId:'legacy_main',revision:1}};
+    const goal=Catalog.candidateFor(auto,{ignoreStagger:true,timestamp:1000});
+    assert.equal(goal.target.questId,401);
+    const Goal=invoke('GameServer/Bot/Goals/GoalService');
+    const prior={snapshot:Life.snapshot,upsertState:Life.upsertState,goal:Goal.snapshot,complete:Goal.complete};
+    try {
+        Life.snapshot=()=>auto;Life.upsertState=async next=>(auto=next);
+        Goal.snapshot=()=>({current:{...goal,status:'active'}});Goal.complete=async()=>{};
+        Math.random=()=>0;
+        for(let tick=1;tick<=100 && auto.classId!==1;tick++) {
+            if(auto.activity==='traveling') {
+                const travel=auto.stats.travel;
+                assert(travel?.to);
+                auto={...auto,loc:{...travel.to},spotId:travel.spotId||auto.spotId,activity:'hunting',stats:{...auto.stats,travel:null}};
+            }
+            auto=await Runtime.advance(auto,{timestamp:tick*1000});
+            const intent=Bridge.intentFrom(auto);
+            if(auto.activity==='hunting' && intent?.step==='collect') {
+                assert((await Cold.resolveColdKill(auto,intent.targetNpcId,`autonomous-${tick}`)).ok);
+            }
+            if(tick===10) {await Database.close();Database.init();}
+        }
+        assert.equal(auto.classId,1,'autonomous Q401 reaches Warrior using earned proof');
+        assert.equal(auto.stats.classId,1);
+        assert.equal(auto.stats.questBridge,null);
+        assert.equal((await Database.fetchItems(id)).some(i=>i.selfId===1145),false,'transfer consumes the earned medallion');
+        assert.equal((await Transfer.transferPersisted(id,1)).alreadyTransferred,true);
+    } finally {
+        Life.snapshot=prior.snapshot;Life.upsertState=prior.upsertState;Goal.snapshot=prior.goal;Goal.complete=prior.complete;Math.random=random;
+    }
     const a = await Database.chooseFirstProfessionPath(29,0,1);
     await Database.close(); Database.init();
     assert.deepEqual(await Database.chooseFirstProfessionPath(29,0,4),a,'stored branch survives restart and changed selection');

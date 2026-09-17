@@ -186,6 +186,17 @@ function disposeFullSession(session) {
     session.actor = null;
 }
 
+async function equipQuestItem(state, itemId) {
+    const session=await coldFullSessionFor(state);
+    try {
+        const item=session.actor.backpack.fetchItemFromSelfId(itemId);
+        if(!item) return {ok:false,state};
+        if(!item.fetchEquipped()) session.actor.backpack.useItem(session,item.fetchId());
+        const next=await reconcileColdSession(state,session);
+        return {ok:!!item.fetchEquipped(),state:next};
+    } finally {disposeFullSession(session);}
+}
+
 function killActionKey(intent, killKey) {
     return Bridge.actionKey(intent, `kill:${String(killKey)}`);
 }
@@ -363,6 +374,7 @@ module.exports = {
     coldSessionFor,
     commitRevision,
     disposeFullSession,
+    equipQuestItem,
     hasReceipt,
     killActionKey,
     normalizedReceipts,

@@ -35,6 +35,11 @@ Proof and quest completion are atomic; transfer at level 20 consumes the proof
 and writes a durable consumed marker. Profession quests remain one-time in the
 current runtime, unlike the inventory's REPEATABLE classification. No migration
 silently grants proof to historically promoted characters.
+Q401's reviewed route schedules NPC travel, script events and trial equipment
+through the current Bridge. Its autonomous SQLite test starts with no quest or
+proof, restarts during progress and ends at Warrior with a spent proof receipt.
+The other seventeen professions share the transfer contract; their autonomous
+retail routes and intermediate transaction recovery are not yet certified.
 
 Q038/Q039 remain disabled: missing templates 1100/1101 and 925 respectively.
 Their old handlers also lack atomic hand-ins and completed-state restart guards;

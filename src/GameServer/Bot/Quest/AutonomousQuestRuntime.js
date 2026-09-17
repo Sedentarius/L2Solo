@@ -126,6 +126,7 @@ function collectDestination(state, spec) {
 async function beginFromGoal(state, goal, timestamp) {
     const spec = Catalog.specFor(goal?.target?.questId || goal?.plan?.questId);
     if (!spec) return state;
+    if(spec.route) return advanceRoute(state,spec,timestamp);
     const row = await questRow(state.characterId, spec.questId);
     if (isCompletedRow(row)) return markComplete(state, spec, timestamp);
     if (isStartedRow(row)) {
@@ -230,6 +231,7 @@ async function advance(state, options = {}) {
     }
     const spec = Catalog.specFor(intent.questId);
     if (!spec) return state;
+    if(spec.route) return advanceRoute(state,spec,timestamp);
     if (intent.step === 'start') return advanceStart(state, spec, intent, timestamp);
     if (intent.step === 'collect') return advanceCollect(state, spec, intent, timestamp);
     if (intent.step === 'return' || intent.step === 'deliver' || intent.step === 'complete') {
@@ -238,11 +240,54 @@ async function advance(state, options = {}) {
     return state;
 }
 
+async function advanceRoute(state,spec,timestamp) {
+    if(spec.toClassId) {
+        const selected=await Database.chooseFirstProfessionPath(state.characterId,spec.fromClassId,
+            invoke('GameServer/Bot/BotClassProgression').nextClass(spec.fromClassId,20,state.characterId));
+        if(selected.toClassId!==spec.toClassId) return state;
+    }
+    const row=await questRow(state.characterId,spec.questId);
+    if(isCompletedRow(row)) {
+        if(spec.toClassId && Number(state.level)>=20) {
+            // Only ClassTransfer can consume proof and mutate class.
+            const session=await ColdQuestRuntime.coldFullSessionFor(state);
+            try {
+                await invoke('GameServer/ClassTransfer').transfer(session,spec.toClassId);
+                state=await ColdQuestRuntime.reconcileColdSession(state,session,timestamp);
+                state={...state,stats:{...state.stats,classId:state.classId}};
+            } finally {ColdQuestRuntime.disposeFullSession(session);}
+        }
+        return markComplete(state,spec,timestamp);
+    }
+    const variables=typeof row?.variables==='string'?JSON.parse(row.variables):row?.variables||{};
+    const cond=isStartedRow(row)?Number(variables.cond||0):0;
+    const action=spec.route[cond];
+    if(!action || state.activity==='traveling') return state;
+    if(action.killNpcIds) {
+        if(action.equipItem) {
+            const equipped=await ColdQuestRuntime.equipQuestItem(state,action.equipItem);
+            if(!equipped.ok) return state;
+            state=equipped.state;
+        }
+        return advanceCollect(state,{...spec,...action,preferredKillNpcIds:action.killNpcIds,allowedKillNpcIds:action.killNpcIds},
+            {attempt:cond+1},timestamp);
+    }
+    const loc=Catalog.npcLocation(action.npc);
+    if(!loc) return state;
+    const intent=intentFor(spec,'talk',action.npc,loc,timestamp,{attempt:cond+1,eventName:action.event});
+    if(!atTarget(state,loc)) return save(questTravel(state,intent,loc,timestamp), 'quest_bridge_route_travel');
+    state=await save(Bridge.withIntent(state,intent,timestamp),'quest_bridge_route_ready');
+    const talk=await ColdQuestRuntime.resolveColdTalk(state,action.npc,`route:${cond}`,{eventName:action.event,timestamp});
+    const after=talk.state||state;
+    if(talk.finished) return advanceRoute(after,spec,timestamp);
+    return after;
+}
+
 function targetNpcId(state, context = {}) {
     const intent = Bridge.intentFrom(state);
     if (!intent || intent.step !== 'collect') return Number(context.targetNpcId || 0);
     const spec = Catalog.specFor(intent.questId);
-    const questTarget = Catalog.killTargetForSpot(spec, context.spot);
+    const questTarget = Catalog.killTargetForSpot(spec?.route ? {...spec,allowedKillNpcIds:[Number(intent.targetNpcId)],preferredKillNpcIds:[Number(intent.targetNpcId)]} : spec, context.spot);
     return questTarget || Number(intent.targetNpcId || 0) || Number(context.targetNpcId || 0);
 }
 

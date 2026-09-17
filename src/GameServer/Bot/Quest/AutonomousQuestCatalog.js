@@ -6,6 +6,7 @@ const QUEST_BUCKETS = 8;
 const SPOT_GRID_SIZE = 6000;
 
 const QUESTS = Object.freeze({
+    ...require('./ReviewedQuestRoutes'),
     165: Object.freeze({
         questId: 165,
         name: "Shilen's Hunt",
@@ -57,6 +58,12 @@ function eligible(state, spec, timestamp = Date.now(), options = {}) {
     if (!['hunting', 'resting', 'traveling'].includes(String(state.activity || ''))) return false;
     if (Number(state.level || 1) < Number(spec.minLevel || 1)) return false;
     if (spec.race !== null && spec.race !== undefined && classRace(state) !== Number(spec.race)) return false;
+    if(spec.fromClassId !== undefined) {
+        const current=Number(state.stats?.classId ?? state.classId);
+        if(current!==spec.fromClassId) return false;
+        const selected=state.stats?.firstProfessionTarget ?? invoke('GameServer/Bot/BotClassProgression').nextClass(current,20,state.characterId);
+        if(Number(selected)!==spec.toClassId) return false;
+    }
     if (Number(state.stats?.questBridge?.questId || 0) === Number(spec.questId)) return true;
     if (options.ignoreStagger === true) return true;
     return admissionBucket(state.characterId) === bucketFor(timestamp);
@@ -64,7 +71,7 @@ function eligible(state, spec, timestamp = Date.now(), options = {}) {
 
 function candidateFor(state = {}, options = {}) {
     const timestamp = Number(options.timestamp || options.now) || Date.now();
-    for (const spec of Object.values(QUESTS)) {
+    for (const spec of Object.values(QUESTS).sort((a,b)=>b.priority-a.priority||a.questId-b.questId)) {
         if (!eligible(state, spec, timestamp, options)) continue;
         return {
             type: 'complete_quest',
@@ -182,7 +189,7 @@ function npcLocation(npcSelfId) {
 function questKillTargets(spec) {
     const quest = require('../../Quest/QuestRegistry').activeQuests()
         .find((entry) => Number(entry.id) === Number(spec?.questId));
-    return (quest?.killNpcs || []).map(Number).filter((id) => Number.isSafeInteger(id) && id > 0);
+    return (quest?.killNpcs || []).map(Number).filter((id) => Number.isSafeInteger(id) && id > 0 && (!spec.allowedKillNpcIds || spec.allowedKillNpcIds.includes(id)));
 }
 
 function preferredRank(spec, spot) {
