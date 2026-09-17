@@ -54,6 +54,7 @@ function normalize(effect = {}) {
         toggle: effect.toggle === true,
         requires: effect.requires || null,
         stats: effect.stats || {},
+        conditionalStats: effect.conditionalStats || [],
         situationalStats: effect.situationalStats || [],
         dot: effect.dot || null,
         healthDot: effect.healthDot || null,

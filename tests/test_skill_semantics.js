@@ -344,6 +344,28 @@ for (let level = 1; level <= 6; level++) {
 }
 const revivalAttack = new Attack();
 const totemIds = [76, 83, 109, 282, 292, 298];
+const bisonActor = statActor();
+bisonActor.statusUpdateVitals = () => calculateStats({}, bisonActor);
+calculateStats({}, bisonActor);
+bisonActor.hp = bisonActor.fetchMaxHp();
+const bisonSkill = skill({ selfId: 292, name: 'Totem Spirit Bison', level: 1, buff: 120000 });
+assert.strictEqual(new Attack().skillUseConditionFailure(bisonActor, bisonSkill), null, 'Bison must be castable at full HP');
+const bisonBaseAtk = bisonActor.collectivePAtk;
+const bisonEffect = SkillEffects.execute(session(), bisonActor, bisonActor, bisonSkill).effect;
+assert.strictEqual(bisonActor.fetchHp(), bisonActor.fetchMaxHp(), 'Bison must not consume HP');
+for (const percent of [100, 60.01, 60, 30, 61, 50, 100]) {
+    bisonActor.hp = bisonActor.fetchMaxHp() * percent / 100;
+    bisonActor.statusUpdateVitals();
+    const active = percent <= 60;
+    assert.strictEqual(EffectStats.multiplier(bisonActor, 'pAtkMul'), active ? 1.125 : 1);
+    assert.strictEqual(EffectStats.add(bisonActor, 'pCritRateAdd'), active ? 200 : 0);
+    assert.strictEqual(bisonActor.collectivePAtk, Math.round(bisonBaseAtk * (active ? 1.125 : 1)), 'Actual attack stat must follow HP changes without recasting');
+    assert.strictEqual(EffectStore.list(bisonActor)[0], bisonEffect, 'HP changes must retain the totem itself');
+}
+bisonActor.hp = bisonActor.fetchMaxHp() / 2;
+SkillEffects.execute(session(), bisonActor, bisonActor, skill({ selfId: 83, name: 'Totem Spirit Wolf', buff: 120000 }));
+assert.strictEqual(EffectStats.add(bisonActor, 'pCritRateAdd'), 0, 'Replacing Bison must remove its conditional bonuses');
+EffectStore.remove(bisonActor, 'totem_spirit_wolf');
 for (const firstId of totemIds) {
     for (const secondId of totemIds) {
         const target = statActor();

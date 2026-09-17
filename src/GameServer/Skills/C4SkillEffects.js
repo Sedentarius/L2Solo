@@ -891,6 +891,7 @@ function applyEffect(session, target, skill, semantic, source = session?.actor) 
         stackOrder: semantic.stackOrder,
         dispellable: semantic.dispellable,
         stats: semantic.stats || {},
+        conditionalStats: semantic.conditionalStats || [],
         situationalStats: semantic.situationalStats || [],
         dot: dotFromSkill(skill, semantic),
         manaDot: manaDotFromSkill(skill, semantic),
@@ -1386,7 +1387,7 @@ function refreshStats(session, target) {
 }
 
 function hasStats(effect) {
-    return Object.keys(effect?.stats || {}).length > 0;
+    return Object.keys(effect?.stats || {}).length > 0 || effect?.conditionalStats?.length > 0;
 }
 
 function applyBalanceLife(session, actor) {

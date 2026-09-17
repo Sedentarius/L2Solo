@@ -31,6 +31,9 @@ function situationalMultiplier(actor, stat, context = {}, fallback = 1) {
 function statValues(actor, stat) {
     return [
         ...EffectStore.list(actor).map((effect) => Number(effect.stats?.[stat])),
+        ...EffectStore.list(actor).flatMap((effect) => (effect.conditionalStats || [])
+            .filter((entry) => matchesCondition(actor, entry.condition) && matchesRequirements(actor, entry.requires))
+            .map((entry) => Number(entry.stats?.[stat]))),
         ...passiveStatValues(actor, stat)
     ];
 }
@@ -66,7 +69,7 @@ function matchesCondition(actor, condition = {}) {
     if (condition.actorHpPercentAtMost !== undefined) {
         const maxHp = Number(actor?.fetchMaxHp?.()) || 0;
         const hp = Number(actor?.fetchHp?.()) || 0;
-        if (!maxHp || hp / maxHp * 100 > Number(condition.actorHpPercentAtMost)) return false;
+        if (!maxHp || hp > maxHp * Number(condition.actorHpPercentAtMost) / 100) return false;
     }
 
     const state = actor?.state;
