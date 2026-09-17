@@ -571,11 +571,12 @@
     "reviewedRequirements": []
   },
   "325": {
-    "certified": false,
-    "blocker": {
-      "code": "BRANCH_DEFINITION_PENDING",
-      "detail": "No absent generic resolver demonstrated. Retail exchanges, branches or source details need reviewed definitions and tests."
-    }
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ],
+    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "reviewedRequirements": []
   },
   "340": {
     "certified": false,
@@ -907,7 +908,7 @@
     }
   },
   "_certification": {
-    "generatedAt": "2026-09-17T23:00:40.703Z",
+    "generatedAt": "2026-09-17T23:05:53.802Z",
     "sourceHashes": {
       "config/default.ini": "b34385217a93dacbfb4d402af40c81c878d6715c770dc3ed2ff9d2e1cd01ec1b",
       "config/local.example.ini": "cb13f57c7e72f2b6f55e342378bb9acc974e7f7c0ab6708a6ed8f5d0dc8f8fa0",
@@ -1875,9 +1876,9 @@
       "src/GameServer/Progression/OverhitReward.js": "e4f12e67f88f9c23c67263c8b03e65a20e7619e31085ac7794f896444f1f876e",
       "src/GameServer/Progression/ProgressionCap.js": "efdcf417d1af764e5a997906211fec7f95c4d2da98313746c894065aedbc2744",
       "src/GameServer/ProgressionRates.js": "95d06283ab218b645938906b708d59bbcfbae6c715aad37532a469a47bfafdf8",
-      "src/GameServer/Quest/DeclarativeQuest.js": "1c730f086a5acee39cf3b54ef0b2f8d01afb5dda2c670a7119847b6846800534",
+      "src/GameServer/Quest/DeclarativeQuest.js": "c430b5dedef7e706511bf2dbdf1215782d05069ec6faa3eef8b17e89732c4d6c",
       "src/GameServer/Quest/FirstProfessionProof.js": "836445225f11c0b25f3b30e1549adfdaecf1c3ee750a087b5442d786f4ecef2a",
-      "src/GameServer/Quest/LowLevelDefinitions.js": "2d14ea2fa0a2bf6d1e8de50ca6b58af872ae29c4209ba08d5183d98565b77d2e",
+      "src/GameServer/Quest/LowLevelDefinitions.js": "6fbb937001742755760ef38ed3faf61567a58595b3534bc194b2d4e41aec065f",
       "src/GameServer/Quest/QuestRegistry.js": "620d5e7083fe46b9463ff19881fbfc7de80ecc3f4e4be889c86de702c93f22ee",
       "src/GameServer/Quest/QuestService.js": "593e3b0f8bd3a7214173201a6234027e11cbf16036d237edaaf940db376d42de",
       "src/GameServer/Quest/QuestState.js": "d764e7fac7367002c151fd44e0006e6e8b27556d8586af4f40b73e4703d69e46",
@@ -3145,7 +3146,7 @@
       "tests/test_c4_catacomb_of_the_heretics.js": "8c7518910d0d7a6b51bff87d1b74eece6bfa537d4185349340a7732dfc1b3077",
       "tests/test_c4_catacomb_of_the_witch.js": "c1d38225c2ae603c9b4a3ca37e59dc96609dafd4e0a26578097f24feea9d0664",
       "tests/test_c4_cruma_tower_teleports.js": "27b6d1098baf149e0206a829d735a1737b5d509cebf56e2e859d286362b6458a",
-      "tests/test_c4_declarative_quests.js": "31767a880190621cee0aa625c9e13899c43d4a5aa01f9a22dbfcbbf1efea4ad6",
+      "tests/test_c4_declarative_quests.js": "15601ef0a9222ce63ed096b048468170fea9bed4ce4ae4dfa786bbf3e4b25572",
       "tests/test_c4_devastated_castle.js": "c9925f0981f023e72456b26336cc7cfa67fb788ab46f3722ceec06f2bfa134f1",
       "tests/test_c4_devils_isle.js": "d786c8b8afda6d8ff79f1b941f0eb6182f1a37daee062b2d37fcab3491e360fa",
       "tests/test_c4_elmore_northeast_coast.js": "6cb6fdaf4644fd21f740bd80fcefdaff345c30f17bf6963021e58fee65be0559",
@@ -3490,7 +3491,7 @@
       "tests/test_world_observer_world_state.js": "1694e9a8d888d7495da71f79d1ac6fc0f27b69a28b33e5f73753529cacce9c78",
       "tests/test_world_visible_users.js": "53949729f44132946b001ebe4ace8644ffac482aea9953a0ffa80829dac74aab",
       "tests/test_world_wipe.js": "d7f3aa5197dc8359c9542250394fc0ccd96010402be9c83b0576696ec47cf89c",
-      "docs/c4/quests/runtime-review.json": "61376b53fd74bf9a3268cd0aefde19173f6e8488c93f5371c7921e9c10aa0da5",
+      "docs/c4/quests/runtime-review.json": "3d0ccf56ad0fa055c0575900c6bfc3584be7f576483a12d8e3f5a4c147f506e6",
       "docs/c4/quests/C4_QUEST_MASTER_INVENTORY.jsonl": "9f63e96d5fe25e0ce21f81027b805d8a4cc556e25e8f17b74a179ff316befc86"
     },
     "tests": [

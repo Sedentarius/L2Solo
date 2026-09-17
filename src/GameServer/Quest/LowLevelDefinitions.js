@@ -6,6 +6,23 @@ const collect = (id, name, minLevel, startNpc, item, count, drops, reward, extra
         { type: 'COMPLETE', npc: startNpc, takes: [[item,count]] }], reward
 });
 const definitions = [
+    {id:325,name:'Grim Collector',minLevel:15,startNpc:7336,quitNpc:7434,repeatable:true,
+        questItems:Array.from({length:10},(_,i)=>1349+i),
+        stages:[{type:'TALK',npc:7434,gives:[[1349,1]]},
+            {type:'COLLECT',npc:7434,cashoutEvent:'sell_parts',quitPays:true,
+                prices:[[1350,30],[1351,20],[1352,20],[1353,100],[1354,40],[1355,14],[1356,14],[1357,14],[1358,341]],
+                bonusAt:11,bonusAdena:1629,ownedBonuses:[{item:1358,adena:543}],
+                drops:[
+                    [26,[[1350,30],[1351,50],[1352,75]]],[29,[[1350,30],[1351,52],[1352,75]]],
+                    [35,[[1353,5],[1354,15],[1355,29],[1357,79]]],[42,[[1353,6],[1354,19],[1356,69],[1357,86]]],
+                    [45,[[1353,9],[1355,59],[1356,77],[1357,97]]],[51,[[1353,9],[1354,59],[1355,79],[1356,100]]],
+                    [457,[[1350,40],[1351,60],[1352,80]]],[458,[[1350,40],[1351,70],[1352,100]]],
+                    [514,[[1353,6],[1354,21],[1355,30],[1356,31],[1357,64]]],
+                    [515,[[1353,5],[1354,20],[1355,31],[1356,33],[1357,69]]]
+                ].map(([npc,thresholds])=>({npc,chance:1,outcomes:thresholds.map(([item,percent],i)=>({item,chance:(percent-(thresholds[i-1]?.[1]||0))/100}))}))}],
+        exchanges:[{npc:7342,event:'assemble',cond:2,label:'Assemble one skeleton (90% success)',
+            takes:[[1353,1],[1354,1],[1355,1],[1356,1],[1357,1]],reward:{choices:[{weight:9,items:[[1358,1]]},{weight:1,items:[]}]}},
+            {npc:7434,event:'sell_skeletons',cond:2,label:'Sell only complete skeletons',consumeAll:[1358],reward:{adena:543,perItemAdena:[[1358,341]]}}]},
     {id:292,name:'Brigands Sweep',minLevel:5,race:4,startNpc:7532,repeatable:true,questItems:[1483,1484,1485,1486,1487],
         stages:[false,true].map(hasContract=>({type:'COLLECT',npc:7532,prices:[[1483,12],[1484,36],[1485,33]],bonusAt:10,bonusAdena:1000,
             handInExtras:[{item:1487,adena:1120,next:1}],

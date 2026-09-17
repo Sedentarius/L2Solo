@@ -53,6 +53,60 @@ async function main() {
         assert.equal(state.state,'started');
         const objective=d.stages[0];
         const random=Math.random;
+        if(d.id===325) {
+            const kill=async(npc,roll=0)=>{Math.random=()=>roll;await quest.onKill(state,{fetchSelfId:()=>npc});};
+            const talk=npc=>quest.onTalk(state,{fetchSelfId:()=>npc});
+            const event=async(npc,name)=>{s.activeNpcTalk={selfId:npc,objectId:1};return Service.onEvent(s,{questId:d.id,name});};
+            const reopen=async()=>{await Database.close();Database.init();s=await sessionFor(d.id);state=s.questStates.get(d.id);};
+            const bones=async()=>{for(const [npc,roll] of [[35,.01],[35,.1],[35,.2],[42,.4],[35,.5]]) await kill(npc,roll);};
+            try {
+                await kill(26);assert.equal(await amount(d.id,1350),0,'diagram required before credit');
+                assert.equal(await event(7342,'assemble'),false,'assembly before Samed denied');
+                await talk(7336);assert.equal(state.getInt('cond'),1);
+                await talk(7434);assert.equal(await amount(d.id,1349),1);assert.equal(state.getInt('cond'),2);
+                const menu=await talk(7434);
+                assert(menu.includes('sell_parts') && menu.includes('sell_skeletons'),'buyer exposes both payment choices');
+                assert.equal(await event(7434,'sell_skeletons'),false,'no empty skeleton bonus');
+                await bones();
+                assert.equal(await event(7434,'assemble'),false,'assembly NPC guard');
+                await reopen();const staleAssembly=await sessionFor(d.id);
+                Math.random=()=>0;await event(7342,'assemble');
+                for(const item of [1353,1354,1355,1356,1357]) assert.equal(await amount(d.id,item),0);
+                assert.equal(await amount(d.id,1358),1,'successful assembly');
+                await assert.rejects(quest.onEvent(staleAssembly.questStates.get(d.id),'assemble'),/step changed/);
+                const staleSale=await sessionFor(d.id);
+                await event(7434,'sell_skeletons');assert.equal(await amount(d.id,57),884);
+                await assert.rejects(quest.onEvent(staleSale.questStates.get(d.id),'sell_skeletons'),/step changed/);
+                assert.equal(await event(7434,'sell_skeletons'),false,'skeleton bonus cannot be replayed');
+                for(let n=0;n<10;n++) await kill(26);
+                await talk(7434);assert.equal(await amount(d.id,57),884,'opening buyer does not force sale');
+                await event(7434,'sell_parts');assert.equal(await amount(d.id,57),1184,'exactly ten pieces receive no bulk bonus');
+                await bones();Math.random=()=>0;await event(7342,'assemble');
+                for(let n=0;n<10;n++) await kill(26);
+                await reopen();const stalePayment=await sessionFor(d.id);
+                await event(7434,'sell_parts');
+                assert.equal(await amount(d.id,57),3997,'eleven pieces include 1629 bulk and 543 skeleton bonuses');
+                await assert.rejects(quest.onEvent(stalePayment.questStates.get(d.id),'sell_parts'),/step changed/);
+                await event(7434,'sell_parts');assert.equal(await amount(d.id,57),3997,'empty bulk sale earns nothing');
+                await bones();Math.random=()=>.99;await event(7342,'assemble');
+                for(const item of [1353,1354,1355,1356,1357,1358]) assert.equal(await amount(d.id,item),0,'failed assembly consumes pieces without reward');
+                // Independent species/outcome checks, including both no-drop and guaranteed tables.
+                for(const [npc,roll,item] of [[26,.4,1351],[29,.6,1352],[35,.2,1355],[42,.4,1356],[45,.85,1357],
+                    [51,.99,1356],[457,.3,1350],[458,.99,1352],[514,.305,1356],[515,.4,1357]]) {
+                    const before=await amount(d.id,item);await kill(npc,roll);assert.equal(await amount(d.id,item),before+1);
+                }
+                const beforeNoDrop=JSON.stringify(await Database.fetchItems(d.id));
+                await kill(26,.99);assert.equal(JSON.stringify(await Database.fetchItems(d.id)),beforeNoDrop);
+                assert.equal(await event(7336,'quit'),false,'quit payment belongs to Samed');
+                await event(7434,'quit');assert.equal(state.state,'created');
+                assert.equal(await amount(d.id,57),4171,'quit pays ten mixed pieces once (174)');
+                for(const item of d.questItems) assert.equal(await amount(d.id,item),0,'quit clears diagram and all pieces');
+                await reopen();assert.equal(await event(7434,'quit'),false,'restart preserves final paid receipt');
+                await event(7336,'start');await talk(7434);assert.equal(await amount(d.id,1349),1,'repeatable diagram reset');
+                await event(7434,'quit');assert.equal(await amount(d.id,57),4171,'empty quit adds no bonus');
+            } finally {Math.random=random;}
+            continue;
+        }
         if(d.id===292) {
             const kill=async(npc,roll)=>{Math.random=()=>roll;await quest.onKill(state,{fetchSelfId:()=>npc});};
             const talk=npc=>quest.onTalk(state,{fetchSelfId:()=>npc});

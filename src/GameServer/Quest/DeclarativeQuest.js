@@ -51,10 +51,36 @@ function create(definition) {
         }
         return { gives, exp: authored.exp || value.exp || 0, sp: authored.sp || value.sp || 0 };
     };
+    const questItemIds=[...new Set([...(d.questItems||[]), ...(d.startItems||[]).map(x=>x[0]),
+        ...d.stages.flatMap(s=>[s.item,...(s.drops||[]).flatMap(x=>[x.item,...(x.outcomes||[]).map(o=>o.item)]),
+            ...(s.transforms||[]).map(x=>x.to),...(s.sideDrops||[]).map(x=>x.item),
+            ...(s.gives||[]).map(x=>x[0]),...(s.takes||[]).map(x=>x[0])]).filter(Boolean)])];
+    const cleanup=state=>questItemIds.map(id=>[id,count(state,id)]).filter(([,n])=>n>0);
+    async function cashout(state,stage,finish=false) {
+        let takes=stage.prices.map(([id])=>[id,count(state,id)]).filter(([,n])=>n>0);
+        const paid=takes.length>0;
+        if(!paid && !finish) return;
+        const total=takes.filter(([id])=>!stage.bonusItems||stage.bonusItems.includes(id)).reduce((n,[,amount])=>n+amount,0);
+        let adena=takes.reduce((n,[id,amount])=>n+amount*stage.prices.find(p=>p[0]===id)[1],0)
+            +(paid && total>=stage.bonusAt ? stage.bonusAdena : 0);
+        let next=state.getInt('cond');
+        if(paid) {
+            for(const bonus of stage.ownedBonuses||[]) if(count(state,bonus.item)>0) adena+=bonus.adena;
+            for(const extra of stage.handInExtras||[]) {
+                const amount=count(state,extra.item);
+                if(amount>0) {takes.push([extra.item,amount]);adena+=extra.adena;next=extra.next||next;}
+            }
+        }
+        if(finish) takes=cleanup(state);
+        await step(state,{takes,...rewards(state,{adena}),status:finish?'created':'started',variables:{...state.variables,
+            cond:String(finish?0:next),cashouts:String(state.getInt('cashouts')+(paid?1:0))}});
+    }
     const quest = {
         id: d.id, name: d.name, definition: d, npcs, startNpcs: [d.startNpc],
         killNpcs: [...new Set(d.stages.flatMap(s => (s.drops || []).map(x => x.npc)))],
-        eventNpc: event => choices.find(c=>c.event===event)?.npc ?? exchanges.find(e=>e.event===event)?.npc ?? (event === 'start' || (event === 'quit' && d.stages.some(s=>s.type==='COLLECT')) ? d.startNpc : null),
+        eventNpc: event => choices.find(c=>c.event===event)?.npc ?? exchanges.find(e=>e.event===event)?.npc
+            ?? d.stages.find(s=>s.cashoutEvent===event)?.npc
+            ?? (event==='start'?d.startNpc:event==='quit' && d.stages.some(s=>s.type==='COLLECT')?(d.quitNpc||d.startNpc):null),
         canTalk: state => state.isStarted() || state.isCompleted() || allowed(state),
         async onEvent(state, event) {
             const choice=state.isStarted() && stageFor(state)?.choices?.find(c=>c.event===event);
@@ -68,21 +94,26 @@ function create(definition) {
             }
             const exchange=exchanges.find(e=>e.event===event);
             if(exchange && state.isStarted() && state.getInt('cond')===exchange.cond) {
-                let takes=exchange.takes,gives=exchange.gives;
+                let takes=exchange.takes || (exchange.consumeAll||[]).map(id=>[id,count(state,id)]).filter(([,n])=>n>0),gives=exchange.gives;
                 if(exchange.convertAll) {
                     const {from,to,min,max}=exchange.convertAll;
                     const amount=count(state,from);
                     if(!amount) return null;
                     takes=[[from,amount]];gives=[[to,amount*(min+Math.floor(Math.random()*(max-min+1)))]];
                 }
-                if(!takes.every(([id,n])=>count(state,id)>=n)) return null;
+                if(!takes.length || !takes.every(([id,n])=>count(state,id)>=n)) return null;
                 const reward=exchange.reward ? rewards(state,exchange.reward) : {gives};
                 await step(state,{takes,...reward,
                     ...(exchange.next ? {variables:{...state.variables,cond:String(exchange.next)}} : {})});
                 return page(d.name,'Your exchange is complete.');
             }
+            if(state.isStarted() && stageFor(state)?.cashoutEvent && event===stageFor(state).cashoutEvent) {
+                await cashout(state,stageFor(state));
+                return page(d.name,'Your collected items have been paid for.');
+            }
             if (event === 'quit' && state.isStarted() && stageFor(state)?.type === 'COLLECT') {
-                await quest.onAbort(state);
+                if(stageFor(state).quitPays) await cashout(state,stageFor(state),true);
+                else await quest.onAbort(state);
                 return page(d.name, 'Your task has ended.');
             }
             if (event !== 'start' || state.isStarted() || state.isCompleted() || !allowed(state)) return null;
@@ -99,24 +130,15 @@ function create(definition) {
             const stage = stageFor(state);
             if (!stage) return null;
             const offers=exchanges.filter(e=>e.npc===id && e.cond===state.getInt('cond'));
-            if(offers.length) return page(d.name,offers.map(e=>`<a action="bypass -h quest ${d.id} ${e.event}">${e.label}</a>`).join('<br>'));
+            const offerHtml=offers.map(e=>`<a action="bypass -h quest ${d.id} ${e.event}">${e.label}</a>`).join('<br>');
+            if(offers.length && !(stage.cashoutEvent && stage.npc===id)) return page(d.name,offerHtml);
             if(stage.type==='CHOICE') return page(d.name,stage.choices.filter(c=>c.npc===id)
                 .map(c=>`<a action="bypass -h quest ${d.id} ${c.event}">${c.label}</a>`).join('<br>')||'Consult the people involved in your task.');
             if (stage.type === 'KILL_COLLECT') return page(d.name, `${describe(stage)}<br>${objectives(stage).map(([id,n])=>`${itemName(id)}: ${count(state,id)}/${n}`).join('<br>')}`);
             if (id !== stage.npc) return page(d.name, stage.text || 'Continue your task.');
             if (stage.type === 'COLLECT') {
-                const takes=stage.prices.map(([item])=>[item,count(state,item)]).filter(([,n])=>n>0);
-                if(takes.length) {
-                    const total=takes.filter(([id])=>!stage.bonusItems||stage.bonusItems.includes(id)).reduce((n,[,amount])=>n+amount,0);
-                    let adena=takes.reduce((n,[item,amount])=>n+amount*stage.prices.find(p=>p[0]===item)[1],0)
-                        +(total >= stage.bonusAt ? stage.bonusAdena : 0);
-                    let next=state.getInt('cond');
-                    for(const extra of stage.handInExtras||[]) {
-                        const amount=count(state,extra.item);
-                        if(amount>0) {takes.push([extra.item,amount]);adena+=extra.adena;next=extra.next||next;}
-                    }
-                    await step(state,{takes,...rewards(state,{adena}),variables:{...state.variables,cond:String(next),cashouts:String(state.getInt('cashouts')+1)}});
-                }
+                if(stage.cashoutEvent) return page(d.name,`${offerHtml}<br><a action="bypass -h quest ${d.id} ${stage.cashoutEvent}">Sell collected pieces.</a><br><a action="bypass -h quest ${d.id} quit">Finish this task.</a>`);
+                await cashout(state,stage);
                 return page(d.name, `${describe(stage)}<br>Continue hunting, or <a action="bypass -h quest ${d.id} quit">end this task</a>.`);
             }
             const takes = [...(stage.takes || []), ...(stage.consumeAll||[]).map(id=>[id,count(state,id)]).filter(([,n])=>n>0)];
@@ -172,9 +194,8 @@ function create(definition) {
             state.playSound(complete ? 'ItemSound.quest_middle' : 'ItemSound.quest_itemget');
         },
         async onAbort(state) {
-            const ids = [...new Set([...(d.questItems||[]), ...(d.startItems || []).map(x => x[0]), ...d.stages.flatMap(s => [s.item, ...(s.drops || []).flatMap(x => [x.item,...(x.outcomes||[]).map(o=>o.item)]), ...(s.transforms||[]).map(x=>x.to), ...(s.sideDrops||[]).map(x=>x.item), ...(s.gives || []).map(x => x[0]), ...(s.takes || []).map(x => x[0])]).filter(Boolean)])];
             await step(state, { status: 'created', variables: { completions: state.get('completions', '0'), cashouts:state.get('cashouts','0') },
-                takes: ids.map(id => [id, count(state, id)]).filter(([,n]) => n > 0) });
+                takes: cleanup(state) });
         }
     };
     return quest;
