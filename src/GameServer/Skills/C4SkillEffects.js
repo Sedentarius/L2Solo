@@ -100,7 +100,7 @@ function execute(session, actor, target, skill, context = {}) {
 
     if (semantic.skillType === C4SkillRules.HEAL_PERCENT) {
         // Battle Roar and Spirit of Ogre raise maximum HP before their percentage heal.
-        const effectBeforeHeal = [109, 121].includes(Number(skill.fetchSelfId()));
+        const effectBeforeHeal = [109, 121].includes(Number(skill.fetchSelfId?.()));
         if (effectBeforeHeal && semantic.effect) {
             result.effect = applyEffect(session, target, skill, semantic, actor);
         }
@@ -394,7 +394,7 @@ function execute(session, actor, target, skill, context = {}) {
 function finalizeSkillResult(result, session, actor, target, skill, semantic) {
     // Poison Blade Dance is hostile on application, even when resisted.
     // Waiting for its first DOT tick leaves a resisted cast without retaliation.
-    if (Number(skill.fetchSelfId()) === 84 && actor && target !== actor
+    if (Number(skill.fetchSelfId?.()) === 84 && actor && target !== actor
         && target?.fetchAttackable?.() === true && target.isDead?.() !== true
         && target.state?.fetchDead?.() !== true) {
         if (typeof target.addDamageHate === 'function') target.addDamageHate(session, actor, 0, 1);
