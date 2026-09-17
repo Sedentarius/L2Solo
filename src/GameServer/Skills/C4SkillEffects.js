@@ -387,6 +387,14 @@ function execute(session, actor, target, skill, context = {}) {
 }
 
 function finalizeSkillResult(result, session, actor, target, skill, semantic) {
+    // Poison Blade Dance is hostile on application, even when resisted.
+    // Waiting for its first DOT tick leaves a resisted cast without retaliation.
+    if (Number(skill.fetchSelfId()) === 84 && actor && target !== actor
+        && target?.fetchAttackable?.() === true && target.isDead?.() !== true
+        && target.state?.fetchDead?.() !== true) {
+        if (typeof target.addDamageHate === 'function') target.addDamageHate(session, actor, 0, 1);
+        else target.enterCombatState?.(session, actor);
+    }
     result.aggroPointsApplied = applyAggroPoints(session, actor, target, skill, semantic);
     return result;
 }

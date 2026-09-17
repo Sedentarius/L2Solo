@@ -4379,6 +4379,23 @@ assert.strictEqual(poisonBladeOutcome.effect.dot.count, 10, 'Poison Blade Dance 
 assert.strictEqual(poisonBladeOutcome.effect.dot.intervalMs, 3000, 'Poison Blade Dance should tick every sourced 3 seconds');
 EffectStore.remove(poisonBladeTarget, 'poison');
 
+for (const [level, magicLevel] of [[1, 55], [2, 60], [3, 72]]) {
+    assert.strictEqual(skill({ selfId: 84, level }).fetchSemantic().magicLevel, magicLevel, 'Poison Blade Dance must use its sourced magic level');
+}
+for (const resisted of [false, true]) {
+    const target = statActor();
+    const hateEvents = [];
+    target.fetchAttackable = () => true;
+    target.addDamageHate = (castSession, source, damage, hate) => hateEvents.push({ source, damage, hate });
+    const outcome = SkillEffects.execute(session(), caster, target, poisonBladeDance, {
+        magicSkill: false, rng: () => resisted ? 1 : 0, attack: { clearLoadedShot() {} }
+    });
+    assert.strictEqual(outcome.effectResisted, resisted);
+    assert.deepStrictEqual(hateEvents, [{ source: caster, damage: 0, hate: 1 }], 'Successful and resisted poison casts must immediately provoke the target without dealing direct damage');
+    assert.strictEqual(EffectStore.hasDebuff(target, 'poison'), !resisted);
+    EffectStore.remove(target, 'poison');
+}
+
 const poisonCloudData = activeSkills.find((entry) => entry.selfId === 1167);
 assert(poisonCloudData, 'Poisonous Cloud should be present in active skills data');
 assert.strictEqual(poisonCloudData.levels.length, 6, 'Poisonous Cloud should preserve sourced 6 base levels');
