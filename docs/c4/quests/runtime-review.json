@@ -1,0 +1,899 @@
+{
+  "1": {
+    "certified": false,
+    "certificationBlocker": {
+      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
+      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
+    }
+  },
+  "2": {
+    "certified": false,
+    "certificationBlocker": {
+      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
+      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
+    }
+  },
+  "3": {
+    "certified": false,
+    "certificationBlocker": {
+      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
+      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
+    }
+  },
+  "4": {
+    "certified": false,
+    "certificationBlocker": {
+      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
+      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
+    }
+  },
+  "5": {
+    "certified": false,
+    "certificationBlocker": {
+      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
+      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
+    }
+  },
+  "6": {
+    "certified": false,
+    "certificationBlocker": {
+      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
+      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
+    }
+  },
+  "7": {
+    "certified": false,
+    "certificationBlocker": {
+      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
+      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
+    }
+  },
+  "8": {
+    "certified": false,
+    "certificationBlocker": {
+      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
+      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
+    }
+  },
+  "9": {
+    "certified": false,
+    "certificationBlocker": {
+      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
+      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
+    }
+  },
+  "10": {
+    "certified": false,
+    "certificationBlocker": {
+      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
+      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
+    }
+  },
+  "38": {
+    "certified": false,
+    "runtimeBlocker": {
+      "code": "MISSING_NPC_TEMPLATES",
+      "detail": "Required combat templates 1100/1101 are absent; old non-atomic hand-ins also need recovery."
+    }
+  },
+  "39": {
+    "certified": false,
+    "runtimeBlocker": {
+      "code": "MISSING_NPC_TEMPLATES",
+      "detail": "Required combat template 925 is absent; old non-atomic hand-ins also need recovery."
+    }
+  },
+  "45": {
+    "certified": false,
+    "certificationBlocker": {
+      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
+      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
+    }
+  },
+  "46": {
+    "certified": false,
+    "certificationBlocker": {
+      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
+      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
+    }
+  },
+  "47": {
+    "certified": false,
+    "certificationBlocker": {
+      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
+      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
+    }
+  },
+  "48": {
+    "certified": false,
+    "certificationBlocker": {
+      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
+      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
+    }
+  },
+  "49": {
+    "certified": false,
+    "certificationBlocker": {
+      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
+      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
+    }
+  },
+  "101": {
+    "certified": false,
+    "certificationBlocker": {
+      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
+      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
+    }
+  },
+  "102": {
+    "certified": false,
+    "certificationBlocker": {
+      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
+      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
+    }
+  },
+  "103": {
+    "certified": false,
+    "certificationBlocker": {
+      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
+      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
+    }
+  },
+  "104": {
+    "certified": false,
+    "certificationBlocker": {
+      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
+      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
+    }
+  },
+  "105": {
+    "certified": false,
+    "certificationBlocker": {
+      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
+      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
+    }
+  },
+  "106": {
+    "certified": false,
+    "certificationBlocker": {
+      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
+      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
+    }
+  },
+  "107": {
+    "certified": false,
+    "certificationBlocker": {
+      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
+      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
+    }
+  },
+  "108": {
+    "certified": false,
+    "certificationBlocker": {
+      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
+      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
+    }
+  },
+  "151": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ],
+    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "reviewedRequirements": []
+  },
+  "152": {
+    "certified": false,
+    "certificationBlocker": {
+      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
+      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
+    }
+  },
+  "153": {
+    "certified": false,
+    "certificationBlocker": {
+      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
+      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
+    }
+  },
+  "154": {
+    "certified": false,
+    "certificationBlocker": {
+      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
+      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
+    }
+  },
+  "155": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ],
+    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "reviewedRequirements": []
+  },
+  "156": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ],
+    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "reviewedRequirements": []
+  },
+  "157": {
+    "certified": false,
+    "certificationBlocker": {
+      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
+      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
+    }
+  },
+  "159": {
+    "certified": false,
+    "certificationBlocker": {
+      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
+      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
+    }
+  },
+  "160": {
+    "certified": false,
+    "certificationBlocker": {
+      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
+      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
+    }
+  },
+  "161": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ],
+    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "reviewedRequirements": []
+  },
+  "162": {
+    "certified": false,
+    "certificationBlocker": {
+      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
+      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
+    }
+  },
+  "163": {
+    "certified": false,
+    "certificationBlocker": {
+      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
+      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
+    }
+  },
+  "165": {
+    "certified": true,
+    "tests": [
+      "tests/test_bot_quest_bridge_autonomous_vertical.js",
+      "tests/test_bot_quest_bridge_kill_collect.js",
+      "tests/test_bot_quest_bridge_deliver_complete.js",
+      "tests/test_bot_quest_bridge_handoff.js"
+    ],
+    "bridge": "P0_B_AUTONOMOUS_VERTICAL",
+    "reviewedRequirements": []
+  },
+  "166": {
+    "certified": false,
+    "certificationBlocker": {
+      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
+      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
+    }
+  },
+  "167": {
+    "certified": false,
+    "certificationBlocker": {
+      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
+      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
+    }
+  },
+  "168": {
+    "certified": false,
+    "certificationBlocker": {
+      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
+      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
+    }
+  },
+  "169": {
+    "certified": false,
+    "certificationBlocker": {
+      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
+      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
+    }
+  },
+  "255": {
+    "certified": false,
+    "blocker": {
+      "code": "QUARANTINED_CHRONICLE_STATUS"
+    }
+  },
+  "257": {
+    "certified": false,
+    "blocker": {
+      "code": "NEWBIE_REWARD_STATE_UNRESOLVED",
+      "detail": "Ordinary payouts are reviewed; shared once-per-character beginner-shot eligibility/receipt must be reconciled before complete implementation."
+    }
+  },
+  "258": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ],
+    "bridge": "REVIEWED_COLLECT_ROUTE",
+    "reviewedRequirements": []
+  },
+  "259": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ],
+    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "reviewedRequirements": []
+  },
+  "260": {
+    "certified": false,
+    "blocker": {
+      "code": "NEWBIE_REWARD_STATE_UNRESOLVED",
+      "detail": "Ordinary payouts are reviewed; shared once-per-character beginner-shot eligibility/receipt must be reconciled before complete implementation."
+    }
+  },
+  "261": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ],
+    "bridge": "REVIEWED_COLLECT_ROUTE",
+    "reviewedRequirements": []
+  },
+  "262": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ],
+    "bridge": "REVIEWED_COLLECT_ROUTE",
+    "reviewedRequirements": []
+  },
+  "263": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ],
+    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "reviewedRequirements": []
+  },
+  "264": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ],
+    "bridge": "REVIEWED_COLLECT_ROUTE",
+    "reviewedRequirements": []
+  },
+  "265": {
+    "certified": false,
+    "blocker": {
+      "code": "NEWBIE_REWARD_STATE_UNRESOLVED",
+      "detail": "Ordinary payouts are reviewed; shared once-per-character beginner-shot eligibility/receipt must be reconciled before complete implementation."
+    }
+  },
+  "266": {
+    "certified": false,
+    "runtimeBlocker": {
+      "code": "NPC_ID_MAPPING_UNRESOLVED",
+      "detail": "Technical reference NPCs 31852/31853 have no local native 8852/8853 templates. Multiple Murika/Bremec templates exist; do not guess a replacement. No evidence that Q266 requires DEFEND."
+    }
+  },
+  "267": {
+    "certified": false,
+    "runtimeBlocker": {
+      "code": "NPC_ID_MAPPING_UNRESOLVED",
+      "detail": "Technical reference NPCs 31852/31853 have no local native 8852/8853 templates. Multiple Murika/Bremec templates exist; do not guess a replacement. No evidence that Q266 requires DEFEND."
+    }
+  },
+  "271": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ],
+    "bridge": "REVIEWED_COLLECT_ROUTE",
+    "reviewedRequirements": []
+  },
+  "272": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ],
+    "bridge": "REVIEWED_COLLECT_ROUTE",
+    "reviewedRequirements": []
+  },
+  "273": {
+    "certified": false,
+    "blocker": {
+      "code": "NEWBIE_REWARD_STATE_UNRESOLVED",
+      "detail": "Ordinary payouts are reviewed; shared once-per-character beginner-shot eligibility/receipt must be reconciled before complete implementation."
+    }
+  },
+  "274": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ],
+    "bridge": "REVIEWED_COLLECT_ROUTE",
+    "reviewedRequirements": []
+  },
+  "275": {
+    "certified": false,
+    "blocker": {
+      "code": "ENCOUNTER_HANDOFF_UNCERTIFIED",
+      "detail": "Hot scripted spawning already exists. Owner-scoped encounter recovery and cold/hot parity need focused implementation; DEFEND requirement remains unproven."
+    }
+  },
+  "276": {
+    "certified": false,
+    "blocker": {
+      "code": "ENCOUNTER_HANDOFF_UNCERTIFIED",
+      "detail": "Hot scripted spawning already exists. Owner-scoped encounter recovery and cold/hot parity need focused implementation; DEFEND requirement remains unproven."
+    }
+  },
+  "277": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ],
+    "bridge": "REVIEWED_COLLECT_ROUTE",
+    "reviewedRequirements": []
+  },
+  "291": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ],
+    "bridge": "REVIEWED_COLLECT_ROUTE",
+    "reviewedRequirements": []
+  },
+  "292": {
+    "certified": false,
+    "blocker": {
+      "code": "BRANCH_DEFINITION_PENDING",
+      "detail": "No absent generic resolver demonstrated. Retail exchanges, branches or source details need reviewed definitions and tests."
+    }
+  },
+  "293": {
+    "certified": false,
+    "blocker": {
+      "code": "NEWBIE_REWARD_STATE_UNRESOLVED",
+      "detail": "Ordinary payouts are reviewed; shared once-per-character beginner-shot eligibility/receipt must be reconciled before complete implementation."
+    }
+  },
+  "294": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ],
+    "bridge": "REVIEWED_COLLECT_ROUTE",
+    "reviewedRequirements": []
+  },
+  "295": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ],
+    "bridge": "REVIEWED_COLLECT_ROUTE",
+    "reviewedRequirements": []
+  },
+  "296": {
+    "certified": false,
+    "blocker": {
+      "code": "BRANCH_DEFINITION_PENDING",
+      "detail": "No absent generic resolver demonstrated. Retail exchanges, branches or source details need reviewed definitions and tests."
+    }
+  },
+  "297": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ],
+    "bridge": "REVIEWED_COLLECT_ROUTE",
+    "reviewedRequirements": []
+  },
+  "303": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ],
+    "bridge": "REVIEWED_COLLECT_ROUTE",
+    "reviewedRequirements": []
+  },
+  "306": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ],
+    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "reviewedRequirements": []
+  },
+  "313": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ],
+    "bridge": "REVIEWED_COLLECT_ROUTE",
+    "reviewedRequirements": []
+  },
+  "316": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ],
+    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "reviewedRequirements": []
+  },
+  "317": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ],
+    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "reviewedRequirements": []
+  },
+  "319": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ],
+    "bridge": "REVIEWED_COLLECT_ROUTE",
+    "reviewedRequirements": []
+  },
+  "320": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ],
+    "bridge": "REVIEWED_COLLECT_ROUTE",
+    "reviewedRequirements": []
+  },
+  "324": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ],
+    "bridge": "REVIEWED_COLLECT_ROUTE",
+    "reviewedRequirements": []
+  },
+  "325": {
+    "certified": false,
+    "blocker": {
+      "code": "BRANCH_DEFINITION_PENDING",
+      "detail": "No absent generic resolver demonstrated. Retail exchanges, branches or source details need reviewed definitions and tests."
+    }
+  },
+  "340": {
+    "certified": false,
+    "blocker": {
+      "code": "ENCOUNTER_HANDOFF_UNCERTIFIED",
+      "detail": "Hot scripted spawning already exists. Owner-scoped encounter recovery and cold/hot parity need focused implementation; DEFEND requirement remains unproven."
+    }
+  },
+  "341": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ],
+    "bridge": "REVIEWED_COLLECT_ROUTE",
+    "reviewedRequirements": []
+  },
+  "347": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ],
+    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "reviewedRequirements": []
+  },
+  "362": {
+    "certified": false,
+    "runtimeBlocker": {
+      "code": "MISSING_NPC_TEMPLATES",
+      "detail": "Music-quest NPCs Swan/Galion/Nanarin are absent at native IDs 7957/7958/7956."
+    }
+  },
+  "363": {
+    "certified": false,
+    "runtimeBlocker": {
+      "code": "MISSING_NPC_TEMPLATES",
+      "detail": "Music-quest NPCs Swan/Galion/Nanarin are absent at native IDs 7957/7958/7956."
+    }
+  },
+  "364": {
+    "certified": false,
+    "runtimeBlocker": {
+      "code": "MISSING_NPC_TEMPLATES",
+      "detail": "Music-quest NPCs Swan/Galion/Nanarin are absent at native IDs 7957/7958/7956."
+    }
+  },
+  "378": {
+    "certified": false,
+    "blocker": {
+      "code": "BRANCH_DEFINITION_PENDING",
+      "detail": "No absent generic resolver demonstrated. Retail exchanges, branches or source details need reviewed definitions and tests."
+    }
+  },
+  "379": {
+    "certified": false,
+    "runtimeBlocker": {
+      "code": "MISSING_ITEM_TEMPLATES",
+      "detail": "Reviewed definition is disabled: 5893/5894/5956/5957/5958 absent."
+    }
+  },
+  "385": {
+    "certified": false,
+    "runtimeBlocker": {
+      "code": "PARTY_SEVEN_SIGNS_INTEGRATION",
+      "detail": "Needs shared party credit and Seven Signs participation/reward integration; generic resolver already exists."
+    }
+  },
+  "401": {
+    "certified": true,
+    "tests": [
+      "tests/test_first_profession_proof.js",
+      "tests/test_quest_runtime.js"
+    ],
+    "professionProofContract": "PASS",
+    "bridge": "AUTONOMOUS_COLD_AND_HOT_COLD_HANDOFF"
+  },
+  "402": {
+    "certified": false,
+    "tests": [
+      "tests/test_first_profession_proof.js",
+      "tests/test_quest_runtime.js"
+    ],
+    "professionProofContract": "PASS",
+    "bridge": "AUTONOMOUS_ROUTE_PENDING",
+    "certificationBlocker": {
+      "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
+      "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
+    }
+  },
+  "403": {
+    "certified": false,
+    "tests": [
+      "tests/test_first_profession_proof.js",
+      "tests/test_quest_runtime.js"
+    ],
+    "professionProofContract": "PASS",
+    "bridge": "AUTONOMOUS_ROUTE_PENDING",
+    "certificationBlocker": {
+      "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
+      "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
+    }
+  },
+  "404": {
+    "certified": false,
+    "tests": [
+      "tests/test_first_profession_proof.js",
+      "tests/test_quest_runtime.js"
+    ],
+    "professionProofContract": "PASS",
+    "bridge": "AUTONOMOUS_ROUTE_PENDING",
+    "certificationBlocker": {
+      "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
+      "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
+    }
+  },
+  "405": {
+    "certified": false,
+    "tests": [
+      "tests/test_first_profession_proof.js",
+      "tests/test_quest_runtime.js"
+    ],
+    "professionProofContract": "PASS",
+    "bridge": "AUTONOMOUS_ROUTE_PENDING",
+    "certificationBlocker": {
+      "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
+      "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
+    }
+  },
+  "406": {
+    "certified": false,
+    "tests": [
+      "tests/test_first_profession_proof.js",
+      "tests/test_quest_runtime.js"
+    ],
+    "professionProofContract": "PASS",
+    "bridge": "AUTONOMOUS_ROUTE_PENDING",
+    "certificationBlocker": {
+      "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
+      "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
+    }
+  },
+  "407": {
+    "certified": false,
+    "tests": [
+      "tests/test_first_profession_proof.js",
+      "tests/test_quest_runtime.js"
+    ],
+    "professionProofContract": "PASS",
+    "bridge": "AUTONOMOUS_ROUTE_PENDING",
+    "certificationBlocker": {
+      "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
+      "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
+    }
+  },
+  "408": {
+    "certified": false,
+    "tests": [
+      "tests/test_first_profession_proof.js",
+      "tests/test_quest_runtime.js"
+    ],
+    "professionProofContract": "PASS",
+    "bridge": "AUTONOMOUS_ROUTE_PENDING",
+    "certificationBlocker": {
+      "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
+      "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
+    }
+  },
+  "409": {
+    "certified": false,
+    "tests": [
+      "tests/test_first_profession_proof.js",
+      "tests/test_quest_runtime.js"
+    ],
+    "professionProofContract": "PASS",
+    "bridge": "AUTONOMOUS_ROUTE_PENDING",
+    "certificationBlocker": {
+      "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
+      "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
+    }
+  },
+  "410": {
+    "certified": false,
+    "tests": [
+      "tests/test_first_profession_proof.js",
+      "tests/test_quest_runtime.js"
+    ],
+    "professionProofContract": "PASS",
+    "bridge": "AUTONOMOUS_ROUTE_PENDING",
+    "certificationBlocker": {
+      "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
+      "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
+    }
+  },
+  "411": {
+    "certified": false,
+    "tests": [
+      "tests/test_first_profession_proof.js",
+      "tests/test_quest_runtime.js"
+    ],
+    "professionProofContract": "PASS",
+    "bridge": "AUTONOMOUS_ROUTE_PENDING",
+    "certificationBlocker": {
+      "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
+      "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
+    }
+  },
+  "412": {
+    "certified": false,
+    "tests": [
+      "tests/test_first_profession_proof.js",
+      "tests/test_quest_runtime.js"
+    ],
+    "professionProofContract": "PASS",
+    "bridge": "AUTONOMOUS_ROUTE_PENDING",
+    "certificationBlocker": {
+      "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
+      "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
+    }
+  },
+  "413": {
+    "certified": false,
+    "tests": [
+      "tests/test_first_profession_proof.js",
+      "tests/test_quest_runtime.js"
+    ],
+    "professionProofContract": "PASS",
+    "bridge": "AUTONOMOUS_ROUTE_PENDING",
+    "certificationBlocker": {
+      "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
+      "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
+    }
+  },
+  "414": {
+    "certified": false,
+    "tests": [
+      "tests/test_first_profession_proof.js",
+      "tests/test_quest_runtime.js"
+    ],
+    "professionProofContract": "PASS",
+    "bridge": "AUTONOMOUS_ROUTE_PENDING",
+    "certificationBlocker": {
+      "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
+      "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
+    }
+  },
+  "415": {
+    "certified": false,
+    "tests": [
+      "tests/test_first_profession_proof.js",
+      "tests/test_quest_runtime.js"
+    ],
+    "professionProofContract": "PASS",
+    "bridge": "AUTONOMOUS_ROUTE_PENDING",
+    "certificationBlocker": {
+      "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
+      "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
+    }
+  },
+  "416": {
+    "certified": false,
+    "tests": [
+      "tests/test_first_profession_proof.js",
+      "tests/test_quest_runtime.js"
+    ],
+    "professionProofContract": "PASS",
+    "bridge": "AUTONOMOUS_ROUTE_PENDING",
+    "certificationBlocker": {
+      "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
+      "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
+    }
+  },
+  "417": {
+    "certified": false,
+    "tests": [
+      "tests/test_first_profession_proof.js",
+      "tests/test_quest_runtime.js"
+    ],
+    "professionProofContract": "PASS",
+    "bridge": "AUTONOMOUS_ROUTE_PENDING",
+    "certificationBlocker": {
+      "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
+      "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
+    }
+  },
+  "418": {
+    "certified": false,
+    "tests": [
+      "tests/test_first_profession_proof.js",
+      "tests/test_quest_runtime.js"
+    ],
+    "professionProofContract": "PASS",
+    "bridge": "AUTONOMOUS_ROUTE_PENDING",
+    "certificationBlocker": {
+      "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
+      "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
+    }
+  },
+  "419": {
+    "certified": false,
+    "certificationBlocker": {
+      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
+      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
+    }
+  },
+  "422": {
+    "certified": false,
+    "runtimeBlocker": {
+      "code": "SIN_EATER_PROGRESSION",
+      "detail": "Needs Sin Eater pet progression and authoritative PK reduction; ordinary collection would misrepresent the quest."
+    }
+  },
+  "634": {
+    "certified": false,
+    "runtimeBlocker": {
+      "code": "PARTY_SEVEN_SIGNS_INTEGRATION",
+      "detail": "Needs shared party credit and Seven Signs participation/reward integration; generic resolver already exists."
+    }
+  },
+  "635": {
+    "certified": false,
+    "runtimeBlocker": {
+      "code": "DIMENSION_RIFT_INSTANCE_LIFECYCLE",
+      "detail": "Needs party instance admission, timed rooms, encounter ownership and restart/handoff semantics."
+    }
+  },
+  "999": {
+    "certified": false,
+    "blocker": {
+      "code": "QUARANTINED_CHRONICLE_STATUS"
+    }
+  }
+}

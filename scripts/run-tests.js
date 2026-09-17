@@ -1,6 +1,7 @@
 const { spawnSync } = require('child_process');
 
 const tests = [
+    'tests/test_c4_inventory_validation.js',
     'tests/test_first_profession_proof.js',
     'tests/test_c4_declarative_quests.js',
     'tests/test_npc_passive_retaliation.js',
@@ -514,14 +515,21 @@ const tests = [
 const fromArgument = process.argv.indexOf('--from');
 const fromTest = fromArgument >= 0 ? process.argv[fromArgument + 1] : null;
 if (fromTest && !tests.includes(fromTest)) throw new Error(`Unknown regression start: ${fromTest}`);
+const keepGoing = process.argv.includes('--keep-going');
+const reportArgument=process.argv.indexOf('--report');
+const results=[];
 for (const testFile of fromTest ? tests.slice(tests.indexOf(fromTest)) : tests) {
     console.log(`\n> node ${testFile}`);
     const result = spawnSync(process.execPath, [testFile], {
         cwd: process.cwd(),
-        stdio: 'inherit'
+        stdio: 'inherit',
+        ...(keepGoing ? {timeout:180000} : {})
     });
+    results.push({test:testFile,exitCode:result.status,error:result.error?.message||null});
 
     if (result.status !== 0) {
-        process.exit(result.status || 1);
+        if(!keepGoing) process.exit(result.status || 1);
     }
 }
+if(reportArgument>=0) require('fs').writeFileSync(process.argv[reportArgument+1],JSON.stringify({results},null,2)+'\n');
+if(results.some(r=>r.exitCode!==0)) process.exitCode=1;

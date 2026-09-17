@@ -103,7 +103,7 @@ async function run() {
         const realPromise = realFixture.session.pendingPathRequest.promise;
         await realPromise;
         assert.strictEqual(synchronousFindPathCalls, 0, 'eligible companion movement must never call synchronous findPath');
-        assert.strictEqual(realFixture.session.lastPathfinding.strategy, 'worker_geodata');
+        assert.strictEqual(realFixture.session.lastPathfinding.strategy, 'worker_geodata', JSON.stringify(realFixture.session.lastPathfinding));
         assert.strictEqual(realFixture.session.lastPathfinding.worker, true);
         assert.strictEqual(realFixture.actor.state.towards, 'move', 'the main thread must apply a current real-worker path');
         stopMove(realFixture);
@@ -123,7 +123,7 @@ async function run() {
         await autonomousFixture.session.pendingPathRequest.promise;
         assert.strictEqual(synchronousFindPathCalls, 0,
             'autonomous town errands must not execute A* on the game thread');
-        assert.strictEqual(autonomousFixture.session.lastPathfinding.strategy, 'worker_geodata');
+        assert.strictEqual(autonomousFixture.session.lastPathfinding.strategy, 'worker_geodata', JSON.stringify(autonomousFixture.session.lastPathfinding));
         assert.strictEqual(autonomousFixture.session.lastPathfinding.routeUsable, true,
             'the real Giran route to Groot must use the requested errand budget');
         assert.strictEqual(autonomousFixture.session.lastPathfinding.maxNodes, 30000);
