@@ -112,15 +112,10 @@ module.exports = {
     }
 
     if (hasAllStolenItems(state) && !count(state, HORSESHOE_OF_LIGHT)) {
-      const profession = await quest.awardFirstProfession(state, 7);
+      const profession = await quest.awardFirstProfession(state, 7, STOLEN_ITEMS.map(id => [id, 1]), [NETIS_BOW, NETIS_DAGGER, WANTED_BILL]);
       if (!profession.ok) {
         return page('Bezique', profession.reason === 'level' ? `Reach level ${profession.requiredLevel} to become a Rogue.` : 'Your profession could not be granted. Keep your quest items and try again.');
-      }
-      for (const item of [NETIS_BOW, NETIS_DAGGER, WANTED_BILL, ...STOLEN_ITEMS]) await quest.takeItem(state.session, item, -1);
-      await quest.giveItem(state.session, BEZIQUES_RECOMMENDATION, 1);
-      state.playSound(FINISH);
-      await state.exit(false);
-      return page('Bezique', 'You have completed the Path to Rogue and become a Rogue.');
+      } state.playSound(FINISH); return page('Bezique', 'You have completed the Path to Rogue. Present your proof for class transfer at level 20.');
     }
     if (count(state, BEZIQUES_LETTER)) return page('Bezique', 'Take my letter to Neti.');
     if (count(state, HORSESHOE_OF_LIGHT)) {

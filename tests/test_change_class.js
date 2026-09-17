@@ -97,6 +97,16 @@ function createSession({ level = 20, classId = 0 } = {}) {
 }
 
 (async () => {
+    Database.transferFirstProfession = async () => ({ ok: false, reason: 'proof' });
+    const noProof = createSession();
+    assert.equal((await ChangeClass(noProof, ['change-class', '4'])).reason, 'proof');
+    assert.equal(noProof.actor.fetchClassId(), 0, 'ordinary Gatekeeper transfer requires proof');
+    // Database proof/consumption semantics are exercised against SQLite in
+    // test_first_profession_proof; this test covers successful actor/UI refresh.
+    Database.transferFirstProfession = async (id, classId) => {
+        await Database.updateCharacterClassId(id, classId);
+        return { ok: true, targetClassId: classId };
+    };
     const lowSession = createSession({ level: 19, classId: 0 });
     ChangeClass(lowSession, ['change-class', '4', 'Human', 'Knight']);
     assert.strictEqual(lowSession.packets.at(-1)[0], 0x0f, 'low-level class change rejection should render NPC HTML');

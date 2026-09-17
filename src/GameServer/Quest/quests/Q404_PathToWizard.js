@@ -158,15 +158,10 @@ module.exports = {
     if (npcId === GALLINT) {
       const signs = [FLAME_EARRING, WIND_BANGLE, WATER_NECKLACE, EARTH_RING];
       if (signs.every((item) => count(state, item))) {
-        const profession = await quest.awardFirstProfession(state, 11);
+        const profession = await quest.awardFirstProfession(state, 11, signs.map(id => [id, 1]));
         if (!profession.ok) {
           return page("Gallint", profession.reason === "level" ? `Reach level ${profession.requiredLevel} to become a Wizard.` : "Your profession could not be granted. Keep your elemental signs and try again.");
-        }
-        for (const item of signs) await quest.takeItem(state.session, item);
-        if (!count(state, BEAD_OF_SEASON)) await quest.giveItem(state.session, BEAD_OF_SEASON, 1);
-        state.playSound(FINISH);
-        await state.exit(false);
-        return page("Gallint", "You have completed the Path to Wizard and become a Wizard.");
+        } state.playSound(FINISH); return page("Gallint", "You have completed the Path to Wizard. Present your proof for class transfer at level 20.");
       }
       return page("Gallint", "Bring me the four elemental signs.");
     }

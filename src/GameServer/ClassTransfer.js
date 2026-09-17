@@ -69,6 +69,7 @@ async function transfer(session, targetClassId, options = {}) {
             session.dataSendToMe?.(ServerResponse.skillsList(actor.skillset.fetchSkills()));
             await invoke('GameServer/Shortcuts').refreshSkills(session, actor);
             session.dataSendToMe?.(ServerResponse.userInfo(actor));
+            session.dataSendToMe?.(ServerResponse.statusUpdate(actor.fetchId(), statusParams(actor)));
             session.dataSendToOthers?.(ServerResponse.charInfo(actor), actor);
         } catch (error) {
             utils.infoWarn('Character', 'class committed; refresh deferred for %s: %s', actor.fetchId(), error.message);

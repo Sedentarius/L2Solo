@@ -84,13 +84,8 @@ module.exports = {
 
     if (npcId === MANUEL) {
       if (count(state, MONEY_OF_SWINDLER) && count(state, DIARY_OF_ALLANA) && count(state, LIZARD_CAPTAIN_ORDER) && !count(state, HALF_OF_DIARY)) {
-        const profession = await quest.awardFirstProfession(state, 29);
-        if (!profession.ok) return page("Manuel", profession.reason === "level" ? `Reach level ${profession.requiredLevel} to become an Elven Oracle.` : "Your profession could not be granted. Keep the evidence and try again.");
-        for (const item of [MONEY_OF_SWINDLER, DIARY_OF_ALLANA, LIZARD_CAPTAIN_ORDER, CRYSTAL_MEDALLION]) await quest.takeItem(state.session, item);
-        await quest.giveItem(state.session, LEAF_OF_ORACLE, 1);
-        state.playSound(FINISH);
-        await state.exit(false);
-        return page("Manuel", "You have completed the Path to Elven Oracle and become an Elven Oracle.");
+        const profession = await quest.awardFirstProfession(state, 29, [MONEY_OF_SWINDLER, DIARY_OF_ALLANA, LIZARD_CAPTAIN_ORDER, CRYSTAL_MEDALLION].map(id => [id, 1]));
+        if (!profession.ok) return page("Manuel", profession.reason === "level" ? `Reach level ${profession.requiredLevel} to become an Elven Oracle.` : "Your profession could not be granted. Keep the evidence and try again."); state.playSound(FINISH); return page("Manuel", "You have completed the Path to Elven Oracle. Present your proof for class transfer at level 20.");
       }
       return page("Manuel", "Bring me Allana's diary, Perrin's money, and the Lizard Captain's Order.");
     }

@@ -165,6 +165,7 @@ async function onEvent(session, event) {
     if (quest.eventNpc?.(eventName) !== Number(npc.selfId)) return false;
     const state = stateFor(session, quest);
     const before = activeQuestSnapshot(session);
+    if (state.isCompleted()) return false;
     const html = await quest.onEvent(state, eventName);
     if (!html) return false;
     if (before !== activeQuestSnapshot(session)) syncActiveQuests(session);
@@ -327,6 +328,7 @@ async function awardFirstProfession(state, targetClassId, takes = [], cleanup = 
     if (amount) required.set(id, Math.max(amount, required.get(id) || 0));
   }
   return require('./QuestStep').apply(state, { takes: [...required], gives: [[spec.itemId, 1]],
+    ...require('./FirstProfessionProof').rewardFor(spec.questId),
     variables: { ...state.variables, professionProof: String(spec.itemId) }, status: 'completed' });
 }
 

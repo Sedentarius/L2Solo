@@ -50,7 +50,7 @@ function plan({ classId, level, seed } = {}) {
     return { classId: resolvedClassId, transitions };
 }
 
-async function reconcile({ characterId, classId, level, seed = characterId } = {}) {
+async function reconcile({ characterId, classId, level, seed = characterId, session = null } = {}) {
     const Database = invoke('Database');
     const Skillset = invoke('GameServer/Actor/Skillset');
     const id = Number(characterId);
@@ -64,9 +64,16 @@ async function reconcile({ characterId, classId, level, seed = characterId } = {
     for (const ancestor of ClassProgression.lineage(resolvedClassId)) {
         await skillset.awardSkills(id, ancestor, level);
     }
-    for (let target = nextClass(resolvedClassId, level, seed); target; target = nextClass(resolvedClassId, level, seed)) {
+    let firstTarget = null;
+    if (Number(level) >= 19 && ClassProgression.firstProfMap[resolvedClassId]) {
+        const choice = await Database.chooseFirstProfessionPath(id, resolvedClassId,
+            nextClass(resolvedClassId, 20, id));
+        if (choice.fromClassId === resolvedClassId) firstTarget = choice.toClassId;
+    }
+    for (let target = firstTarget && Number(level) >= 20 ? firstTarget : nextClass(resolvedClassId, level, seed); target; target = nextClass(resolvedClassId, level, seed)) {
         if (ClassProgression.firstProfMap[resolvedClassId]) {
-            const result = await invoke('GameServer/ClassTransfer').transferPersisted(id, target);
+            const authority = invoke('GameServer/ClassTransfer');
+            const result = session ? await authority.transfer(session, target) : await authority.transferPersisted(id, target);
             if (!result.ok) break;
         } else await Database.updateCharacterClassId(id, target);
         resolvedClassId = target;

@@ -1200,6 +1200,13 @@ function applySchemaMigrations() {
             CREATE INDEX death_world_items_ground ON death_world_items(status, id);
             CREATE UNIQUE INDEX death_world_items_active_source
                 ON death_world_items(sourceItemId) WHERE status = 'ground';
+        `)],
+        [43, () => connection.exec(`
+            CREATE TABLE character_profession_paths (
+                characterId INTEGER PRIMARY KEY REFERENCES characters(id) ON DELETE CASCADE,
+                fromClassId INTEGER NOT NULL,
+                toClassId INTEGER NOT NULL
+            );
         `)]
     ];
     const applied = new Set(connection.prepare('SELECT version FROM schema_migrations').all().map((row) => Number(row.version)));
@@ -4241,15 +4248,21 @@ const Database = {
         if (![420, 421].includes(questId)) return Promise.reject(new Error('Unsupported pet quest'));
         return this.applyQuestStep(characterId, questId, expected, next, takes, gives);
     },
-    applyQuestStep(characterId, questId, expected, next, takes, gives) {
+    applyQuestStep(characterId, questId, expected, next, takes, gives, experience = null) {
         return withCharacterFlush(characterId, () => inTransaction(() => {
             if (!require('./GameServer/Quest/QuestRegistry').entries.some(e => e.id === questId && e.status === 'active')) throw new Error('Unsupported quest');
             const row = one('SELECT state, variables FROM character_quests WHERE characterId = ? AND questId = ?', [characterId, questId]);
             const current = row ? JSON.parse(row.variables || '{}') : {};
             if ((row?.state || 'created') !== expected.state || JSON.stringify(current) !== JSON.stringify(expected.variables)) throw new Error('Pet quest step changed');
+            const profession = require('./GameServer/Quest/FirstProfessionProof').forQuest(questId);
+            if (profession && next.state === 'completed') {
+                const character = one('SELECT classId, level FROM characters WHERE id = ?', [characterId]);
+                if (character?.classId !== profession.fromClassId || character.level < 19) throw new Error('Profession eligibility changed');
+            }
             const changed = new Set();
             for (const take of takes) {
-                const items = all('SELECT id, amount FROM items WHERE characterId = ? AND selfId = ? ORDER BY id', [characterId, take.selfId]);
+                const unequipped = [420,421].includes(questId) ? ' AND equipped = 0' : '';
+                const items = all(`SELECT id, amount FROM items WHERE characterId = ? AND selfId = ?${unequipped} ORDER BY id`, [characterId, take.selfId]);
                 if (!Number.isSafeInteger(take.amount) || take.amount < 1 || items.reduce((sum, item) => sum + item.amount, 0) < take.amount) throw new Error('Required quest items missing');
                 let remaining = take.amount;
                 for (const item of items) {
@@ -4268,7 +4281,18 @@ const Database = {
                 else changed.add(Number(write('INSERT INTO items(selfId, name, amount, characterId) VALUES (?, ?, ?, ?)', [give.selfId, give.name, give.amount, characterId]).insertId));
             }
             write(UPSERT_CHARACTER_QUEST, [characterId, questId, next.state, JSON.stringify(next.variables)]);
-            return [...changed].map(id => one('SELECT * FROM items WHERE id = ? AND characterId = ?', [id, characterId]) || { id, amount: 0 });
+            const rows = [...changed].map(id => one('SELECT * FROM items WHERE id = ? AND characterId = ?', [id, characterId]) || { id, amount: 0 });
+            if (experience) {
+                if (![experience.exp, experience.sp].every(n => Number.isSafeInteger(n) && n >= 0)) throw new Error('Invalid quest experience');
+                const actor = one('SELECT exp, sp, level FROM characters WHERE id = ?', [characterId]);
+                const cap = require('./GameServer/Progression/ProgressionCap');
+                const award = cap.applyAward(actor.exp, experience.exp);
+                const level = Math.max(actor.level, cap.levelForExperience(award.totalExp, actor.level));
+                const totalSp = actor.sp + experience.sp;
+                write('UPDATE characters SET exp = ?, sp = ?, level = ? WHERE id = ?', [award.totalExp, totalSp, level, characterId]);
+                rows.experience = { totalExp: award.totalExp, totalSp, level, grantedExp: award.accepted, grantedSp: experience.sp };
+            }
+            return rows;
         }, 'quest:step'));
     },
     transferFirstProfession(characterId, targetClassId) {
@@ -4291,6 +4315,14 @@ const Database = {
             write('UPDATE characters SET classId = ? WHERE id = ?', [spec.toClassId, characterId]);
             return { ok: true, targetClassId: spec.toClassId, requiredLevel: 20, consumedItemId: item.id, remaining: item.amount - 1 };
         }, 'quest:first-profession-transfer'));
+    },
+    chooseFirstProfessionPath(characterId, fromClassId, toClassId) {
+        return withCharacterFlush(characterId, () => inTransaction(() => {
+            const spec = require('./GameServer/Quest/FirstProfessionProof').forTarget(toClassId);
+            if (!spec || spec.fromClassId !== fromClassId) throw new Error('Invalid profession branch');
+            write('INSERT OR IGNORE INTO character_profession_paths(characterId, fromClassId, toClassId) VALUES (?, ?, ?)', [characterId, fromClassId, toClassId]);
+            return one('SELECT fromClassId, toClassId FROM character_profession_paths WHERE characterId = ?', [characterId]);
+        }, 'quest:profession-branch'));
     },
     evolveHatchling(characterId, controlId) {
         return withCharacterFlush(characterId, () => inTransaction(() => {

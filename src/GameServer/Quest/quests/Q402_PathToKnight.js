@@ -111,15 +111,10 @@ module.exports = {
       const coins = coinsCollected(state);
       const hasAllCoins = COINS.every((coin) => count(state, coin) >= 1);
       if (!count(state, MARK_OF_ESQUIRE) || !hasAllCoins) return page('Sir Klaus Vasper', `Coins of Lords: ${coins}/6. Complete the Lords’ requests in any order.`);
-      const profession = await quest.awardFirstProfession(state, 4);
+      const profession = await quest.awardFirstProfession(state, 4, [MARK_OF_ESQUIRE, ...COINS].map(id => [id, 1]), assignments.flatMap(a => [a.mark, a.item]));
       if (!profession.ok) {
         return page('Sir Klaus Vasper', profession.reason === 'level' ? `Reach level ${profession.requiredLevel} to become a Human Knight.` : 'Your profession could not be granted. Keep your quest items and try again.');
-      }
-      await consume(quest, state, [MARK_OF_ESQUIRE, ...COINS, ...assignments.flatMap((assignment) => [assignment.mark, assignment.item])]);
-      await quest.giveItem(state.session, SWORD_OF_RITUAL, 1);
-      state.playSound(FINISH);
-      await state.exit(false);
-      return page('Sir Klaus Vasper', 'You have completed the Path to Knight and become a Human Knight.');
+      } state.playSound(FINISH); return page('Sir Klaus Vasper', 'You have completed the Path to Knight. Present your proof for class transfer at level 20.');
     }
 
     const assignment = assignmentForNpc(npcId);
