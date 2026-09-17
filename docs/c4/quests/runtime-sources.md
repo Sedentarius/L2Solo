@@ -49,7 +49,10 @@ Q038/Q039 remain disabled: missing templates 1100/1101 and 925 respectively.
 Their old handlers also lack atomic hand-ins and completed-state restart guards;
 simply registering them would not certify playable content.
 
-Q151 and Q161 preserve their existing L2Solo mechanics in reviewed definitions.
+Q151, Q155, Q156 and Q161 preserve their existing L2Solo mechanics in reviewed definitions.
 Their old module paths are compatibility entry points. Real SQLite tests cover
 every delivery, restart between NPCs, stale-session rejection, final reward and
 one-time completion. This replaces separate item/state writes with QuestStep.
+The existing Q155 reward is one item 734; Q156 gives item 5250 and 3000 EXP.
+The supplied inventory omits both item rewards, so these are recorded as local
+runtime evidence rather than silently added to the historical package.

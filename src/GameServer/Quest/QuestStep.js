@@ -21,17 +21,26 @@ async function apply(state, { takes = [], gives = [], variables = state.variable
     const rows = await Database.applyQuestStep(actor.fetchId(), state.quest.id,
         { state: state.state, variables: state.variables }, next,
         takes.map(([selfId, amount]) => ({ selfId, amount })), rewards, experience);
+    let equipmentChanged=false;
     for (const row of rows) {
         const item = actor.backpack.fetchItemRaw(row.id);
         if (!row.amount) {
             // Quest trial weapons may be equipped at the final hand-in.
-            if (item?.fetchEquipped?.()) actor.backpack.unequipPaperdoll(item.fetchSlot());
+            if (item?.fetchEquipped?.()) {
+                actor.backpack.unequipPaperdoll(item.fetchSlot());
+                equipmentChanged=true;
+            }
             actor.backpack.items = actor.backpack.items.filter(i => i.fetchId() !== row.id);
         } else if (item) item.setAmount(row.amount);
         else actor.backpack.insertItem(row.id, row.selfId, row);
     }
     state.state = next.state;
     state.variables = next.variables;
+    if(equipmentChanged && actor.fetchCon) {
+        invoke('GameServer/Actor/Generics/CalculateStats')(state.session,actor);
+        state.session.dataSendToMe(Response.userInfo(actor));
+        state.session.dataSendToOthers?.(Response.charInfo(actor),actor);
+    }
     if (rows.experience) {
         const award = rows.experience;
         actor.setExpSp(award.totalExp, award.totalSp);

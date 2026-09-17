@@ -163,16 +163,21 @@ async function main() {
             await assert.rejects(quest.onTalk(stale.questStates.get(d.id),{fetchSelfId:()=>stage.npc}),/step changed/);
             await Database.close();Database.init();s=await sessionFor(d.id);state=s.questStates.get(d.id);
         }
+        const finishNpc=d.stages.at(-1).npc;
         const clone=await sessionFor(d.id);
         const before=(await Database.execute(['SELECT exp,sp FROM characters WHERE id=?',[d.id]]))[0];
         await quest.onTalk(state,{fetchSelfId:()=>d.startNpc+100000});
         assert.equal(state.state,'started','wrong NPC cannot deliver');
         try {
             Math.random=()=>0;
-            await quest.onTalk(state,{fetchSelfId:()=>d.startNpc});
+            await quest.onTalk(state,{fetchSelfId:()=>finishNpc});
         } finally {Math.random=random;}
         assert.equal(state.state,d.repeatable?'created':'completed','authored completion policy');
         assert.equal(state.getInt('completions'),1);
+        const expectedRewards={151:[[102,1]],155:[[734,1]],156:[[5250,1]],161:[[57,1000]],258:[[390,1]],261:[[57,1000]],262:[[57,3000]],
+            264:[[43,1]],271:[[1507,1]],272:[[57,1500]],277:[[1658,2]],291:[[1502,1]],294:[[1508,1]],295:[[1509,1]],
+            297:[[1659,2]],303:[[57,1000]],313:[[57,3500]],319:[[57,3350],[1060,1]],320:[[57,8470]],324:[[57,5810]],341:[[57,3710]]};
+        for(const [item,quantity] of expectedRewards[d.id]||[]) assert.equal(await amount(d.id,item),quantity,`Q${d.id} authored reward ${item}`);
         if(d.id===274) {
             assert.equal(await amount(d.id,57),27500,'forty bonus totems paid once with base reward');
             assert.equal(await amount(d.id,1501),0);
@@ -180,8 +185,8 @@ async function main() {
         }
         for(const [item] of d.stages.at(-1).takes||[]) assert.equal(await amount(d.id,item),0);
         const rewards=JSON.stringify(await Database.fetchItems(d.id));
-        await assert.rejects(quest.onTalk(clone.questStates.get(d.id),{fetchSelfId:()=>d.startNpc}),/step changed/,'stale session cannot duplicate reward');
-        await quest.onTalk(state,{fetchSelfId:()=>d.startNpc});
+        await assert.rejects(quest.onTalk(clone.questStates.get(d.id),{fetchSelfId:()=>finishNpc}),/step changed/,'stale session cannot duplicate reward');
+        await quest.onTalk(state,{fetchSelfId:()=>finishNpc});
         assert.equal(JSON.stringify(await Database.fetchItems(d.id)),rewards);
         const after=(await Database.execute(['SELECT exp,sp FROM characters WHERE id=?',[d.id]]))[0];
         assert.equal(after.exp-before.exp,d.reward.exp||0,'quest EXP commits once');
@@ -192,6 +197,16 @@ async function main() {
         await quest.onAbort(state);
         assert.equal(state.state,'created');
         assert.equal(state.getInt('completions'),1,'abort preserves completion receipts');
+        if([294,295].includes(d.id)) {
+            await quest.onEvent(state,'start');
+            try {
+                Math.random=()=>0;
+                for(let n=0;n<objective.count;n++) await quest.onKill(state,{fetchSelfId:()=>objective.drops[0].npc});
+                await quest.onTalk(state,{fetchSelfId:()=>d.startNpc});
+            } finally {Math.random=random;}
+            assert.equal(await amount(d.id,57),2400,'owned ring chooses Adena alternative');
+            assert.equal(await amount(d.id,d.id===294?1508:1509),1,'repeat does not duplicate unique ring');
+        }
     }
     // Same physical quest progresses cold -> hot -> cold. The Bridge keeps
     // receipts; QuestService and QuestStep own all item/state mutations.
