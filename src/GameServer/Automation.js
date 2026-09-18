@@ -242,7 +242,7 @@ class Automation extends SelectedModel {
     }
 
     scheduleAction(session, src, dst, radius, callback, options = {}) {
-        this.playerAttackApproach = null;
+        this.clearPlayerAttackApproach();
         this.stopMoveInterpolation();
         const actionRange = options.collisionAware
             ? AttackRange.effectiveRange(src, dst, radius)
@@ -298,7 +298,7 @@ class Automation extends SelectedModel {
         // Arrived
         const arrive = () => {
             if (approach && this.playerAttackApproach !== approach) return;
-            this.playerAttackApproach = null;
+            this.clearPlayerAttackApproach();
             if (approach) Timer.clear(this.timer.action);
             this.stopMoveInterpolation();
             src.state.setTowards(false);
@@ -320,6 +320,7 @@ class Automation extends SelectedModel {
         if (approach) {
             approach.finish = arrive;
             this.schedulePlayerAttackArrival(approach, ticks);
+            this.watchPlayerAttackRange(approach);
         } else {
             Timer.start(this.timer.action, arrive, ticks);
         }
@@ -329,8 +330,37 @@ class Automation extends SelectedModel {
         const revision = ++approach.timerRevision;
         Timer.start(this.timer.action, () => {
             if (this.playerAttackApproach !== approach || approach.timerRevision !== revision) return;
-            approach.finish();
+            this.finishPlayerAttackInRange(approach) || approach.finish();
         }, delay);
+    }
+
+    clearPlayerAttackApproach() {
+        clearTimeout(this.playerAttackApproach?.rangeTimer);
+        this.playerAttackApproach = null;
+    }
+
+    finishPlayerAttackInRange(approach) {
+        if (this.playerAttackApproach !== approach) return false;
+        if (AttackRange.distance2d(approach.src, approach.dst) > approach.actionRange) return false;
+        approach.stopCoords = {
+            locX: approach.src.fetchLocX(),
+            locY: approach.src.fetchLocY(),
+            locZ: approach.src.fetchLocZ()
+        };
+        approach.finish();
+        return true;
+    }
+
+    watchPlayerAttackRange(approach) {
+        approach.rangeTimer = setTimeout(() => {
+            if (this.playerAttackApproach !== approach) return;
+            // A moving target can enter melee range without another player
+            // ValidatePosition. Do not wait for the old travel deadline or
+            // move the player back to the target's former stopping point.
+            if (this.finishPlayerAttackInRange(approach)) return;
+            this.watchPlayerAttackRange(approach);
+        }, 100);
+        approach.rangeTimer.unref?.();
     }
 
     refreshPlayerAttackApproach(session, actor) {
@@ -354,7 +384,7 @@ class Automation extends SelectedModel {
     }
 
     scheduleMoveToCoords(session, src, to, callback = () => {}) {
-        this.playerAttackApproach = null;
+        this.clearPlayerAttackApproach();
         const from = {
             locX: src.fetchLocX(),
             locY: src.fetchLocY(),
@@ -461,7 +491,7 @@ class Automation extends SelectedModel {
     abortAll(creature, { notifyClient = true } = {}) {
         this.pickupGeneration = Number(this.pickupGeneration || 0) + 1;
         this.pickupTargetId = null;
-        this.playerAttackApproach = null;
+        this.clearPlayerAttackApproach();
         this.stopMoveInterpolation();
         const wasMoving = !!creature?.state?.inMotion?.() && !creature?.session?.pendingPathRequest;
         this.clearDestId();
