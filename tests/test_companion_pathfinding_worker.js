@@ -11,6 +11,7 @@ const PoolSingleton = invoke('GameServer/Geodata/PathfindingWorkerPool');
 const { BoundedPathfindingWorkerPool } = PoolSingleton;
 
 class BotSession {}
+const fixtures = new Set();
 
 function companionFixture(pool, start = { locX: 53027, locY: 102938, locZ: -1064 }) {
     const packets = [];
@@ -59,7 +60,9 @@ function companionFixture(pool, start = { locX: 53027, locY: 102938, locZ: -1064
     actor.automation = new Automation();
     session.actor = actor;
     RuntimeWorld.user = { sessions: [session, leaderSession] };
-    return { session, actor, leaderSession, packets, position, leaderPosition };
+    const fixture = { session, actor, leaderSession, packets, position, leaderPosition };
+    fixtures.add(fixture);
+    return fixture;
 }
 
 function issueMove(fixture, to, targetActor = null, options = {}) {
@@ -83,12 +86,14 @@ function stopMove(fixture) {
         fixture.session.moveTimer = null;
     }
     fixture.actor.state.setTowards(false);
+    fixtures.delete(fixture);
 }
 
 async function run() {
     const originalFindPath = GeodataEngine.findPath;
     const originalHasLineOfSight = GeodataEngine.hasLineOfSight;
     let synchronousFindPathCalls = 0;
+    const pools = [];
     GeodataEngine.findPath = () => {
         synchronousFindPathCalls++;
         throw new Error('companion path must not execute A* on the game thread');
@@ -97,6 +102,7 @@ async function run() {
 
     try {
         const realPool = new BoundedPathfindingWorkerPool({ size: 1, queueLimit: 4 });
+        pools.push(realPool);
         const realFixture = companionFixture(realPool);
         const pending = issueMove(realFixture, { locX: 53327, locY: 102938, locZ: -1064 });
         assert.strictEqual(pending.strategy, 'worker_pending', 'eligible companion routes must return without blocking the game thread');
@@ -237,6 +243,7 @@ async function run() {
             queueLimit: 2,
             workerPath: path.join(__dirname, 'fixtures', 'companion_path_worker.js')
         });
+        pools.push(delayedPool);
         const staleFixture = companionFixture(delayedPool, { locX: 0, locY: 0, locZ: 0 });
         issueMove(staleFixture, { locX: 1000, locY: 0, locZ: 0 });
         const stalePromise = staleFixture.session.pendingPathRequest.promise;
@@ -326,6 +333,8 @@ async function run() {
 
         await delayedPool.shutdown();
     } finally {
+        for (const fixture of fixtures) stopMove(fixture);
+        await Promise.allSettled(pools.map(pool => pool.shutdown()));
         GeodataEngine.findPath = originalFindPath;
         GeodataEngine.hasLineOfSight = originalHasLineOfSight;
     }
