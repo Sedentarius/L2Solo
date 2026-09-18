@@ -37,6 +37,7 @@ const EMERGENCY_RETREAT_DISTANCE = 850;
 const MAX_WALK_SPOT_DISTANCE = 12000;
 const SPOT_ARRIVAL_RADIUS = 1000;
 const MAX_SPOT_RELOCATION_MS = 120000;
+const FAILED_SPOT_RETRY_MS = 60000;
 const FULL_TARGET_CANDIDATE_LIMIT = 96;
 const VISIBLE_TARGET_CANDIDATE_LIMIT = 32;
 const ENCOUNTER_BASE_HP_RATIO = 0.70;
@@ -344,6 +345,26 @@ function expireSpotRelocation(session, bot, relocation) {
     };
 }
 
+function failWalkRelocation(session, bot, relocation, reason) {
+    expireSpotRelocation(session, bot, relocation);
+    const now = Date.now();
+    session.spotRetryAfter = Object.fromEntries(Object.entries(session.spotRetryAfter || {})
+        .filter(([, retryAt]) => retryAt > now));
+    session.spotRetryAfter[relocation.spotId] = now + FAILED_SPOT_RETRY_MS;
+    session.lastSpotMoveAt = now;
+    session.noTargetTicks = 0;
+    session.lastSpotRelocation.method = `walk_${reason}`;
+    session.lastDecision = { action: 'search_locally', reason, spotId: relocation.spotId };
+}
+
+function walkRouteFailed(session, relocation) {
+    const path = session.lastPathfinding;
+    return path?.routeUsable === false
+        && Number(path.at) >= Number(relocation.lastCommandAt)
+        && ['locX', 'locY', 'locZ'].every((key) =>
+            path.requestedTo?.[key] === relocation.destination[key]);
+}
+
 function expireTimedOutSpotRelocation(session, bot) {
     const relocation = session.spotRelocation;
     if (!relocation) return false;
@@ -351,14 +372,19 @@ function expireTimedOutSpotRelocation(session, bot) {
     if (!Number.isFinite(startedAt) || Date.now() - startedAt < MAX_SPOT_RELOCATION_MS) return false;
     if (relocation.method === 'town_gatekeeper') {
         BotSpotTravel.recoverOrDefer(session, bot, 'gatekeeper_route_timeout');
-    } else expireSpotRelocation(session, bot, relocation);
+    } else if (relocation.method === 'walk') failWalkRelocation(session, bot, relocation, 'timeout');
+    else expireSpotRelocation(session, bot, relocation);
     return true;
 }
 
 function issueWalkRelocation(session, bot, relocation) {
     const from = botLocation(bot);
+    const previousPath = session.lastPathfinding;
     relocation.lastCommandAt = Date.now();
     bot.moveTo({ from, to: { ...relocation.destination } });
+    if (session.lastPathfinding !== previousPath && walkRouteFailed(session, relocation)) {
+        failWalkRelocation(session, bot, relocation, 'route_unavailable');
+    }
 }
 
 function tickSpotRelocation(session, bot) {
@@ -374,8 +400,14 @@ function tickSpotRelocation(session, bot) {
         return false;
     }
     if (bot.state.fetchTowards() || session.moveTimer) return true;
+    // Worker pathfinding can finish after moveTo returns. Only consume the
+    // result for this destination and command, never an old combat route.
+    if (walkRouteFailed(session, relocation)) {
+        failWalkRelocation(session, bot, relocation, 'route_unavailable');
+        return false;
+    }
     if (Date.now() - Number(relocation.lastCommandAt || 0) >= 1000) issueWalkRelocation(session, bot, relocation);
-    return true;
+    return !!session.spotRelocation;
 }
 
 function beginSpotRelocation(session, bot, spot, BotAI) {
@@ -706,6 +738,7 @@ module.exports = {
                 if (session.currentTargetId) clearTarget(session, bot, session.currentTargetId);
                 const status = session.botStatus || BotAI.getStatus(session);
                 const destination = SpotService.findBestSpot(status, {
+                    spotRetryAfter: session.spotRetryAfter,
                     minDistance: 1,
                     mode: 'solo',
                     equipment: equippedItems(bot)

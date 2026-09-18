@@ -1,6 +1,7 @@
 const { spawnSync } = require('child_process');
 
 const tests = [
+    'tests/test_bot_hunting_route_failure.js',
     'tests/test_skill_cooldowns.js',
     'tests/test_cold_pve_continuation.js',
     'tests/test_bot_acquisition_recovery.js',
