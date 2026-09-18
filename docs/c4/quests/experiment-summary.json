@@ -1,0 +1,242 @@
+{
+  "baseline": "aed7d6bf",
+  "confirmed": 107,
+  "counts": {
+    "VERIFIED": 34,
+    "IMPLEMENTED": 50,
+    "PARTIAL/BLOCKED": 14,
+    "MISSING": 9
+  },
+  "baselineRegistered": 59,
+  "registered": 86,
+  "newlyRegistered": [
+    258,
+    259,
+    261,
+    262,
+    263,
+    264,
+    271,
+    272,
+    274,
+    277,
+    291,
+    292,
+    294,
+    295,
+    296,
+    297,
+    303,
+    306,
+    313,
+    316,
+    317,
+    319,
+    320,
+    324,
+    325,
+    341,
+    347
+  ],
+  "newPerQuestScripts": 0,
+  "sharedRuntimeModulesAdded": 6,
+  "retiredScriptImplementations": [
+    151,
+    153,
+    155,
+    156,
+    160,
+    161,
+    168
+  ],
+  "compatibilityEntryPointsRetained": true,
+  "activeDefinitions": 34,
+  "disabledDefinitions": [
+    379
+  ],
+  "newTestFiles": [
+    "tests/test_c4_inventory_validation.js",
+    "tests/test_first_profession_proof.js",
+    "tests/test_c4_declarative_quests.js"
+  ],
+  "newBridgePrimitives": [],
+  "proofContractsPassing": 18,
+  "fullProfessionQuestAndTransferPassing": [
+    401
+  ],
+  "inScopeDrift": 107,
+  "allInventoryDrift": 296,
+  "missing": [
+    {
+      "questId": 257,
+      "reason": {
+        "code": "NEWBIE_REWARD_STATE_UNRESOLVED",
+        "detail": "Ordinary payouts are reviewed; shared once-per-character beginner-shot eligibility/receipt must be reconciled before complete implementation."
+      }
+    },
+    {
+      "questId": 260,
+      "reason": {
+        "code": "NEWBIE_REWARD_STATE_UNRESOLVED",
+        "detail": "Ordinary payouts are reviewed; shared once-per-character beginner-shot eligibility/receipt must be reconciled before complete implementation."
+      }
+    },
+    {
+      "questId": 265,
+      "reason": {
+        "code": "NEWBIE_REWARD_STATE_UNRESOLVED",
+        "detail": "Ordinary payouts are reviewed; shared once-per-character beginner-shot eligibility/receipt must be reconciled before complete implementation."
+      }
+    },
+    {
+      "questId": 273,
+      "reason": {
+        "code": "NEWBIE_REWARD_STATE_UNRESOLVED",
+        "detail": "Ordinary payouts are reviewed; shared once-per-character beginner-shot eligibility/receipt must be reconciled before complete implementation."
+      }
+    },
+    {
+      "questId": 275,
+      "reason": {
+        "code": "ENCOUNTER_HANDOFF_UNCERTIFIED",
+        "detail": "Hot scripted spawning already exists. Owner-scoped encounter recovery and cold/hot parity need focused implementation; DEFEND requirement remains unproven."
+      }
+    },
+    {
+      "questId": 276,
+      "reason": {
+        "code": "ENCOUNTER_HANDOFF_UNCERTIFIED",
+        "detail": "Hot scripted spawning already exists. Owner-scoped encounter recovery and cold/hot parity need focused implementation; DEFEND requirement remains unproven."
+      }
+    },
+    {
+      "questId": 293,
+      "reason": {
+        "code": "NEWBIE_REWARD_STATE_UNRESOLVED",
+        "detail": "Ordinary payouts are reviewed; shared once-per-character beginner-shot eligibility/receipt must be reconciled before complete implementation."
+      }
+    },
+    {
+      "questId": 340,
+      "reason": {
+        "code": "ENCOUNTER_HANDOFF_UNCERTIFIED",
+        "detail": "Hot scripted spawning already exists. Owner-scoped encounter recovery and cold/hot parity need focused implementation; DEFEND requirement remains unproven."
+      }
+    },
+    {
+      "questId": 378,
+      "reason": {
+        "code": "BRANCH_DEFINITION_PENDING",
+        "detail": "No absent generic resolver demonstrated. Retail exchanges, branches or source details need reviewed definitions and tests."
+      }
+    }
+  ],
+  "partial": [
+    {
+      "questId": 38,
+      "reason": {
+        "code": "MISSING_NPC_TEMPLATES",
+        "detail": "Required combat templates 1100/1101 are absent; old non-atomic hand-ins also need recovery."
+      }
+    },
+    {
+      "questId": 39,
+      "reason": {
+        "code": "MISSING_NPC_TEMPLATES",
+        "detail": "Required combat template 925 is absent; old non-atomic hand-ins also need recovery."
+      }
+    },
+    {
+      "questId": 266,
+      "reason": {
+        "code": "NPC_ID_MAPPING_UNRESOLVED",
+        "detail": "Technical reference NPCs 31852/31853 have no local native 8852/8853 templates. Multiple Murika/Bremec templates exist; do not guess a replacement. No evidence that Q266 requires DEFEND."
+      }
+    },
+    {
+      "questId": 267,
+      "reason": {
+        "code": "NPC_ID_MAPPING_UNRESOLVED",
+        "detail": "Technical reference NPCs 31852/31853 have no local native 8852/8853 templates. Multiple Murika/Bremec templates exist; do not guess a replacement. No evidence that Q266 requires DEFEND."
+      }
+    },
+    {
+      "questId": 296,
+      "reason": {
+        "code": "OPTIONAL_KILL_TARGET_UNSPAWNED",
+        "detail": "The reference lists Crimson Tarantula 20394 (native 394), but it has no local world spawn and is absent from the reviewed DwarvenStarting.xml. Active handlers support the two authored, spawned alternatives 403 and 508; all payment/extraction paths pass. No location has been invented."
+      }
+    },
+    {
+      "questId": 306,
+      "reason": {
+        "code": "OPTIONAL_KILL_TARGETS_UNSPAWNED",
+        "detail": "Reference targets 20112–20115 (native 112–115) have templates but no authored local world spawns. Both quest items remain obtainable from active targets 109/110 with their supported 30% chances; higher-variant content is explicitly incomplete."
+      }
+    },
+    {
+      "questId": 362,
+      "reason": {
+        "code": "MISSING_NPC_TEMPLATES",
+        "detail": "Music-quest NPCs Swan/Galion/Nanarin are absent at native IDs 7957/7958/7956."
+      }
+    },
+    {
+      "questId": 363,
+      "reason": {
+        "code": "MISSING_NPC_TEMPLATES",
+        "detail": "Music-quest NPCs Swan/Galion/Nanarin are absent at native IDs 7957/7958/7956."
+      }
+    },
+    {
+      "questId": 364,
+      "reason": {
+        "code": "MISSING_NPC_TEMPLATES",
+        "detail": "Music-quest NPCs Swan/Galion/Nanarin are absent at native IDs 7957/7958/7956."
+      }
+    },
+    {
+      "questId": 379,
+      "reason": {
+        "code": "MISSING_ITEM_TEMPLATES",
+        "detail": "Reviewed definition is disabled: 5893/5894/5956/5957/5958 absent."
+      }
+    },
+    {
+      "questId": 385,
+      "reason": {
+        "code": "PARTY_SEVEN_SIGNS_INTEGRATION",
+        "detail": "Needs shared party credit and Seven Signs participation/reward integration; generic resolver already exists."
+      }
+    },
+    {
+      "questId": 422,
+      "reason": {
+        "code": "SIN_EATER_PROGRESSION",
+        "detail": "Needs Sin Eater pet progression and authoritative PK reduction; ordinary collection would misrepresent the quest."
+      }
+    },
+    {
+      "questId": 634,
+      "reason": {
+        "code": "PARTY_SEVEN_SIGNS_INTEGRATION",
+        "detail": "Needs shared party credit and Seven Signs participation/reward integration; generic resolver already exists."
+      }
+    },
+    {
+      "questId": 635,
+      "reason": {
+        "code": "DIMENSION_RIFT_INSTANCE_LIFECYCLE",
+        "detail": "Needs party instance admission, timed rooms, encounter ownership and restart/handoff semantics."
+      }
+    }
+  ],
+  "sourceEvidence": "runtime-evidence.json",
+  "lastCompleteRegression": {
+    "commit": "07412719",
+    "passed": 508,
+    "failed": 1,
+    "total": 509
+  },
+  "sourceHashDigest": "5a5c21c2a7446b527334453e536f2d50ea1f5ede030164c4201e7c1bfc714d6b"
+}

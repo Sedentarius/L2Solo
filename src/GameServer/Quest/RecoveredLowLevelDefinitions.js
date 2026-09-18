@@ -1,5 +1,25 @@
 // Existing L2Solo quest mechanics, moved onto atomic QuestService steps.
 module.exports = [
+    {id:153,name:'Deliver Goods',minLevel:2,startNpc:7041,repeatable:false,
+        questItems:[1012,1013,1014,1015,1016,1017,1018],startItems:[[1012,1],[1013,1],[1014,1],[1015,1]],
+        stages:[{type:'DELIVER',objectives:[[1016,1],[1017,1],[1018,1]],deliveries:[
+            {npc:7002,takes:[[1013,1]],gives:[[1016,1]]},
+            {npc:7003,takes:[[1014,1]],gives:[[1017,1]],onceReward:{key:'sylvia_shots',items:[[1835,3]]}},
+            {npc:7054,takes:[[1015,1]],gives:[[1018,1]]}]},
+            {type:'COMPLETE',npc:7041,takes:[[1012,1],[1016,1],[1017,1],[1018,1]]}],reward:{items:[[875,2]],exp:600}},
+    {id:160,name:"Nerupa's Request",minLevel:3,race:1,startNpc:7370,repeatable:false,startItems:[[1026,1]],
+        stages:[{type:'DELIVER',npc:7147,takes:[[1026,1]],gives:[[1027,1]]},
+            {type:'DELIVER',npc:7149,takes:[[1027,1]],gives:[[1028,1]]},
+            {type:'DELIVER',npc:7152,takes:[[1028,1]],gives:[[1029,1]]},
+            {type:'COMPLETE',npc:7370,takes:[[1029,1]]}],reward:{items:[[1060,5]],exp:1000}},
+    {id:168,name:'Deliver Supplies',minLevel:3,race:2,startNpc:7349,repeatable:false,
+        questItems:[1153,1154,1155,1156,1157],startItems:[[1153,1]],
+        stages:[{type:'DELIVER',npc:7360,event:'harant',takes:[[1153,1]],gives:[[1154,1],[1155,1],[1156,1]]},
+            {type:'DELIVER',npc:7349,event:'jenna',takes:[[1154,1]]},
+            {type:'DELIVER',objectives:[[1157,2]],deliveries:[
+                {npc:7355,event:'roselyn',takes:[[1155,1]],gives:[[1157,1]]},
+                {npc:7357,event:'kristin',takes:[[1156,1]],gives:[[1157,1]]}]},
+            {type:'COMPLETE',npc:7349,event:'reward',takes:[[1157,2]]}],reward:{adena:820}},
     { id:155, name:'Find Sir Windawood', minLevel:3, startNpc:7042, repeatable:false,
         startItems:[[1019,1]],stages:[{type:'COMPLETE',npc:7311,takes:[[1019,1]]}],reward:{items:[[734,1]]} },
     { id:156, name:'Millennium Love', minLevel:15, startNpc:7368, repeatable:false,

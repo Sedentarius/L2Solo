@@ -39,6 +39,12 @@ This is a deliberate scheduling abstraction, not a different reward rule.
 Continuous bounties expose their normal talk/kill/quit handlers to Quest Bridge;
 automatic selection of when to cash out remains uncertified.
 
+The pinned Player.java persists beginner eligibility at creation from first-character
+account status or an explicit server override; its quest handlers additionally use
+a character-wide NEWBIE_SHOTS_RECEIVED receipt. L2Solo lacks the historical eligibility
+flag. The remaining five beginner-reward quests need a deliberate migration and
+atomic shared receipt, not an inference from present level or current inventory.
+
 Profession completion uses the inventory's 3200 EXP and per-quest SP values.
 Proof and quest completion are atomic; transfer at level 20 consumes the proof
 and writes a durable consumed marker. Profession quests remain one-time in the
@@ -61,3 +67,12 @@ one-time completion. This replaces separate item/state writes with QuestStep.
 The existing Q155 reward is one item 734; Q156 gives item 5250 and 3000 EXP.
 The supplied inventory omits both item rewards, so these are recorded as local
 runtime evidence rather than silently added to the historical package.
+
+Q153, Q160 and Q168 likewise preserve existing L2Solo delivery mechanics, with
+atomic exchanges and completion. Q153 permits all six package orders; Q168
+requires Harant and Jenna before either order of Roselyn/Kristin. Q160 now rejects
+restarting after completion. Q153's two rings (875) and three intermediate shots
+(1835), and Q160's five potions (1060), are absent from the inventory's item rewards.
+Those local rewards remain; Q153 additionally retains a durable intermediate-reward
+receipt across cancellation so restarting cannot farm Sylvia's shots. No historical
+inventory field was changed to hide these differences.

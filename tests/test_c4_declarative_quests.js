@@ -53,6 +53,73 @@ async function main() {
         assert.equal(state.state,'started');
         const objective=d.stages[0];
         const random=Math.random;
+        if([153,168].includes(d.id)) {
+            const orders=d.id===153?[[0,1,2],[0,2,1],[1,0,2],[1,2,0],[2,0,1],[2,1,0]]:[[0,1],[1,0]];
+            const event=async(npc,name)=>{s.activeNpcTalk={selfId:npc,objectId:1};return Service.onEvent(s,{questId:d.id,name});};
+            const reopen=async()=>{const id=s.actor.fetchId();await Database.close();Database.init();s=await sessionFor(id);state=s.questStates.get(d.id);};
+            if(d.id===153) {
+                await quest.onTalk(state,{fetchSelfId:()=>7003});
+                assert.equal(await amount(d.id,1835),3);
+                const abortPacket=Buffer.alloc(5);abortPacket.writeUInt8(0x64);abortPacket.writeInt32LE(d.id,1);
+                const abort=invoke('GameServer/Network/Request/QuestAbort');
+                await abort(s,abortPacket);await abort(s,abortPacket);await reopen();
+                assert.equal(state.state,'created','real abort packet ends the delivery without replaying rewards');
+                await event(d.startNpc,'start');
+                assert.equal(state.get('reward:sylvia_shots'),'1','intermediate reward receipt survives abort and restart');
+            }
+            for(let orderIndex=0;orderIndex<orders.length;orderIndex++) {
+                if(orderIndex) {
+                    const id=10000+d.id*10+orderIndex;
+                    await Database.execute([`INSERT INTO characters(id,username,name,classId,race,level,exp,sp,maxHp,maxMp,hp,mp,sex,face,hair,hairColor,locX,locY,locZ)
+                        SELECT ?,username,?,classId,race,level,exp,sp,maxHp,maxMp,hp,mp,sex,face,hair,hairColor,locX,locY,locZ FROM characters WHERE id=?`,[id,`Delivery${id}`,d.id]]);
+                    s=await sessionFor(id);await event(d.startNpc,'start');state=s.questStates.get(d.id);
+                }
+                const id=s.actor.fetchId();
+                const expBefore=s.actor.exp;
+                if(d.id===168) {
+                    assert.equal(await event(7349,'reward'),false,'cannot claim reward before deliveries');
+                    assert.equal(await event(7349,'harant'),false,'ordered delivery NPC guard');
+                    await event(7360,'harant');await reopen();
+                    assert.equal(await event(7355,'roselyn'),false,'Jenna must receive first blade');
+                    await event(7349,'jenna');
+                }
+                const stage=d.stages[d.id===153?0:2];
+                for(let position=0;position<orders[orderIndex].length;position++) {
+                    const delivery=stage.deliveries[orders[orderIndex][position]];
+                    const stale=await sessionFor(id);
+                    if(delivery.event) {
+                        assert.equal(await event(7349,delivery.event),false,'unordered delivery NPC guard');
+                        await event(delivery.npc,delivery.event);
+                        await assert.rejects(quest.onEvent(stale.questStates.get(d.id),delivery.event),/step changed/);
+                        assert.equal(await event(delivery.npc,delivery.event),false,'delivered blade cannot be reused');
+                    } else {
+                        await quest.onTalk(state,{fetchSelfId:()=>delivery.npc});
+                        await assert.rejects(quest.onTalk(stale.questStates.get(d.id),{fetchSelfId:()=>delivery.npc}),/step changed/);
+                        const held=JSON.stringify(await Database.fetchItems(id));
+                        await quest.onTalk(state,{fetchSelfId:()=>delivery.npc});
+                        assert.equal(JSON.stringify(await Database.fetchItems(id)),held,'receipt and intermediate reward cannot repeat');
+                    }
+                    await reopen();
+                    const finished=position===orders[orderIndex].length-1;
+                    assert.equal(state.getInt('cond'),(d.id===153?1:3)+(finished?1:0),'all deliveries required, either order');
+                }
+                const stale=await sessionFor(id);
+                if(d.id===168) {
+                    await event(7349,'reward');
+                    await assert.rejects(quest.onEvent(stale.questStates.get(d.id),'reward'),/step changed/);
+                    assert.equal(await amount(id,57),820);assert.equal(await amount(id,1157),0);
+                } else {
+                    await quest.onTalk(state,{fetchSelfId:()=>7041});
+                    await assert.rejects(quest.onTalk(stale.questStates.get(d.id),{fetchSelfId:()=>7041}),/step changed/);
+                    assert.equal(await amount(id,875),2);assert.equal(await amount(id,1835),3,'Sylvia bonus remains once per character');
+                    assert.equal(s.actor.exp-expBefore,600);
+                }
+                await reopen();assert.equal(state.state,'completed');
+                assert.equal(await event(d.startNpc,'start'),false,'completed delivery quest cannot restart');
+                for(const item of d.questItems) assert.equal(await amount(id,item),0,'all quest supplies consumed');
+            }
+            continue;
+        }
         if(d.id===325) {
             const kill=async(npc,roll=0)=>{Math.random=()=>roll;await quest.onKill(state,{fetchSelfId:()=>npc});};
             const talk=npc=>quest.onTalk(state,{fetchSelfId:()=>npc});
@@ -340,7 +407,7 @@ async function main() {
         } finally {Math.random=random;}
         assert.equal(state.state,d.repeatable?'created':'completed','authored completion policy');
         assert.equal(state.getInt('completions'),1);
-        const expectedRewards={151:[[102,1]],155:[[734,1]],156:[[5250,1]],161:[[57,1000]],258:[[390,1]],261:[[57,1000]],262:[[57,3000]],
+        const expectedRewards={151:[[102,1]],155:[[734,1]],156:[[5250,1]],160:[[1060,5]],161:[[57,1000]],258:[[390,1]],261:[[57,1000]],262:[[57,3000]],
             264:[[43,1]],271:[[1507,1]],272:[[57,1500]],277:[[1658,2]],291:[[1502,1]],294:[[1508,1]],295:[[1509,1]],
             297:[[1659,2]],303:[[57,1000]],313:[[57,3500]],319:[[57,3350],[1060,1]],320:[[57,8470]],324:[[57,5810]],341:[[57,3710]]};
         for(const [item,quantity] of expectedRewards[d.id]||[]) assert.equal(await amount(d.id,item),quantity,`Q${d.id} authored reward ${item}`);

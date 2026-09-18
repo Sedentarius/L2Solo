@@ -13,6 +13,7 @@ function validate(definition) {
         if(stage.type==='CHOICE' && (!stage.choices?.length || stage.choices.some(c=>!c.event||!Number.isInteger(c.npc)||(!c.finish&&(!Number.isInteger(c.next)||c.next<1||c.next>definition.stages.length))))) throw new Error('Unresolved quest choice');
         if (stage.type === 'KILL_COLLECT' && (!stage.drops?.length || !objectives(stage).length || objectives(stage).some(([id,n])=>!Number.isInteger(id)||!Number.isInteger(n)||n<1))) throw new Error('Unresolved collection mechanic');
         if (stage.type === 'COLLECT' && (!stage.drops?.length || !stage.prices?.length || !stage.npc)) throw new Error('Unresolved bounty mechanic');
+        if(stage.deliveries && (stage.type!=='DELIVER' || !stage.deliveries.length || !stage.objectives?.length || stage.deliveries.some(d=>!Number.isInteger(d.npc)||!d.takes?.length))) throw new Error('Unresolved delivery set');
         for (const drop of stage.drops || []) {
             if (!Number.isInteger(drop.npc) || !Number.isFinite(drop.chance) || drop.chance <= 0 || drop.chance > 1) throw new Error('Unresolved quest drop');
         }
@@ -23,7 +24,9 @@ function create(definition) {
     const d = definition;
     const exchanges=d.exchanges||[];
     const choices=d.stages.flatMap(s=>s.choices||[]);
-    const npcs = [...new Set([d.startNpc, ...exchanges.map(e=>e.npc), ...choices.map(c=>c.npc), ...d.stages.map(s => s.npc).filter(Boolean)])];
+    const deliveries=d.stages.flatMap(s=>s.deliveries||[]);
+    const rewardReceipts=[...d.stages,...deliveries].filter(s=>s.onceReward).map(s=>`reward:${s.onceReward.key}`);
+    const npcs = [...new Set([d.startNpc, ...exchanges.map(e=>e.npc), ...choices.map(c=>c.npc), ...deliveries.map(s=>s.npc), ...d.stages.map(s => s.npc).filter(Boolean)])];
     const allowed = state => Number(state.session.actor.fetchLevel()) >= d.minLevel &&
         (d.race === undefined || Number(state.session.actor.fetchRace()) === d.race) &&
         (!d.classes || d.classes.includes(Number(state.session.actor.fetchClassId()))) &&
@@ -32,7 +35,8 @@ function create(definition) {
     const stageFor = state => d.stages[state.getInt('cond') - 1];
     const itemName=id=>invoke('GameServer/DataCache').items.find(x=>x.selfId===id)?.template?.name||`item ${id}`;
     const npcName=id=>invoke('GameServer/DataCache').npcs.find(x=>x.selfId===id)?.template?.name||`NPC ${id}`;
-    const describe=stage=>stage?.choices ? `Consult ${[...new Set(stage.choices.map(c=>npcName(c.npc)))].join(' and ')}.` : stage?.drops
+    const describe=stage=>stage?.deliveries ? `Deliver the supplies to ${stage.deliveries.map(c=>npcName(c.npc)).join(', ')}.`
+        : stage?.choices ? `Consult ${[...new Set(stage.choices.map(c=>npcName(c.npc)))].join(' and ')}.` : stage?.drops
         ? `Hunt ${[...new Set(stage.drops.map(x=>npcName(x.npc)))].join(', ')}. ${objectives(stage).map(([id,n])=>`Collect ${n} ${itemName(id)}.`).join(' ')} Return to ${npcName(d.startNpc)}.`
         : `Visit ${npcName(stage?.npc||d.startNpc)}. ${(stage?.takes||[]).map(([id,n])=>`Bring ${n} ${itemName(id)}.`).join(' ')}`;
     const rewards = (state, authored = {}) => {
@@ -52,6 +56,7 @@ function create(definition) {
         return { gives, exp: authored.exp || value.exp || 0, sp: authored.sp || value.sp || 0 };
     };
     const questItemIds=[...new Set([...(d.questItems||[]), ...(d.startItems||[]).map(x=>x[0]),
+        ...deliveries.flatMap(s=>[...(s.takes||[]),...(s.gives||[])].map(x=>x[0])),
         ...d.stages.flatMap(s=>[s.item,...(s.drops||[]).flatMap(x=>[x.item,...(x.outcomes||[]).map(o=>o.item)]),
             ...(s.transforms||[]).map(x=>x.to),...(s.sideDrops||[]).map(x=>x.item),
             ...(s.gives||[]).map(x=>x[0]),...(s.takes||[]).map(x=>x[0])]).filter(Boolean)])];
@@ -75,14 +80,37 @@ function create(definition) {
         await step(state,{takes,...rewards(state,{adena}),status:finish?'created':'started',variables:{...state.variables,
             cond:String(finish?0:next),cashouts:String(state.getInt('cashouts')+(paid?1:0))}});
     }
+    async function deliver(state,stage,offer=stage) {
+        const takes=[...(offer.takes||[]),...(offer.consumeAll||[]).map(id=>[id,count(state,id)]).filter(([,n])=>n>0)];
+        if(!takes.every(([id,n])=>count(state,id)>=n)) return null;
+        const finishing=stage.type==='COMPLETE';
+        const reward=finishing?rewards(state,d.reward):{gives:offer.gives||[]};
+        const variables={...state.variables};
+        if(offer.onceReward && !state.get(`reward:${offer.onceReward.key}`)) {
+            reward.gives=[...reward.gives,...offer.onceReward.items];
+            variables[`reward:${offer.onceReward.key}`]='1';
+        }
+        const delta=(rows,id)=>rows.filter(([item])=>item===id).reduce((sum,[,n])=>sum+n,0);
+        const advance=!stage.deliveries || stage.objectives.every(([id,n])=>count(state,id)-delta(takes,id)+delta(reward.gives,id)>=n);
+        await step(state,{...reward,takes,variables:{...variables,
+            cond:String(finishing?0:state.getInt('cond')+(advance?1:0)),
+            ...(finishing?{completions:String(state.getInt('completions')+1)}:{})},
+            status:finishing?(d.repeatable?'created':'completed'):'started'});
+        state.playSound(finishing?'ItemSound.quest_finish':'ItemSound.quest_middle');
+        return page(d.name,finishing?'Your task is complete. You have received your reward.':describe(stageFor(state)));
+    }
     const quest = {
         id: d.id, name: d.name, definition: d, npcs, startNpcs: [d.startNpc],
         killNpcs: [...new Set(d.stages.flatMap(s => (s.drops || []).map(x => x.npc)))],
         eventNpc: event => choices.find(c=>c.event===event)?.npc ?? exchanges.find(e=>e.event===event)?.npc
+            ?? deliveries.find(s=>s.event===event)?.npc ?? d.stages.find(s=>s.event===event)?.npc
             ?? d.stages.find(s=>s.cashoutEvent===event)?.npc
             ?? (event==='start'?d.startNpc:event==='quit' && d.stages.some(s=>s.type==='COLLECT')?(d.quitNpc||d.startNpc):null),
         canTalk: state => state.isStarted() || state.isCompleted() || allowed(state),
         async onEvent(state, event) {
+            const current=state.isStarted() && stageFor(state);
+            const delivery=current && (current.event===event ? current : current.deliveries?.find(s=>s.event===event));
+            if(event && delivery) return deliver(state,current,delivery);
             const choice=state.isStarted() && stageFor(state)?.choices?.find(c=>c.event===event);
             if(choice) {
                 if(!(choice.takes||[]).every(([id,n])=>count(state,id)>=n)) return null;
@@ -134,23 +162,21 @@ function create(definition) {
             if(offers.length && !(stage.cashoutEvent && stage.npc===id)) return page(d.name,offerHtml);
             if(stage.type==='CHOICE') return page(d.name,stage.choices.filter(c=>c.npc===id)
                 .map(c=>`<a action="bypass -h quest ${d.id} ${c.event}">${c.label}</a>`).join('<br>')||'Consult the people involved in your task.');
+            if(stage.deliveries) {
+                const offer=stage.deliveries.find(s=>s.npc===id && s.takes.every(([item,n])=>count(state,item)>=n));
+                if(!offer) return page(d.name,describe(stage));
+                if(offer.event) return page(d.name,`<a action="bypass -h quest ${d.id} ${offer.event}">Deliver supplies.</a>`);
+                return deliver(state,stage,offer);
+            }
             if (stage.type === 'KILL_COLLECT') return page(d.name, `${describe(stage)}<br>${objectives(stage).map(([id,n])=>`${itemName(id)}: ${count(state,id)}/${n}`).join('<br>')}`);
             if (id !== stage.npc) return page(d.name, stage.text || 'Continue your task.');
+            if(stage.event) return page(d.name,`<a action="bypass -h quest ${d.id} ${stage.event}">Continue.</a>`);
             if (stage.type === 'COLLECT') {
                 if(stage.cashoutEvent) return page(d.name,`${offerHtml}<br><a action="bypass -h quest ${d.id} ${stage.cashoutEvent}">Sell collected pieces.</a><br><a action="bypass -h quest ${d.id} quit">Finish this task.</a>`);
                 await cashout(state,stage);
                 return page(d.name, `${describe(stage)}<br>Continue hunting, or <a action="bypass -h quest ${d.id} quit">end this task</a>.`);
             }
-            const takes = [...(stage.takes || []), ...(stage.consumeAll||[]).map(id=>[id,count(state,id)]).filter(([,n])=>n>0)];
-            if (!takes.every(([item, amount]) => count(state, item) >= amount)) return page(d.name, 'Bring all required quest items.');
-            const finishing = stage.type === 'COMPLETE';
-            const reward = finishing ? rewards(state, d.reward) : { gives: stage.gives || [] };
-            await step(state, { ...reward, takes,
-                variables: { ...state.variables, cond: String(finishing ? 0 : state.getInt('cond') + 1),
-                    ...(finishing ? { completions: String(state.getInt('completions') + 1) } : {}) },
-                status: finishing ? (d.repeatable ? 'created' : 'completed') : 'started' });
-            state.playSound(finishing ? 'ItemSound.quest_finish' : 'ItemSound.quest_middle');
-            return page(d.name, finishing ? 'Your task is complete. You have received your reward.' : describe(stageFor(state)));
+            return (await deliver(state,stage)) || page(d.name,'Bring all required quest items.');
         },
         async onKill(state, npc) {
             if (!state.isStarted()) return;
@@ -194,7 +220,9 @@ function create(definition) {
             state.playSound(complete ? 'ItemSound.quest_middle' : 'ItemSound.quest_itemget');
         },
         async onAbort(state) {
-            await step(state, { status: 'created', variables: { completions: state.get('completions', '0'), cashouts:state.get('cashouts','0') },
+            await step(state, { status: 'created', variables: {
+                ...Object.fromEntries(rewardReceipts.filter(key=>state.get(key)).map(key=>[key,state.get(key)])),
+                completions: state.get('completions', '0'), cashouts:state.get('cashouts','0') },
                 takes: cleanup(state) });
         }
     };

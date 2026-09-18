@@ -2,8 +2,8 @@
   "errors": [],
   "confirmedInScope": 107,
   "counts": {
-    "VERIFIED": 31,
-    "IMPLEMENTED": 53,
+    "VERIFIED": 34,
+    "IMPLEMENTED": 50,
     "PARTIAL/BLOCKED": 14,
     "MISSING": 9
   },
@@ -2440,25 +2440,24 @@
       "name": "Deliver Goods",
       "inScope": true,
       "quarantined": false,
-      "status": "IMPLEMENTED",
+      "status": "VERIFIED",
       "script": "Q153_DeliverGoods.js",
       "definitionId": null,
       "registered": true,
-      "tests": [],
+      "tests": [
+        "tests/test_c4_declarative_quests.js"
+      ],
       "blocker": null,
-      "certificationBlocker": {
-        "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-        "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-      },
+      "certificationBlocker": null,
       "professionProofContract": null,
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "NOT_CERTIFIED",
-        "reviewedRequirements": null,
+        "questAdapter": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+        "reviewedRequirements": [],
         "requirementsNeedingReview": []
       },
       "drift": [
-        "status:REGISTERED_UNTESTED->IMPLEMENTED",
+        "status:REGISTERED_UNTESTED->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -2630,26 +2629,25 @@
       "name": "Nerupa's Request",
       "inScope": true,
       "quarantined": false,
-      "status": "IMPLEMENTED",
+      "status": "VERIFIED",
       "script": "Q160_NerupasRequest.js",
       "definitionId": null,
       "registered": true,
       "tests": [
-        "tests/test_quest_runtime.js"
+        "tests/test_quest_runtime.js",
+        "tests/test_c4_declarative_quests.js"
       ],
       "blocker": null,
-      "certificationBlocker": {
-        "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-        "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-      },
+      "certificationBlocker": null,
       "professionProofContract": null,
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "NOT_CERTIFIED",
-        "reviewedRequirements": null,
+        "questAdapter": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+        "reviewedRequirements": [],
         "requirementsNeedingReview": []
       },
       "drift": [
+        "status:IMPLEMENTED->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -2849,25 +2847,24 @@
       "name": "Deliver Supplies",
       "inScope": true,
       "quarantined": false,
-      "status": "IMPLEMENTED",
+      "status": "VERIFIED",
       "script": "Q168_DeliverSupplies.js",
       "definitionId": null,
       "registered": true,
-      "tests": [],
+      "tests": [
+        "tests/test_c4_declarative_quests.js"
+      ],
       "blocker": null,
-      "certificationBlocker": {
-        "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-        "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-      },
+      "certificationBlocker": null,
       "professionProofContract": null,
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "NOT_CERTIFIED",
-        "reviewedRequirements": null,
+        "questAdapter": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+        "reviewedRequirements": [],
         "requirementsNeedingReview": []
       },
       "drift": [
-        "status:REGISTERED_UNTESTED->IMPLEMENTED",
+        "status:REGISTERED_UNTESTED->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },

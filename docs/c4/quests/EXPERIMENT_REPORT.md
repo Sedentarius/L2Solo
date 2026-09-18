@@ -5,22 +5,22 @@ Baseline inspected: prewipe-c4-p0-b at aed7d6bf. The five supplied files remain 
 | Repository-derived measure | Result |
 |---|---:|
 | Confirmed quests, minimum level 1–20 | 107 |
-| VERIFIED | 31 |
-| IMPLEMENTED, full certification pending | 53 |
+| VERIFIED | 34 |
+| IMPLEMENTED, full certification pending | 50 |
 | PARTIAL/BLOCKED | 14 |
 | MISSING | 9 |
 | Active quests in scope | 86 |
 | Newly registered active quests | 27 |
 | New per-quest script classes | 0 |
-| Existing script implementations replaced by reviewed definitions | 4 |
-| Active declarative definitions | 31 |
+| Existing script implementations replaced by reviewed definitions | 7 |
+| Active declarative definitions | 34 |
 | Disabled declarative definitions | 1 (Q379) |
 | New focused test files | 3 |
 | New Quest Bridge primitives | 0 |
 | Shared profession proof contracts passing | 18 / 18 |
 | Entire first-profession quest and transfer passing end-to-end | 1 / 18 (Q401) |
 
-The four recovered modules are Q151, Q155, Q156 and Q161. Their old paths remain as compatibility entry points. Six shared runtime modules were added: FirstProfessionProof, QuestStep, DeclarativeQuest, LowLevelDefinitions, RecoveredLowLevelDefinitions and ReviewedQuestRoutes. New commands are check-c4-quests and certify-c4-quests. Twenty-seven ordinary quests were added without twenty-seven bespoke classes:
+The seven recovered modules are Q151, Q153, Q155, Q156, Q160, Q161 and Q168. Their old paths remain as compatibility entry points. Six shared runtime modules were added: FirstProfessionProof, QuestStep, DeclarativeQuest, LowLevelDefinitions, RecoveredLowLevelDefinitions and ReviewedQuestRoutes. New commands are check-c4-quests and certify-c4-quests. Twenty-seven ordinary quests were added without twenty-seven bespoke classes:
 
 Q258, Q259, Q261, Q262, Q263, Q264, Q271, Q272, Q274, Q277, Q291, Q292, Q294, Q295, Q296, Q297, Q303, Q306, Q313, Q316, Q317, Q319, Q320, Q324, Q325, Q341, Q347.
 
@@ -36,13 +36,15 @@ Declarative quests implement existing QuestService handlers. State, item consump
 
 The other seventeen profession routes are not full end-to-end certifications. Their intermediate script transactions, encounter behavior and autonomous schedules still need work. Hot/cold proof rules are shared; fully autonomous hot execution of every retail route is not claimed.
 
-53 active quests are implemented but not fully certified. Each has a machine-readable certificationBlocker, including older multi-write hand-ins and missing lifecycle coverage. Importing a module is not treated as verification. Q038/Q039 remain disabled because their required mob templates are missing; enabling their old handlers would not create playable certified quests.
+50 active quests are implemented but not fully certified. Each has a machine-readable certificationBlocker, including older multi-write hand-ins and missing lifecycle coverage. Importing a module is not treated as verification. Q038/Q039 remain disabled because their required mob templates are missing; enabling their old handlers would not create playable certified quests.
 
 Blocked/partial IDs: Q38, Q39, Q266, Q267, Q296, Q306, Q362, Q363, Q364, Q379, Q385, Q422, Q634, Q635.
 
 Missing implementation IDs: Q257, Q260, Q265, Q273, Q275, Q276, Q293, Q340, Q378.
 
 The remaining ordinary gaps include shared once-per-character beginner-shot eligibility/receipts and their shared reward contract. Exceptional gaps include encounter ownership across hot/cold handoff, party/Seven Signs integration, Sin Eater progression and Dimension Rift instance lifecycle. Music NPC templates and Q379's item templates are absent; Murika/Bremec IDs have unresolved mappings. These are explicitly recorded instead of approximated. Q255/Q999 remain quarantined outside the 107-quest denominator.
+
+The reference persists beginner eligibility when a character is created (first character on its account, or an explicit server override). L2Solo has no equivalent historical eligibility flag. Current level or possession of beginner ammunition cannot safely reconstruct it. A future migration must distinguish historical uncertainty from eligibility for newly created characters; the five associated quests are not silently stripped of this reward.
 
 ## Inventory drift and Bridge reconciliation
 
@@ -56,8 +58,10 @@ Historical reward omissions and drop-chance resolutions are listed in runtime-so
 
 Run node scripts/check-c4-quests.js for current drift and structural checks. Run node scripts/certify-c4-quests.js to rerun the seventeen focused files and regenerate evidence/report. Certification records source/test/data hashes and actual zero exit codes, and becomes stale when those inputs change. It does not certify the entire catalogue or the whole regression suite.
 
-The integration regression executed 509 files: 508 passed, with one availability failure exposing absent alternative kill-target spawns in Q296/Q306. The correction limits active targets to existing authored spawns, leaves both quests explicitly partial, and adds availability to focused certification. The corrected availability test passes. Final validation is recorded in regression-summary.json.
+Machine-readable milestone totals and per-quest remaining reasons are in experiment-summary.json. Detailed script/registration/test reconciliation is in runtime-report.json; source resolutions are in runtime-sources.md. The registry comparison against aed7d6bf establishes the 59 → 86 active-quest change directly.
+
+The last complete regression, on the Q325 implementation snapshot (07412719), executed 509 files: 508 passed. The remaining companion-pathfinding test hit PATH_BUDGET on the Giran route and subsequently timed out because its workers were not released after the assertion. Test cleanup now releases workers in finally; an isolated rerun reports the same route assertion immediately. Its assertion and production pathfinding budget remain unchanged. The later Q153/Q160/Q168 recovery is covered by a fresh focused certification, not claimed as a second 509-file pass. check-syntax.js passes for 1453 JavaScript files. Details and exit codes are recorded in regression-summary.json.
 
 ## Scaling conclusion
 
-This supports scaling the same reviewed-definition architecture: 27 newly playable quests plus four recovered quests use shared transactions and existing QuestService/Bridge, with no new Bridge primitive. It covers more than simple collection: variable rewards, ongoing bounty payments, barter and explicit choices also fit. It does not support blindly executing the inventory or claiming that all remaining catalogue mechanics fit this pattern. Datapack completeness, ambiguous evidence, account-wide reward flags, scripted encounters and party/instance systems remain separate engineering work. Nine missing implementations and seventeen uncertified profession routes are concrete remaining scope, not hidden behind the VERIFIED count.
+This supports scaling the same reviewed-definition architecture: 27 newly playable quests plus seven recovered quests use shared transactions and existing QuestService/Bridge, with no new Bridge primitive. It covers more than simple collection: variable rewards, ongoing bounty payments, barter and explicit choices also fit. It does not support blindly executing the inventory or claiming that all remaining catalogue mechanics fit this pattern. Datapack completeness, ambiguous evidence, account-wide reward flags, scripted encounters and party/instance systems remain separate engineering work. Nine missing implementations and seventeen uncertified profession routes are concrete remaining scope, not hidden behind the VERIFIED count.
