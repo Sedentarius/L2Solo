@@ -16,7 +16,10 @@ const tests = [
     'tests/test_pk_hunting_state.js',
 
     // Adjacent frozen P0-A invariants: A6 must not regress them.
-    'tests/test_bow_normal_attack_mp.js',
+    // Upstream replaced the parallel bow implementation with
+    // GameServer/Actor/BowResources and removed test_bow_normal_attack_mp.js.
+    // Ranged attack resource consumption is covered here now.
+    'tests/test_player_ranged_combat.js',
     'tests/test_overhit_reward.js',
     'tests/test_progression_content_cap.js',
     'tests/test_quest_registry_integrity.js'
