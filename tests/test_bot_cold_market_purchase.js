@@ -17,6 +17,7 @@ const BotGear = invoke('GameServer/Bot/AI/BotGear');
 DataCache.init();
 
 const originals = {
+    reconcileBotClanMembership: Database.reconcileBotClanMembership,
     execute: Database.execute,
     fetchItems: Database.fetchItems,
     updateItemAmount: Database.updateItemAmount,
@@ -39,6 +40,7 @@ const playerStore = {
 };
 
 async function run() {
+    Database.reconcileBotClanMembership = async () => ({ repairedMembers: 0, repairedParties: 0 });
     MarketTelemetry.reset();
     Database.execute = (statement) => {
         calls.push({ type: 'execute', statement });
@@ -474,6 +476,7 @@ run().catch((err) => {
     console.error(err);
     process.exitCode = 1;
 }).finally(() => {
+    Database.reconcileBotClanMembership = originals.reconcileBotClanMembership;
     Database.execute = originals.execute;
     Database.fetchItems = originals.fetchItems;
     Database.updateItemAmount = originals.updateItemAmount;

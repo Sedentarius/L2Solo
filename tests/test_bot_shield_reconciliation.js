@@ -12,6 +12,7 @@ const originalExecute = Database.execute;
 const originalSyncInventorySummary = Database.syncInventorySummary;
 const originalFetchItems = Database.fetchItems;
 const originalRecoverStartupLeases = ColdSimulationOwner.recoverStartupLeases;
+const originalReconcileClanMembership = Database.reconcileBotClanMembership;
 
 function persistedShieldRow(characterId, name) {
     return {
@@ -69,6 +70,7 @@ Database.execute = ([sql, params]) => {
 };
 Database.syncInventorySummary = () => Promise.resolve();
 ColdSimulationOwner.recoverStartupLeases = () => Promise.resolve({ affectedRows: 0 });
+Database.reconcileBotClanMembership = () => Promise.resolve({ repairedMembers: 0, repairedParties: 0 });
 
 const BotLifeState = invoke('GameServer/Bot/Population/BotLifeState');
 
@@ -113,6 +115,7 @@ const BotLifeState = invoke('GameServer/Bot/Population/BotLifeState');
         Database.syncInventorySummary = originalSyncInventorySummary;
         Database.fetchItems = originalFetchItems;
         ColdSimulationOwner.recoverStartupLeases = originalRecoverStartupLeases;
+        Database.reconcileBotClanMembership = originalReconcileClanMembership;
     }
 })().catch((error) => {
     console.error(error);

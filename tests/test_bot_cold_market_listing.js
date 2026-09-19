@@ -32,6 +32,7 @@ const speculativeItem = DataCache.items.find((item) => (
 assert(marketItem && equippedItem && speculativeItem && spellbook, 'the datapack must contain market gear and spellbook fixtures');
 
 const originals = {
+    reconcileBotClanMembership: Database.reconcileBotClanMembership,
     execute: Database.execute,
     fetchItems: Database.fetchItems,
     fetchWarehouseItems: Database.fetchWarehouseItems,
@@ -48,6 +49,7 @@ const originals = {
 const calls = [];
 
 async function run() {
+    Database.reconcileBotClanMembership = async () => ({ repairedMembers: 0, repairedParties: 0 });
     Database.execute = () => Promise.resolve([]);
     Database.fetchItems = () => Promise.resolve([
         { id: 20, selfId: 57, amount: 500, equipped: false, slot: 0 },
@@ -435,6 +437,7 @@ run().catch((err) => {
     console.error(err);
     process.exitCode = 1;
 }).finally(() => {
+    Database.reconcileBotClanMembership = originals.reconcileBotClanMembership;
     Database.execute = originals.execute;
     Database.fetchItems = originals.fetchItems;
     Database.fetchWarehouseItems = originals.fetchWarehouseItems;

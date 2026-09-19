@@ -25,6 +25,7 @@ const originalSetSkill = Database.setSkill;
 const originalUpdateSkillLevel = Database.updateSkillLevel;
 const originalUpdateCharacterClassId = Database.updateCharacterClassId;
 const originalRecoverStartupLeases = ColdSimulationOwner.recoverStartupLeases;
+const originalReconcileClanMembership = Database.reconcileBotClanMembership;
 const statements = [];
 const classUpdates = [];
 let stalePartyRows = [];
@@ -32,6 +33,7 @@ let marketCandidateRows = [];
 
 try {
     ColdSimulationOwner.recoverStartupLeases = () => Promise.resolve({ affectedRows: 0 });
+    Database.reconcileBotClanMembership = () => Promise.resolve({ repairedMembers: 0, repairedParties: 0 });
     Database.execute = ([sql, params, queryOptions]) => {
         statements.push({ sql: String(sql), params, queryOptions });
         if (String(sql).startsWith('SELECT id, classId, level, exp, sp FROM characters')) {
@@ -533,6 +535,7 @@ try {
         Database.updateSkillLevel = originalUpdateSkillLevel;
         Database.updateCharacterClassId = originalUpdateCharacterClassId;
         ColdSimulationOwner.recoverStartupLeases = originalRecoverStartupLeases;
+        Database.reconcileBotClanMembership = originalReconcileClanMembership;
     });
 } catch (err) {
     Database.execute = originalExecute;
@@ -549,5 +552,6 @@ try {
     Database.updateSkillLevel = originalUpdateSkillLevel;
     Database.updateCharacterClassId = originalUpdateCharacterClassId;
     ColdSimulationOwner.recoverStartupLeases = originalRecoverStartupLeases;
+    Database.reconcileBotClanMembership = originalReconcileClanMembership;
     throw err;
 }

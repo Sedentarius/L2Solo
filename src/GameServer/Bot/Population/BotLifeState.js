@@ -1,3 +1,4 @@
+const ClanMembershipPolicy = require('../../Clan/ClanMembershipPolicy');
 const LifeStateCache = require('./LifeStateCache');
 const ItemTemplateIndex = require('../../Item/ItemTemplateIndex');
 const Database = invoke('Database');
@@ -457,7 +458,7 @@ function normalize(row) {
     const stats = parseJson(row.statsJson, {});
     const inventory = normalizeInventoryStackability(parseJson(row.inventorySummary, {}));
 
-    return {
+    return ClanMembershipPolicy.reconcileState({
         characterId: Number(row.characterId),
         accountName: row.accountName || '',
         name: row.characterName || '',
@@ -502,7 +503,7 @@ function normalize(row) {
             leaseUntil: Math.max(0, Number(row.simulationLeaseUntil || 0))
         },
         updatedAt: Number(row.updatedAt || 0)
-    };
+    });
 }
 
 function recordFromSession(session, phase, reason = '') {
@@ -525,13 +526,17 @@ function recordFromSession(session, phase, reason = '') {
         pvpIncidents: invoke('GameServer/Social/PvpResponsibility').snapshot(actor, timestamp),
         revengeUntil: Math.max(Number(session.nextRevengeAt || 0), Number(cache.get(characterId)?.stats?.revengeUntil || 0)),
         clanGearExchangeRevision: Number(cache.get(characterId)?.stats?.clanGearExchangeRevision || 0),
+        clanInventoryRevision: Number(cache.get(characterId)?.stats?.clanInventoryRevision || 0),
+        clanMembershipVersion: Number(cache.get(characterId)?.stats?.clanMembershipVersion || 0),
         classId: actor.fetchClassId ? Number(actor.fetchClassId()) : null,
         // A freshly spawned bot may cool before it has gone through a cold
         // resolve. Persist the completed profile here so it is never picked
         // up by the one-off legacy migration on a later restart.
         classProgressionLevel: actor.fetchLevel(),
         classProgressionClassId: actor.fetchClassId ? Number(actor.fetchClassId()) : null,
-        clanId: actor.fetchClanId ? Number(actor.fetchClanId()) || 0 : 0,
+        clanId: cache.get(characterId)?.stats?.clanMembershipVersion
+            ? Number(cache.get(characterId).stats.clanId || 0)
+            : actor.fetchClanId ? Number(actor.fetchClanId()) || 0 : 0,
         clanHallVisit: session.clanHallVisit === undefined ? session.coldLifeState?.stats?.clanHallVisit || null : session.clanHallVisit,
         clanHallRetryAt: session.clanHallRetryAt ?? session.coldLifeState?.stats?.clanHallRetryAt ?? 0,
         route: currentSpot?.route || null,
@@ -591,6 +596,7 @@ function recordFromSession(session, phase, reason = '') {
 }
 
 function rowFromState(state) {
+    state = ClanMembershipPolicy.reconcileState(state);
     const inventory = InventorySummary.canonicalize(state?.inventory);
     const equipmentAdvance = equipmentCompletionSignal({ ...state, inventory });
     const persistedState = reconcileFulfilledEquipmentPlan({
@@ -658,10 +664,16 @@ function preserveVersionedAppearanceForSave(row) {
 }
 
 function save(row) {
+    const proposed = { activity: row.activity, stats: parseJson(row.statsJson, {}) };
+    const reconciled = ClanMembershipPolicy.reconcileState(proposed);
+    if (reconciled !== proposed) {
+        row.activity = reconciled.activity;
+        row.statsJson = safeJson(reconciled.stats);
+    }
     // An async lifecycle step may still hold the inventory from before an
     // exchange. Reject it before its subsequent inventory sync restores gear.
     const exchangeRevision = Number(cache.get(Number(row.characterId))?.stats?.clanGearExchangeRevision || 0);
-    if (exchangeRevision > Number(parseJson(row.statsJson, {}).clanGearExchangeRevision || 0)) {
+    if (exchangeRevision > Number(reconciled.stats.clanGearExchangeRevision || 0)) {
         const error = new Error(`stale inventory before clan equipment exchange for ${row.characterId}`);
         error.code = 'BOT_LIFE_STATE_OWNERSHIP_CONFLICT';
         return Promise.reject(error);
@@ -705,7 +717,9 @@ function save(row) {
             updatedAt = excluded.updatedAt
         WHERE ${TABLE}.simulationOwner = 'legacy_main'
           AND COALESCE(json_extract(${TABLE}.statsJson, '$.clanInventoryRevision'), 0)
-              <= COALESCE(json_extract(excluded.statsJson, '$.clanInventoryRevision'), 0)`,
+              <= COALESCE(json_extract(excluded.statsJson, '$.clanInventoryRevision'), 0)
+          AND COALESCE(json_extract(${TABLE}.statsJson, '$.clanMembershipVersion'), 0)
+              <= COALESCE(json_extract(excluded.statsJson, '$.clanMembershipVersion'), 0)`,
         [
             row.characterId,
             row.accountName,
@@ -1414,6 +1428,11 @@ const BotLifeState = {
             // even when its wall-clock lease had time remaining. Reclaim the
             // rows before any legacy startup repair can touch them.
             .then(() => invoke('GameServer/Bot/Population/ColdSimulationOwner').recoverStartupLeases())
+            .then(() => Database.reconcileBotClanMembership()).then(({ repairedMembers, repairedParties }) => {
+                if (repairedMembers || repairedParties) {
+                    utils.infoWarn('BotLife', 'reconciled clan membership and crafting goals: bots=%d parties=%d', repairedMembers, repairedParties);
+                }
+            })
             .then(() => Database.execute([`UPDATE ${TABLE}
                 SET statsJson = json_set(COALESCE(statsJson, '{}'), '$.karma',
                     (SELECT karma FROM characters WHERE id = characterId))
@@ -1528,6 +1547,12 @@ const BotLifeState = {
     markCold(session, reason = 'cooldown') {
         if (!session || !session.actor) return Promise.resolve(null);
 
+        const membership = cache.get(Number(session.actor.fetchId()))?.stats;
+        const membershipStats = membership?.clanMembershipVersion ? {
+            clanId: membership.clanId,
+            clanMembershipVersion: membership.clanMembershipVersion,
+            clanDiscipline: membership.clanDiscipline
+        } : {};
         const marketState = session.coldMarketState;
         const craftState = refreshCraftShop(session.coldCraftState);
         if (marketState?.stats?.marketStore) {
@@ -1548,6 +1573,7 @@ const BotLifeState = {
                 },
                 stats: {
                     ...(marketState.stats || {}),
+                    ...membershipStats,
                     pvpEnemies: invoke('GameServer/Bot/AI/BotEnemyMemory').snapshot(session),
                     marketStore: {
                         ...(marketState.stats.marketStore || {}),
@@ -1582,7 +1608,7 @@ const BotLifeState = {
                     activityStartedAt: now(),
                     nextResolveAt: null
                 },
-                stats: { ...(craftState.stats || {}), pvpEnemies: invoke('GameServer/Bot/AI/BotEnemyMemory').snapshot(session), lastReason: reason },
+                stats: { ...(craftState.stats || {}), ...membershipStats, pvpEnemies: invoke('GameServer/Bot/AI/BotEnemyMemory').snapshot(session), lastReason: reason },
                 inventory: parseJson(row.inventorySummary, {})
             };
             return this.upsertState(nextState, reason);
@@ -3223,6 +3249,13 @@ const BotLifeState = {
         });
         pendingWrites.set(id, tracked);
         return tracked;
+    },
+
+    acceptClanMembershipState(row) {
+        const snapshot = normalize(row);
+        cache.set(snapshot.characterId, snapshot);
+        notifyColdSnapshot(snapshot, 'clan_membership', { critical: true });
+        return snapshot;
     },
 
     acceptClanCraftState(row) {
