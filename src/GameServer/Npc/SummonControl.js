@@ -347,6 +347,7 @@ function attackTick(session, summon, target) {
         if (hitLanded) {
             if (target.fetchKind) invoke(path.npc).receivedHit(session, summon, target, hit.damage);
             else invoke(path.actor).receivedHit(session, target, hit.damage, { source: summon });
+            attackHelper.applyDamageAbsorb(session, summon, hit.damage);
         } else if (!target.fetchKind && invoke('GameServer/Bot/AI/BotPvpThreats').record(target, summon)) {
             invoke('GameServer/Actor/PvpFlag').mark(session, session.actor);
         }

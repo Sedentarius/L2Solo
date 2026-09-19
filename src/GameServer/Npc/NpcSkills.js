@@ -25,9 +25,12 @@ const c4RaidBossMinionSkills = require('../../../data/Npcs/Skills/c4_raid_boss_m
 const c4LegacyMonsterSkillTemplates = require('../../../data/Npcs/Skills/c4_legacy_monster_templates.json');
 const c4LegacyMonsterSkillRows = require('../../../data/Npcs/Skills/c4_legacy_monsters.json');
 const c4LegacyMonsterIds = new Set(c4LegacyMonsterSkillRows.map((row) => Number(row.npcId)));
+const phantomSummons = require('../../../data/Npcs/Skills/c4_phantom_summons.json');
+const phantomSummonIds = new Set(phantomSummons.rows.map(row => row.npcId));
 const npcSkillRows = [
     ...require('../../../data/Pets/c4-quest-npcs.json').skills,
-    ...require('../../../data/Npcs/Skills/skills.json').filter((row) => !c4LegacyMonsterIds.has(Number(row.npcId))),
+    ...require('../../../data/Npcs/Skills/skills.json').filter((row) => !c4LegacyMonsterIds.has(Number(row.npcId)) && !phantomSummonIds.has(Number(row.npcId))),
+    ...phantomSummons.rows,
     ...c4LegacyMonsterSkillRows,
     ...require('../../../data/Npcs/Skills/c4_swamp_of_screams.json'),
     ...require('../../../data/Npcs/Skills/c4_garden_of_beasts.json'),
@@ -72,10 +75,8 @@ const npcSkillRows = [
 // importer covers all generated servitor templates.
 const summonActionSkills = [
     { selfId: 4137, template: { name: 'Hydro Screw', passive: false, spell: true, distance: 500 }, time: { hitTime: 4000, reuse: 8000, buff: 0 }, levels: [{ level: 1, power: 9, mp: 18, hp: 0, itemId: 0, itemCount: 0 }] },
-    { selfId: 4138, template: { name: 'NPC AE - Corpse Burst', passive: false, spell: true, distance: 900 }, time: { hitTime: 4000, reuse: 8000, buff: 0 }, levels: [{ level: 1, power: 9, mp: 18, hp: 0, itemId: 0, itemCount: 0 }] },
     { selfId: 4139, template: { name: 'Boom Attack', passive: false, spell: true, distance: -1 }, time: { hitTime: 6000, reuse: 8000, buff: 0 }, levels: [{ level: 1, power: 52, mp: 0, hp: 0, itemId: 0, itemCount: 0 }] },
     { selfId: 4230, template: { name: 'Wild Cannon', passive: false, spell: false, distance: 2500 }, time: { hitTime: 10000, reuse: 10500, buff: 0 }, levels: [{ level: 1, power: 532048, mp: 0, hp: 0, itemId: 0, itemCount: 0 }] },
-    { selfId: 4259, template: { name: 'Toxic Smoke', passive: false, spell: true, distance: 500 }, time: { hitTime: 2000, reuse: 8000, buff: 30000 }, levels: [{ level: 1, power: 2, mp: 18, hp: 0, itemId: 0, itemCount: 0 }] },
     { selfId: 4378, template: { name: 'Self Damage Shield', passive: false, spell: false, distance: -1 }, time: { hitTime: 1800, reuse: 60000, buff: 60000 }, levels: [{ level: 1, power: 0, mp: 12, hp: 0, itemId: 0, itemCount: 0 }] }
 ];
 
@@ -88,7 +89,7 @@ const summonActionSkillIds = new Map([
 ]);
 
 const skillTemplates = new Map(
-    [...activeSkills, ...passiveSkills, ...npcActiveSkills, ...c4LegacyMonsterSkillTemplates, ...c4SwampSkills, ...c4GardenSkills, ...c4ValleySkills, ...summonActionSkills, ...c4ForestSkills, ...c4DevilsIsleSkills, ...c4NecropolisSacrificeSkills, ...c4DevastatedCastleSkills, ...c4KetraOrcOutpostSkills, ...c4VarkaSilenosStrongholdSkills, ...c4HotSpringsSkills, ...c4WallOfArgosSkills, ...c4ForgeOfTheGodsSkills, ...c4FieldsSkills, ...c4HeathenCampSkills, ...c4ImperialTombSkills, ...c4LowLevelRaidBossSkills, ...c4RaidBossSkills, ...c4RaidBossMinionSkills, ...require('../../../data/Pets/c4-skills.json').skills]
+    [...activeSkills, ...passiveSkills, ...npcActiveSkills, ...c4LegacyMonsterSkillTemplates, ...c4SwampSkills, ...c4GardenSkills, ...c4ValleySkills, ...summonActionSkills, ...c4ForestSkills, ...c4DevilsIsleSkills, ...c4NecropolisSacrificeSkills, ...c4DevastatedCastleSkills, ...c4KetraOrcOutpostSkills, ...c4VarkaSilenosStrongholdSkills, ...c4HotSpringsSkills, ...c4WallOfArgosSkills, ...c4ForgeOfTheGodsSkills, ...c4FieldsSkills, ...c4HeathenCampSkills, ...c4ImperialTombSkills, ...c4LowLevelRaidBossSkills, ...c4RaidBossSkills, ...c4RaidBossMinionSkills, ...require('../../../data/Pets/c4-skills.json').skills, ...phantomSummons.templates]
         .map((skill) => [Number(skill.selfId), skill])
 );
 
