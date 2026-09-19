@@ -38,6 +38,7 @@ const mocks = {
     'GameServer/World/World': world,
     'GameServer/Bot/BotManager': { botPartySay: (session, text) => { reports.push(text); return true; }, botTell() { throw new Error('Unexpected whisper'); } },
     'GameServer/Effects/EffectStore': {
+        hasDebuff: () => false,
         apply(actor, effect) { poisonEffects.push(effect); actor.effects[effect.key] = effect; return effect; },
         remove(actor, key) { delete actor.effects[key]; }
     },

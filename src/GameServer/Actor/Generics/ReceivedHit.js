@@ -105,6 +105,7 @@ function tauntAfterPkKill(session, victim, attacker = session?.actor) {
 }
 
 function receivedHit(session, actor, hit, options = {}) {
+    if (invoke('GameServer/Effects/EffectStore').hasDebuff(actor, 'petrification')) return;
     const Generics = invoke(path.actor);
     const EffectRestrictions = invoke('GameServer/Effects/EffectRestrictions');
     const victimSession = actor?.session;
@@ -183,7 +184,7 @@ function receivedHit(session, actor, hit, options = {}) {
             tauntAfterPkKill(attackerSession, victim, attacker);
         }
 
-        Generics.die(session, actor);
+        Generics.die(session, actor, { source, killer });
         return;
     }
 

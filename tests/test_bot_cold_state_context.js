@@ -126,6 +126,21 @@ async function run() {
     assert.strictEqual(saved.spotId, '2_-24');
     assert.strictEqual(saved.stats.equipmentPlan.target.name, 'Atuba Mace', 'cooldown must preserve the acquisition plan');
 
+    session.actor.deathExperience = { expBeforeDeath: 1300, expLost: 100,
+        expAfterDeath: 1200, penaltyAppliedAt: 100, pendingRestoration: true };
+    await LifeState.markCold(session, 'death_handoff');
+    assert.deepStrictEqual(saved.stats.deathExperience, session.actor.deathExperience,
+        'hot death entitlement must be captured when cooling');
+    assert.notStrictEqual(saved.stats.deathExperience, session.actor.deathExperience);
+    session.actor.deathExperience.pendingRestoration = false;
+    session.actor.deathExperience.resolutionReason = 'resurrection';
+    await LifeState.markCold(session, 'resurrection_handoff');
+    assert.strictEqual(saved.stats.deathExperience.pendingRestoration, false,
+        'hot restoration must replace the stale pending cold snapshot');
+    session.actor.deathExperience = null;
+    await LifeState.markCold(session, 'cleared_death_handoff');
+    assert.strictEqual(saved.stats.deathExperience, null);
+
     const returnState = session.coldLifeState;
     session.populationLocationPolicy = 'physical';
     const originalFindCurrentSpot = SpotService.findCurrentSpot;

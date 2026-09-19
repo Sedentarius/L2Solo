@@ -7,79 +7,9 @@ const ExperienceReward = invoke("GameServer/Actor/Generics/ExperienceReward");
 const ConsoleText = invoke("GameServer/ConsoleText");
 const World = invoke("GameServer/World/World");
 const ClassTransfer = invoke("GameServer/ClassTransfer");
+const QuestRegistry = require("./QuestRegistry");
 
-const quests = [
-  require("./quests/Q001_LettersOfLove"),
-  require("./quests/Q002_WhatWomenWant"),
-  require("./quests/Q003_WillTheSealBeBroken"),
-  require("./quests/Q004_LongLiveThePaagrioLord"),
-  require("./quests/Q005_MinersFavor"),
-  require("./quests/Q006_StepIntoTheFuture"),
-  require("./quests/Q007_ATripBegins"),
-  require("./quests/Q008_AnAdventureBegins"),
-  require("./quests/Q009_IntoTheCityOfHumans"),
-  require("./quests/Q010_IntoTheWorld"),
-  require("./quests/Q034_InSearchOfCloth"),
-  require("./quests/Q036_MakeASewingKit"),
-  require("./quests/Q042_HelpTheUncle"),
-  require("./quests/Q043_HelpTheSister"),
-  require("./quests/Q044_HelpTheSon"),
-  require("./quests/Q045_ToTalkingIsland"),
-  require("./quests/Q046_OnceMoreInTheArmsOfTheMotherTree"),
-  require("./quests/Q047_IntoTheDarkForest"),
-  require("./quests/Q048_ToTheImmortalPlateau"),
-  require("./quests/Q049_TheRoadHome"),
-  require("./quests/Q101_SwordOfSolidarity"),
-  require("./quests/Q102_FungusFever"),
-  require("./quests/Q103_SpiritOfCraftsman"),
-  require("./quests/Q104_SpiritOfMirrors"),
-  require("./quests/Q105_SkirmishWithTheOrcs"),
-  require("./quests/Q106_ForgottenTruth"),
-  require("./quests/Q107_MercilessPunishment"),
-  require("./quests/Q108_JumbleTumbleDiamondFuss"),
-  require("./quests/Q151_CureForFeverDisease"),
-  require("./quests/Q152_ShardsOfGolem"),
-  require("./quests/Q153_DeliverGoods"),
-  require("./quests/Q154_SacrificeToTheSea"),
-  require("./quests/Q155_FindSirWindawood"),
-  require("./quests/Q156_MillenniumLove"),
-  require("./quests/Q157_RecoverSmuggledGoods"),
-  require("./quests/Q158_SeedOfEvil"),
-  require("./quests/Q159_ProtectTheWaterSource"),
-  require("./quests/Q160_NerupasRequest"),
-  require("./quests/Q161_FruitOfTheMotherTree"),
-  require("./quests/Q162_CurseOfTheUndergroundFortress"),
-  require("./quests/Q163_LegacyOfThePoet"),
-  require("./quests/Q164_BloodFiend"),
-  require("./quests/Q165_ShilensHunt"),
-  require("./quests/Q166_MassOfDarkness"),
-  require("./quests/Q167_DwarvenKinship"),
-  require("./quests/Q168_DeliverSupplies"),
-  require("./quests/Q169_OffspringOfNightmares"),
-  require("./quests/Q170_DangerousSeduction"),
-  require("./quests/Q401_PathToWarrior"),
-  require("./quests/Q402_PathToKnight"),
-  require("./quests/Q403_PathToRogue"),
-  require("./quests/Q404_PathToWizard"),
-  require("./quests/Q405_PathToCleric"),
-  require("./quests/Q406_PathToElvenKnight"),
-  require("./quests/Q407_PathToElvenScout"),
-  require("./quests/Q408_PathToElvenWizard"),
-  require("./quests/Q409_PathToElvenOracle"),
-  require("./quests/Q410_PathToPalusKnight"),
-  require("./quests/Q411_PathToAssassin"),
-  require("./quests/Q412_PathToDarkWizard"),
-  require("./quests/Q413_PathToShillienOracle"),
-  require("./quests/Q414_PathToOrcRaider"),
-  require("./quests/Q415_PathToOrcMonk"),
-  require("./quests/Q416_PathToOrcShaman"),
-  require("./quests/Q417_PathToScavenger"),
-  require("./quests/Q418_PathToArtisan"),
-  require("./quests/Q419_GetAPet"),
-  require("./quests/Q420_LittleWing"),
-  require("./quests/Q421_LittleWingsBigAdventure"),
-  require("./quests/Q501_ProofOfClanAlliance"),
-];
+const quests = QuestRegistry.activeQuests();
 const byId = new Map(quests.map((quest) => [quest.id, quest]));
 const attackQuests = new Map();
 for (const quest of quests) for (const npcId of quest.attackNpcs || []) {
@@ -104,7 +34,12 @@ function mutate(session, work) {
 
 async function ensureLoaded(session) {
   if (session.questStatesLoaded) return;
-  const rows = await Database.fetchCharacterQuests(session.actor.fetchId());
+  const actor = session.actor;
+  const cache = states(session);
+  const rows = await Database.fetchCharacterQuests(actor.fetchId());
+  // A response for the previous character must not populate the new cache.
+  if (session.actor !== actor || states(session) !== cache) return;
+  cache.clear();
   rows.forEach((row) => {
     const quest = byId.get(Number(row.questId));
     if (quest)
@@ -440,7 +375,10 @@ function onAttack(session, npc, source, damage) {
 function active(session) {
   return [...states(session).values()]
     .filter((state) => state.isStarted())
-    .map((state) => ({ id: state.quest.id, condition: state.getInt("cond") }));
+    .map((state) => ({
+      id: state.quest.id,
+      condition: state.quest.clientCondition?.(state) ?? state.getInt("cond"),
+    }));
 }
 
 function questRates() {

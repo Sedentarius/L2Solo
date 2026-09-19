@@ -49,8 +49,12 @@ module.exports = {
       return page("Tanapi", "Speak with TAmil about your journey.");
     }
     if (event === "reward" && state.isStarted() && state.getInt("cond") === 2) {
-      await service().giveItem(state.session, MARK_OF_TRAVELER, 1);
-      await service().giveItem(state.session, SOE_GIRAN, 1);
+      // Resume a partial reward without adding more marks after a failed grant.
+      for (const itemId of [MARK_OF_TRAVELER, SOE_GIRAN]) {
+        const item = actor.backpack.fetchItemFromSelfId(itemId);
+        if (!item || item.fetchAmount() < 1)
+          await service().giveItem(state.session, itemId, 1);
+      }
       state.playSound(SOUND_FINISH);
       await state.exit(false);
       return page("TAmil", "May Pa’agrio watch over your travels.");

@@ -131,6 +131,16 @@ async function main() {
 
         const leader = actor(5400001, 2047, [stem, earringOne, earringTwo, tunic, missingShirt]);
         const depositSession = sessionFor(leader, 'deposit');
+        const questTemplate = DataCache.items.find(item => item.selfId === 1252);
+        const quest = new Item(7499999, { ...utils.crushOb(questTemplate), amount: 1 });
+        leader.backpack.items.push(quest);
+        await assert.rejects(ClanWarehouse.deposit(depositSession, [
+            { objectId: 7400001, amount: 1 }, { objectId: 7499999, amount: 1 }
+        ]), /invalid clan warehouse deposit/);
+        assert.equal(stem.fetchAmount(), 10);
+        const unchanged = await Database.execute(['SELECT amount FROM items WHERE id = 7400001']);
+        assert.equal(Number(unchanged[0].amount), 10, 'rejected batch must not write inventory');
+        leader.backpack.items.pop();
         await ClanWarehouse.deposit(depositSession, [{ objectId: 7400001, amount: 6 }]);
         assert.strictEqual(stem.fetchAmount(), 4, 'successful clan deposit must update the live backpack');
         let [stored] = await Database.execute([`SELECT id, amount, reservedAmount FROM clan_warehouse_items

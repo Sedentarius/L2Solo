@@ -37,6 +37,7 @@ function shutdown(signal) {
         .then(() => CharacterWriteQueue.flushAll())
         .catch((error) => utils.infoWarn('DB', 'final buffered flush failed: %s', error.message))
         .then(() => PathfindingWorkerPool.shutdown())
+        .then(() => invoke('GameServer/Clan/ClanPlanningCoordinator').shutdown())
         .then(() => LangfuseTracing.shutdown())
         .then(async () => {
             const result = await invoke('GameServer/Social/InteractionMemoryRuntime').events.drain();
@@ -75,6 +76,7 @@ console.info(
 // Startup procedure, init `World` & `Data`, then `AuthServer`, finally `GameServer`
 Database.init(() => {
     DataCache.init();
+    invoke('GameServer/Clan/ClanPlanningCoordinator').start();
     const stackableItemIds = (DataCache.items || [])
         .filter((item) => item.etc?.stackable === true)
         .map((item) => Number(item.selfId));

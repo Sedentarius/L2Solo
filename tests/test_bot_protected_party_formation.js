@@ -62,6 +62,26 @@ assert.deepStrictEqual(
     'an isolated oldest request must not hide a later compatible level cluster'
 );
 
+const clanCandidate = (id, clanId, goal = `clan:${clanId}`) => {
+    const state = candidate(id);
+    state.stats.clanPartyObjective = { status: 'open', priority: 'required',
+        clanId, clanGoalKey: goal, clanOperation: 'equipment', spotId: 'clan-ground',
+        minPartySize: 3, maxPartySize: 9, levelRange: 99 };
+    return state;
+};
+const playerRoster = [501, 502, 503].map(id => clanCandidate(id, 11));
+const priorityProposal = RequiredPartyFormation.proposalFromStates([...crowded, ...playerRoster], { priorityClanIds: [11] });
+assert.deepStrictEqual(priorityProposal.candidates.map(state => state.characterId), [501, 502, 503],
+    'a ready player clan roster must precede a larger world backlog');
+assert.notStrictEqual(RequiredPartyFormation.proposalFromStates([...crowded, ...playerRoster]).spotId, 'clan-ground',
+    'offline clans receive ordinary world priority');
+assert.deepStrictEqual(RequiredPartyFormation.proposalFromStates([
+    clanCandidate(511, 11), clanCandidate(512, 11), clanCandidate(513, 12)
+], { priorityClanIds: [11] }).candidates, [], 'different clan goals at one spot cannot fake a complete roster');
+assert.strictEqual(RequiredPartyFormation.proposalFromStates([...crowded, playerRoster[0]], {
+    priorityClanIds: [11]
+}).spotId, proposal.spotId, 'an incomplete player roster must not stall other formation');
+
 const originals = {
     activity: PopulationService.playerActivityProfile,
     lag: Metrics.currentEventLoopLag,

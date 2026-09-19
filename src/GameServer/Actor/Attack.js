@@ -113,6 +113,7 @@ class Attack {
             return;
         }
         const rangedAttack = AttackRange.weaponKind(actor) === 'Weapon.Bow';
+        if (rangedAttack && !invoke('GameServer/Actor/BowResources').consume(session, actor)) return;
 
         // Soulshots are only reloaded after the player enables their hotbar toggle.
         const autoSoulshotId = actor.backpack?.fetchAutoShot?.(actor, 'soulshot');
@@ -388,7 +389,7 @@ class Attack {
                 }
 
                 if (outcome.damage > 0) {
-                    this.hit(session, actor, target, outcome.damage);
+                    this.hit(session, actor, target, outcome.damage, { skill });
                     if (outcome.forceLethalVitals && target.fetchHp?.() > 0) {
                         target.setHp?.(1);
                         target.setCp?.(1);
@@ -1242,7 +1243,7 @@ class Attack {
         return false;
     }
 
-    hit(session, actor, creature, hit) {
+    hit(session, actor, creature, hit, context = {}) {
         ConsoleText.transmit(session, ConsoleText.caption.actorHit, [{ kind: ConsoleText.kind.number, value: hit }]);
         this.tryBreakCast(creature, hit);
 
@@ -1270,7 +1271,7 @@ class Attack {
             invoke(path.actor).receivedHit(session, creature, hit, { source: actor });
         }
         else {
-            invoke(path.npc).receivedHit(session, actor, creature, hit);
+            invoke(path.npc).receivedHit(session, actor, creature, hit, context);
         }
 
         this.applyReflectedDamage(session, actor, creature, hit);

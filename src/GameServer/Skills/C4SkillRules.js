@@ -65,6 +65,8 @@ const DUAL_SWORD_DANCE = Object.freeze({
 // separate from the local effect key preserves source stack families without
 // collapsing unrelated multi-stat buffs such as Prophecies and Chant of Victory.
 const STACK_FAMILY_BY_SKILL_ID = Object.freeze({
+    76: 'possession', 83: 'possession', 109: 'possession',
+    282: 'possession', 292: 'possession', 298: 'possession',
     77: 'pAtk', 91: 'pDef',
     230: 'SpeedUp',
     1002: 'mAtkSpeedUp', 1003: 'pAtk', 1004: 'mAtkSpeedUp', 1005: 'pDef',
@@ -175,7 +177,7 @@ const RULES = {
     },
     1: { skillType: DAMAGE, trait: 'physical', target: 'enemy', ssBoost: 1, requires: { weaponsAllowed: 512, itemKind: 'Dual Sword' } },
     2: { skillType: EFFECT, trait: 'confusion', effect: 'confusion', effectType: 'debuff', target: 'enemy', baseLandRate: 80, mobOnly: true, castRange: 600, effectRange: 1100 },
-    3: { skillType: DAMAGE, trait: 'sword', ssBoost: 1 },
+    3: { skillType: DAMAGE, trait: 'sword', ssBoost: 1, requires: { weaponsAllowed: 2060 } },
     4: { skillType: EFFECT, trait: 'buff', effect: 'dash', effectType: 'buff', target: 'self', baseLandRate: 100, aggroPointsByLevel: [204, 438], statsByLevel: { runSpdAdd: [40, 66] } },
     5: { skillType: DAMAGE, trait: 'physical', target: 'enemy', ssBoost: 1, requires: { weaponsAllowed: 512, itemKind: 'Dual Sword', charges: 2, condition: 128, conditionValue: 2 } },
     6: { skillType: DAMAGE, trait: 'physical', target: 'enemy', ssBoost: 1, requires: { weaponsAllowed: 524, charges: 1, condition: 128, conditionValue: 1 } },
@@ -208,7 +210,7 @@ const RULES = {
     92: { skillType: EFFECT, trait: 'shock', effect: 'stun', effectType: 'debuff', target: 'enemy', baseLandRate: 80, levelDepend: 2, requires: { weaponsAllowed: 1048576, itemKind: 'shield' }, castRange: 40, effectRange: 400 },
     100: { skillType: DAMAGE_EFFECT, trait: 'shock', effect: 'stun', effectType: 'debuff', target: 'enemy', isMagic: false, ssBoost: 1, baseLandRate: 50, levelDepend: 1, magicLevelByLevel: [18, 19, 20, 22, 23, 24, 26, 27, 28, 30, 31, 32, 34, 35, 36], maxLevel: 15, durationMs: 9000, castRange: 40, effectRange: 400, reuseTime: 13000, hitTime: 1080, coolTime: 720, overHit: true, nextActionAttack: true, requires: { weaponsAllowed: 16392 } },
     101: { skillType: DAMAGE_EFFECT, trait: 'shock', effect: 'stun', effectType: 'debuff', target: 'enemy', isMagic: false, ssBoost: 1, baseLandRate: 50, levelDepend: 1, magicLevelByLevel: [34, 35, 36, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74], maxLevel: 40, powerByLevel: [287, 306, 326, 369, 392, 417, 442, 469, 496, 525, 555, 586, 618, 651, 686, 722, 758, 796, 835, 875, 916, 959, 1002, 1046, 1091, 1136, 1183, 1230, 1278, 1327, 1376, 1425, 1475, 1525, 1576, 1626, 1677, 1727, 1777, 1827], mpConsumeByLevel: [69, 72, 74, 80, 82, 85, 85, 87, 90, 93, 95, 98, 101, 104, 107, 109, 110, 112, 115, 118, 121, 124, 126, 129, 132, 135, 135, 138, 140, 143, 145, 148, 150, 153, 155, 157, 160, 162, 164, 166], durationMs: 9000, castRange: 900, effectRange: 1400, reuseTime: 10000, hitTime: 3000, coolTime: 1000, overHit: true, nextActionAttack: true, requires: { weaponsAllowed: 32 } },
-    102: { skillType: EFFECT, trait: 'root', effect: 'root', effectType: 'debuff', target: 'enemy', baseLandRate: 80, levelDepend: 2, magicLevelByLevel: [36, 40, 43, 46, 49, 52, 55, 58, 60, 62, 64, 66, 68, 70, 72, 74], maxLevel: 16, power: 80, mpConsumeByLevel: [17, 18, 19, 22, 23, 24, 25, 28, 28, 29, 30, 32, 33, 33, 34, 35], hitTime: 3000, reuseTime: 7000, durationMs: 120000, castRange: 600, effectRange: 1100, statsByLevel: { runSpdMul: [0.3, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5] } },
+    102: { skillType: EFFECT, trait: 'slow', effect: 'entangle', effectType: 'debuff', target: 'enemy', baseLandRate: 80, levelDepend: 2, magicLevelByLevel: [36, 40, 43, 46, 49, 52, 55, 58, 60, 62, 64, 66, 68, 70, 72, 74], maxLevel: 16, power: 80, mpConsumeByLevel: [17, 18, 19, 22, 23, 24, 25, 28, 28, 29, 30, 32, 33, 33, 34, 35], hitTime: 3000, reuseTime: 7000, durationMs: 120000, castRange: 600, effectRange: 1100, statsByLevel: { runSpdMul: [0.3, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5] } },
     103: { skillType: EFFECT, trait: 'poison', effect: 'poison', effectType: 'debuff', target: 'corpse_mob', sourceTarget: 'area', radius: 400, baseLandRateByLevel: [5, 6, 7, 8], levelDepend: 1, castRange: 400, effectRange: 900, dot: { count: 10, intervalMs: 3000, damageByLevel: [31, 38, 45, 52] } },
     104: { skillType: EFFECT, trait: 'detect_weakness', effect: 'detect_weakness', effectType: 'buff', target: 'self', effectTargetKind: 'plant', baseLandRate: 100, aggroPoints: 438, stats: { 'pAtk-plants': 1.5 } },
     105: { skillType: DAMAGE_EFFECT, trait: 'water', effect: 'freezing_strike', effectType: 'debuff', target: 'enemy', radius: 205, baseLandRate: 60, levelDepend: 1, magicLevelByLevel: [34, 36, 38, 40, 42, 43, 45, 46, 48, 49, 51, 52, 54, 55, 57, 58, 60, 62, 64, 66, 68, 70, 72, 74], maxLevel: 24, powerByLevel: [26, 28, 30, 31, 33, 34, 36, 37, 39, 40, 42, 43, 45, 46, 48, 49, 51, 53, 56, 58, 59, 61, 63, 65], mpConsumeByLevel: [15, 17, 18, 18, 19, 19, 20, 22, 23, 23, 24, 24, 25, 25, 27, 28, 28, 29, 30, 32, 33, 33, 34, 35], hitTime: 3000, reuseTime: 8000, durationMs: 120000, castRange: 600, effectRange: 1100, stats: { runSpdMul: 0.7 } },
@@ -275,7 +277,7 @@ const RULES = {
     81: { skillType: DAMAGE, trait: 'physical', target: 'enemy', ssBoost: 1, overHit: true, levelDepend: 2, requires: { weaponsAllowed: 1024 }, castRange: 40, effectRange: 400, selfEffect: { effect: 'stun', effectType: 'debuff', trait: 'shock' } },
     82: { skillType: EFFECT, trait: 'buff', effect: 'majesty', effectType: 'buff', target: 'self', baseLandRate: 100, aggroPointsByLevel: [204, 379, 549], statsByLevel: { pDefMul: [1.07, 1.11, 1.15], pEvasionRateAdd: [-2, -4, -6] } },
     83: { skillType: EFFECT, trait: 'totem', effect: 'totem_spirit_wolf', effectType: 'buff', target: 'self', baseLandRate: 100, aggroPoints: 204, stats: { runSpdMul: 1.15 } },
-    84: { skillType: EFFECT, trait: 'poison', effect: 'poison', effectType: 'debuff', target: 'enemy', sourceTarget: 'aura', radius: 150, baseLandRateByLevel: [6, 7, 8], levelDepend: 1, requires: { weaponsAllowed: 512 }, dot: { count: 10, intervalMs: 3000, damageByLevel: [38, 44, 48] } },
+    84: { skillType: EFFECT, trait: 'poison', effect: 'poison', effectType: 'debuff', target: 'enemy', sourceTarget: 'aura', radius: 150, baseLandRateByLevel: [6, 7, 8], magicLevelByLevel: [55, 60, 72], levelDepend: 1, requires: { weaponsAllowed: 512 }, dot: { count: 10, intervalMs: 3000, damageByLevel: [38, 44, 48] } },
     86: { skillType: EFFECT, trait: 'buff', effect: 'reflect_damage', effectType: 'buff', target: 'self', baseLandRate: 100, aggroPointsByLevel: [379, 438, 495], statsByLevel: { reflectDam: [10, 15, 20] } },
     87: { skillType: EFFECT, trait: 'detect_weakness', effect: 'detect_weakness', effectType: 'buff', target: 'self', effectTargetKind: 'animal', baseLandRate: 100, aggroPoints: 379, stats: { 'pAtk-animals': 1.5 } },
     88: { skillType: EFFECT, trait: 'detect_weakness', effect: 'detect_weakness', effectType: 'buff', target: 'self', effectTargetKind: 'dragon', baseLandRate: 100, aggroPoints: 549, stats: { 'pAtk-dragons': 1.5 } },
@@ -286,8 +288,8 @@ const RULES = {
     97: { skillType: EFFECT, trait: 'debuff', effect: 'sanctuary', effectType: 'debuff', target: 'enemy', sourceTarget: 'aura', radius: 200, baseLandRate: 40, levelDepend: 2, undeadOnly: true, stats: { pAtkMul: 0.77 } },
     98: { skillType: DAMAGE_EFFECT, trait: 'fear', effect: 'fear', effectType: 'debuff', target: 'enemy', sourceTarget: 'aura', radius: 150, ssBoost: 1, baseLandRate: 15 },
     99: { skillType: EFFECT, trait: 'buff', effect: 'rapid_shot', effectType: 'buff', target: 'self', baseLandRate: 100, aggroPointsByLevel: [303, 549], requires: { weaponsAllowed: 32 }, statsByLevel: { pAtkSpdMul: [1.08, 1.12] } },
-    109: { skillType: HEAL_PERCENT, trait: 'heal', target: 'self', ssBoost: 0, healPowerByLevel: [20] },
-    121: { skillType: HEAL_PERCENT, trait: 'heal', target: 'self', ssBoost: 0, healPowerByLevel: [9.1, 13, 16.6, 20, 23, 25.7] },
+    109: { skillType: HEAL_PERCENT, trait: 'heal', target: 'self', ssBoost: 0, healPowerByLevel: [20], effect: 'spirit_of_ogre', effectType: 'buff', durationMs: 120000, aggroPoints: 438, stats: { pAtkMul: 1.07, pDefMul: 1.15, pAccuracyCombatAdd: 3, maxHpMul: 1.2, runSpdMul: 0.7, pEvasionRateAdd: -10 } },
+    121: { skillType: HEAL_PERCENT, trait: 'heal', target: 'self', ssBoost: 0, healPowerByLevel: [9.1, 13, 16.6, 20, 23, 25.7], effect: 'battle_roar', effectType: 'buff', durationMs: 600000, stackFamily: 'MaxHPUp', stackOrderByLevel: [1.1, 1.15, 1.2, 1.25, 1.3, 1.35], statsByLevel: { maxHpMul: [1.1, 1.15, 1.2, 1.25, 1.3, 1.35] } },
     123: { skillType: EFFECT, trait: 'buff', effect: 'spirit_barrier', effectType: 'buff', target: 'self', baseLandRate: 100, statsByLevel: { mDefMul: [1.15, 1.23, 1.3] } },
     129: { skillType: EFFECT, trait: 'poison', effect: 'poison', effectType: 'debuff', target: 'enemy', baseLandRate: 70, levelDepend: 1, magicLevelByLevel: [20, 49, 58, 66, 74], maxLevel: 5, powerByLevel: [3, 5, 6, 7, 8], mpConsumeByLevel: [10, 23, 28, 32, 35], hitTime: 3000, reuseTime: 9000, durationMs: 30000, castRange: 600, effectRange: 1100, dot: { count: 10, intervalMs: 3000, damageByLevel: [18, 31, 38, 44, 48] } },
     139: { skillType: EFFECT, trait: 'buff', effect: 'guts', effectType: 'buff', target: 'self', baseLandRate: 100, statsByLevel: { pDefMul: [2.0, 2.5, 3.0] }, condition: { actorHpPercentAtMost: 30 } },
@@ -378,11 +380,11 @@ const RULES = {
     290: { skillType: PASSIVE, trait: 'passive', target: 'self', maxLevel: 14, condition: { actorHpPercentAtMost: 30 }, statsByLevel: { pAtkAdd: [32.9, 39.4, 46.6, 54.6, 63.3, 72.7, 79.3, 86.1, 93.1, 100.2, 107.5, 114.8, 122.1, 129.3] } },
     291: { skillType: PASSIVE, trait: 'passive', target: 'self', condition: { actorHpPercentAtMost: 30 }, statsByLevel: { pDefAdd: [116.9, 129.0, 141.6, 150.4, 159.3, 168.4, 177.7, 187.0, 196.5, 206.2, 215.8] } },
     293: { skillType: PASSIVE, trait: 'passive', target: 'self', maxLevel: 20, requires: { weaponKinds: ['Weapon.GreatSword', 'Weapon.BigBlunt'] }, statsByLevel: { pAtkAdd: [4.5, 7.3, 10.7, 15.1, 20.5, 27.1, 32.9, 39.4, 46.6, 54.6, 63.3, 72.7, 79.3, 86.6, 93.1, 100.2, 107.5, 114.8, 122.1, 129.3], pAccuracyCombatAdd: [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3] } },
-    292: { skillType: EFFECT, trait: 'totem', effect: 'totem_spirit_bison', effectType: 'buff', target: 'self', baseLandRate: 100, condition: { actorHpPercentAtMost: 60 }, stats: { pAtkMul: 1.125, pCritRateAdd: 200 } },
+    292: { skillType: EFFECT, trait: 'totem', effect: 'totem_spirit_bison', effectType: 'buff', target: 'self', baseLandRate: 100, aggroPoints: 624, conditionalStats: [{ condition: { actorHpPercentAtMost: 60 }, stats: { pAtkMul: 1.125, pCritRateAdd: 200 } }] },
     294: { skillType: PASSIVE, trait: 'passive', target: 'self', condition: { night: true }, stats: { pAccuracyCombatAdd: 3 } },
     295: { skillType: PASSIVE, trait: 'passive', target: 'self', maxLevel: 1, stats: { fallMul: 0.6 } },
     297: { skillType: EFFECT, trait: 'buff', effect: 'duelist_spirit', effectType: 'buff', target: 'self', baseLandRate: 100, requires: { weaponsAllowed: 512, itemKind: 'Dual Sword' }, statsByLevel: { pAtkSpdMul: [1.08, 1.12] } },
-    298: { skillType: EFFECT, trait: 'totem', effect: 'totem_spirit_rabbit', effectType: 'buff', target: 'self', baseLandRate: 100, stats: { pAtkMul: 0.7, pEvasionRateAdd: 12, runSpdMul: 1.3 } },
+    298: { skillType: EFFECT, trait: 'totem', effect: 'totem_spirit_rabbit', effectType: 'buff', target: 'self', baseLandRate: 100, aggroPoints: 582, stats: { pAtkMul: 0.7, pEvasionRateAdd: 12, runSpdMul: 1.3 } },
     303: { skillType: EFFECT, trait: 'buff', effect: 'soul_of_sagittarius', effectType: 'buff', target: 'self', baseLandRate: 100, statsByLevel: { maxMpMul: [1.1, 1.15, 1.2, 1.25] } },
     304: { ...SONG_DANCE, skillType: EFFECT, trait: 'buff', effect: 'song_of_vitality', effectType: 'buff', target: 'party', radius: 1000, baseLandRate: 100, stats: { maxHpMul: 1.3 } },
     305: { ...SONG_DANCE, skillType: EFFECT, trait: 'buff', effect: 'song_of_vengeance', effectType: 'buff', target: 'party', radius: 1000, baseLandRate: 100, stats: { reflectDam: 20 } },
@@ -438,6 +440,7 @@ const RULES = {
     364: { ...SONG_DANCE, skillType: EFFECT, trait: 'buff', effect: 'song_of_champion', effectType: 'buff', target: 'party', radius: 1000, baseLandRate: 100, stats: { pReuseMul: 0.7, physicalMpConsumeMul: 0.8 } },
     365: { ...DUAL_SWORD_DANCE, skillType: EFFECT, trait: 'buff', effect: 'dance_of_siren', effectType: 'buff', target: 'party', radius: 1000, baseLandRate: 100, stats: { mCritRateMul: 3 } },
     366: { ...DUAL_SWORD_DANCE, skillType: EFFECT, trait: 'buff', effect: 'dance_of_shadow', effectType: 'buff', target: 'party', radius: 1000, baseLandRate: 100, stats: { runSpdMul: 0.5, silentMoving: true } },
+    367: { skillType: EFFECT, trait: 'paralyze', effect: 'petrification', effectType: 'debuff', target: 'enemy', sourceTarget: 'aura', radius: 150, isMagic: false, baseLandRate: 40, magicLevel: 77, levelDepend: 1, mpConsume: 105, hitTime: 2000, reuseTime: 120000, durationMs: 30000, stackFamily: 'turn_stone', stackOrder: 30, requires: { weaponsAllowed: 512 } },
     350: { skillType: EFFECT, trait: 'buff', effect: 'physical_mirror', effectType: 'buff', target: 'self', isMagic: false, baseLandRate: 100, requires: { weaponsAllowed: 1048576, itemKind: 'shield', shield: true }, stats: { reflectSkillPhysic: 30, reflectSkillMagic: 10 } },
     351: { skillType: EFFECT, trait: 'buff', effect: 'magical_mirror', effectType: 'buff', target: 'self', isMagic: false, baseLandRate: 100, requires: { weaponsAllowed: 1048576, itemKind: 'shield', shield: true }, stats: { reflectSkillMagic: 30, reflectSkillPhysic: 10 } },
     352: { skillType: EFFECT, trait: 'shock', effect: 'stun', effectType: 'debuff', target: 'enemy', isMagic: false, baseLandRate: 80, magicLevel: 77, durationMs: 3000, castRange: 40, effectRange: 400, reuseTime: 10000, hitTime: 1000, nextActionAttack: true, removeTarget: true, requires: { weaponsAllowed: 1048576, itemKind: 'shield', shield: true }, stats: { stunned: true } },
@@ -525,7 +528,7 @@ const RULES = {
     1042: { skillType: EFFECT, trait: 'paralyze', effect: 'paralyze', effectType: 'debuff', target: 'enemy', baseLandRate: 20, undeadOnly: true },
     1043: { skillType: EFFECT, trait: 'buff', effect: 'holy_weapon', effectType: 'buff', target: 'friendly', baseLandRate: 100, stats: { pAtkUndeadMul: 1.2 } },
     1044: { skillType: EFFECT, trait: 'buff', effect: 'regeneration', effectType: 'buff', target: 'friendly', baseLandRate: 100, statsByLevel: { regHp: [1.1, 1.15, 1.2] } },
-    1045: { skillType: EFFECT, trait: 'buff', effect: 'blessed_body', effectType: 'buff', target: 'friendly', maxLevel: 6, baseLandRate: 100, statsByLevel: { maxHpMul: [1.1, 1.15, 1.2, 1.25, 1.3, 1.35] } },
+    1045: { skillType: EFFECT, trait: 'buff', effect: 'blessed_body', effectType: 'buff', target: 'friendly', stackFamily: 'MaxHPUp', stackOrderByLevel: [1.1, 1.15, 1.2, 1.25, 1.3, 1.35], maxLevel: 6, baseLandRate: 100, statsByLevel: { maxHpMul: [1.1, 1.15, 1.2, 1.25, 1.3, 1.35] } },
     1047: { skillType: EFFECT, trait: 'buff', effect: 'mana_regeneration', effectType: 'buff', target: 'self', baseLandRate: 100, statsByLevel: { regMpAdd: [1.72, 2.16, 2.74, 3.09] } },
     1048: { skillType: EFFECT, trait: 'buff', effect: 'blessed_soul', effectType: 'buff', target: 'friendly', maxLevel: 6, baseLandRate: 100, statsByLevel: { maxMpMul: [1.1, 1.15, 1.2, 1.25, 1.3, 1.35] } },
     1049: { skillType: AGGRO_REMOVE, trait: 'derangement', target: 'enemy', ssBoost: 1, undeadOnly: true, baseLandRate: 35 },
@@ -1265,6 +1268,7 @@ function resolve(skill = {}) {
 
 function stackOrderFromStats(stackFamily, stats = {}, level = 1) {
     switch (stackFamily) {
+        case 'possession': return 1;
         case 'SpeedUp': return Number(stats.runSpdAdd) || Number(level) || 1;
         case 'pAtk': return Number(stats.pAtkMul) || Number(level) || 1;
         case 'pDef': return Number(stats.pDefMul) || Number(level) || 1;
@@ -1384,9 +1388,9 @@ function inferDebuff(name) {
     if (lower.includes('stun')) return { effect: 'stun', trait: 'shock', baseLandRate: 50 };
     if (lower.includes('poison')) return { effect: 'poison', trait: 'poison', baseLandRate: 70 };
     if (lower.includes('bleed')) return { effect: 'bleed', trait: 'bleed', baseLandRate: 70 };
-    if (lower.includes('entangle') || lower.includes('root')) return { effect: 'root', trait: 'root', baseLandRate: 70 };
+    if (lower.includes('root')) return { effect: 'root', trait: 'root', baseLandRate: 70 };
     if (lower.includes('hex') || lower.includes('power break')) return { effect: normalizeKey(name), trait: 'debuff', baseLandRate: 80 };
-    if (lower.includes('cripple') || lower.includes('slow')) return { effect: 'slow', trait: 'slow', baseLandRate: 70 };
+    if (lower.includes('entangle') || lower.includes('cripple') || lower.includes('slow')) return { effect: 'slow', trait: 'slow', baseLandRate: 70 };
     return null;
 }
 

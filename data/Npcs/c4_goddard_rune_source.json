@@ -1,0 +1,77 @@
+{
+  "revision": "fdc7e33af5d69067b41a6ee7cc7c07fe7aa35975",
+  "towns": [
+    {
+      "name": "Goddard",
+      "key": "c4_goddard",
+      "box": [
+        143000,
+        153500,
+        -62000,
+        -51000
+      ]
+    },
+    {
+      "name": "Rune",
+      "key": "c4_rune",
+      "box": [
+        33000,
+        47000,
+        -53000,
+        -43000
+      ]
+    }
+  ],
+  "omittedItems": [
+    {
+      "npcId": 8257,
+      "selfId": 5284,
+      "listId": 107
+    },
+    {
+      "npcId": 8263,
+      "selfId": 5589,
+      "listId": 117
+    },
+    {
+      "npcId": 8265,
+      "selfId": 6645,
+      "listId": 118
+    },
+    {
+      "npcId": 8265,
+      "selfId": 6646,
+      "listId": 118
+    },
+    {
+      "npcId": 8265,
+      "selfId": 6647,
+      "listId": 118
+    },
+    {
+      "npcId": 8301,
+      "selfId": 5284,
+      "listId": 125
+    },
+    {
+      "npcId": 8307,
+      "selfId": 5589,
+      "listId": 135
+    },
+    {
+      "npcId": 8309,
+      "selfId": 6645,
+      "listId": 136
+    },
+    {
+      "npcId": 8309,
+      "selfId": 6646,
+      "listId": 136
+    },
+    {
+      "npcId": 8309,
+      "selfId": 6647,
+      "listId": 136
+    }
+  ]
+}

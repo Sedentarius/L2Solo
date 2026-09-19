@@ -144,6 +144,7 @@ function flush(now = Date.now(), immediate = false) {
                     entry.source = newcomer;
                 }
             }
+            if (entry.help && !helpStillGrouped(entry.help)) continue;
             if (entry.goal && goalKey(invoke('GameServer/Bot/Goals/GoalState').snapshot(id(entry.source))?.current) !== entry.goal) continue;
             const players = audience(entry.source, clanId);
             if (!players.length) continue;
@@ -157,6 +158,9 @@ function flush(now = Date.now(), immediate = false) {
                 catch (error) { utils.infoWarn('BotClanChat', 'delivery failed: %s', error.message); }
             }
             if (delivered) {
+                if (['struggling_solo', 'struggling_group'].includes(entry.topic)) {
+                    invoke('GameServer/Bot/Population/ClanPartyHelp').request(id(entry.source), clanId, now);
+                }
                 queue.nextAt = now + Number(Config.clanChatMinIntervalMs || 15000);
                 console.info('BotClanChat :: %s clan=%s topic=%s recipients=%s text=%s',
                     actor.fetchName(), clanId, entry.topic, delivered, JSON.stringify(text));
@@ -216,6 +220,21 @@ function onResolved(source, events = [], now = Date.now()) {
     }
 }
 
+function helpStillGrouped(help) {
+    const party = invoke('GameServer/Bot/Population/BackgroundPartyState').find(help.partyId);
+    const clan = ClanService.findById(help.clanId);
+    return party?.status === 'active' && [help.helperId, help.requesterId].every(characterId =>
+        party.memberIds?.map(Number).includes(characterId)
+        && clan?.members?.some(member => Number(member.id) === characterId));
+}
+
+function onPartyHelp(helper, requester, party, clanId, now = Date.now()) {
+    if (!helper || !requester || !party) return false;
+    const help = { helperId: id(helper), requesterId: id(requester), partyId: party.partyId, clanId };
+    if (!helpStillGrouped(help)) return false;
+    return enqueue(helper, 'party_help', { name: requester.name }, `party_help:${id(requester)}`, now, { clanId, help });
+}
+
 function onWarehouse(source, result, clanId, now = Date.now()) {
     if (!result?.ok || !result.received) return false;
     const received = result.received;
@@ -242,7 +261,7 @@ function safe(callback) {
 
 module.exports = {
     onGoal: safe(onGoal), onDeath: safe(onDeath), onResolved: safe(onResolved), onWarehouse: safe(onWarehouse),
-    onWithdrawal: safe(onWithdrawal), onJoined: safe(onJoined), flush: safe(flush), goalKey,
+    onPartyHelp: safe(onPartyHelp), onWithdrawal: safe(onWithdrawal), onJoined: safe(onJoined), flush: safe(flush), goalKey,
     DEATH_WINDOW_MS, EVENT_COOLDOWN_MS, QUEUE_TTL_MS, MAX_PENDING, MAX_CLANS,
     snapshot() { return { clans: queues.size, pending: [...queues.values()].reduce((sum, queue) => sum + queue.pending.length, 0), history: history.size, deaths: deaths.size }; },
     reset() { queues.clear(); history.clear(); deaths.clear(); nextFlushAt = 0; }

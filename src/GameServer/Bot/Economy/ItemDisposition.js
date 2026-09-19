@@ -175,12 +175,22 @@ function inventoryCleanupNeed(state = {}, options = {}) {
 function reservedCraftAmounts(state) {
     const plan = state?.stats?.equipmentPlan;
     if (!['active', 'component_ready', 'ready_to_craft'].includes(plan?.status) || plan.strategy !== 'craft') return {};
-    return (plan.materials || []).reduce((reserved, material) => {
-        const selfId = Number(material.selfId || 0);
-        if (!selfId) return reserved;
-        reserved[selfId] = Math.max(Number(reserved[selfId] || 0), Math.min(Number(material.owned || 0), Number(material.amount || 0)));
-        return reserved;
-    }, {});
+    const reserved = {};
+    const reserve = (materials, multiplier = 1, visited = new Set()) => {
+        for (const material of materials || []) {
+            const selfId = Number(material.selfId || 0);
+            if (!selfId || visited.has(selfId)) continue;
+            const required = Number(material.amount || 0) * multiplier;
+            reserved[selfId] = Number(reserved[selfId] || 0) + required;
+            const owned = Number(state.inventory?.[selfId]?.amount ?? material.owned ?? 0);
+            const missing = Math.max(0, required - owned);
+            const component = missing > 0 ? C4RecipeItems.resolveByProductId(selfId) : null;
+            if (component) reserve(component.materials,
+                Math.ceil(missing / Math.max(1, Number(component.productCount || 1))), new Set(visited).add(selfId));
+        }
+    };
+    reserve(plan.materials);
+    return reserved;
 }
 
 function reservedCombinationAmounts(state) {

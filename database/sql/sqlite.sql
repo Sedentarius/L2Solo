@@ -56,6 +56,19 @@ CREATE INDEX IF NOT EXISTS characters_username ON characters(username);
 CREATE INDEX IF NOT EXISTS characters_clanId ON characters(clanId);
 CREATE INDEX IF NOT EXISTS characters_clan_level_id ON characters(clanId, level DESC, id ASC);
 
+CREATE TABLE IF NOT EXISTS character_death_experience (
+    characterId INTEGER PRIMARY KEY REFERENCES characters(id) ON DELETE CASCADE,
+    deathSequence INTEGER NOT NULL DEFAULT 1,
+    expBeforeDeath INTEGER NOT NULL,
+    expLost INTEGER NOT NULL,
+    expAfterDeath INTEGER NOT NULL,
+    deathContext TEXT NOT NULL DEFAULT '{}',
+    penaltyAppliedAt INTEGER NOT NULL,
+    pendingRestoration INTEGER NOT NULL DEFAULT 1 CHECK(pendingRestoration IN (0, 1)),
+    resolvedAt INTEGER,
+    resolutionReason TEXT NOT NULL DEFAULT ''
+);
+
 CREATE TABLE IF NOT EXISTS clans (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL COLLATE NOCASE UNIQUE,

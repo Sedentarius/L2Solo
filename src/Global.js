@@ -154,6 +154,8 @@ global.options = {
     default: configLayers.reduce((config, layer) => mergeConfig(config, layer), defaultConfig)
 };
 
+require(__dirname + '/GameServer/Progression/ProgressionCap').validate(global.options.default);
+
 global.path = {
     world: 'GameServer/World/Generics/',
     actor: 'GameServer/Actor/Generics/',

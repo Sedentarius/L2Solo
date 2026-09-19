@@ -31,7 +31,8 @@ Clean C4 client protocol 656
 
 
 ## Latest updates
-
+- **2026-09-17** Death exp penalties, overhit bonus, max level setting, bot lucky protection
+- **2026-09-17** Gameplay fixes, clan progression, skills, and town services
 - **2026-09-14** Better class-specific bot gameplay, fixes, and improvements
 - **2026-09-12** Bot persistent social memory and hot/cold PvP
 - **2026-09-08** Pets, striders, clan lvl 4, fixes and updates
@@ -47,7 +48,7 @@ Clean C4 client protocol 656
 - **2026-08-20** Loot and mob skills bug fixes, bot social graph base
 - **2026-08-19** Runtime optimization, cold bot progression bottlenecks fix, bot equipment enchantment
 - **2026-08-18** Fixes, cold bots progression, better AI compatibility
-- **2026-08-17** Fix cold bots progression, melee and polearm attack range, raid minion party fear
+- **2026-08-17** Fix cold bot progression, melee and polearm attack range, raid minion party fear
 
 <details>
 <summary>Earlier</summary>

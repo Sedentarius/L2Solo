@@ -1,0 +1,172 @@
+const path = require('node:path');
+const { Worker } = require('node:worker_threads');
+const yieldLoop = () => new Promise((resolve) => setImmediate(resolve));
+
+class ClanPlanningCoordinator {
+    constructor({ workerFile = path.join(__dirname, 'ClanPlanningWorker.js'), timeoutMs = 30000, maxPending = 8, restartDelayMs = 5000 } = {}) {
+        this.workerFile = workerFile;
+        this.timeoutMs = timeoutMs;
+        this.maxPending = maxPending;
+        this.restartDelayMs = restartDelayMs;
+        this.worker = null;
+        this.pending = new Map();
+        this.sequence = 0;
+        this.initializing = null;
+        this.retryAt = 0;
+        this.closed = false;
+        this.stats = { completed: 0, failures: 0, timeouts: 0, rejected: 0, restarts: 0, maxRunMs: 0 };
+    }
+
+    fail(worker, error) {
+        if (this.worker !== worker) return;
+        this.worker = null;
+        this.retryAt = Date.now() + this.restartDelayMs;
+        this.stats.failures++;
+        for (const entry of this.pending.values()) {
+            clearTimeout(entry.timer);
+            entry.reject(error);
+        }
+        this.pending.clear();
+        void worker.terminate();
+    }
+
+    send(type, payload) {
+        const worker = this.worker;
+        if (!worker || this.closed) return Promise.reject(new Error('clan planning worker unavailable'));
+        if (this.pending.size >= this.maxPending) {
+            this.stats.rejected++;
+            return Promise.reject(new Error('clan planning worker queue full'));
+        }
+        return new Promise((resolve, reject) => {
+            const id = ++this.sequence;
+            const timer = setTimeout(() => {
+                this.stats.timeouts++;
+                this.fail(worker, new Error('clan planning worker timed out'));
+            }, this.timeoutMs);
+            this.pending.set(id, { resolve, reject, timer });
+            worker.ref();
+            try {
+                worker.postMessage({ id, type, ...payload });
+            } catch (error) {
+                this.fail(worker, error);
+            }
+        });
+    }
+
+    async ready(catalogs) {
+        if (this.closed) throw new Error('clan planning worker stopped');
+        if (this.initializing) return this.initializing;
+        if (this.worker) return;
+        if (Date.now() < this.retryAt) throw new Error('clan planning worker recovering');
+        const worker = new Worker(this.workerFile);
+        this.worker = worker;
+        this.stats.restarts++;
+        worker.on('error', (error) => this.fail(worker, error));
+        worker.on('exit', (code) => this.fail(worker, new Error(`clan planning worker exited: ${code}`)));
+        worker.on('message', (message) => {
+            if (this.worker !== worker) return;
+            const entry = this.pending.get(message.id);
+            if (!entry) return;
+            this.pending.delete(message.id);
+            clearTimeout(entry.timer);
+            if (message.error) {
+                this.stats.failures++;
+                entry.reject(new Error(message.error));
+            }
+            else entry.resolve(message.result);
+            if (!this.pending.size) worker.unref();
+        });
+        this.initializing = (async () => {
+            // Bound serialization work on the game thread, including initial startup.
+            for (const name of ['items', 'npcs', 'npcRewards']) {
+                const rows = catalogs[name] || [];
+                for (let offset = 0; offset < rows.length; offset += 128) {
+                    await this.send('catalog', { name, rows: rows.slice(offset, offset + 128) });
+                    await yieldLoop();
+                }
+            }
+        })();
+        try { await this.initializing; }
+        catch (error) { this.fail(worker, error); throw error; }
+        finally { this.initializing = null; }
+    }
+
+    async plan(payload, catalogs) {
+        await this.ready(catalogs);
+        if (payload.deadlineAt && Date.now() >= payload.deadlineAt) throw new Error('clan planning deadline');
+        const result = await this.send('plan', { payload });
+        this.stats.completed++;
+        this.stats.maxRunMs = Math.max(this.stats.maxRunMs, result.durationMs);
+        return result.plan;
+    }
+
+    async shutdown() {
+        this.closed = true;
+        const worker = this.worker;
+        if (worker) {
+            this.worker = null;
+            for (const entry of this.pending.values()) {
+                clearTimeout(entry.timer);
+                entry.reject(new Error('clan planning worker stopped'));
+            }
+            this.pending.clear();
+            await worker.terminate();
+        }
+    }
+
+    metrics() { return { ...this.stats, pending: this.pending.size, running: !!this.worker }; }
+}
+
+let coordinator = null;
+let enabled = false;
+let staticMarket = null;
+let staticMarketBuild = null;
+
+function offerRow(offer) {
+    // Live sessions, actors and mutable store entries never cross the boundary.
+    const { selfId, sourceType, sourceId, town, price, count, available, sellerKind, playerPriority } = offer;
+    return { selfId, sourceType, sourceId, town, price, count, available, sellerKind, playerPriority };
+}
+
+async function context() {
+    const cache = invoke('GameServer/DataCache');
+    const market = invoke('GameServer/Bot/Economy/MarketOpportunity');
+    const craft = invoke('GameServer/Bot/Economy/CraftShopService');
+    const shops = invoke('GameServer/World/Generics/NpcShopBuyLists');
+    const items = (cache.items || []).filter((item) => Number(item.etc?.slot) > 0);
+    if (!staticMarket) {
+        staticMarketBuild ||= (async () => {
+            const npcOffers = [];
+            for (let i = 0; i < items.length; i++) {
+                npcOffers.push(...market.npcOffersAll(items[i].selfId).map(offerRow));
+                if (i % 8 === 7) await yieldLoop();
+            }
+            return { npcOffers, towns: market.TOWN_NPC_SELLERS, shopEntries: shops.allEntries().map(({ selfId }) => ({ selfId })) };
+        })();
+        try { staticMarket = await staticMarketBuild; }
+        finally { staticMarketBuild = null; }
+    }
+    const offers = [];
+    for (let i = 0; i < items.length; i++) {
+        offers.push(...market.sellOfferCandidates(items[i].selfId).map(offerRow));
+        if (i % 8 === 7) await yieldLoop();
+    }
+    const allowed = craft.availableRecipes({ level: 70, stats: { classId: 57 } });
+    const recipes = [...new Map(craft.CraftStations.flatMap((station) => craft.stationRecipes(station, allowed))
+        .map((recipe) => [Number(recipe.recipeId), recipe])).values()];
+    const general = {};
+    for (const key of ['progressionPreset', 'expRate', 'spRate', 'adenaRate', 'dropChanceRate', 'spoilRate']) {
+        general[key] = global.options.default.General?.[key];
+    }
+    return { ...staticMarket, offers, recipes, general, progressionRate: process.env.L2NODE_PROGRESSION_RATE };
+}
+
+module.exports = {
+    ClanPlanningCoordinator,
+    start() { enabled = true; coordinator ||= new ClanPlanningCoordinator(); },
+    enabled: () => enabled,
+    context,
+    plan: (payload) => coordinator.plan(payload, invoke('GameServer/DataCache')),
+    metrics: () => coordinator?.metrics() || { running: false, pending: 0 },
+    shutdown: () => coordinator?.shutdown()
+};

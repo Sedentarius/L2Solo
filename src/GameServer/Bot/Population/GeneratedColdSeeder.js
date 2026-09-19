@@ -1,6 +1,7 @@
 const ItemTemplateIndex = require('../../Item/ItemTemplateIndex');
 const Database = invoke('Database');
 const DataCache = invoke('GameServer/DataCache');
+const ProgressionCap = invoke('GameServer/Progression/ProgressionCap');
 const GeodataEngine = invoke('GameServer/Geodata/GeodataEngine');
 const Config = invoke('GameServer/Bot/Population/PopulationConfig');
 const LifeState = invoke('GameServer/Bot/Population/BotLifeState');
@@ -87,11 +88,11 @@ function baseForIndex(index, starterRegion = null) {
 
 function profileForIndex(index, base = baseForIndex(index), seedProfile = null) {
     if (base.serviceCrafter) {
-        return { level: 70, band: 'craft_service' };
+        return { level: ProgressionCap.clampLevel(70), band: 'craft_service' };
     }
     if (seedProfile?.level) {
         return {
-            level: Math.max(1, Number(seedProfile.level)),
+            level: ProgressionCap.clampLevel(seedProfile.level),
             band: seedProfile.band || 'population_wave'
         };
     }
@@ -306,16 +307,20 @@ function ensureCharacter(username, index, base = baseForIndex(index), seedProfil
         if (characters[0]) {
             const character = characters[0];
             const profile = profileForIndex(index, base, seedProfile);
-            const level = base.serviceCrafter ? profile.level : Number(character.level || profile.level);
+            const level = base.serviceCrafter ? profile.level : ProgressionCap.clampLevel(character.level || profile.level);
+            const exp = ProgressionCap.clampTotalExperience(character.exp || expForLevel(level));
+            const lowered = !base.serviceCrafter && Number(character.level) > level;
             const adena = Number(character.adena || Math.round(level * 85));
             const classId = base.serviceCrafter ? base.classId : character.classId;
             const classChanged = Number(character.classId) !== Number(classId);
-            const classReady = classChanged
+            const classReady = classChanged || lowered
                 ? Database.deleteSkills(character.id).then(() => Database.updateCharacterClassId(character.id, classId))
                 : Promise.resolve();
             const levelReady = base.serviceCrafter
                 ? classReady.then(() => Database.updateCharacterExperience(character.id, level, expForLevel(level), Math.round(level * level * 3)))
-                : classReady;
+                : level !== Number(character.level) || exp !== Number(character.exp)
+                    ? classReady.then(() => Database.updateCharacterExperience(character.id, level, exp, Number(character.sp || 0)))
+                    : classReady;
             return levelReady
                 .then(() => ensureBaseLoadout(character.id, classId, adena, level))
                 .then(() => Database.fetchCharacters(username))
@@ -378,7 +383,7 @@ function stateFor(character, index, seedMeta = {}) {
     const base = seedMeta.base || baseForIndex(index);
     const classId = Number(character.classId || base.classId);
     const levelProfile = seedMeta.levelProfile || profileForIndex(index, base, seedMeta.seedProfile);
-    const level = Number(character.level || levelProfile.level);
+    const level = ProgressionCap.clampLevel(character.level || levelProfile.level);
     const spot = base.serviceCrafter ? null : seedMeta.spot || targetSpot(level, index, { ...base, classId });
     const loc = seedMeta.loc || randomNear(spot?.center || {
         locX: character.locX,
@@ -394,7 +399,7 @@ function stateFor(character, index, seedMeta = {}) {
         accountName: character.username || usernameFor(index),
         name: character.name || nameFor(index),
         level,
-        exp: Number(character.exp || expForLevel(level)),
+        exp: ProgressionCap.clampTotalExperience(Number(character.exp || expForLevel(level))),
         sp: Number(character.sp || Math.round(level * level * 3)),
         adena: Number(character.adena || Math.round(level * 85)),
         phase: 'cold',

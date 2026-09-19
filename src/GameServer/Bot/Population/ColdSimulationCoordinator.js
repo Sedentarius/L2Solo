@@ -497,6 +497,7 @@ class ColdSimulationCoordinator {
         const msgId = this.post('party_formation_request', {
             timestamp: Number(options.timestamp || Date.now()),
             candidateLimit: Math.max(2, Math.min(64, Number(options.candidateLimit) || 12)),
+            priorityClanIds: [...new Set((options.priorityClanIds || []).map(Number).filter(id => id > 0))].slice(0, 64),
             minSize: Math.max(2, Number(options.minSize) || 2),
             maxSize: Math.max(2, Number(options.maxSize) || 5),
             levelRange: Math.max(0, Number(options.levelRange ?? PartyComposition.DEFAULT_LEVEL_RANGE))
@@ -565,6 +566,7 @@ class ColdSimulationCoordinator {
 
     routeFor(state, currentSpot, party, partyMembers, index) {
         if (!state || state.phase !== 'cold' || state.stats?.travel) return null;
+        if (!party && require('./ClanPartyDuty').waiting(state)) return null;
         const partyRoute = !!party;
         const eligibleActivity = state.activity === 'hunting'
             || (partyRoute && state.activity === 'grouped');
@@ -576,8 +578,11 @@ class ColdSimulationCoordinator {
         const currentId = physical?.id || currentSpot?.id || state.spotId || party?.spotId || null;
         const timestamp = Number(index.timestamp || Date.now());
         const routedMembers = partyRoute ? partyMembers : [state];
-        const excludedSpotIds = SpotRiskPolicy.excludedSpotIdsForStates(routedMembers, timestamp);
-        const spotBackoff = SpotRiskPolicy.backoffForStates(routedMembers, currentId, timestamp);
+        const partyRisk = require('./PartySpotRiskPolicy');
+        const excludedSpotIds = partyRoute ? partyRisk.excludedSpotIds(party, timestamp)
+            : SpotRiskPolicy.excludedSpotIdsForStates(routedMembers, timestamp);
+        const spotBackoff = partyRoute ? partyRisk.backoff(party, currentId, timestamp)
+            : SpotRiskPolicy.backoffForStates(routedMembers, currentId, timestamp);
 
         const role = partyRoute ? PartyComposition.roleForState(state) : null;
         const partyRequired = !partyRoute
@@ -642,7 +647,9 @@ class ColdSimulationCoordinator {
             } : currentSpot;
         const unsafeSoloGround = !partyRoute && currentGround
             && !LevelingRoutes.isSpotAllowedForState(currentGround, state, { ...options, mode: 'solo' });
-        let selected = fallbackSpot;
+        const sharedSpot = party?.stats?.objective?.spotId;
+        let selected = partyRoute && sharedSpot && !excludedSpotIds.has(String(sharedSpot))
+            ? index.spots.get(String(sharedSpot)) || null : fallbackSpot;
         try {
             if (!selected) selected = SpotProfiles.findForState(routeState, options);
         } catch (_) { selected = null; }
@@ -693,7 +700,8 @@ class ColdSimulationCoordinator {
         const repairingPartyPosition = partyRoute && String(selected.id) === String(party.spotId || '')
             && partyMembers.every(member => member.phase === 'cold' && member.vitals?.hp > 0
                 && !member.stats?.pvpEncounter && !member.stats?.travel)
-            && partyMembers.some(member => !SpotService.containsLocation(selected, member.loc));
+            && (!require('./PartyHuntingAssembly').nearby(partyMembers)
+                || partyMembers.some(member => !SpotService.containsLocation(selected, member.loc)));
         if (String(selected.id) === String(currentId || '') && !repairingPartyPosition
             && (!partyRoute || String(party.spotId || '') === String(selected.id))) return null;
 
@@ -709,8 +717,9 @@ class ColdSimulationCoordinator {
         if (!reserved) return null;
 
         const members = partyRoute ? partyMembers : [state];
-        const destinations = {};
-        for (const member of members) {
+        const destinations = partyRoute ? SpotService.arrivalPointsForParty(members, selected) : {};
+        if (!destinations) return null;
+        for (const member of partyRoute ? [] : members) {
             let destination = null;
             try { destination = SpotService.arrivalPointForState(member, selected); } catch (_) { destination = null; }
             if (!destination) return null;

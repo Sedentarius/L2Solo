@@ -1,3 +1,4 @@
+const PveEncounter = require('./ColdPveEncounter');
 const ProgressionRates = invoke('GameServer/ProgressionRates');
 const BackgroundDropResolver = invoke('GameServer/Bot/Population/BackgroundDropResolver');
 const BackgroundResolver = invoke('GameServer/Bot/Population/BackgroundResolver');
@@ -41,7 +42,7 @@ function estimateFightCount({ party, members, spot, elapsedMs }) {
     return Math.max(1, Math.min(4, Math.round(baseWindows * densityFactor * cohesionFactor)));
 }
 
-function distributeRewards({ members, spot, wins, defeatedNpcIds = [], pressure, rng, timestamp }) {
+function distributeRewards({ members, spot, wins, defeatedNpcIds = [], overhitContexts = [], pressure, rng, timestamp }) {
     const expMultiplier = Number(pressure?.expMultiplier || 1);
     const rates = ProgressionRates.profile();
     const memberProgression = members.map((state) => ({
@@ -53,9 +54,11 @@ function distributeRewards({ members, spot, wins, defeatedNpcIds = [], pressure,
         const progression = BackgroundDropResolver.progressionForFight({
             spot, npcSelfId: defeatedNpcIds[winIndex], rng
         });
+        const adjustedExp = invoke('GameServer/Progression/OverhitReward')
+            .resolveContext(overhitContexts[winIndex], progression.exp).adjustedExp;
         PartyRewardMath.sharesForLevels(
             members.map((state) => Number(state.level || 1)),
-            progression.exp,
+            adjustedExp,
             progression.sp
         ).forEach((share) => {
             memberProgression[share.index].exp += Math.round(share.exp * expMultiplier * rates.exp
@@ -216,7 +219,9 @@ const BackgroundPartyResolver = {
             };
         }
 
-        if (!require('./PartyHuntingAssembly').ready(party, members, spot)) {
+        const understaffed = party.stats?.objective?.clanGoalKey
+            && members.length < Math.max(2, Number(party.stats.objective.minPartySize) || 3);
+        if (understaffed || !require('./PartyHuntingAssembly').ready(party, members, spot)) {
             // No route may mean admission is temporarily unavailable. Do not
             // turn that into remote combat or rewrite a member's physical spot.
             const nextResolveAt = timestamp + 30000;
@@ -227,12 +232,16 @@ const BackgroundPartyResolver = {
                 } })),
                 events: [], nextResolveAt,
                 partyPatch: { stats: { lastResolveAt: timestamp } },
-                debug: { reason: 'party_assembling', fights: 0, wins: 0, spotId: spot.id }
+                debug: { reason: understaffed ? 'clan_party_understaffed' : 'party_assembling', fights: 0, wins: 0, spotId: spot.id }
             };
         }
 
-        const fights = estimateFightCount({ party, members, spot, elapsedMs });
+        const fightBudget = estimateFightCount({ party, members, spot, elapsedMs });
+        let fights = 0;
+        let attemptedFights = 0;
+        let pending = PveEncounter.read(party.stats?.pveEncounter, PveEncounter.key(members, spot, targetNpcId, party.partyId), timestamp);
         let wins = 0;
+        const overhitContexts = [];
         let losses = 0;
         let combatActions = 0;
         let skillUses = 0;
@@ -246,14 +255,17 @@ const BackgroundPartyResolver = {
         const combatHelp = new Map();
         let combatMembers = members.map((state) => ({
             ...state,
-            vitals: BackgroundResolver.applyStandingRegen(state, state.vitals, elapsedMs, timestamp)
+            vitals: pending ? { ...state.vitals } : BackgroundResolver.applyStandingRegen(state, state.vitals, elapsedMs, timestamp)
         }));
-        for (let i = 0; i < fights; i++) {
-            const encounter = BackgroundResolver.resolvePartyFight({ members: combatMembers, spot, targetNpcId, rng, timestamp });
+        for (let i = 0; i < fightBudget; i++) {
+            const encounter = BackgroundResolver.resolvePartyFight({ members: combatMembers, spot, targetNpcId, rng, timestamp, encounter: pending, partyId: party.partyId });
             if (encounter.avoided) {
                 avoidedReason = encounter.reason;
                 break;
             }
+            attemptedFights += 1;
+            pending = encounter.encounter || null;
+            if (encounter.won || !pending) fights += 1;
             for (const help of encounter.help || []) combatHelp.set(`${help.sourceId}:${help.targetId}:${help.type}`, help);
             combatActions += Number(encounter.debug?.actions || 0);
             skillUses += encounter.members.reduce((sum, member) => sum + Number(member.skillUses || 0), 0);
@@ -279,12 +291,13 @@ const BackgroundPartyResolver = {
             if (encounter.won) {
                 wins += 1;
                 if (Number(encounter.debug?.mobSelfId) > 0) defeatedNpcIds.push(Number(encounter.debug.mobSelfId));
+                overhitContexts.push(encounter.debug?.overhitContext || null);
             }
-            else losses += 1;
+            else if (!pending) losses += 1;
             if (!encounter.won || combatMembers.some((member) => Number(member.vitals?.hp || 0) <= 0)) break;
         }
 
-        const rewards = distributeRewards({ members, spot, wins, defeatedNpcIds, pressure, rng, timestamp });
+        const rewards = distributeRewards({ members, spot, wins, defeatedNpcIds, overhitContexts, pressure, rng, timestamp });
         const memberResults = [];
         const events = [];
         let deaths = 0;
@@ -461,8 +474,19 @@ const BackgroundPartyResolver = {
                 }
             });
         });
-        const cohesionDelta = wins >= losses ? 0.015 : -0.035;
-        const riskDelta = deaths > 0 ? 0.05 : losses > wins ? 0.02 : -0.01;
+        if (pending && (resting > 0 || deaths > 0 || pending.slices >= PveEncounter.MAX_SLICES)) {
+            pending = null;
+            fights += 1;
+            losses += 1;
+        }
+        // Member telemetry must describe actual completed encounters, including withdrawals.
+        for (const entry of distributedMemberResults) {
+            entry.result.debug.fights = fights;
+            entry.result.debug.losses = losses;
+            entry.result.debug.pendingFight = !!pending;
+        }
+        const cohesionDelta = !fights ? 0 : wins >= losses ? 0.015 : -0.035;
+        const riskDelta = !fights ? 0 : deaths > 0 ? 0.05 : losses > wins ? 0.02 : -0.01;
 
         return {
             memberResults: distributedMemberResults,
@@ -471,6 +495,7 @@ const BackgroundPartyResolver = {
                 cohesion: clamp(Number(party.cohesion || 0.65) + cohesionDelta, 0.1, 1),
                 risk: clamp(Number(party.risk || 0.25) + riskDelta, 0.05, 0.95),
                 stats: {
+                    pveEncounter: pending,
                     fightsResolved: Number(party.stats?.fightsResolved || 0) + fights,
                     fightsWon: Number(party.stats?.fightsWon || 0) + wins,
                     lastProgressAt: wins > 0 ? timestamp : Number(party.stats?.lastProgressAt || 0),
@@ -483,6 +508,8 @@ const BackgroundPartyResolver = {
             nextResolveAt: partyRestUntil || timestamp + 45000 + Math.round(rng() * 90000),
             debug: {
                 fights,
+                attemptedFights,
+                pendingFight: !!pending,
                 wins,
                 losses,
                 deaths,
@@ -518,6 +545,9 @@ BackgroundPartyResolver.resolve = (options = {}) => {
         events: [], partyPatch: {}, nextResolveAt: competition.until || timestamp + 1000,
         debug: { reason: options.party?.stats?.coldCompetition?.action === 'yield' ? 'competition_yield' : 'competition_contest', fights: 0, wins: 0 }
     } : resolveParty({ ...options, party: competition.party, members, elapsedMs: competition.elapsedMs, timestamp });
+    if (options.party?.stats?.pveEncounter && !Object.hasOwn(result.debug || {}, 'pendingFight')) {
+        result.partyPatch = { ...result.partyPatch, stats: { ...(result.partyPatch?.stats || options.party.stats), pveEncounter: null } };
+    }
     if (competition.waiting) return result;
     if (competition.party !== options.party) result.partyPatch = { ...result.partyPatch,
         stats: { ...(result.partyPatch?.stats || competition.party.stats), coldCompetition: competition.party.stats.coldCompetition } };
@@ -529,4 +559,7 @@ BackgroundPartyResolver.resolve = (options = {}) => {
     });
     return result;
 };
+const resolveWithCompetition = BackgroundPartyResolver.resolve;
+BackgroundPartyResolver.resolve = (options = {}) => require('./PartySpotRiskPolicy').record(
+    options.party, resolveWithCompetition(options), options.timestamp ?? Date.now());
 module.exports = BackgroundPartyResolver;

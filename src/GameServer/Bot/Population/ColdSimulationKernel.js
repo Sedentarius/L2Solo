@@ -145,7 +145,7 @@ function beginRouteTravelState(state = {}, route = null, timestamp = Date.now(),
     if (!destination || !hasFiniteCoordinate(from.locX) || !hasFiniteCoordinate(from.locY)) return null;
     const arrivalAt = timestamp + Math.max(1000, Number(route.travelMs) || HUNTING_TRAVEL_MS);
     const isPartyRoute = route.mode === 'party';
-    const routedState = route.spotBackoff
+    const routedState = route.spotBackoff && !isPartyRoute
         ? SpotRiskPolicy.withBackoff(state, route.spotBackoff, timestamp)
         : state;
     return {
@@ -158,6 +158,7 @@ function beginRouteTravelState(state = {}, route = null, timestamp = Date.now(),
         },
         stats: {
             ...(routedState.stats || {}),
+            pveEncounter: null,
             travel: {
                 from,
                 to: { ...destination },
@@ -254,6 +255,9 @@ function lifecycleKind(state = {}, context = {}) {
     // any, is selected on the next state after the transition is durable.
     if (state.activity === 'traveling' || state.activity === 'dead'
         || (state.activity === 'resting' && Number(stats.restUntil || 0) > 0)) return 'resolver';
+    if (require('./PartyMarketBreak').ready(state)) return 'command';
+    if (stats.partyMarketReturn && ['shopping', 'merchant'].includes(state.activity)) return 'command';
+    if (require('./ClanPartyDuty').waiting(state)) return 'resolver';
     if (!SIMPLE_ACTIVITIES.has(String(state.activity || ''))) return 'command';
     if (stats.warehouseWorkflow || stats.warehouseErrand || stats.marketStore || stats.marketReturn
         || stats.craftShop || stats.craftStationId || stats.craftReturn || stats.supplyErrand) return 'command';
@@ -555,11 +559,13 @@ class ColdSimulationKernel {
                     this.requeue(id, timestamp + 1000);
                     continue;
                 }
-                const invalidPartySize = memberIds.length < this.partyMinSize;
+                const reserved = require('./PartyMarketBreak').pending(party, timestamp).length > 0;
+                const minimum = reserved ? 1 : this.partyMinSize;
+                const invalidPartySize = memberIds.length < minimum;
                 const membershipMismatch = attachedMembers.length !== memberIds.length;
                 const invalidReason = invalidPartySize
                     ? 'party_min_size'
-                    : attachedMembers.length < this.partyMinSize || membershipMismatch
+                    : attachedMembers.length < minimum || membershipMismatch
                         ? 'party_membership_mismatch'
                         : null;
                 const partyMembers = invalidReason
@@ -999,7 +1005,8 @@ class ColdSimulationKernel {
                     spotId: run.route.spotId,
                     nextResolveAt: arrivalAt,
                     stats: {
-                        ...(run.party.stats || {}),
+                        ...(require('./PartySpotRiskPolicy').withBackoff(run.party, run.route.spotBackoff, startedAt).stats || {}),
+                        pveEncounter: null,
                         travel: {
                             reason: 'party_spot_replan',
                             regionName: run.route.regionName,

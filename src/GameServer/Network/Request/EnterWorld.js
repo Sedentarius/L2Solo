@@ -14,7 +14,7 @@ function sendClanWindow(session) {
 }
 
 function enterWorld(session, buffer) {
-    const continueEnter = () => {
+    const continueEnter = async () => {
         session.dataSendToMe(ServerResponse.itemsList(session.actor.backpack.fetchItems()));
         const shortcutsReady = Database.fetchMacros(session.actor.fetchId()).then((macros) => {
             const revision = (session.macroRevision || 0) + 1;
@@ -28,11 +28,17 @@ function enterWorld(session, buffer) {
         // Wait for both, otherwise every unresolved skill is sent as level one.
         Promise.all([shortcutsReady, skillsReady]).then(([shortcuts]) => {
             session.dataSendToMe(ServerResponse.shortcutInit(shortcuts, session.actor.skillset));
+            session.dataSendToMe(ServerResponse.skillCoolTime(session.actor));
         }).catch(error => utils.infoWarn('Character', 'shortcut login initialization failed: %s', error.message));
+        await skillsReady;
         session.dataSendToMe(GameTime.isNight() ? ServerResponse.sunset() : ServerResponse.sunrise());
         sendClanWindow(session);
-        if (session.actor.fetchClanId?.()) invoke('GameServer/Quest/QuestService').ensureLoaded(session)
-            .catch(error => utils.infoWarn('ClanQuest', 'login resume failed: %s', error.message));
+        const questActor = session.actor;
+        const quests = invoke('GameServer/Quest/QuestService');
+        quests.ensureLoaded(session).then(() => {
+            if (session.actor === questActor)
+                session.dataSendToMe(ServerResponse.questList(quests.active(session)));
+        }).catch(error => utils.infoWarn('Quest', 'login load failed: %s', error.message));
         session.dataSendToMe(ServerResponse.userInfo(session.actor));
         session.dataSendToMe(ServerResponse.exStorageMaxCount(session.actor));
         session.dataSendToMe(ServerResponse.abnormalStatusUpdate.fromActor(session.actor));
@@ -43,12 +49,16 @@ function enterWorld(session, buffer) {
             .catch((error) => utils.infoWarn('AfkTrade', 'notification delivery failed: %s', error.message));
     };
 
-    ShotStock.ensureActorStock(session.actor, { targetAmount: ShotStock.DEFAULT_TARGET_AMOUNT })
-        .then(continueEnter)
+    const ready = ShotStock.ensureActorStock(session.actor, { targetAmount: ShotStock.DEFAULT_TARGET_AMOUNT })
         .catch((err) => {
             utils.infoWarn('Character', 'starter shot stock failed for %s: %s', session.actor.fetchName(), err.message);
-            continueEnter();
-        });
+        }).then(continueEnter);
+    const tracked = ready.finally(() => {
+        if (session.enterWorldReady === tracked) session.enterWorldReady = null;
+    });
+    session.enterWorldReady = tracked;
+    tracked.catch(error => utils.infoWarn('Character', 'world entry failed: %s', error.message));
+    return tracked;
 }
 
 module.exports = enterWorld;

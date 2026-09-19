@@ -1,5 +1,11 @@
 function receivedHit(session, actor, npc, hit, options = {}) {
+    if (invoke('GameServer/Effects/EffectStore').hasDebuff(npc, 'petrification')) return;
     if (npc.state?.fetchDead?.()) return;
+    invoke('GameServer/Progression/OverhitReward').capture(npc, actor, {
+        skill: options.skill,
+        damage: hit,
+        timestamp: options.timestamp
+    });
     invoke('GameServer/Pets/PetRuntime').recordDamage(npc, actor, hit);
     const questSession = actor.ownerSession || session;
     invoke('GameServer/Quest/QuestService').onAttack(questSession, npc, actor, hit).catch(error => utils.infoWarn('Quest', 'pet attack: %s', error.message));

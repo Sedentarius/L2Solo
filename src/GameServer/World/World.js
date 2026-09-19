@@ -166,9 +166,12 @@ const World = {
     },
 
     removeUser(session) {
+        const wasPresent = this.user.sessions.includes(session);
         this.user.sessions = this.user.sessions.filter((ob) => ob !== session);
         this.user.revision += 1;
         invoke('GameServer/Bot/AI/BotPvpIndex').invalidate();
+        // Build the packet after removal so its online object ID becomes zero.
+        if (wasPresent) invoke('GameServer/Clan/ClanService').broadcastMemberPresence(session.actor);
     },
 
     fetchUser(id) {

@@ -1105,7 +1105,31 @@ function applySchemaMigrations() {
             );
             CREATE INDEX IF NOT EXISTS clan_social_memory_updated ON clan_social_memory(updatedAt, clanId);
         `)],
-        [39, () => require('./DatabasePartyCandidateProjection').install(connection)]
+        [39, () => require('./DatabasePartyCandidateProjection').install(connection)],
+        [40, () => {
+            if (!connection.prepare('PRAGMA table_info(characters)').all().some(column => column.name === 'skillCooldowns'))
+                connection.exec("ALTER TABLE characters ADD COLUMN skillCooldowns TEXT NOT NULL DEFAULT '[]'");
+        }],
+        [41, () => {
+            // Early versions of this branch used 40 for death EXP. Also repair
+            // those databases without changing main's existing migration.
+            if (!connection.prepare('PRAGMA table_info(characters)').all().some(column => column.name === 'skillCooldowns'))
+                connection.exec("ALTER TABLE characters ADD COLUMN skillCooldowns TEXT NOT NULL DEFAULT '[]'");
+            connection.exec(`
+            CREATE TABLE IF NOT EXISTS character_death_experience (
+                characterId INTEGER PRIMARY KEY REFERENCES characters(id) ON DELETE CASCADE,
+                deathSequence INTEGER NOT NULL DEFAULT 1,
+                expBeforeDeath INTEGER NOT NULL,
+                expLost INTEGER NOT NULL,
+                expAfterDeath INTEGER NOT NULL,
+                deathContext TEXT NOT NULL DEFAULT '{}',
+                penaltyAppliedAt INTEGER NOT NULL,
+                pendingRestoration INTEGER NOT NULL DEFAULT 1 CHECK(pendingRestoration IN (0, 1)),
+                resolvedAt INTEGER,
+                resolutionReason TEXT NOT NULL DEFAULT ''
+            );
+        `);
+        }]
     ];
     const applied = new Set(connection.prepare('SELECT version FROM schema_migrations').all().map((row) => Number(row.version)));
     migrations.forEach(([version, apply]) => {
@@ -1673,6 +1697,38 @@ function syncInventorySummaryUnsafe(characterId, inventory = {}) {
         rows.slice(desired.length).forEach((row) => write('DELETE FROM items WHERE id = ? AND characterId = ?', [row.id, characterId]));
     });
     return { characterId, entries: Object.keys(inventory).length };
+}
+
+function syncColdDeathExperienceUnsafe(characterId, record, timestamp) {
+    if (record === undefined) return;
+    if (!record) {
+        write(`UPDATE character_death_experience SET pendingRestoration = 0, resolvedAt = ?,
+            resolutionReason = 'cold_recovery' WHERE characterId = ? AND pendingRestoration = 1`,
+        [timestamp, characterId]);
+        return;
+    }
+    const existing = one('SELECT * FROM character_death_experience WHERE characterId = ?', [characterId]);
+    const appliedAt = Number(record.penaltyAppliedAt);
+    if (existing && Number(existing.penaltyAppliedAt) > appliedAt) return;
+    const sameDeath = existing && Number(existing.penaltyAppliedAt) === appliedAt;
+    // A later snapshot of the same corpse cannot reopen consumed restoration.
+    const pending = record.pendingRestoration && (!sameDeath || Number(existing.pendingRestoration) === 1) ? 1 : 0;
+    if (sameDeath && Number(existing.pendingRestoration) === pending) return;
+    write(`INSERT INTO character_death_experience
+        (characterId, deathSequence, expBeforeDeath, expLost, expAfterDeath, deathContext,
+         penaltyAppliedAt, pendingRestoration, resolvedAt, resolutionReason)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(characterId) DO UPDATE SET
+            deathSequence = excluded.deathSequence, expBeforeDeath = excluded.expBeforeDeath,
+            expLost = excluded.expLost, expAfterDeath = excluded.expAfterDeath,
+            deathContext = excluded.deathContext, penaltyAppliedAt = excluded.penaltyAppliedAt,
+            pendingRestoration = excluded.pendingRestoration, resolvedAt = excluded.resolvedAt,
+            resolutionReason = excluded.resolutionReason`,
+    [characterId, Number(existing?.deathSequence || 0) + (sameDeath ? 0 : 1),
+        record.expBeforeDeath, record.expLost, record.expAfterDeath,
+        JSON.stringify(record.deathContext || {}), appliedAt, pending,
+        pending ? null : sameDeath && existing.resolvedAt != null ? existing.resolvedAt : timestamp,
+        pending ? '' : record.resolutionReason || existing?.resolutionReason || 'cold_recovery']);
 }
 
 function applyColdPhysicalStateUnsafe(characterId, physical = {}) {
@@ -2585,7 +2641,7 @@ const Database = {
     },
 
     commitBackgroundPartyMembership({ party, members = [], event = null, review = false, expectedPartyUpdatedAt = null,
-        expectedPhase = 'cold', canCommitHot = null } = {}) {
+        expectedPhase = 'cold', canCommitHot = null, preserveClanOperations = false } = {}) {
         const batch = Array.isArray(members) ? members.slice(0, 40) : [];
         const characterIds = [...new Set(batch.map((entry) => Number(entry?.row?.characterId)).filter((id) => (
             Number.isSafeInteger(id) && id > 0
@@ -2640,7 +2696,7 @@ const Database = {
             const reserved = all(`SELECT characterId FROM clan_operation_members
                 WHERE characterId IN (${placeholders}) AND status = 'active'`, characterIds)
                 .map((row) => Number(row.characterId));
-            if (reserved.length && !review) return { ok: false, reason: 'clan_operation_reserved', conflicts: reserved };
+            if (reserved.length && (!review || preserveClanOperations)) return { ok: false, reason: 'clan_operation_reserved', conflicts: reserved };
 
             write(`INSERT INTO bot_background_parties (
                 partyId, leaderId, memberIdsJson, spotId, startedAt, nextResolveAt,
@@ -3009,6 +3065,10 @@ const Database = {
             }
             const physical = request.physical || null;
             if (physical) applyColdPhysicalStateUnsafe(characterId, physical);
+            // Persist the entitlement under the same lease fence and transaction
+            // as EXP. Cold-to-hot resurrection reads this durable record.
+            syncColdDeathExperienceUnsafe(characterId,
+                parsedObject(requestedPatch.statsJson)?.deathExperience, timestamp);
             return {
                 ok: true,
                 characterId,
@@ -6616,8 +6676,79 @@ const Database = {
             [exp, KARMA_XP_DIVIDER, level, exp, sp, id], 'character:cold-experience'));
     },
     updateCharacterExperience(id, level, exp, sp) { return withCharacterFlush(id, () => update('characters', { level, exp, sp }, 'id = ?', [id], 'character:experience')); },
+    fetchCharacterDeathExperience(id) {
+        return selectOne('character_death_experience', ['*'], 'characterId = ?', [Number(id)], 'character:death-exp-fetch')
+            .then((rows) => rows[0] || null);
+    },
+    updateColdCharacterProgression(id, state) {
+        return withCharacterFlush(id, () => inTransaction(() => {
+            write('UPDATE characters SET level = ?, exp = ?, sp = ? WHERE id = ?',
+                [state.level, state.exp, state.sp, id]);
+            syncColdDeathExperienceUnsafe(id, state.stats?.deathExperience, Number(state.updatedAt || now()));
+        }, 'character:cold-progression'));
+    },
+    applyCharacterDeathExperience(record) {
+        const id = Number(record.characterId);
+        return withCharacterFlush(id, () => inTransaction(() => {
+            const existing = one('SELECT * FROM character_death_experience WHERE characterId = ?', [id]);
+            const character = one('SELECT level, exp, sp FROM characters WHERE id = ?', [id]);
+            if (!character) throw new Error(`death experience character missing: ${id}`);
+            if (existing && Number(existing.pendingRestoration) === 1
+                && Number(existing.expAfterDeath) === Number(character.exp)) {
+                return { ...existing, duplicate: true };
+            }
+            const sequence = Number(existing?.deathSequence || 0) + 1;
+            write(`UPDATE characters SET level = ?, exp = ?,
+                sp = COALESCE(?, sp), karma = COALESCE(?, karma) WHERE id = ?`,
+            [record.level, record.expAfterDeath,
+                Number.isFinite(Number(record.sp)) ? Number(record.sp) : null,
+                Number.isFinite(Number(record.karma)) ? Number(record.karma) : null, id]);
+            write(`INSERT INTO character_death_experience
+                (characterId, deathSequence, expBeforeDeath, expLost, expAfterDeath, deathContext,
+                 penaltyAppliedAt, pendingRestoration, resolvedAt, resolutionReason)
+                VALUES (?, ?, ?, ?, ?, ?, ?, 1, NULL, '')
+                ON CONFLICT(characterId) DO UPDATE SET
+                    deathSequence = excluded.deathSequence,
+                    expBeforeDeath = excluded.expBeforeDeath,
+                    expLost = excluded.expLost,
+                    expAfterDeath = excluded.expAfterDeath,
+                    deathContext = excluded.deathContext,
+                    penaltyAppliedAt = excluded.penaltyAppliedAt,
+                    pendingRestoration = 1,
+                    resolvedAt = NULL,
+                    resolutionReason = ''`, [id, sequence, record.expBeforeDeath, record.expLost,
+                record.expAfterDeath, JSON.stringify(record.deathContext || {}), record.penaltyAppliedAt]);
+            return { ...record, deathSequence: sequence, pendingRestoration: 1, duplicate: false };
+        }, 'character:death-exp-apply'));
+    },
+    restoreCharacterDeathExperience(id, restorePercent, resolvedAt = Date.now()) {
+        const characterId = Number(id);
+        const percent = Math.max(0, Math.min(100, Number(restorePercent) || 0));
+        return withCharacterFlush(characterId, () => inTransaction(() => {
+            const death = one('SELECT * FROM character_death_experience WHERE characterId = ?', [characterId]);
+            if (!death || Number(death.pendingRestoration) !== 1) return null;
+            const character = one('SELECT level, exp, sp FROM characters WHERE id = ?', [characterId]);
+            if (!character) return null;
+            const restoredExp = Math.min(Number(death.expLost), Math.round(Number(death.expLost) * percent / 100));
+            const totalExp = Math.min(Number(death.expBeforeDeath), Number(character.exp) + restoredExp);
+            const level = invoke('GameServer/Progression/ProgressionCap').levelForExperience(totalExp, character.level);
+            const consumed = write(`UPDATE character_death_experience
+                SET pendingRestoration = 0, resolvedAt = ?, resolutionReason = 'resurrection'
+                WHERE characterId = ? AND pendingRestoration = 1`, [resolvedAt, characterId]);
+            if (Number(consumed.affectedRows) !== 1) return null;
+            write('UPDATE characters SET level = ?, exp = ? WHERE id = ?', [level, totalExp, characterId]);
+            return { ...death, pendingRestoration: 0, restoredExp, totalExp, level, restorePercent: percent };
+        }, 'character:death-exp-restore'));
+    },
+    clearCharacterDeathExperience(id, reason = 'invalidated', resolvedAt = Date.now()) {
+        const characterId = Number(id);
+        return withCharacterFlush(characterId, () => run(`UPDATE character_death_experience
+            SET pendingRestoration = 0, resolvedAt = ?, resolutionReason = ?
+            WHERE characterId = ? AND pendingRestoration = 1`,
+        [resolvedAt, String(reason || 'invalidated'), characterId], 'character:death-exp-clear'));
+    },
     updateCharacterVitals(id, hp, maxHp, mp, maxMp) { return withCharacterFlush(id, () => update('characters', { hp, maxHp, mp, maxMp }, 'id = ?', [id], 'character:vitals')); },
-    updateCharacterStatus(id, { hp, mp, cp, effects }) { return withCharacterFlush(id, () => update('characters', { hp, mp, cp, effects }, 'id = ?', [id], 'character:status')); },
+    updateCharacterStatus(id, { hp, mp, cp, effects, skillCooldowns }) { return withCharacterFlush(id, () => update('characters', { hp, mp, cp, effects, ...(skillCooldowns === undefined ? {} : { skillCooldowns }) }, 'id = ?', [id], 'character:status')); },
     updateCharacterPvpPkKarma(id, pvp, pk, karma) { return withCharacterFlush(id, () => update('characters', { pvp, pk, karma }, 'id = ?', [id], 'character:karma')); },
     updateCharacterClassId(id, classId) { return withCharacterFlush(id, () => update('characters', { classId }, 'id = ?', [id], 'character:class')); }
 };

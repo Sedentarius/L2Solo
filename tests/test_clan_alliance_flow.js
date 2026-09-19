@@ -94,6 +94,10 @@ const mocks = {
     'GameServer/Effects/EffectRestrictions': { stopMovement() {} },
     'GameServer/Network/Response': { itemsList() {}, sitAndStand() {}, skillStarted() {}, userInfo() {}, revive() {}, socialAction() {} },
     'GameServer/Actor/Generics/Die': (s, a) => { a.dead = true; service.onDeath(s); },
+    'GameServer/Progression/DeathExperience': {
+        clearPendingRestoration: () => Promise.resolve({ cleared: false }),
+        restoreFromResurrection: () => ({ restored: 0, persistence: Promise.resolve() })
+    },
     'GameServer/Actor/Generics/TeleportTo': (s, a, loc) => { teleports.push({ id: a.fetchId(), ...loc }); place(a, loc); },
     'GameServer/Quest/QuestService': { questRates: () => ({ questSp: 1 }) },
     'GameServer/World/Generics/SpawnNpcs': { despawnQuestNpc: (w, npc) => despawn(npc) },
