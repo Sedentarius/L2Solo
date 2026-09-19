@@ -177,6 +177,57 @@ async function main() {
         dead = false;
         assert.equal(effects.execute(session, session.actor, session.actor, escape).recalled, false);
         assert.equal(teleported, null, 'lost ownership rejects a hall scroll without a town fallback');
+        for (const hall of Policy.catalog.halls) {
+            for (const managerId of hall.managerIds) {
+                const manager = DataCache.npcs.find(n => n.selfId === managerId);
+                const allSpawns = DataCache.npcSpawns.flatMap(g => g.spawns);
+                const locations = allSpawns.filter(s => s.selfId === managerId).flatMap(s => s.coords);
+                assert.equal(locations.length, 1, `manager ${managerId} must have one spawn`);
+                const aliases = new Set(DataCache.npcs.filter(n => n.selfId !== managerId
+                    && n.template.name === manager.template.name).map(n => n.selfId));
+                for (const spawn of allSpawns.filter(s => aliases.has(s.selfId))) {
+                    for (const point of spawn.coords) {
+                        const samePlace = locations.some(location => Math.hypot(
+                            point.locX - location.locX, point.locY - location.locY
+                        ) < 150 && Math.abs(point.locZ - location.locZ) < 150);
+                        assert(!samePlace, `${manager.template.name}: legacy NPC ${spawn.selfId} overlaps manager ${managerId}`);
+                    }
+                }
+            }
+            assert(hall.doormanIds.length, `missing doorman for ${hall.id}`);
+            for (const id of hall.doormanIds) {
+                assert(NpcUi.handles(id));
+                assert(DataCache.npcs.some(n => n.selfId === id), `missing doorman template ${id}`);
+                const spawns = DataCache.npcSpawns.flatMap(g => g.spawns).filter(s => s.selfId === id);
+                assert.equal(spawns.length, 1, `doorman ${id} must not be spawned twice`);
+            }
+        }
+        Runtime.applyRows(rows);
+        npc.fetchSelfId = () => 7787;
+        npc.fetchName = () => 'Latif';
+        session.activeNpcTalk.selfId = 7787;
+        await NpcUi.render(session);
+        let html = packets.filter(p => p.html).at(-1).html;
+        assert(html.includes('Ruby Hall') && html.includes('has no owner'));
+        assert(html.includes('Your clan hall: Aden') && html.includes('The Golden Chamber'));
+        assert(!html.includes('quest'), 'doormen never open the unrelated quest fallback');
+        rows.find(h => h.id === 25).ownerId = 2;
+        Runtime.applyRows(rows);
+        await NpcUi.render(session);
+        html = packets.filter(p => p.html).at(-1).html;
+        assert(html.includes('Only members of the owning clan'));
+        actorClan = 2;
+        await NpcUi.render(session);
+        html = packets.filter(p => p.html).at(-1).html;
+        assert(html.includes('belongs to your clan') && html.includes('Clan Hall Manager inside'));
+        const beforeMutations = mutations;
+        effect = null;
+        teleported = null;
+        for (const parts of [['set', 'hp', '80'], ['buff', '1086'], ['bid', '31', '9000000'], ['leave']])
+            await NpcUi.handle(session, ['clan-hall', ...parts]);
+        assert.equal(mutations, beforeMutations, 'doormen do not accept manager or auction commands');
+        assert.equal(effect, null);
+        assert.equal(teleported, null);
         console.log('Clan hall NPC authorization, data, buff levels, recall and restart checks passed');
     } finally {
         global.invoke = originalInvoke;

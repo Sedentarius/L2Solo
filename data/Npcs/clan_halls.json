@@ -1,5 +1,632 @@
 [
   {
+    "selfId": 8151,
+    "template": {
+      "kind": "Doormen",
+      "name": "Daniel",
+      "title": "Clan Hall Gatekeeper",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 132
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 22
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 8153,
+    "template": {
+      "kind": "Doormen",
+      "name": "Jacques",
+      "title": "Clan Hall Gatekeeper",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 132
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 23
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 8155,
+    "template": {
+      "kind": "Doormen",
+      "name": "Joff",
+      "title": "Clan Hall Gatekeeper",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 132
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 22
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 8157,
+    "template": {
+      "kind": "Doormen",
+      "name": "Niels",
+      "title": "Clan Hall Gatekeeper",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 132
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 22
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 8159,
+    "template": {
+      "kind": "Doormen",
+      "name": "Rudy",
+      "title": "Clan Hall Gatekeeper",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 132
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 22
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 8161,
+    "template": {
+      "kind": "Doormen",
+      "name": "Gellar",
+      "title": "Clan Hall Gatekeeper",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 132
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 23
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 8447,
+    "template": {
+      "kind": "Doormen",
+      "name": "Rosconne",
+      "title": "Clan Hall Gatekeeper",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 132
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 22
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 8448,
+    "template": {
+      "kind": "Doormen",
+      "name": "Stewart",
+      "title": "Clan Hall Gatekeeper",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 132
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 23
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 8449,
+    "template": {
+      "kind": "Doormen",
+      "name": "Theobolt",
+      "title": "Clan Hall Gatekeeper",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 132
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 22
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 8450,
+    "template": {
+      "kind": "Doormen",
+      "name": "Theron",
+      "title": "Clan Hall Gatekeeper",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 132
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 23
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 8451,
+    "template": {
+      "kind": "Doormen",
+      "name": "Trey",
+      "title": "Clan Hall Gatekeeper",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 132
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 22
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
     "selfId": 12833,
     "template": {
       "kind": "ClanHallManager",

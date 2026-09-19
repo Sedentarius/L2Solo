@@ -15,6 +15,11 @@ const Database = invoke('Database');
 const World = invoke('GameServer/World/World');
 const Approach = invoke('GameServer/Bot/AI/TownNpcApproach');
 const Navigation = invoke('GameServer/Bot/AI/CompanionNavigationRecovery');
+const Spots = invoke('GameServer/Bot/AI/SpotService');
+const Departure = require('../src/GameServer/ClanHall/Departure');
+const originalBestSpot = Spots.findBestSpot;
+const originalArrival = Spots.arrivalPointForState;
+const originalInvoke = global.invoke;
 const { lifecycleKind, ColdSimulationKernel } = invoke('GameServer/Bot/Population/ColdSimulationKernel');
 const membership = invoke('GameServer/Clan/ClanSocialRuntime').view.memberships;
 const def = Runtime.Policy.definition(36);
@@ -121,7 +126,7 @@ async function main() {
         let state = stateFor(id);
         const physical = hotActor(state);
         actors.push(physical);
-        const magic = hotActor(stateFor(id, 94));
+        const magic = hotActor(stateFor(id + 1, 94));
         actors.push(magic);
         assert(Services.missing(physical, Runtime.owned(1), at).some((s) => s.fetchSelfId() === 1086));
         assert(!Services.missing(magic, Runtime.owned(1), at).some((s) => s.fetchSelfId() === 1086));
@@ -156,18 +161,39 @@ async function main() {
             0,
             'do not evict unrelated buffs for a hall visit'
         );
+        const broadcasts = [];
         const session = {
             actor: physical,
             plan: 'hunting',
             dataSendToMe() {},
             dataSendToOthers() {},
-            dataSendToMeAndOthers() {}
+            dataSendToMeAndOthers(packet, caster) { broadcasts.push({ packet, caster }); }
         };
         physical.session = session;
         const beforeMp = mp;
         assert(Hot.tick(session, physical, at));
         assert(mp < beforeMp, 'real hot casting consumes manager MP');
         assert(Effects.list(physical).length > 3, 'native hot effect pipeline applies a hall buff');
+        assert.deepEqual(broadcasts.map(b => b.packet[0]), [0x48, 0x76], 'each NPC cast has a start and launch');
+        for (const { packet, caster } of broadcasts) {
+            assert.strictEqual(caster, npc, 'both packets reach observers of the same manager');
+            assert.equal(packet.readInt32LE(1), npc.fetchId());
+        }
+        assert.equal(broadcasts[0].packet.readInt32LE(5), physical.fetchId());
+        assert.equal(broadcasts[1].packet.readInt32LE(17), physical.fetchId());
+        const afterFirstMp = mp;
+        const magicEffects = Effects.list(magic).length;
+        const contention = Services.cast(session, magic, npc, 1059, at + 1);
+        assert.equal(contention.code, 'manager_busy', 'all recipients share one manager cast window');
+        assert.equal(mp, afterFirstMp, 'a busy manager does not consume MP');
+        assert.equal(Effects.list(magic).length, magicEffects, 'a busy manager grants no effect');
+        assert.equal(broadcasts.length, 2, 'no overlapping animation for another recipient');
+        assert.equal(Services.cast(null, magic, npc, 1059, at + 1, true).code, 'manager_busy',
+            'cold recipients use the same manager budget');
+        const waiting = { ...session, actor: magic, clanHallVisit: null };
+        assert(Hot.tick(waiting, magic, at + 1));
+        assert(waiting.clanHallVisit, 'a busy manager does not cancel the bot visit');
+        assert.equal(waiting.clanHallVisit.nextCastAt, contention.retryAt);
         const hotExpiry = Effects.list(physical).find((e) => e.id === 1204).expiresAt;
         const blocked = { ...session, clanHallVisit: null, currentTargetId: 55 };
         assert.equal(Hot.tick(blocked, physical, at + 2000), false, 'combat target takes priority');
@@ -218,6 +244,37 @@ async function main() {
         kernel.upsert({ state, context: { clanHallServices: true } });
         await kernel.resolveCommand(id);
         assert(requests?.[0].precomputedResult, 'worker requests a main-thread service operation');
+        const returnSpot = { id: 'hall-return-test', name: 'Hunting field',
+            center: { locX: 10000, locY: 15000, locZ: -3000 }, npcNames: [] };
+        let selection;
+        Spots.findBestSpot = (status, options) => { selection = { status, options }; return { spot: returnSpot }; };
+        Spots.arrivalPointForState = () => ({ ...returnSpot.center });
+        const safeDeparture = Departure.plan({ ...state, stats: { ...state.stats,
+            spotBackoffs: [{ spotId: 'dangerous', until: at + 100000 }] } }, Runtime.owned(1), at);
+        assert(safeDeparture);
+        assert.equal(selection.options.spotRetryAfter.dangerous, Infinity, 'do not return to a dangerous spot');
+        assert.equal(selection.options.mode, 'solo');
+        assert.equal(Departure.plan({ ...state, loc: { locX: 0, locY: 0, locZ: 0 } }, Runtime.owned(1), at), null,
+            'hall departure is not a free teleport from anywhere');
+        Spots.arrivalPointForState = () => null;
+        assert.equal(Departure.plan(state, Runtime.owned(1), at), null, 'no teleport without a valid arrival point');
+        Spots.arrivalPointForState = () => ({ ...returnSpot.center });
+        let hotDestination;
+        global.invoke = (name) => name === 'GameServer/Actor/Generics/TeleportTo'
+            ? (_session, _actor, destination) => { hotDestination = destination; return true; }
+            : originalInvoke(name);
+        const departing = { ...session, actor: full, clanHallVisit: { hallId: def.id, expiresAt: at + 180000 } };
+        assert(Hot.tick(departing, full, at + 1000));
+        assert.deepEqual(hotDestination, returnSpot.center, 'a serviced hot bot teleports directly to hunting');
+        assert.equal(departing.currentSpot.id, returnSpot.id);
+        assert.equal(departing.spotRelocation.method, 'clan_hall');
+        assert(departing.spotRelocation.arrivalPending, 'normal teleport settling prevents an immediate movement command');
+        hotDestination = null;
+        const grouped = { ...session, actor: full, followPlayerSession: {},
+            clanHallVisit: { hallId: def.id, expiresAt: at + 180000 } };
+        assert.equal(Hot.tick(grouped, full, at + 1000), false);
+        assert.equal(hotDestination, null, 'party members stay with their party after support');
+        global.invoke = originalInvoke;
         for (let i = 0; i < 30; i++) {
             const outcome = await Cold.resolve(state, at + i * 2000);
             assert(outcome?.ok, 'cold service snapshot persists');
@@ -226,6 +283,9 @@ async function main() {
         }
         assert.equal(state.activity, 'hunting');
         assert.equal(state.stats.clanHallVisit, null, 'completed visit resumes hunting');
+        assert.deepEqual(state.loc, returnSpot.center, 'cold departure persists an immediate teleport');
+        assert.equal(state.spotId, returnSpot.id);
+        assert.equal(state.stats.travel, null, 'no gatekeeper or walking leg after hall support');
         const haste = state.stats.coldCombat.effects.find((e) => e.id === 1086);
         assert.equal(haste.level, 1, 'cold service preserves the C4 hall skill rank');
         assert(haste.expiresAt > at && haste.expiresAt < at + 1300000);
@@ -275,6 +335,12 @@ async function main() {
         const cancelled = await Cold.resolve(lost, at + 70000);
         assert(cancelled.ok && !cancelled.state.stats.clanHallVisit, 'membership loss cancels an in-progress visit');
         membership.set(id, 1);
+        const later = Services.cast(session, magic, npc, 1059, at + 200000);
+        assert(later.ok, 'the next recipient can use the manager after the shared interval');
+        const lastPackets = broadcasts.slice(-2).map(b => b.packet);
+        assert.deepEqual(lastPackets.map(p => p[0]), [0x48, 0x76]);
+        assert.equal(lastPackets[0].readInt32LE(5), magic.fetchId());
+        assert.equal(lastPackets[1].readInt32LE(17), magic.fetchId(), 'launch never retains the previous recipient');
         Runtime.applyRows([{ ...hallRow, serviceDueAt: at - 1 }]);
         assert.equal(Services.missing(magic, Runtime.owned(1), at).length, 0);
         assert.equal(Services.cast(null, magic, npc, 1059, at, true).code, 'not_authorized');
@@ -293,6 +359,9 @@ async function main() {
         );
     } finally {
         actors.forEach((a) => Ticker.clearAll(a));
+        global.invoke = originalInvoke;
+        Spots.findBestSpot = originalBestSpot;
+        Spots.arrivalPointForState = originalArrival;
         World.npc = originalNpc;
         Approach.hasLineOfSight = originalLos;
         Navigation.move = originalMove;

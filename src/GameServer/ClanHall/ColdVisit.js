@@ -220,9 +220,18 @@ async function resolve(state, timestamp = Date.now()) {
                     mpMultiplier: inside ? 1 + Number(hall.functions.mp || 0) / 100 : 1
                 }
             );
-            if (!skill && (!inside || !Services.recovery(actor, hall)))
+            if (!skill && (!inside || !Services.recovery(actor, hall))) {
                 next = finish(state, timestamp, 'clan_hall_services_complete');
-            else
+                const departure = require('./Departure').plan(state, hall, timestamp);
+                if (departure) {
+                    next.patch.loc = departure.destination;
+                    next.patch.spotId = departure.spot.id;
+                    next.patch.currentRegion = departure.spot.name;
+                    next.patch.stats.pveEncounter = null;
+                    next.events[0].summary = `${state.name || 'Bot'} teleported from ${hall.name} to ${departure.spot.name}`;
+                    next.debug.reason = 'clan_hall_teleport';
+                }
+            } else
                 next = result(
                     state,
                     {
@@ -240,7 +249,7 @@ async function resolve(state, timestamp = Date.now()) {
                         }
                     },
                     timestamp,
-                    timestamp + (cast?.ok ? 1500 : 5000),
+                    cast?.retryAt || timestamp + 5000,
                     cast?.ok ? 'clan_hall_buff_received' : 'clan_hall_recovery'
                 );
         }

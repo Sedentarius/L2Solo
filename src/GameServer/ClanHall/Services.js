@@ -4,6 +4,7 @@ const Effects = invoke('GameServer/Effects/EffectStore');
 const Loadout = invoke('GameServer/Bot/AI/PartyBuffLoadout');
 const REFRESH_MS = 120000;
 const skills = new Map();
+const castReadyAt = new WeakMap();
 let cachedSpawns,
     managers = new Map();
 
@@ -116,18 +117,24 @@ function cast(session, actor, npc, id, timestamp = Date.now(), cold = false) {
     if (!skill) return { ok: false, code: 'invalid_function' };
     const mp = Number(skill.fetchConsumedMp()) || 0;
     if (npc.fetchMp() < mp) return { ok: false, code: 'manager_needs_mp' };
+    const readyAt = castReadyAt.get(npc) || 0;
+    if (timestamp < readyAt) return { ok: false, code: 'manager_busy', retryAt: readyAt };
+    const retryAt = timestamp + Math.max(1500, Number(skill.fetchCalculatedHitTime()) || 0);
+    castReadyAt.set(npc, retryAt);
+    if (!cold && session?.dataSendToMeAndOthers) {
+        const response = invoke('GameServer/Network/Response');
+        // Support applies immediately, like cubic support. Complete that cast
+        // for every observer before another recipient can use the same NPC.
+        session.dataSendToMeAndOthers(response.skillStarted(npc, actor.fetchId(), skill), npc);
+        session.dataSendToMeAndOthers(response.magicSkillLaunched(npc, skill, [actor]), npc);
+    }
     const effect = cold
         ? Effects.apply(actor, effectFor(skill, timestamp))
         : invoke('GameServer/Skills/C4SkillEffects').execute(session, npc, actor, skill, { magicSkill: true })?.effect;
     if (!effect && cold) return { ok: false, code: 'stronger_effect' };
     npc.setMp(npc.fetchMp() - mp);
     npc.automation?.replenishVitals(npc);
-    if (!cold && session?.dataSendToMeAndOthers)
-        session.dataSendToMeAndOthers(
-            invoke('GameServer/Network/Response').skillStarted(npc, actor.fetchId(), skill),
-            npc
-        );
-    return { ok: true, effect, skill };
+    return { ok: true, effect, skill, retryAt };
 }
 function recovery(actor, hall) {
     if (!available(hall)) return false;

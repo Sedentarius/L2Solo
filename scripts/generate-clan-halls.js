@@ -92,6 +92,16 @@ const halls = rows('clanhall.sql')
             managerIds: [...new Set(managers)]
         };
     });
+// L2DoormenInstance binds to a hall within 500 units of its zone.
+for (const hall of halls) hall.doormanIds = [];
+const doormen = new Set(allNpcs.filter(n => n[11] === 'L2Doormen').map(n => n[0]));
+for (const spawn of spawns.filter(s => doormen.has(s[3]))) {
+    const hall = halls.find(({ bounds: b }) => Math.hypot(
+        Math.max(b.minX - spawn[4], 0, spawn[4] - b.maxX),
+        Math.max(b.minY - spawn[5], 0, spawn[5] - b.maxY)
+    ) < 500);
+    if (hall && !hall.doormanIds.includes(spawn[3])) hall.doormanIds.push(spawn[3]);
+}
 require('../src/Global');
 const cache = invoke('GameServer/DataCache');
 cache.init();
@@ -100,7 +110,7 @@ const oldIds = new Set(previous('data/Npcs/clan_halls.json').map((n) => n.selfId
 const knownIds = new Set(cache.npcs.filter((n) => !oldIds.has(n.selfId)).map((n) => n.selfId));
 const knownSpawns = cache.npcSpawns.filter((g) => g.selfId !== 'auction_clan_halls').flatMap((g) => g.spawns);
 const auctioneerIds = allNpcs.filter((n) => n[11] === 'L2Auctioneer').map((n) => n[0]);
-const needed = new Set([...auctioneerIds, ...halls.flatMap((h) => h.managerIds)]);
+const needed = new Set([...auctioneerIds, ...halls.flatMap((h) => [...h.managerIds, ...h.doormanIds])]);
 const npcs = allNpcs
     .filter((n) => needed.has(n[0]) && !knownIds.has(n[0]))
     .map((row) => {
@@ -161,7 +171,8 @@ const missingSpawns = spawns
         (s) =>
             needed.has(s[3]) &&
             !knownSpawns.some(
-                (k) => k.selfId === s[3] && k.coords.some((c) => c.locX === s[4] && c.locY === s[5] && c.locZ === s[6])
+                (k) => k.selfId === s[3] && (doormen.has(s[3])
+                    || k.coords.some((c) => c.locX === s[4] && c.locY === s[5] && Math.abs(c.locZ - s[6]) < 64))
             )
     )
     .map((s) => ({
@@ -213,6 +224,14 @@ const support = Object.fromEntries(
 );
 save('data/ClanHalls/support.json', support);
 save('data/ClanHalls/catalog.json', { revision, source: 'https://gitlab.com/TheDnR/l2j-lisvus', halls, auctioneerIds });
+const doors = [...read('data/doors.xml').matchAll(/<door id="(\d+)" name="([^"]+)">([\s\S]*?)<\/door>/g)]
+    .map(([, id, name, body]) => {
+        const values = Object.fromEntries([...body.matchAll(/<set name="([^"]+)" val="([^"]+)"/g)]
+            .map(([, key, value]) => [key, Number(value)]));
+        return { id: Number(id), name, hallId: values.clanHallId,
+            locX: values.x, locY: values.y, locZ: values.z, maxHp: values.baseHpMax };
+    }).filter(door => halls.some(hall => hall.id === door.hallId));
+save('data/ClanHalls/doors.json', doors);
 save('data/Npcs/clan_halls.json', npcs);
 save('data/Npcs/Spawns/clan_halls.json', [{ selfId: 'auction_clan_halls', bounds: [], spawns: missingSpawns }]);
 console.log(`Imported ${halls.length} auction halls, ${npcs.length} NPC templates, ${missingSpawns.length} spawns`);

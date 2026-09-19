@@ -43,6 +43,9 @@ module.exports = function ({
             highWater INTEGER NOT NULL, contributed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(clanId,characterId))`);
         write(`CREATE TABLE IF NOT EXISTS clan_hall_events (id INTEGER PRIMARY KEY, clanId INTEGER NOT NULL,
             hallId INTEGER NOT NULL, kind TEXT NOT NULL, amount INTEGER NOT NULL DEFAULT 0, at INTEGER NOT NULL)`);
+        write(`CREATE TABLE IF NOT EXISTS clan_hall_startup_schedule (
+            id INTEGER PRIMARY KEY CHECK(id=1), delayMs INTEGER NOT NULL CHECK(delayMs>0 AND delayMs<=86400000),
+            requestedAt INTEGER NOT NULL)`);
         for (const h of Policy.catalog.halls)
             write('INSERT OR IGNORE INTO clan_halls(id,auctionEndsAt,auctionDurationMs) VALUES (?,?,?)', [
                 h.id,
@@ -287,6 +290,12 @@ module.exports = function ({
         initClanHalls(timestamp = Date.now()) {
             return tx(() => {
                 ensure(timestamp);
+                const schedule = one('SELECT delayMs FROM clan_hall_startup_schedule WHERE id=1');
+                if (schedule) {
+                    // Consume an operator's one-time reschedule atomically with the new deadlines.
+                    write('UPDATE clan_halls SET auctionEndsAt=? WHERE ownerId=0', [timestamp + schedule.delayMs]);
+                    write('DELETE FROM clan_hall_startup_schedule WHERE id=1');
+                }
                 settle(timestamp);
                 return all('SELECT * FROM clan_halls');
             }, 'init');

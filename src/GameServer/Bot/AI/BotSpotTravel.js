@@ -88,11 +88,26 @@ function completeTeleport(session, bot, spot, relocation, method) {
         bot,
         arrivedSpot,
         method,
-        method === 'town_gatekeeper'
+        method === 'clan_hall'
+            ? `${bot.fetchName?.() || 'Bot'} teleported from the clan hall to ${arrivedSpot.name || 'a hunting ground'}.`
+            : method === 'town_gatekeeper'
             ? `${bot.fetchName?.() || 'Bot'} left ${relocation.gatekeeper?.town || 'town'} through ${relocation.gatekeeper?.name || 'the gatekeeper'} and reached ${arrivedSpot.name || 'a hunting ground'}.`
             : `${bot.fetchName?.() || 'Bot'} reached ${arrivedSpot.name || 'a hunting ground'} via SoE and gatekeeper.`,
         relocation.recoveryReason
     );
+}
+
+function startFromClanHall(session, bot, spot, destination) {
+    const hall = require('../../ClanHall/Runtime').forActor(bot);
+    const services = require('../../ClanHall/Services');
+    if (!hall || !services.near(bot, services.manager(hall)) || session.spotRelocation
+        || bot.isDead?.() || BotTownTravel.hasCombatThreat(session, bot)
+        || !spot || !destination
+        || !['locX', 'locY', 'locZ'].every(key => hasFiniteCoordinate(destination[key]))) return false;
+    completeTeleport(session, bot, spot, {
+        token: Symbol('clan-hall-departure'), spotId: spot.id, destination: { ...destination }, method: 'clan_hall'
+    }, 'clan_hall');
+    return true;
 }
 
 function start(session, bot, spot, targetLoc = null) {
@@ -326,5 +341,6 @@ module.exports = {
     start,
     startViaEscape,
     startViaTownGatekeeper,
+    startFromClanHall,
     tick
 };

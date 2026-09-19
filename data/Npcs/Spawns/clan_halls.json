@@ -19,6 +19,36 @@
         "bias": 0
       },
       {
+        "selfId": 8155,
+        "name": "Joff",
+        "coords": [
+          {
+            "locX": 145250,
+            "locY": 25244,
+            "locZ": -2136,
+            "head": 32500
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 8161,
+        "name": "Gellar",
+        "coords": [
+          {
+            "locX": 144462,
+            "locY": 28125,
+            "locZ": -2264,
+            "head": 0
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
         "selfId": 12893,
         "name": "Korgen",
         "coords": [
@@ -27,6 +57,21 @@
             "locY": 27172,
             "locZ": -2256,
             "head": 33000
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 8159,
+        "name": "Rudy",
+        "coords": [
+          {
+            "locX": 144352,
+            "locY": 27165,
+            "locZ": -2264,
+            "head": 0
           }
         ],
         "total": 1,
@@ -94,6 +139,21 @@
         "bias": 0
       },
       {
+        "selfId": 8157,
+        "name": "Niels",
+        "coords": [
+          {
+            "locX": 150342,
+            "locY": 26471,
+            "locZ": -2264,
+            "head": 32500
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
         "selfId": 12890,
         "name": "Dianne",
         "coords": [
@@ -101,6 +161,21 @@
             "locX": 150416,
             "locY": 23605,
             "locZ": -2112,
+            "head": 0
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 8151,
+        "name": "Daniel",
+        "coords": [
+          {
+            "locX": 149494,
+            "locY": 23219,
+            "locZ": -2136,
             "head": 0
           }
         ],
@@ -124,6 +199,21 @@
         "bias": 0
       },
       {
+        "selfId": 8153,
+        "name": "Jacques",
+        "coords": [
+          {
+            "locX": 150194,
+            "locY": 23758,
+            "locZ": -2136,
+            "head": 33500
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
         "selfId": 12835,
         "name": "Emma",
         "coords": [
@@ -132,6 +222,36 @@
             "locY": 148280,
             "locZ": -3584,
             "head": 46703
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8449,
+        "name": "Theobolt",
+        "coords": [
+          {
+            "locX": 78448,
+            "locY": 148400,
+            "locZ": -3592,
+            "head": 16000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8448,
+        "name": "Stewart",
+        "coords": [
+          {
+            "locX": 83680,
+            "locY": 145456,
+            "locZ": -3400,
+            "head": 0
           }
         ],
         "total": 1,
@@ -177,6 +297,36 @@
             "locY": 145392,
             "locZ": -3512,
             "head": 60088
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8450,
+        "name": "Theron",
+        "coords": [
+          {
+            "locX": 81264,
+            "locY": 151728,
+            "locZ": -3528,
+            "head": 0
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 8451,
+        "name": "Trey",
+        "coords": [
+          {
+            "locX": 81808,
+            "locY": 151776,
+            "locZ": -3528,
+            "head": 32000
           }
         ],
         "total": 1,
@@ -274,21 +424,6 @@
         "bias": 0
       },
       {
-        "selfId": 7767,
-        "name": "Auctioneer",
-        "coords": [
-          {
-            "locX": -81376,
-            "locY": 151715,
-            "locZ": -3128,
-            "head": 49152
-          }
-        ],
-        "total": 1,
-        "respawn": 5,
-        "bias": 0
-      },
-      {
         "selfId": 12851,
         "name": "Black",
         "coords": [
@@ -349,21 +484,6 @@
         "bias": 0
       },
       {
-        "selfId": 7767,
-        "name": "Auctioneer",
-        "coords": [
-          {
-            "locX": -14767,
-            "locY": 122955,
-            "locZ": -3112,
-            "head": 0
-          }
-        ],
-        "total": 1,
-        "respawn": 5,
-        "bias": 0
-      },
-      {
         "selfId": 12862,
         "name": "Ron",
         "coords": [
@@ -394,18 +514,18 @@
         "bias": 0
       },
       {
-        "selfId": 7767,
-        "name": "Auctioneer",
+        "selfId": 8447,
+        "name": "Rosconne",
         "coords": [
           {
-            "locX": 18853,
-            "locY": 145939,
-            "locZ": -3072,
-            "head": 49152
+            "locX": 81776,
+            "locY": 145200,
+            "locZ": -3512,
+            "head": 32000
           }
         ],
         "total": 1,
-        "respawn": 5,
+        "respawn": 60,
         "bias": 0
       },
       {

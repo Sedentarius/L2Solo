@@ -46,6 +46,12 @@ function fixture(result = false) {
 const ai = { say() {}, getStatus: s => s.botStatus };
 const tick = f => Hunting.tick(f.session, f.bot, {}, ai);
 try {
+    const teleporting = fixture();
+    teleporting.session.spotRelocation.method = 'clan_hall';
+    teleporting.session.spotRelocation.arrivalPending = true;
+    tick(teleporting);
+    assert.equal(teleporting.bot.moves, 0, 'wait for the clan hall teleport instead of walking across the map');
+    assert(teleporting.session.spotRelocation.arrivalPending);
     const failed = fixture();
     tick(failed);
     assert.strictEqual(failed.session.spotRelocation, undefined, 'empty route must release travel on the first failure');

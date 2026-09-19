@@ -390,6 +390,7 @@ function issueWalkRelocation(session, bot, relocation) {
 function tickSpotRelocation(session, bot) {
     const relocation = session.spotRelocation;
     if (!relocation) return false;
+    if (relocation.arrivalPending) return true;
     if (expireTimedOutSpotRelocation(session, bot)) return !!session.spotRelocation;
     if (relocation.method === 'town_gatekeeper') return BotSpotTravel.tick(session, bot);
     if (relocation.method === 'soe_gatekeeper') return true;

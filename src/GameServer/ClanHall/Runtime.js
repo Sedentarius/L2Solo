@@ -20,12 +20,19 @@ function refresh(rows) {
         response = invoke('GameServer/Network/Response');
     for (const h of halls) {
         if (before.get(h.id) === h.ownerId) continue;
+        require('./Doors').change(h.id, false);
         for (const session of World.user?.sessions || []) {
             const actor = session.actor,
                 id = actor?.fetchClanId?.();
             if (id && (id === h.ownerId || id === before.get(h.id))) {
                 const clan = invoke('GameServer/Clan/ClanService').findById(id);
-                if (clan) session.dataSendToMe(response.pledgeShowInfoUpdate(clan));
+                if (clan) {
+                    session.dataSendToMe(response.pledgeShowInfoUpdate(clan));
+                    // Lisvus Auction.removeBids / ClanHall.RentTask: notify online clan members.
+                    session.dataSendToMe(id === h.ownerId
+                        ? response.systemMessage(776, clan.name)
+                        : response.systemMessage(1052));
+                }
             }
             if (before.get(h.id) > 0 && Policy.inside(h, actor || {}) && id !== h.ownerId) {
                 const coords = invoke('GameServer/World/TownRespawn').getRespawnCoords(
@@ -100,6 +107,7 @@ module.exports = {
     async start() {
         this.stop();
         applyRows(await invoke('Database').initClanHalls());
+        require('./Doors').start(invoke('GameServer/World/World'));
         timer = setInterval(
             () => tick().catch((e) => utils.infoWarn('ClanHall', 'finance tick: %s', e.message)),
             10000

@@ -114,8 +114,9 @@ function tick(session, actor, timestamp = Date.now()) {
     if (skill) {
         if (timestamp < Number(session.clanHallVisit.nextCastAt || 0)) return true;
         const result = Services.cast(session, actor, npc, skill.fetchSelfId(), timestamp);
-        session.clanHallVisit.nextCastAt = timestamp + (result.ok ? 1500 : 5000);
-        if (!result.ok && result.code !== 'manager_needs_mp') finish(session, actor, timestamp + RETRY_MS);
+        session.clanHallVisit.nextCastAt = result.retryAt || timestamp + 5000;
+        if (!result.ok && !['manager_needs_mp', 'manager_busy'].includes(result.code))
+            finish(session, actor, timestamp + RETRY_MS);
         return true;
     }
     if (!grouped && Runtime.Policy.inside(hall, actor) && Services.recovery(actor, hall)) {
@@ -131,6 +132,7 @@ function tick(session, actor, timestamp = Date.now()) {
         session.plan = 'hunting';
         session.currentSpot = null;
         session.pendingFarmDepartureAnnouncement = true;
+        return require('./Departure').hot(session, actor, hall, timestamp);
     }
     return false;
 }

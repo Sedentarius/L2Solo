@@ -253,6 +253,25 @@ async function main() {
         Database.init();
         await Database.initClanHalls(start + 3 * Policy.WEEK + 2);
         assert.deepEqual((await Database.fetchClanHallFinance(3)).goal, before, 'restart keeps the chosen bid');
+        const scheduledStart = start + 3 * Policy.WEEK + 10000;
+        await exec('INSERT INTO clan_hall_startup_schedule(id,delayMs,requestedAt) VALUES (1,300000,?)', [start]);
+        const bidsBeforeSchedule = await exec('SELECT * FROM clan_hall_bids ORDER BY clanId');
+        const ownedBeforeSchedule = (await Database.fetchClanHallAuctions()).filter(h => h.ownerId);
+        await Database.close();
+        Database.init();
+        const scheduled = await Database.initClanHalls(scheduledStart);
+        assert(scheduled.filter(h => !h.ownerId).every(h => h.auctionEndsAt === scheduledStart + 300000),
+            'one-time test schedule starts five minutes after startup, not after the request');
+        assert.deepEqual(await exec('SELECT * FROM clan_hall_bids ORDER BY clanId'), bidsBeforeSchedule);
+        assert.equal((await exec('SELECT * FROM clan_hall_startup_schedule')).length, 0);
+        assert.deepEqual((await Database.fetchClanHallAuctions()).filter(h => h.ownerId), ownedBeforeSchedule,
+            'scheduling an auction leaves existing ownership and payments unchanged');
+        const restarted = await Database.initClanHalls(scheduledStart + 60000);
+        assert(restarted.filter(h => !h.ownerId).every(h => h.auctionEndsAt === scheduledStart + 300000),
+            'restarting must not restart the five-minute countdown');
+        const settledDaily = await Database.tickClanHalls(scheduledStart + 300000);
+        assert(settledDaily.filter(h => !h.ownerId).every(h => h.auctionEndsAt === scheduledStart + 300000 + Policy.DAY),
+            'ordinary 24-hour rounds resume after the one-time short auction');
         console.log('Clan hall auction, rent, ownership, permissions, contribution and restart checks passed');
     } finally {
         Runtime.stop();

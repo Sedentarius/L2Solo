@@ -28,11 +28,16 @@ const messages = {
         'There is not enough unreserved clan warehouse Adena after protected development and upkeep funds.',
     no_bid: 'Your clan has no active bid.',
     invalid_function: 'This service level is unavailable.',
-    manager_needs_mp: 'The manager needs time to recover MP.'
+    manager_needs_mp: 'The manager needs time to recover MP.',
+    manager_busy: 'The manager is helping another member. Please try again in a moment.'
 };
 const link = (command, label) => `<a action="bypass -h clan-hall ${command}">${esc(label)}</a><br>`;
+function doorLinks(actor, hall) {
+    return require('./Doors').canManage(actor, hall)
+        ? '<br>' + link('doors open', 'Open doors') + link('doors close', 'Close doors') : '';
+}
 function hallForNpc(id) {
-    return Policy.catalog.halls.find((h) => h.managerIds.includes(Number(id)));
+    return Policy.catalog.halls.find((h) => h.managerIds.includes(Number(id)) || h.doormanIds?.includes(Number(id)));
 }
 function handles(id) {
     return Policy.catalog.auctioneerIds.includes(Number(id)) || !!hallForNpc(id);
@@ -67,6 +72,22 @@ async function render(session, parts = ['clan-hall'], notice = '') {
         actor = session.actor,
         clanId = Number(actor.fetchClanId?.()) || 0;
     const hall = hallForNpc(npc.fetchSelfId());
+    if (hall?.doormanIds?.includes(Number(npc.fetchSelfId()))) {
+        const residence = Runtime.all().find(h => h.id === hall.id);
+        const ownerId = Number(residence?.ownerId || 0);
+        const owner = ownerId ? invoke('GameServer/Clan/ClanService').findById(ownerId) : null;
+        let body = `${esc(npc.fetchName?.() || 'Clan Hall Gatekeeper')}<br>${esc(hall.town)}: ${esc(hall.name)}<br>${esc(notice)}<br>`;
+        if (!ownerId) body += 'This clan hall has no owner. It is available through the auctioneer.';
+        else if (ownerId === clanId)
+            body += 'Welcome! This clan hall belongs to your clan.<br>For support magic and hall services, speak to the Clan Hall Manager inside.';
+        else body += `This clan hall belongs to ${esc(owner?.name || 'another clan')}. Only members of the owning clan may use it.`;
+        body += doorLinks(actor, residence);
+        const ownHall = Runtime.owned(clanId);
+        if (ownHall && ownHall.id !== hall.id)
+            body += `<br><br>Your clan hall: ${esc(ownHall.town)} — ${esc(ownHall.name)}.<br>Use a Scroll of Escape: Clan Hall to return there.`;
+        send(session, body);
+        return;
+    }
     if (!hall) {
         const lots = await db.fetchClanHallAuctions(clanId);
         const selected = parts[1] === 'view' ? lots.find((h) => h.id === Number(parts[2])) : null;
@@ -104,6 +125,7 @@ async function render(session, parts = ['clan-hall'], notice = '') {
         body += link('', 'Back');
     } else {
         body += link('support', 'Support magic');
+        body += doorLinks(actor, owned);
         body += link('leave', 'Teleport to town');
         for (const [kind, config] of Object.entries(Policy.functions)) {
             if (parts[1] !== 'manage' || parts[2] !== kind) {
@@ -121,6 +143,18 @@ async function render(session, parts = ['clan-hall'], notice = '') {
 async function handle(session, parts) {
     const npc = await validNpc(session);
     if (!npc) return;
+    if (parts[1] === 'doors' && ['open', 'close'].includes(parts[2])) {
+        const result = require('./Doors').setOpen(session, npc, hallForNpc(npc.fetchSelfId()), parts[2] === 'open');
+        await render(session, ['clan-hall'], result.ok
+            ? `The clan hall doors are ${parts[2] === 'open' ? 'open' : 'closed'}.`
+            : messages[result.code] || 'The action is unavailable.');
+        return;
+    }
+    // A doorman must not accept forged auction or manager service commands.
+    if (hallForNpc(npc.fetchSelfId())?.doormanIds?.includes(Number(npc.fetchSelfId()))) {
+        await render(session);
+        return;
+    }
     const db = invoke('Database'),
         actor = session.actor,
         clanId = Number(actor.fetchClanId?.()) || 0,
@@ -144,7 +178,13 @@ async function handle(session, parts) {
     if (parts[1] === 'buff' && !isAuctioneer) {
         result = require('./Services').cast(session, actor, npc, Number(parts[2]));
     }
-    if (result) await Runtime.refresh();
+    if (result) {
+        await Runtime.refresh();
+        if (result.ok && isAuctioneer && ['bid', 'cancel'].includes(parts[1])) {
+            // C4 Auction.setBid and L2AuctioneerInstance use native system messages.
+            session.dataSendToMe(invoke('GameServer/Network/Response').systemMessage(parts[1] === 'bid' ? 1006 : 679));
+        }
+    }
     await render(
         session,
         parts,
