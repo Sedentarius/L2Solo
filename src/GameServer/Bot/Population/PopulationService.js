@@ -739,6 +739,7 @@ function commitPartyMembership(party, members = [], event = null) {
         const committedParty = BackgroundPartyState.acceptCommit(preparedParty);
         const assigned = LifeState.acceptPartyAssignments(preparedMembers);
         assigned.forEach(() => Metrics.recordDbFlush());
+        invoke('GameServer/Bot/AI/BotClanChat').onClanTask?.(committedParty, assigned);
         return { party: committedParty, assigned, failed: [], eventCommitted: !!event };
     }).catch((error) => {
         if (error?.code !== 'BOT_PARTY_MEMBERSHIP_CONFLICT') {
@@ -3462,7 +3463,7 @@ const PopulationService = {
                 // or a station may be temporarily unavailable. Do not pin the
                 // bot at a station: re-enter hunting so the acquisition planner
                 // can select the missing material again.
-                const recoveredState = !completed
+                const recoveredState = !completed && craft.state?.activity !== 'traveling'
                     ? {
                         ...(craft.state || plannedState),
                         activity: 'hunting',

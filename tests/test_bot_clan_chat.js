@@ -78,6 +78,29 @@ async function main() {
         Database.upsertBotGoalStates = saved.batch;
 
         reset();
+        const Parties = invoke('GameServer/Bot/Population/BackgroundPartyState');
+        const originalFindParty = Parties.find;
+        const objective = { clanId: 11, clanGoalKey: 'craft-order', itemId: 2, sourceKind: 'spoil' };
+        const taskParty = { partyId: 'clan-hunt', status: 'active', leaderId: 101, memberIds: [101, 102, 103], stats: { objective } };
+        const taskMembers = [source, { characterId: 102, name: 'Belen' }, { characterId: 103, name: 'Cora' }];
+        try {
+            Parties.find = () => null;
+            assert(!Chat.onClanTask(taskParty, taskMembers, now), 'an uncommitted party stays silent');
+            Parties.find = () => taskParty;
+            assert(Chat.onClanTask(taskParty, taskMembers, now));
+            assert.equal(delivered.length, 1);
+            assert.equal(delivered[0].kind, 4);
+            assert(delivered[0].text.includes('Belen') && delivered[0].text.includes('Cora') && delivered[0].text.includes('Iron Ore'));
+            assert.equal(leaked.length, 0);
+            assert(!Chat.onClanTask(taskParty, taskMembers, now + 1), 'repeated planning must not repeat the announcement');
+            reset();
+            Chat.onWithdrawal(source, { ok: true, code: 'warehouse_withdraw_applied', selfId: 2, amount: 1, ledgerId: 989, clanId: 11 }, now);
+            assert(Chat.onClanTask(taskParty, taskMembers, now + 1));
+            taskParty.status = 'dissolved';
+            Chat.flush(now + 20000);
+            assert.equal(delivered.length, 1, 'a party dissolved before delivery must not announce a hunt');
+        } finally { Parties.find = originalFindParty; }
+        reset();
         const receipt = { ok: true, received: { id: 123, selfId: 1, enchant: 3 } };
         assert(!Chat.onWarehouse(source, { ok: false, received: receipt.received }, 11, now));
         assert(Chat.onWarehouse(source, receipt, 11, now));

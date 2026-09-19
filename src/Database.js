@@ -1480,7 +1480,7 @@ function syncAdenaSnapshotUnsafe(characterId, amount, event = null) {
     return true;
 }
 
-function updateColdInventorySnapshotUnsafe(characterId, selfId, event = null, expectedRevision = null) {
+function updateColdInventorySnapshotUnsafe(characterId, selfId, event = null, expectedRevision = null, allowParty = false) {
     const id = Number(characterId);
     const itemId = Number(selfId);
     const row = one(`SELECT phase, simulationOwner, simulationRevision, partyId,
@@ -1488,8 +1488,8 @@ function updateColdInventorySnapshotUnsafe(characterId, selfId, event = null, ex
         FROM bot_life_state WHERE characterId = ?`, [id]);
     if (!row) return { ok: false, code: 'missing_state' };
     if (String(row.phase || '') !== 'cold'
-        || String(row.simulationOwner || LEGACY_SIMULATION_OWNER) !== LEGACY_SIMULATION_OWNER
-        || String(row.partyId || '') !== '') {
+        || (!allowParty && String(row.simulationOwner || LEGACY_SIMULATION_OWNER) !== LEGACY_SIMULATION_OWNER)
+        || (!allowParty && String(row.partyId || '') !== '')) {
         return { ok: false, code: 'stale_snapshot' };
     }
     const currentRevision = Number(row.simulationRevision || 0);
@@ -1509,18 +1509,20 @@ function updateColdInventorySnapshotUnsafe(characterId, selfId, event = null, ex
     const stats = jsonObject(row.statsJson);
     if (event) stats.lastClanWarehouseTransfer = { ...event };
     const nextRevision = currentRevision + 1;
+    if (allowParty) stats.clanInventoryRevision = nextRevision;
     const updated = write(`UPDATE bot_life_state
         SET inventorySummary = ?, statsJson = ?, simulationRevision = ?, updatedAt = ?
         WHERE characterId = ? AND phase = 'cold'
           AND simulationOwner = ? AND simulationRevision = ?
-          AND (partyId IS NULL OR partyId = '')`, [
+          AND (? = 1 OR partyId IS NULL OR partyId = '')`, [
         JSON.stringify(inventory),
         JSON.stringify(stats),
         nextRevision,
         now(),
         id,
-        LEGACY_SIMULATION_OWNER,
-        currentRevision
+        String(row.simulationOwner || LEGACY_SIMULATION_OWNER),
+        currentRevision,
+        allowParty ? 1 : 0
     ]);
     if (Number(updated.affectedRows || 0) !== 1) {
         return { ok: false, code: 'stale_snapshot', simulationRevision: currentRevision };
@@ -4393,8 +4395,41 @@ const Database = {
         }, 'item:cold-safe-enchant'));
     },
 
-    craftForCustomer(crafterId, customerId, { materials, product, crafterMp, price, adena }) {
+    craftForCustomer(crafterId, customerId, { materials, product, crafterMp, price, adena, clanCraft = null }) {
         return withCharacterFlushes([crafterId, customerId], () => inTransaction(() => {
+            let clanCrafter = null;
+            if (clanCraft) {
+                const recipes = invoke('GameServer/Items/C4RecipeItems');
+                const recipe = recipes.resolveByRecipeId(clanCraft.recipeId);
+                const craftRules = invoke('GameServer/Bot/Economy/CraftShopService');
+                const rows = all(`SELECT life.*, members.clanId, members.classId, members.level AS characterLevel
+                    FROM bot_life_state life JOIN characters members ON members.id = life.characterId
+                    WHERE life.characterId IN (?, ?)`, [crafterId, customerId]);
+                clanCrafter = rows.find(row => Number(row.characterId) === Number(crafterId));
+                const customer = rows.find(row => Number(row.characterId) === Number(customerId));
+                for (const [row, revision] of [[clanCrafter, clanCraft.crafterRevision], [customer, clanCraft.customerRevision]]) {
+                    if (!row || Number(row.clanId) !== Number(clanCraft.clanId) || row.phase !== 'cold'
+                        || row.simulationOwner !== LEGACY_SIMULATION_OWNER || row.partyId
+                        || Number(row.simulationRevision) !== Number(revision)) throw new Error('clan craft ownership changed');
+                }
+                if (!recipe || Number(clanCrafter.hp) <= 0 || Number(customer.hp) <= 0
+                    || ['dead', 'respawning'].includes(clanCrafter.activity)
+                    || craftRules.craftLevelFor({ classId: clanCrafter.classId, level: clanCrafter.characterLevel }) < recipe.level
+                    || Number(clanCrafter.mp) < Number(clanCraft.mpCost)
+                    || Math.hypot(Number(customer.locX) - Number(clanCrafter.locX), Number(customer.locY) - Number(clanCrafter.locY)) > 1200) {
+                    throw new Error('clan crafter unavailable');
+                }
+                const known = one('SELECT recipeId FROM character_recipes WHERE characterId = ? AND recipeId = ?', [crafterId, recipe.recipeId]);
+                if (!known) {
+                    if (!clanCraft.learning) throw new Error('clan recipe not learned');
+                    const recipeAmount = recipe.materials.filter(item => Number(item.selfId) === Number(recipe.recipeItemId))
+                        .reduce((sum, item) => sum + Number(item.amount), 0);
+                    if (materials.filter(item => Number(item.selfId) === Number(recipe.recipeItemId))
+                        .reduce((sum, item) => sum + Number(item.amount), 0) < recipeAmount + 1) throw new Error('clan learning scroll missing');
+                    write(UPSERT_RECIPE, [crafterId, recipe.recipeId, recipe.type]);
+                } else if (clanCraft.learning) throw new Error('clan recipe knowledge changed');
+                crafterMp = Number(clanCrafter.mp) - Number(clanCraft.mpCost);
+            }
             const sources = [];
             for (const material of [...materials].sort((left, right) => Number(left.id) - Number(right.id))) {
                 const source = one('SELECT id, selfId, amount FROM items WHERE id = ? AND characterId = ?', [material.id, customerId]);
@@ -4424,7 +4459,24 @@ const Database = {
                 }
             }
             write('UPDATE characters SET mp = ? WHERE id = ?', [crafterMp, crafterId]);
-            return { sources, product: product ? { id: productId, amount: productAmount } : null, customerAdena: fee > 0 ? { id: Number(customerAdena.id), amount: Number(customerAdena.amount) - fee } : null, crafterAdena: fee > 0 ? { id: Number(crafterAdena.id), amount: nextCrafterAdena } : null };
+            let clanStates = {};
+            if (clanCraft) {
+                const lifeState = invoke('GameServer/Bot/Population/BotLifeState');
+                for (const id of new Set([Number(crafterId), Number(customerId)])) {
+                    const inventory = id === Number(customerId)
+                        ? lifeState.inventorySummaryFromItems(all('SELECT * FROM items WHERE characterId = ? AND amount > 0', [id]))
+                        : JSON.parse(clanCrafter.inventorySummary || '{}');
+                    write(`UPDATE bot_life_state SET inventorySummary = ?, simulationRevision = simulationRevision + 1,
+                        statsJson = json_set(statsJson, '$.clanInventoryRevision', simulationRevision + 1),
+                        mp = CASE WHEN characterId = ? THEN ? ELSE mp END, updatedAt = ? WHERE characterId = ?`,
+                    [JSON.stringify(inventory), crafterId, crafterMp, now(), id]);
+                }
+                clanStates = {
+                    crafterState: normalizeRow(one('SELECT * FROM bot_life_state WHERE characterId = ?', [crafterId])),
+                    customerState: normalizeRow(one('SELECT * FROM bot_life_state WHERE characterId = ?', [customerId]))
+                };
+            }
+            return { ...clanStates, sources, product: product ? { id: productId, amount: productAmount } : null, customerAdena: fee > 0 ? { id: Number(customerAdena.id), amount: Number(customerAdena.amount) - fee } : null, crafterAdena: fee > 0 ? { id: Number(crafterAdena.id), amount: nextCrafterAdena } : null };
         }, 'craft:customer'));
     },
 
@@ -5764,6 +5816,19 @@ const Database = {
             };
         }, 'clan-party:complete');
     },
+    materializeClanSupplies(characterId, expectedRevision, itemIds = []) {
+        return inTransaction(() => {
+            const row = one('SELECT * FROM bot_life_state WHERE characterId = ?', [characterId]);
+            if (!row || row.phase !== 'cold' || Number(row.simulationRevision) !== Number(expectedRevision)) return false;
+            if (row.simulationOwner === COLD_SIMULATION_OWNER) {
+                const inventory = jsonObject(row.inventorySummary);
+                const supplies = Object.fromEntries(itemIds.slice(0, 128).filter(id => inventory[id]).map(id => [id, inventory[id]]));
+                syncInventorySummaryUnsafe(characterId, supplies);
+            }
+            return true;
+        }, 'clan-supplies:materialize');
+    },
+
     transferInventoryToClanWarehouse({
         clanId,
         characterId,
@@ -5771,7 +5836,8 @@ const Database = {
         amount,
         resolveKey,
         expectedWarehouseRevision = null,
-        expectedSimulationRevision = null
+        expectedSimulationRevision = null,
+        allowParty = false
     } = {}) {
         const clan = Number(clanId);
         const character = Number(characterId);
@@ -5787,14 +5853,14 @@ const Database = {
             const simulation = one('SELECT clanId, stateJson FROM clan_simulation_clans WHERE clanId = ?', [clan]);
             const clanRow = one('SELECT id, level FROM clans WHERE id = ?', [clan]);
             const member = one('SELECT id, clanId FROM characters WHERE id = ?', [character]);
-            const life = one(`SELECT phase, simulationOwner, simulationRevision, partyId
+            const life = one(`SELECT phase, simulationOwner, simulationRevision, partyId, inventorySummary
                 FROM bot_life_state WHERE characterId = ?`, [character]);
             if (!simulation || !clanRow || !member || Number(member.clanId) !== clan) {
                 return { ok: false, code: 'warehouse_transfer_failed' };
             }
             if (!life || String(life.phase || '') !== 'cold'
-                || String(life.simulationOwner || LEGACY_SIMULATION_OWNER) !== LEGACY_SIMULATION_OWNER
-                || String(life.partyId || '') !== '') {
+                || (!allowParty && String(life.simulationOwner || LEGACY_SIMULATION_OWNER) !== LEGACY_SIMULATION_OWNER)
+                || (!allowParty && String(life.partyId || '') !== '')) {
                 return { ok: false, code: 'stale_snapshot' };
             }
             if (expectedSimulationRevision !== null
@@ -5832,10 +5898,10 @@ const Database = {
             const kind = String(item.kind || '');
             const recipe = kind.startsWith('Other.Recipe');
             const recipeTarget = recipe
-                ? one(`SELECT id, amount, reservedAmount FROM clan_warehouse_items
-                    WHERE clanId = ? AND selfId = ? AND amount > 0 LIMIT 1`, [clan, selfId])
+                ? one(`SELECT SUM(amount) AS amount FROM clan_warehouse_items
+                    WHERE clanId = ? AND selfId = ? AND amount > 0`, [clan, selfId])
                 : null;
-            if (recipeTarget) {
+            if (recipeTarget && Number(recipeTarget.amount || 0) + requested > Math.max(1, Number(item.recipeLimit || 1))) {
                 return { ok: false, code: 'warehouse_duplicate_recipe' };
             }
 
@@ -5879,8 +5945,8 @@ const Database = {
                 amount: -requested,
                 warehouseId,
                 at: timestamp
-            }, expectedSimulationRevision === null ? Number(life.simulationRevision || 0) : Number(expectedSimulationRevision));
-            if (!lifeUpdate.ok) return lifeUpdate;
+            }, expectedSimulationRevision === null ? Number(life.simulationRevision || 0) : Number(expectedSimulationRevision), allowParty);
+            if (!lifeUpdate.ok) throw new Error(`clan warehouse deposit rejected: ${lifeUpdate.code}`);
 
             const nextWarehouseRevision = currentWarehouseRevision + 1;
             const state = simulationState(simulation.stateJson, clan, previousState.leaderId, previousState.memberIds || [], timestamp);
@@ -5905,6 +5971,7 @@ const Database = {
                 warehouseAmount,
                 warehouseRevision: nextWarehouseRevision,
                 simulationRevision: lifeUpdate.simulationRevision,
+                state: normalizeRow(one('SELECT * FROM bot_life_state WHERE characterId = ?', [character])),
                 ledgerId: Number(ledger.insertId)
             };
         }, 'clan-warehouse:deposit'));
@@ -5998,7 +6065,8 @@ const Database = {
         amount,
         goalKey,
         expectedWarehouseRevision = null,
-        expectedSimulationRevision = null
+        expectedSimulationRevision = null,
+        allowParty = false
     } = {}) {
         const clan = Number(clanId);
         const beneficiary = Number(characterId);
@@ -6019,7 +6087,7 @@ const Database = {
             }
             if (String(life.phase || '') !== 'cold'
                 || String(life.simulationOwner || LEGACY_SIMULATION_OWNER) !== LEGACY_SIMULATION_OWNER
-                || String(life.partyId || '') !== '') {
+                || (!allowParty && String(life.partyId || '') !== '')) {
                 return { ok: false, code: 'stale_snapshot' };
             }
             if (expectedSimulationRevision !== null
@@ -6123,7 +6191,7 @@ const Database = {
                 operation: 'withdraw'
             }, expectedSimulationRevision === null
                 ? Number(life.simulationRevision || 0)
-                : Number(expectedSimulationRevision));
+                : Number(expectedSimulationRevision), allowParty);
             if (!lifeUpdate.ok) throw new Error(`clan warehouse handoff rejected: ${lifeUpdate.code}`);
 
             const nextWarehouseRevision = currentWarehouseRevision + 1;
@@ -6163,6 +6231,7 @@ const Database = {
                 warehouseRevision: nextWarehouseRevision,
                 simulationRevision: lifeUpdate.simulationRevision,
                 reservationId: Number(reservation?.id || reservationResult.insertId || 0),
+                state: normalizeRow(one('SELECT * FROM bot_life_state WHERE characterId = ?', [beneficiary])),
                 ledgerId: Number(ledger.insertId)
             };
         }, 'clan-warehouse:withdraw'));

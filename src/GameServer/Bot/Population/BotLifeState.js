@@ -701,7 +701,9 @@ function save(row) {
             inventorySummary = excluded.inventorySummary,
             statsJson = excluded.statsJson,
             updatedAt = excluded.updatedAt
-        WHERE ${TABLE}.simulationOwner = 'legacy_main'`,
+        WHERE ${TABLE}.simulationOwner = 'legacy_main'
+          AND COALESCE(json_extract(${TABLE}.statsJson, '$.clanInventoryRevision'), 0)
+              <= COALESCE(json_extract(excluded.statsJson, '$.clanInventoryRevision'), 0)`,
         [
             row.characterId,
             row.accountName,
@@ -3217,6 +3219,33 @@ const BotLifeState = {
         });
         pendingWrites.set(id, tracked);
         return tracked;
+    },
+
+    acceptClanCraftState(row) {
+        const snapshot = normalize(row);
+        cache.set(snapshot.characterId, snapshot);
+        notifyColdSnapshot(snapshot, 'clan_craft', { critical: true });
+        return snapshot;
+    },
+
+    applyClanMaterialTransfer(request, withdraw = false) {
+        const id = Number(request.characterId);
+        const previous = pendingWrites.get(id) || Promise.resolve();
+        const next = previous.then(() => withdraw
+            ? Database.transferClanWarehouseToMember({ ...request, allowParty: true })
+            : Database.transferInventoryToClanWarehouse({ ...request, allowParty: true }))
+            .then(result => {
+                if (!result?.ok || !result.state) return result;
+                const snapshot = normalize(result.state);
+                cache.set(id, snapshot);
+                notifyColdSnapshot(snapshot, 'clan_material_transfer', { critical: true });
+                return { ...result, state: snapshot };
+            });
+        const tracked = next.catch(() => {}).finally(() => {
+            if (pendingWrites.get(id) === tracked) pendingWrites.delete(id);
+        });
+        pendingWrites.set(id, tracked);
+        return next;
     },
 
     applyWarehouseGearCleanup(characterId, selections = [], options = {}) {

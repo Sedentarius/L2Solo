@@ -1,3 +1,4 @@
+const ClanCrafting = require('../../Clan/ClanCraftingPolicy');
 const ItemTemplateIndex = require('../../Item/ItemTemplateIndex');
 const DataCache = invoke('GameServer/DataCache');
 const C4RecipeItems = invoke('GameServer/Items/C4RecipeItems');
@@ -529,10 +530,11 @@ function preferredTarget(state = {}, options = {}) {
     const publishedRecipeIds = new Set(CraftShopService.CraftStations.flatMap((station) => (
         CraftShopService.stationRecipes(station, availableToStations).map((recipe) => Number(recipe.recipeId))
     )));
-    const craftRecipes = Object.values(C4RecipeItems.loadRecipeItems() || {}).filter((recipe) => (
-        recipe.type === 'dwarven' && publishedRecipeIds.has(Number(recipe.recipeId))
+    const craftRecipes = (options.craftRecipes || Object.values(C4RecipeItems.loadRecipeItems() || {})).filter((recipe) => (
+        recipe.type === 'dwarven' && (options.craftRecipes || publishedRecipeIds.has(Number(recipe.recipeId)))
     ));
-    const recipes = [...craftRecipes, ...C4DualSwordCombinations.loadRecipes()];
+    const recipes = ClanCrafting.clanIdFor(state) && !options.clanCrafting
+        ? [] : [...craftRecipes, ...C4DualSwordCombinations.loadRecipes()];
     const recipeRank = options.recipeId
         ? String((DataCache.items || []).find((item) => Number(item.selfId) === Number(recipes.find((recipe) => Number(recipe.recipeId) === Number(options.recipeId))?.productId))?.etc?.rank || '')
         : null;
@@ -1133,10 +1135,10 @@ function replanContextFor(state = {}, previousPlan = null, timestamp = Date.now(
         ? recoveryTargets.find((entry) => Number(entry.targetId) === Number(previousPlan.target?.selfId || 0))
         : null;
     return {
-        planCurrent: Boolean(previousPlan)
+        planCurrent: !ClanCrafting.isPersonalCraft(state, previousPlan) && Boolean(previousPlan)
             && sameGrade
             && Number(previousPlan.plannedForLevel || 0) === currentLevel,
-        routeCurrent: Boolean(previousPlan)
+        routeCurrent: !ClanCrafting.isPersonalCraft(state, previousPlan) && Boolean(previousPlan)
             && sameGrade
             && sourceAllowed
             && modelCurrent
@@ -1151,6 +1153,7 @@ function replanContextFor(state = {}, previousPlan = null, timestamp = Date.now(
 }
 
 function finalizePlan(state = {}, previousPlan = null, rawPlan = {}, context = {}, timestamp = Date.now()) {
+    if (ClanCrafting.isPersonalCraft(state, rawPlan)) return { status: 'deferred', strategy: 'none', reason: 'clan_managed_crafting', materials: [], next: null };
     if (clanGoalPlanLocked(state, previousPlan) && context?.allowClanGoalReplan !== true) {
         return previousPlan;
     }
@@ -1353,6 +1356,7 @@ function plannedMaterialAcquired(state, plan) {
 }
 
 function bestSourceForPlan(state = {}, plan = {}, spots = [], options = {}) {
+    if (ClanCrafting.isPersonalCraft(state, plan) && !options.clanCrafting) return null;
     if (plan?.status !== 'active' || plannedMaterialAcquired(state, plan)) return null;
     const itemId = itemIdForPlan(plan);
     if (!itemId) return null;
@@ -1422,6 +1426,7 @@ function retargetPlanSource(state = {}, plan = {}, source = null) {
 }
 
 function replacementPlanFor(state = {}, previousPlan = {}, spots = [], options = {}) {
+    if (ClanCrafting.isPersonalCraft(state, previousPlan) && !options.clanCrafting) return planFor(state, { ...options, spots });
     const targetId = Number(previousPlan?.target?.selfId || 0);
     const excluded = new Set((options.excludedTargetIds || []).map(Number).filter(Boolean));
     if (!excluded.has(targetId)) {
@@ -1559,7 +1564,7 @@ function farmSourceForMaterial(itemId, state, spots, allowedRecipeIds, requiredA
     const directRoute = direct ? { ...direct, itemId: Number(itemId), requiredAmount,
         requiredTotal: requiredAmount + Number(state.inventory?.[itemId]?.amount || 0),
         effort: requiredAmount / Math.max(direct.expectedYield || 0, 0.000001) } : null;
-    const component = C4RecipeItems.resolveByProductId(itemId);
+    const component = options.recipeCatalog?.get(Number(itemId)) || C4RecipeItems.resolveByProductId(itemId);
     if (!component || !allowedRecipeIds.has(Number(component.recipeId))) return directRoute;
     const nextVisited = new Set(visited).add(Number(itemId));
     const crafts = Math.max(1, Math.ceil(requiredAmount / Math.max(1, Number(component.productCount || 1))));
@@ -1579,17 +1584,17 @@ function farmSourceForMaterial(itemId, state, spots, allowedRecipeIds, requiredA
     return { ...(next || { itemId: Number(itemId), requiredAmount }), effort };
 }
 
-function hasReadyCraftComponent(recipe, state, allowedRecipeIds, visited = new Set()) {
+function hasReadyCraftComponent(recipe, state, allowedRecipeIds, visited = new Set(), options = {}) {
     if (!recipe || visited.has(Number(recipe.recipeId))) return false;
     const nextVisited = new Set(visited).add(Number(recipe.recipeId));
     for (const material of recipe.materials || []) {
         const owned = Number(inventoryMap(state.inventory).get(Number(material.selfId)) || 0);
         if (owned >= Number(material.amount || 0)) continue;
-        const component = C4RecipeItems.resolveByProductId(material.selfId);
+        const component = options.recipeCatalog?.get(Number(material.selfId)) || C4RecipeItems.resolveByProductId(material.selfId);
         if (!component || !allowedRecipeIds.has(Number(component.recipeId))) continue;
         if ((component.materials || []).every((ingredient) => (
             Number(inventoryMap(state.inventory).get(Number(ingredient.selfId)) || 0) >= Number(ingredient.amount || 0)
-        )) || hasReadyCraftComponent(component, state, allowedRecipeIds, nextVisited)) return true;
+        )) || hasReadyCraftComponent(component, state, allowedRecipeIds, nextVisited, options)) return true;
     }
     return false;
 }
@@ -1659,6 +1664,7 @@ function rawPlanFor(state = {}, options = {}) {
     const planningOptions = {
         ...options,
         allowedRecipeIds: options.allowedRecipeIds || stationRecipeIds(),
+        recipeCatalog: options.craftRecipes ? new Map(options.craftRecipes.map(recipe => [Number(recipe.productId), recipe])) : null,
         sourceCache: options.sourceCache || new Map()
     };
     const preparedTarget = !options.recipeId && rankIndex(gradeForLevel(state.level)) > rankIndex('d')
@@ -1747,7 +1753,7 @@ function rawPlanFor(state = {}, options = {}) {
     const readyToCraft = strategy === 'craft' && missingMaterialPlans.length === 0;
     const componentReady = strategy === 'craft'
         && !readyToCraft
-        && hasReadyCraftComponent(target.recipe, state, allowedRecipeIds);
+        && hasReadyCraftComponent(target.recipe, state, allowedRecipeIds, new Set(), planningOptions);
     // A ready final recipe or component is a station action, not a request to
     // fight at the next (possibly unsafe) material source.  Let it leave the
     // party gate and finish the prepared manufacture first.
@@ -1781,6 +1787,9 @@ function rawPlanFor(state = {}, options = {}) {
 }
 
 function planFor(state = {}, options = {}) {
+    if (ClanCrafting.clanIdFor(state) && !options.clanCrafting && options.recipeId) {
+        options = { ...options, recipeId: null };
+    }
     const excluded = new Set((options.excludedTargetIds || []).map(Number).filter(Boolean));
     const maxExpectedKills = Number(options.maxExpectedKills);
     let plan;

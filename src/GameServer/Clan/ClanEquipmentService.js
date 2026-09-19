@@ -1,3 +1,6 @@
+const Crafting = require('./ClanCraftingPolicy');
+const CraftShops = invoke('GameServer/Bot/Economy/CraftShopService');
+const Recipes = invoke('GameServer/Items/C4RecipeItems');
 const Database = invoke('Database');
 const GearAcquisitionPlanner = invoke('GameServer/Bot/AI/GearAcquisitionPlanner');
 const LifeState = invoke('GameServer/Bot/Population/BotLifeState');
@@ -11,6 +14,8 @@ const DataCache = invoke('GameServer/DataCache');
 const { planForMember } = require('./ClanEquipmentPlanner');
 const PlanningWorker = require('./ClanPlanningCoordinator');
 const MAX_CAPACITY_TARGET_RETRIES = 5;
+let craftingCatalog = null;
+let craftingCatalogItems = null;
 
 const metrics = {
     resolves: 0,
@@ -77,7 +82,7 @@ function planningFingerprint(clan) {
     return JSON.stringify(clan && {
         id: clan.id, level: clan.level, leaderId: clan.leaderId,
         updatedAt: clan.state?.updatedAt, warehouseRevision: clan.state?.warehouseRevision,
-        mode: clan.state?.mode, goal: clan.state?.goal,
+        mode: clan.state?.mode, goal: clan.state?.goal, productionGoal: clan.state?.productionGoal,
         rateProfile: GearAcquisitionPlanner.rateProfileSignature(),
         members: (clan.members || []).map((member) => ({
             id: memberId(member), level: member.level, classId: member.classId,
@@ -161,6 +166,7 @@ function planningMemberOrder(members = [], previousMemberId = 0, previousFulfill
 
 function equipmentRoster(clan, beneficiary, previousGoal = null, plan = null) {
     const beneficiaryId = memberId(beneficiary);
+    if (plan && (!plan.next?.spotId || ['ready_to_craft', 'component_ready'].includes(plan.status))) return [beneficiaryId];
     const memberIds = new Set((clan?.members || []).map(memberId).filter(Boolean));
     const previousBeneficiaryId = number(previousGoal?.target?.memberId);
     const retained = (previousGoal?.assignedMemberIds || []).map(number)
@@ -196,7 +202,8 @@ function equipmentRoster(clan, beneficiary, previousGoal = null, plan = null) {
 function clanPartyObjective(plan, goal, priority = 'preferred', clanId = 0) {
     // A craft plan with missing components still has a farming route in
     // `next`; a ready-to-craft plan has no route and therefore needs no party.
-    if (!['farm', 'craft'].includes(String(goal?.plan?.kind || '')) || !plan?.next?.spotId) return null;
+    if (['ready_to_craft', 'component_ready'].includes(plan?.status)
+        || !['farm', 'craft'].includes(String(goal?.plan?.kind || '')) || !plan?.next?.spotId) return null;
     const strategy = String(plan.strategy || 'direct_drop');
     const targetItemId = number(plan.next.itemId || plan.target?.selfId);
     const npcId = number(plan.next.npcId);
@@ -218,6 +225,8 @@ function clanPartyObjective(plan, goal, priority = 'preferred', clanId = 0) {
         npcId: npcId || null,
         itemId: targetItemId || null,
         targetId: number(plan.target?.selfId) || null,
+        beneficiaryId: number(goal.target?.memberId),
+        targetName: plan.target?.name || null,
         clanId: number(clanId) || null,
         clanGoalKey: goal.goalKey || null,
         partyPreference: 'clan_first',
@@ -269,6 +278,7 @@ async function releasePreviousBeneficiary(clan, previousGoal, nextGoal) {
     stats.equipmentPlan = { ...currentPlan };
     delete stats.equipmentPlan.clanGoal;
     if (String(stats.clanPartyObjective?.clanGoalKey || '') === previousGoalKey) delete stats.clanPartyObjective;
+    delete stats.clanMaterialDemand;
     if (String(stats.partyRequest?.clanGoalKey || '') === previousGoalKey) delete stats.partyRequest;
     const saved = await LifeState.upsertState({ ...current, stats }, 'clan_equipment_beneficiary_rotated');
     return { changed: !!saved || parties.length > 0, releasedMembers };
@@ -283,7 +293,7 @@ async function releaseConflictingRosterParties(assignedMemberIds, goal, expected
         if (!memberIds.some((id) => roster.has(id))) return false;
         const partyObjective = party?.stats?.objective || null;
         const partyGoalKey = String(partyObjective?.clanGoalKey || '');
-        const sameRoute = !expectedObjective || (
+        const sameRoute = !!expectedObjective && (
             String(party.spotId || '') === String(expectedObjective.spotId || '')
             && String(partyObjective?.objectiveKey || '') === String(expectedObjective.objectiveKey || '')
             && number(partyObjective?.npcId) === number(expectedObjective.npcId)
@@ -313,13 +323,13 @@ async function handoffWarehouseMaterials(current, plan, clan, goal) {
     let state = current;
     const results = [];
     for (const material of materials) {
-        const result = await Database.transferClanWarehouseToMember({
+        const result = await (LifeState.applyClanMaterialTransfer ? (request) => LifeState.applyClanMaterialTransfer(request, true) : Database.transferClanWarehouseToMember)({
             clanId: clan.id,
             characterId: current.characterId,
             selfId: material.selfId,
             amount: material.amount,
-            goalKey: `${goal.goalKey}:warehouse:${material.selfId}`,
-            expectedSimulationRevision: number(state.simulationRevision) || null
+            goalKey: `${goal.goalKey}:warehouse:${material.selfId}:${number(state.simulation?.revision ?? state.simulationRevision)}`,
+            expectedSimulationRevision: number(state.simulation?.revision ?? state.simulationRevision)
         });
         results.push(result);
         if (!result.ok) {
@@ -327,15 +337,16 @@ async function handoffWarehouseMaterials(current, plan, clan, goal) {
             continue;
         }
         invoke('GameServer/Bot/AI/BotClanChat').onWithdrawal(state, result);
+        if (result.state) { state = result.state; continue; }
         state = {
             ...state,
-            simulationRevision: number(result.simulationRevision, number(state.simulationRevision)),
+            simulationRevision: number(result.simulationRevision, number(state.simulation?.revision ?? state.simulationRevision)),
             inventory: { ...(state.inventory || {}) }
         };
         state = await LifeState.refreshInventory(state, { equip: true });
         state = {
             ...state,
-            simulationRevision: number(result.simulationRevision, number(state.simulationRevision))
+            simulationRevision: number(result.simulationRevision, number(state.simulation?.revision ?? state.simulationRevision))
         };
     }
     return { state, results };
@@ -357,6 +368,7 @@ async function assignPartyObjective(member, clan, goal, plan, priority = 'prefer
         if (!old || number(old.clanId) !== number(clan.id)) return { ok: true, changed: false, memberId: id };
         const stats = { ...(current.stats || {}) };
         delete stats.clanPartyObjective;
+        delete stats.clanMaterialDemand;
         if (stats.partyRequest?.clanGoalKey === old.clanGoalKey) delete stats.partyRequest;
         const saved = await LifeState.upsertState({ ...current, stats }, 'clan_equipment_party_clear');
         return { ok: !!saved, changed: !!saved, memberId: id };
@@ -370,6 +382,7 @@ async function assignPartyObjective(member, clan, goal, plan, priority = 'prefer
         stats: {
             ...(current.stats || {}),
             clanId: number(clan.id),
+            clanMaterialDemand: Object.fromEntries(Crafting.requirements(Recipes.resolveByRecipeId(plan?.recipeId), {}, null, 1, plan?.craftProviders, plan?.componentRecipes)),
             clanPartyObjective: nextObjective,
             partyRequest
         }
@@ -388,6 +401,8 @@ async function assignPlan(member, plan, clan, goal) {
 
     const handoff = await handoffWarehouseMaterials(current, plan, clan, goal);
     const currentState = handoff.state || current;
+    if (handoff.results.some(result => !result.ok)) return { ok: false, code: 'warehouse_handoff_deferred', handoff };
+    plan = { ...plan, clanMaterialDemand: Object.fromEntries(Crafting.requirements(Recipes.resolveByRecipeId(plan.recipeId), {}, null, 1, plan.craftProviders, plan.componentRecipes)) };
 
     const currentPlan = currentState.stats?.equipmentPlan;
     if (currentPlan?.clanGoal?.clanId
@@ -398,7 +413,10 @@ async function assignPlan(member, plan, clan, goal) {
     if (samePlanTarget(currentPlan, plan)
         && number(currentPlan.clanGoal?.clanId) === number(clan.id)
         && String(currentPlan.clanGoal?.goalKey || '') === String(goal.goalKey)
-        && samePlanRoute(currentPlan, plan)) {
+        && samePlanRoute(currentPlan, plan)
+        && ['status', 'strategy', 'recipeId', 'materials', 'craftProviders', 'componentRecipes', 'next'].every(key => (
+            JSON.stringify(currentPlan[key]) === JSON.stringify(plan[key])
+        ))) {
         return { ok: true, changed: false, memberId: id, handoff };
     }
 
@@ -408,6 +426,7 @@ async function assignPlan(member, plan, clan, goal) {
             ...(currentState.stats || {}),
             clanId: number(clan.id),
             equipmentPlan: clanPlan(plan, clan, goal),
+            clanMaterialDemand: plan.clanMaterialDemand,
             clanPartyObjective: clanPartyObjective(plan, goal, 'required', clan.id),
             // A stale personal request must not hide the new clan objective.
             partyRequest: clanPartyObjective(plan, goal, 'required', clan.id)
@@ -417,6 +436,49 @@ async function assignPlan(member, plan, clan, goal) {
     if (!saved) return { ok: false, code: 'member_state_write_failed', memberId: id, handoff };
     metrics.assignments += 1;
     return { ok: true, changed: true, memberId: id, handoff };
+}
+
+async function craftingOptions(clan) {
+    const service = { level: 70, stats: { classId: 57 } };
+    if (!craftingCatalog || craftingCatalogItems !== DataCache.items) {
+        const all = CraftShops.availableRecipes(service);
+        craftingCatalog = { all, published: CraftShops.CraftStations.flatMap(station => CraftShops.stationRecipes(station, all)) };
+        craftingCatalogItems = DataCache.items;
+    }
+    const all = craftingCatalog.all;
+    const published = new Map(craftingCatalog.published.map(recipe => [Number(recipe.recipeId), recipe]));
+    const providers = {};
+    const crafters = (clan.members || []).filter(member => member.phase === 'cold'
+        && (!member.partyId || Number(member.stats?.clanPartyObjective?.clanId) === Number(clan.id))
+        && !['dead', 'respawning'].includes(member.activity)
+        && CraftShops.craftLevelFor(member) > 0);
+    if (!crafters.length) return { craftRecipes: [...published.values()], allowedRecipeIds: [...published.keys()], craftProviders: providers };
+    const rows = await Database.execute([`SELECT recipes.characterId, recipes.recipeId FROM character_recipes recipes
+        JOIN characters members ON members.id = recipes.characterId WHERE members.clanId = ?`, [clan.id]], 'clan-craft:recipes');
+    const knownByMember = new Map();
+    for (const row of rows) {
+        const id = Number(row.characterId);
+        if (!knownByMember.has(id)) knownByMember.set(id, new Set());
+        knownByMember.get(id).add(Number(row.recipeId));
+    }
+    for (const recipe of all) {
+        const eligible = crafters.filter(member => CraftShops.craftLevelFor(member) >= Number(recipe.level));
+        const crafter = eligible.find(member => knownByMember.get(memberId(member))?.has(Number(recipe.recipeId))) || eligible[0];
+        if (!crafter) continue;
+        const known = knownByMember.get(memberId(crafter))?.has(Number(recipe.recipeId)) || false;
+        // Prefer a public service over teaching an unknown recipe unnecessarily.
+        if (!known && published.has(Number(recipe.recipeId))) continue;
+        providers[recipe.recipeId] = { characterId: memberId(crafter), known,
+            recipeItemId: Number(recipe.recipeItemId), loc: crafter.loc || { locX: 83400, locY: 148600, locZ: -3400 } };
+        const materials = recipe.materials.map(row => ({ ...row }));
+        if (!known) {
+            const scroll = materials.find(row => Number(row.selfId) === Number(recipe.recipeItemId));
+            if (scroll) scroll.amount += 1;
+            else materials.push({ selfId: Number(recipe.recipeItemId), amount: 1 });
+        }
+        published.set(Number(recipe.recipeId), { ...recipe, materials });
+    }
+    return { craftRecipes: [...published.values()], allowedRecipeIds: [...published.keys()], craftProviders: providers };
 }
 
 async function planningForClan(clan, previousGoal = null, options = {}) {
@@ -447,6 +509,7 @@ async function planningForClan(clan, previousGoal = null, options = {}) {
         )
         : false;
     const warehouseRows = await Database.fetchClanWarehouseItems(clan.id);
+    const craftOptions = await craftingOptions(clan);
     const previousMemberId = number(previousGoal?.target?.memberId);
     const reservationOptions = reservationOptionsForClan(clan);
     const previousAssigned = new Set((previousGoal?.assignedMemberIds || []).map(number).filter(Boolean));
@@ -483,6 +546,7 @@ async function planningForClan(clan, previousGoal = null, options = {}) {
         const id = number(member.characterId ?? member.id);
         const capacityUnits = equipmentRoster(clan, member, previousGoal).length;
         const memberOptions = {
+            ...craftOptions,
             ignoreExistingPlan: previousFulfilled && id === previousMemberId,
             occupancy,
             capacityUnits,
@@ -553,7 +617,7 @@ function selectedPlanningTarget(clan, previousGoal, planning, selectedCandidate 
 
 async function resolveClan(clan, previousGoal = null, options = {}) {
     metrics.resolves += 1;
-    if (!clan || number(clan.level) < 3) {
+    if (!clan || !number(clan.id)) {
         return { ok: true, skipped: true, reason: 'equipment_level_unavailable' };
     }
     const planning = options.planning || await planningForClan(clan, previousGoal, options);
@@ -615,7 +679,9 @@ async function resolveClan(clan, previousGoal = null, options = {}) {
     });
     const rotation = await releasePreviousBeneficiary(clan, previousGoal, goal);
     const expectedObjective = clanPartyObjective(selection.plan, goal, 'required', clan.id);
-    const partyReform = await releaseConflictingRosterParties(assignedMemberIds, goal, expectedObjective);
+    const craftReady = ['ready_to_craft', 'component_ready'].includes(selection.plan?.status);
+    const craftMembers = craftReady ? Object.values(selection.plan.craftProviders || {}).map(provider => number(provider.characterId)) : [];
+    const partyReform = await releaseConflictingRosterParties([...new Set([...assignedMemberIds, ...craftMembers])], goal, expectedObjective);
     const assignment = await assignPlan(selection.member, selection.plan, clan, goal);
     if (!assignment.ok) {
         metrics.assignmentFailures += 1;
@@ -657,6 +723,7 @@ async function resolveClan(clan, previousGoal = null, options = {}) {
 const ClanEquipmentService = {
     resolveClan,
     planningForClan,
+    craftingOptions,
     planForMember,
     planningFingerprint,
     validatePlanning,
