@@ -36,6 +36,80 @@ function completeInstances(item = {}) {
     return { ...item, instances, enchant: enchants.length === 1 ? enchants[0] : null };
 }
 
+function itemValue(item, method, field, fallback = null) {
+    if (typeof item?.[method] === 'function') return item[method]();
+    if (item?.[field] !== undefined) return item[field];
+    return fallback;
+}
+
+// Build the same lifecycle summary from a materialized Backpack that cold
+// simulation uses after a handoff. QuestService remains authoritative for the
+// physical item rows; this is only the compact cold projection of those rows.
+function fromItems(items = []) {
+    return canonicalize((items || []).reduce((summary, item) => {
+        const selfId = Number(itemValue(item, 'fetchSelfId', 'selfId', 0));
+        const amount = Math.max(0, Number(itemValue(item, 'fetchAmount', 'amount', 0)) || 0);
+        if (!selfId || amount <= 0) return summary;
+        const key = String(selfId);
+        const stackable = !!itemValue(item, 'fetchStackable', 'stackable', false);
+        const equipped = !!itemValue(item, 'fetchEquipped', 'equipped', false);
+        const slot = Number(itemValue(item, 'fetchSlot', 'slot', 0)) || 0;
+        const enchant = Math.max(0, Number(itemValue(item, 'fetchEnchantLevel', 'enchant', 0)) || 0);
+        const id = Number(itemValue(item, 'fetchId', 'id', 0)) || null;
+        const name = itemValue(item, 'fetchName', 'name', `Item ${selfId}`);
+        const rank = itemValue(item, 'fetchRank', 'rank', 'none') || 'none';
+        const kind = itemValue(item, 'fetchKind', 'kind', '') || '';
+
+        if (!stackable) {
+            const current = summary[key] || {
+                selfId, name, amount: 0, equipped: false, equippedCount: 0,
+                equippedSlots: [], stackable: false, slot, rank, kind,
+                enchant: null, instances: []
+            };
+            const instance = { id, amount, enchant, equipped, slot: equipped ? slot : 0 };
+            const instances = [...current.instances, instance];
+            const equippedSlots = [...new Set(instances
+                .filter((entry) => entry.equipped && Number(entry.slot) > 0)
+                .map((entry) => Number(entry.slot)))].sort((a, b) => a - b);
+            const enchants = [...new Set(instances.map((entry) => Number(entry.enchant) || 0))];
+            summary[key] = {
+                ...current,
+                amount: instances.reduce((total, entry) => total + Number(entry.amount || 0), 0),
+                equipped: equippedSlots.length > 0,
+                equippedCount: equippedSlots.length,
+                equippedSlots,
+                enchant: enchants.length === 1 ? enchants[0] : null,
+                instances
+            };
+            return summary;
+        }
+
+        const current = summary[key];
+        const equippedSlots = [...new Set([
+            ...(current?.equippedSlots || []),
+            ...(equipped && slot > 0 ? [slot] : [])
+        ])].sort((a, b) => a - b);
+        const currentEnchant = current?.enchant;
+        summary[key] = {
+            selfId,
+            id: Number(current?.id || id) || null,
+            name,
+            amount: Number(current?.amount || 0) + amount,
+            equipped: equippedSlots.length > 0,
+            equippedCount: equippedSlots.length,
+            equippedSlots,
+            stackable: true,
+            slot: Number(current?.slot || slot),
+            rank,
+            kind,
+            enchant: current
+                ? (currentEnchant !== null && Number(currentEnchant) === enchant ? enchant : null)
+                : enchant
+        };
+        return summary;
+    }, {}));
+}
+
 function canonicalize(inventory = {}) {
     return Object.entries(inventory || {}).reduce((summary, [key, item]) => {
         if (!item || !Number.isFinite(Number(item.amount)) || Number(item.amount) <= 0) return summary;
@@ -46,5 +120,6 @@ function canonicalize(inventory = {}) {
 
 module.exports = {
     canonicalize,
-    completeInstances
+    completeInstances,
+    fromItems
 };

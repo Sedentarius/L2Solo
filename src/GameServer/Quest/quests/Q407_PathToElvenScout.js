@@ -81,15 +81,10 @@ module.exports = {
     if (npcId === REISA) {
       if (count(state, REISAS_LETTER)) return page("Reisa", "Take my letter to Moretti.");
       if (count(state, HONORARY_GUARD)) {
-        const profession = await quest.awardFirstProfession(state, 22);
+        const profession = await quest.awardFirstProfession(state, 22, [[HONORARY_GUARD, 1]]);
         if (!profession.ok) {
           return page("Reisa", profession.reason === "level" ? `Reach level ${profession.requiredLevel} to become an Elven Scout.` : "Your profession could not be granted. Keep the Honorary Guard and try again.");
-        }
-        await quest.takeItem(state.session, HONORARY_GUARD);
-        await quest.giveItem(state.session, REISAS_RECOMMENDATION, 1);
-        state.playSound(FINISH);
-        await state.exit(false);
-        return page("Reisa", "You have completed the Path to Elven Scout and become an Elven Scout.");
+        } state.playSound(FINISH); return page("Reisa", "You have completed the Path to Elven Scout. Present your proof for class transfer at level 20.");
       }
       return page("Reisa", "Continue Moretti's trial.");
     }

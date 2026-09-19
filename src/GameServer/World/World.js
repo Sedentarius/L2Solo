@@ -138,6 +138,8 @@ const World = {
         this.npc.raidBossState = await RaidBossState.load();
         this.items = { spawns   : [], nextId: 5000000 };
 
+        await invoke('GameServer/Progression/DeathItemDrop').restoreWorldDrops(this);
+
         World.spawnNpcs();
         RaidBossMinionManager.start(this);
         this.indexSpawnsInGrid();

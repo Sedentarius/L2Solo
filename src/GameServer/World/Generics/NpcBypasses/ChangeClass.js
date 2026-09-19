@@ -30,6 +30,8 @@ module.exports = async function changeClass(session, parts) {
             html(session, `<html><body>Gatekeeper Sylvain:<br>You must be at least level <font color="LEVEL">${result.requiredLevel}</font> to perform this class transfer.</body></html>`);
         } else if (result.reason === 'wrong_profession') {
             html(session, '<html><body>Gatekeeper Sylvain:<br>This class transfer is not available for your current profession.</body></html>');
+        } else if (result.reason === 'proof') {
+            html(session, '<html><body>Complete the matching profession quest and bring its proof before requesting class transfer.</body></html>');
         } else if (result.reason === 'persistence') {
             html(session, '<html><body>Gatekeeper Sylvain:<br>The class transfer could not be completed. Your previous profession was restored.</body></html>');
         }

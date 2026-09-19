@@ -16,6 +16,7 @@ const originalSyncInventorySummary = Database.syncInventorySummary;
 const originalUpdateCharacterLocation = Database.updateCharacterLocation;
 const originalUpdateCharacterExperience = Database.updateCharacterExperience;
 const originalApplyCharacterDeathExperience = Database.applyCharacterDeathExperience;
+const originalApplyCharacterDeathItemDrop = Database.applyCharacterDeathItemDrop;
 const originalRestoreCharacterDeathExperience = Database.restoreCharacterDeathExperience;
 const originalClearCharacterDeathExperience = Database.clearCharacterDeathExperience;
 const originalUpdateCharacterVitals = Database.updateCharacterVitals;
@@ -24,6 +25,8 @@ const originalFetchSkill = Database.fetchSkill;
 const originalSetSkill = Database.setSkill;
 const originalUpdateSkillLevel = Database.updateSkillLevel;
 const originalUpdateCharacterClassId = Database.updateCharacterClassId;
+const originalChoosePath = Database.chooseFirstProfessionPath;
+const originalTransferProfession = Database.transferFirstProfession;
 const originalRecoverStartupLeases = ColdSimulationOwner.recoverStartupLeases;
 const statements = [];
 const classUpdates = [];
@@ -31,6 +34,8 @@ let stalePartyRows = [];
 let marketCandidateRows = [];
 
 try {
+    Database.chooseFirstProfessionPath = async (id, from, to) => ({ fromClassId: from, toClassId: to });
+    Database.transferFirstProfession = async () => ({ ok: false, reason: 'proof' });
     ColdSimulationOwner.recoverStartupLeases = () => Promise.resolve({ affectedRows: 0 });
     Database.execute = ([sql, params, queryOptions]) => {
         statements.push({ sql: String(sql), params, queryOptions });
@@ -56,6 +61,7 @@ try {
     Database.updateCharacterLocation = () => Promise.resolve();
     Database.updateCharacterExperience = () => Promise.resolve();
     Database.applyCharacterDeathExperience = () => Promise.resolve({ applied: true });
+    Database.applyCharacterDeathItemDrop = () => Promise.resolve({ drops: [] });
     Database.restoreCharacterDeathExperience = () => Promise.resolve({ restored: 0 });
     Database.clearCharacterDeathExperience = () => Promise.resolve({ cleared: true });
     Database.updateCharacterVitals = () => Promise.resolve();
@@ -264,8 +270,7 @@ try {
         }).then(() => BotLifeState.migrateLegacyClassProgression(1).then((migrated) => {
                 assert.strictEqual(migrated.length, 1, 'legacy cold bots without progression markers must be migrated');
                 const classUpdate = classUpdates.at(-1);
-                assert(classUpdate, 'migration must persist the profession on the physical character');
-                assert.ok([36, 37].includes(classUpdate.classId), 'migration must use the physical character class as its source of truth');
+                assert.equal(classUpdate, undefined, 'startup reconciliation cannot promote a base class without profession proof');
                 marketCandidateRows = [
                     { characterId: 71, characterName: 'MarketCursorA', phase: 'cold', activity: 'hunting', updatedAt: 10 },
                     { characterId: 72, characterName: 'MarketCursorB', phase: 'cold', activity: 'hunting', updatedAt: 10 }
@@ -519,11 +524,14 @@ try {
         console.error(err);
         process.exitCode = 1;
     }).finally(() => {
+        Database.chooseFirstProfessionPath = originalChoosePath;
+        Database.transferFirstProfession = originalTransferProfession;
         Database.execute = originalExecute;
         Database.syncInventorySummary = originalSyncInventorySummary;
         Database.updateCharacterLocation = originalUpdateCharacterLocation;
         Database.updateCharacterExperience = originalUpdateCharacterExperience;
         Database.applyCharacterDeathExperience = originalApplyCharacterDeathExperience;
+        Database.applyCharacterDeathItemDrop = originalApplyCharacterDeathItemDrop;
         Database.restoreCharacterDeathExperience = originalRestoreCharacterDeathExperience;
         Database.clearCharacterDeathExperience = originalClearCharacterDeathExperience;
         Database.updateCharacterVitals = originalUpdateCharacterVitals;
@@ -535,11 +543,14 @@ try {
         ColdSimulationOwner.recoverStartupLeases = originalRecoverStartupLeases;
     });
 } catch (err) {
+    Database.chooseFirstProfessionPath = originalChoosePath;
+    Database.transferFirstProfession = originalTransferProfession;
     Database.execute = originalExecute;
     Database.syncInventorySummary = originalSyncInventorySummary;
     Database.updateCharacterLocation = originalUpdateCharacterLocation;
     Database.updateCharacterExperience = originalUpdateCharacterExperience;
     Database.applyCharacterDeathExperience = originalApplyCharacterDeathExperience;
+    Database.applyCharacterDeathItemDrop = originalApplyCharacterDeathItemDrop;
     Database.restoreCharacterDeathExperience = originalRestoreCharacterDeathExperience;
     Database.clearCharacterDeathExperience = originalClearCharacterDeathExperience;
     Database.updateCharacterVitals = originalUpdateCharacterVitals;

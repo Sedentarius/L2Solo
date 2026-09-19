@@ -56,6 +56,13 @@ function skillsFor(characterId) {
 }
 
 try {
+    // First-profession authorization is covered with the real database in
+    // test_first_profession_proof. These fixtures represent completed trials.
+    Database.chooseFirstProfessionPath = async (id, from, to) => ({ fromClassId: from, toClassId: to });
+    Database.transferFirstProfession = async (id, target) => {
+        await Database.updateCharacterClassId(id, target);
+        return { ok: true, targetClassId: target };
+    };
     Database.fetchSkill = (characterId, selfId) => Promise.resolve(skillsFor(characterId).filter((skill) => skill.selfId === selfId));
     Database.fetchSkills = (characterId) => Promise.resolve(skillsFor(characterId));
     Database.setSkill = (skill, characterId) => {

@@ -90,6 +90,18 @@ class ItemModel {
         return this.model.petData || null;
     }
 
+    fetchDeathDropId() {
+        return this.model.deathDropId ?? 0;
+    }
+
+    fetchSourceItemId() {
+        return this.model.sourceItemId ?? 0;
+    }
+
+    fetchStackable() {
+        return this.model.stackable === true;
+    }
+
     // Abstract
 
     isWearable() {

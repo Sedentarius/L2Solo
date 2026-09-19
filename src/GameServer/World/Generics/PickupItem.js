@@ -1,6 +1,42 @@
 const ServerResponse = invoke('GameServer/Network/Response');
 const ConsoleText    = invoke('GameServer/ConsoleText');
 const PartyCompanionService = invoke('GameServer/Bot/AI/PartyCompanionService');
+const Database = invoke('Database');
+
+function pickupDeathDrop(world, session, actor, item) {
+    const dropId = Number(item.fetchDeathDropId?.() || 0);
+    const objectId = Number(item.fetchId());
+    return Database.claimDeathWorldItem(dropId, actor.fetchId()).then((claim) => {
+        if (!claim?.claimed) return false;
+        const index = world.items.spawns.findIndex((spawn) => Number(spawn.fetchId()) === objectId);
+        if (index >= 0) {
+            const [claimedItem] = world.items.spawns.splice(index, 1);
+            session.dataSendToMeAndOthers(ServerResponse.deleteOb(objectId), claimedItem);
+        }
+        // The durable claim is authoritative even if the session closes while
+        // SQLite is committing it. Login hydration will load the awarded row.
+        if (session.actor !== actor || actor.isDead?.()) return true;
+        const backpack = actor.backpack;
+        if (claim.stacked) {
+            const target = backpack.fetchItems().find((entry) => Number(entry.fetchId()) === Number(claim.targetItemId));
+            if (target) target.setAmount(Number(target.fetchAmount()) + Number(claim.amount));
+        } else {
+            backpack.insertItem(Number(claim.targetItemId), Number(claim.selfId), {
+                amount: Number(claim.amount), enchant: Number(claim.enchant || 0),
+                equipped: false, slot: Number(claim.slot || 0), petData: claim.petData || null
+            });
+        }
+        if (actor.model) {
+            session.dataSendToMe(ServerResponse.userInfo(actor));
+            session.dataSendToMe(ServerResponse.itemsList(backpack.fetchItems()));
+        }
+        transmitPickup(session, Number(claim.selfId), Number(claim.amount));
+        return true;
+    }).catch((error) => {
+        utils.infoWarn('DeathDrop', 'pickup failed drop=%s actor=%s: %s', dropId, actor.fetchId(), error.message);
+        return false;
+    });
+}
 
 function transmitPickup(session, selfId, amount) {
     const textName   = { kind: ConsoleText.kind.  item, value: selfId };
@@ -20,6 +56,9 @@ function pickupItem(session, actor, item) {
     if (spawnIndex < 0) return false;
 
     const canonicalItem = this.items.spawns[spawnIndex];
+    if (Number(canonicalItem.fetchDeathDropId?.() || 0) > 0) {
+        return pickupDeathDrop(this, session, actor, canonicalItem);
+    }
     const selfId = canonicalItem.fetchSelfId();
     const amount = canonicalItem.fetchAmount();
     const allocations = selfId === 57

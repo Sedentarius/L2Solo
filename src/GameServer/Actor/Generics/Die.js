@@ -17,6 +17,22 @@ function clearEffectsOnDeath(session, actor) {
     EffectTicker.refreshEffects(session, actor);
 }
 
+// Upstream owns the death-cause classification: the explicitly resolved killer
+// wins over the raw damage source, there is no session-actor fallback, and a
+// self-inflicted death is never player-caused. Death-item-drop rules consume the
+// same classification through playerControlledKiller, which therefore already
+// recognizes a player-owned pet/servitor kill (ReceivedHit supplies the owning
+// character as context.killer even when context.source is the servitor).
+function resolveDeathCause(context = {}, victim = null) {
+    const killer = context.killer ?? context.source;
+    const killerPlayable = !!killer && killer !== victim && !killer.fetchKind;
+    return {
+        killer: killer || null,
+        killerPlayable,
+        playerControlledKiller: killerPlayable
+    };
+}
+
 function die(session, actor, context = {}) {
     if (actor.isDead()) {
         return;
@@ -25,20 +41,32 @@ function die(session, actor, context = {}) {
     const victimSession = actor.session || session;
     const ArenaDuelService = invoke('GameServer/World/ArenaDuelService');
     if (typeof actor.fetchExp === 'function' && typeof actor.setExpSp === 'function' && !actor.fetchKind) {
-        const killer = context.killer ?? context.source;
-        invoke('GameServer/Progression/DeathExperience').applyDeathPenalty(victimSession, actor, {
-            timestamp: context.timestamp,
+        const cause = resolveDeathCause(context, actor);
+        const deathContext = {
+            timestamp: Number(context.timestamp || Date.now()),
             arena: victimSession?.arenaEphemeral === true || !!victimSession?.arenaDuelId
                 || !!ArenaDuelService.duelForActor?.(actor),
-            killerPlayable: !!killer && killer !== actor && !killer.fetchKind,
+            killerPlayable: cause.killerPlayable,
+            playerControlledKiller: cause.playerControlledKiller,
             clanWar: context.clanWar === true,
             festival: context.festival === true,
             event: context.event === true,
+            duel: context.duel === true,
+            olympiad: context.olympiad === true,
+            lucky: context.lucky === true,
             pvpZone: context.pvpZone === true,
             siegeZone: context.siegeZone === true,
             siegeParticipant: context.siegeParticipant === true,
-            killerSiegeNpc: context.killerSiegeNpc === true
-        });
+            killerSiegeNpc: context.killerSiegeNpc === true,
+            ...(context.deathKey ? { deathKey: context.deathKey } : {})
+        };
+        invoke('GameServer/Progression/DeathExperience').applyDeathPenalty(victimSession, actor, deathContext);
+        invoke('GameServer/Progression/DeathItemDrop').applyHotDeath(
+            victimSession,
+            actor,
+            deathContext,
+            typeof context.rng === 'function' ? context.rng : Math.random
+        );
     }
 
     if ((actor.fetchMounted?.() || actor.mounted) && actor.pet?.petData) invoke('GameServer/Pets/PetRuntime').die(actor.pet);
@@ -71,3 +99,4 @@ function die(session, actor, context = {}) {
 }
 
 module.exports = die;
+module.exports.resolveDeathCause = resolveDeathCause;

@@ -198,6 +198,8 @@ async function main() {
     const killer = (await Database.execute(['SELECT pvp,pk,karma,exp FROM characters WHERE id=3', []]))[0];
     assert.deepStrictEqual({ ...killer }, { pvp: 0, pk: 1, karma: 240, exp: 0 }, 'white target killed before replying is PK');
     assert.strictEqual(state(3).stats.karma, 240, 'worker snapshot receives authoritative karma');
+    assert.strictEqual(state(3).stats.pkCount, 1,
+        'worker snapshot receives authoritative PK count for later death-drop thresholds');
     const relation = Memory.inspect(1).relations.find(r => r.targetId === 3);
     assert(relation.reasons.some(r => r.type === 'attacked') && relation.reasons.some(r => r.type === 'killed'));
     assert.strictEqual((await new ColdCompetitionActions(base).apply(firstEvent)).ok, false, 'replay cannot kill or award karma twice');

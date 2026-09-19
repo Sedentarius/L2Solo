@@ -7,7 +7,7 @@ function spawnItem(session, selfId, amount, coords, onSpawn) {
         const item = new Item(this.items.nextId++, { ...utils.crushOb(itemDetails), ...coords });
         item.setAmount(amount);
         this.items.spawns.push(item);
-        session.dataSendToMeAndOthers(ServerResponse.spawnItem(item), item);
+        session?.dataSendToMeAndOthers?.(ServerResponse.spawnItem(item), item);
         onSpawn?.(item);
     });
 }

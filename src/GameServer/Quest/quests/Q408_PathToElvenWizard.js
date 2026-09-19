@@ -125,13 +125,8 @@ module.exports = {
 
     if (npcId === ROSELLA) {
       if (hasAllGems(state) && count(state, FERTILITY_PERIDOT)) {
-        const profession = await quest.awardFirstProfession(state, 26);
-        if (!profession.ok) return page("Rosella", profession.reason === "level" ? `Reach level ${profession.requiredLevel} to become an Elven Wizard.` : "Your profession could not be granted. Keep your gems and try again.");
-        for (const item of [MAGICAL_POWERS_RUBY, PURE_AQUAMARINE, NOBILITY_AMETHYST, FERTILITY_PERIDOT]) await takeAll(state, item);
-        if (!count(state, ETERNITY_DIAMOND)) await quest.giveItem(state.session, ETERNITY_DIAMOND, 1);
-        state.playSound(FINISH);
-        await state.exit(false);
-        return page("Rosella", "You have completed the Path to Elven Wizard and become an Elven Wizard.");
+        const profession = await quest.awardFirstProfession(state, 26, [MAGICAL_POWERS_RUBY, PURE_AQUAMARINE, NOBILITY_AMETHYST, FERTILITY_PERIDOT].map(id => [id, 1]));
+        if (!profession.ok) return page("Rosella", profession.reason === "level" ? `Reach level ${profession.requiredLevel} to become an Elven Wizard.` : "Your profession could not be granted. Keep your gems and try again."); state.playSound(FINISH); return page("Rosella", "You have completed the Path to Elven Wizard. Present your proof for class transfer at level 20.");
       }
       if (count(state, ROSELLAS_LETTER)) return page("Rosella", "Take my letter to Greenis.");
       if (count(state, CHARM_OF_GRAIN)) return page("Rosella", `Red Down: ${count(state, RED_DOWN)}/5. Return to Greenis when finished.`);

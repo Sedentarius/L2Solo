@@ -1538,6 +1538,29 @@ class Backpack extends BackpackModel {
         equippedItems.forEach((item) => recordEquipmentEvent(session, item, 'unequip'));
     }
 
+    transferDeathDropItems(session, sourceItemIds = [], stackableSelfIds = []) {
+        const ids = new Set(sourceItemIds.map(Number));
+        const stackIds = new Set(stackableSelfIds.map(Number));
+        const selected = (item) => ids.has(Number(item.fetchId()))
+            || (item.fetchStackable?.() && stackIds.has(Number(item.fetchSelfId())));
+        const removed = this.fetchItems().filter(selected);
+        if (!removed.length) return [];
+        removed.forEach((item) => {
+            if (item.fetchEquipped()) this.unequipPaperdoll(item.fetchSlot());
+            item.setEquipped(false);
+            ConsoleText.transmit(session, ConsoleText.caption.dropped, [
+                { kind: ConsoleText.kind.item, value: item.fetchSelfId() }
+            ]);
+        });
+        this.items = this.fetchItems().filter((item) => !selected(item));
+        invoke(path.actor).calculateStats(session, session.actor);
+        ToggleSkills.syncEquipment(session, session.actor);
+        session.dataSendToMe(ServerResponse.itemsList(this.fetchItems()));
+        session.dataSendToMe(ServerResponse.userInfo(session.actor));
+        session.dataSendToOthers(ServerResponse.charInfo(session.actor), session.actor);
+        return removed;
+    }
+
     updateDatabaseTimer(characterId, changedItems = this.items.filter((ob) => ob.isWearable())) {
         clearTimeout(this.dbTimer);
         // Equipment must reach the write queue before this actor can cool or

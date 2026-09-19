@@ -1129,7 +1129,98 @@ function applySchemaMigrations() {
                 resolutionReason TEXT NOT NULL DEFAULT ''
             );
         `);
-        }]
+        }],
+        // P0-B authored the three migrations below as 41-43; upstream claimed 41
+        // for death EXP first, so they are renumbered here. Their SQL is
+        // unchanged apart from making the last table creation idempotent.
+        [42, () => connection.exec(`
+            CREATE TABLE IF NOT EXISTS character_death_item_drop (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                characterId INTEGER NOT NULL,
+                deathSequence INTEGER NOT NULL,
+                deathKey TEXT NOT NULL,
+                mode TEXT NOT NULL CHECK(mode IN ('hot', 'cold')),
+                reason TEXT NOT NULL DEFAULT '',
+                karma INTEGER NOT NULL DEFAULT 0,
+                pkCount INTEGER NOT NULL DEFAULT 0,
+                candidateCount INTEGER NOT NULL DEFAULT 0,
+                selectedCount INTEGER NOT NULL DEFAULT 0,
+                contextJson TEXT NOT NULL DEFAULT '{}',
+                createdAt INTEGER NOT NULL,
+                UNIQUE(characterId, deathSequence),
+                UNIQUE(characterId, deathKey)
+            );
+            CREATE INDEX IF NOT EXISTS character_death_item_drop_recent
+                ON character_death_item_drop(characterId, createdAt DESC);
+            CREATE TABLE IF NOT EXISTS death_world_items (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                resolutionId INTEGER NOT NULL REFERENCES character_death_item_drop(id) ON DELETE CASCADE,
+                sourceCharacterId INTEGER NOT NULL,
+                sourceItemId INTEGER NOT NULL,
+                selfId INTEGER NOT NULL,
+                name TEXT NOT NULL,
+                amount INTEGER NOT NULL CHECK(amount > 0),
+                enchant INTEGER NOT NULL DEFAULT 0,
+                slot INTEGER NOT NULL DEFAULT 0,
+                stackable INTEGER NOT NULL DEFAULT 0 CHECK(stackable IN (0, 1)),
+                petData TEXT,
+                locX INTEGER NOT NULL DEFAULT 0,
+                locY INTEGER NOT NULL DEFAULT 0,
+                locZ INTEGER NOT NULL DEFAULT 0,
+                status TEXT NOT NULL DEFAULT 'ground' CHECK(status IN ('ground', 'claimed')),
+                claimedBy INTEGER,
+                claimedItemId INTEGER,
+                createdAt INTEGER NOT NULL,
+                claimedAt INTEGER
+            );
+            CREATE INDEX IF NOT EXISTS death_world_items_ground ON death_world_items(status, id);
+            CREATE UNIQUE INDEX IF NOT EXISTS death_world_items_active_source
+                ON death_world_items(sourceItemId) WHERE status = 'ground';
+        `)],
+        [43, () => connection.exec(`
+            DROP INDEX IF EXISTS death_world_items_ground;
+            CREATE TABLE death_world_items_v42 (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                resolutionId INTEGER NOT NULL REFERENCES character_death_item_drop(id) ON DELETE CASCADE,
+                sourceCharacterId INTEGER NOT NULL,
+                sourceItemId INTEGER NOT NULL,
+                selfId INTEGER NOT NULL,
+                name TEXT NOT NULL,
+                amount INTEGER NOT NULL CHECK(amount > 0),
+                enchant INTEGER NOT NULL DEFAULT 0,
+                slot INTEGER NOT NULL DEFAULT 0,
+                stackable INTEGER NOT NULL DEFAULT 0 CHECK(stackable IN (0, 1)),
+                petData TEXT,
+                locX INTEGER NOT NULL DEFAULT 0,
+                locY INTEGER NOT NULL DEFAULT 0,
+                locZ INTEGER NOT NULL DEFAULT 0,
+                status TEXT NOT NULL DEFAULT 'ground' CHECK(status IN ('ground', 'claimed')),
+                claimedBy INTEGER,
+                claimedItemId INTEGER,
+                createdAt INTEGER NOT NULL,
+                claimedAt INTEGER
+            );
+            INSERT INTO death_world_items_v42
+                (id, resolutionId, sourceCharacterId, sourceItemId, selfId, name, amount,
+                 enchant, slot, stackable, petData, locX, locY, locZ, status,
+                 claimedBy, claimedItemId, createdAt, claimedAt)
+                SELECT id, resolutionId, sourceCharacterId, sourceItemId, selfId, name, amount,
+                    enchant, slot, stackable, petData, locX, locY, locZ, status,
+                    claimedBy, claimedItemId, createdAt, claimedAt
+                FROM death_world_items;
+            DROP TABLE death_world_items;
+            ALTER TABLE death_world_items_v42 RENAME TO death_world_items;
+            CREATE INDEX death_world_items_ground ON death_world_items(status, id);
+            CREATE UNIQUE INDEX death_world_items_active_source
+                ON death_world_items(sourceItemId) WHERE status = 'ground';
+        `)],
+        [44, () => connection.exec(`
+            CREATE TABLE IF NOT EXISTS character_profession_paths (
+                characterId INTEGER PRIMARY KEY REFERENCES characters(id) ON DELETE CASCADE,
+                fromClassId INTEGER NOT NULL,
+                toClassId INTEGER NOT NULL
+            );
+        `)]
     ];
     const applied = new Set(connection.prepare('SELECT version FROM schema_migrations').all().map((row) => Number(row.version)));
     migrations.forEach(([version, apply]) => {
@@ -1731,6 +1822,99 @@ function syncColdDeathExperienceUnsafe(characterId, record, timestamp) {
         pending ? '' : record.resolutionReason || existing?.resolutionReason || 'cold_recovery']);
 }
 
+function deathItemDropResult(resolution, duplicate = false) {
+    if (!resolution) return null;
+    const drops = all(`SELECT * FROM death_world_items
+        WHERE resolutionId = ? AND status = 'ground' ORDER BY id`, [resolution.id]);
+    return { ...resolution, duplicate, drops };
+}
+
+function coldDeathDropSource(characterId, selected) {
+    const matches = all(`SELECT id, selfId, name, amount, enchant, equipped, slot, petData
+        FROM items WHERE characterId = ? AND selfId = ? AND amount > 0 ORDER BY id`,
+    [characterId, Number(selected.selfId)]);
+    if (!matches.length) return null;
+    return matches.find((row) => Number(row.enchant || 0) === Number(selected.enchant || 0)
+        && Number(row.equipped || 0) === Number(!!selected.equipped)
+        && Number(row.slot || 0) === Number(selected.slot || 0)) || matches[0];
+}
+
+function applyCharacterDeathItemDropUnsafe(record = {}) {
+    const characterId = Number(record.characterId || 0);
+    const deathKey = String(record.deathKey || '');
+    if (!characterId || !deathKey) throw new Error('death item drop identity missing');
+    const previous = one(`SELECT * FROM character_death_item_drop
+        WHERE characterId = ? AND deathKey = ?`, [characterId, deathKey]);
+    if (previous) return deathItemDropResult(previous, true);
+
+    const latest = one(`SELECT MAX(deathSequence) AS deathSequence
+        FROM character_death_item_drop WHERE characterId = ?`, [characterId]);
+    const deathSequence = Number(latest?.deathSequence || 0) + 1;
+    const createdAt = Number(record.createdAt || now());
+    const inserted = write(`INSERT INTO character_death_item_drop
+        (characterId, deathSequence, deathKey, mode, reason, karma, pkCount,
+         candidateCount, selectedCount, contextJson, createdAt)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?)`, [
+        characterId, deathSequence, deathKey, record.mode === 'cold' ? 'cold' : 'hot',
+        String(record.reason || ''), Math.max(0, Number(record.karma || 0)),
+        Math.max(0, Number(record.pkCount || 0)), Math.max(0, Number(record.candidateCount || 0)),
+        JSON.stringify(record.context || {}), createdAt
+    ]);
+    const resolutionId = Number(inserted.insertId);
+    let selectedCount = 0;
+    for (const selected of (record.selected || []).slice(0, 5)) {
+        const sourceItemId = Number(selected.id || selected.sourceItemId || 0);
+        let source = sourceItemId
+            ? one(`SELECT id, selfId, name, amount, enchant, equipped, slot, petData
+                FROM items WHERE id = ? AND characterId = ? AND amount > 0`, [sourceItemId, characterId])
+            : null;
+        if (!source && record.mode === 'cold') source = coldDeathDropSource(characterId, selected);
+        if (!source && selected.stackable) source = coldDeathDropSource(characterId, selected);
+        if (!source || Number(source.selfId) !== Number(selected.selfId)) continue;
+        const stackRows = selected.stackable
+            ? all(`SELECT id, amount FROM items
+                WHERE characterId = ? AND selfId = ? AND amount > 0 ORDER BY id`,
+            [characterId, Number(source.selfId)])
+            : [source];
+        const amount = stackRows.reduce((sum, row) => sum + Number(row.amount || 0), 0);
+        write(`INSERT INTO death_world_items
+            (resolutionId, sourceCharacterId, sourceItemId, selfId, name, amount,
+             enchant, slot, stackable, petData, locX, locY, locZ, status, createdAt)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'ground', ?)`, [
+            resolutionId, characterId, source.id, source.selfId, source.name,
+            amount, source.enchant, source.slot, selected.stackable ? 1 : 0,
+            source.petData || null, Number(record.locX || 0), Number(record.locY || 0),
+            Number(record.locZ || 0), createdAt
+        ]);
+        stackRows.forEach((row) => write('DELETE FROM items WHERE id = ? AND characterId = ?',
+            [row.id, characterId]));
+        selectedCount += 1;
+    }
+    write('UPDATE character_death_item_drop SET selectedCount = ? WHERE id = ?',
+        [selectedCount, resolutionId]);
+    return deathItemDropResult(one('SELECT * FROM character_death_item_drop WHERE id = ?', [resolutionId]));
+}
+
+function recoverPendingColdDeathItemDropsUnsafe() {
+    const rows = all(`SELECT characterId, statsJson FROM bot_life_state
+        WHERE json_valid(COALESCE(statsJson, ''))
+          AND json_extract(statsJson, '$.deathItemDrop.deathKey') IS NOT NULL
+          AND NOT EXISTS (
+              SELECT 1 FROM character_death_item_drop resolved
+              WHERE resolved.characterId = bot_life_state.characterId
+                AND resolved.deathKey = json_extract(bot_life_state.statsJson, '$.deathItemDrop.deathKey')
+          )`);
+    return rows.flatMap((row) => {
+        const record = parsedObject(row.statsJson)?.deathItemDrop;
+        if (!record?.deathKey) return [];
+        return [applyCharacterDeathItemDropUnsafe({
+            ...record,
+            characterId: Number(row.characterId),
+            mode: 'cold'
+        })];
+    });
+}
+
 function applyColdPhysicalStateUnsafe(characterId, physical = {}) {
     // Use the persisted XP delta inside the fenced transaction: unchanged
     // snapshots cannot wash karma twice, and non-combat updates grant none.
@@ -1753,6 +1937,11 @@ function applyColdPhysicalStateUnsafe(characterId, physical = {}) {
             selfId, String(skill.name || `Skill ${selfId}`), skill.passive ? 1 : 0, level, characterId
         ]);
     });
+    if (physical.deathItemDrop) applyCharacterDeathItemDropUnsafe({
+        ...physical.deathItemDrop,
+        characterId,
+        mode: 'cold'
+    });
     if (physical.inventory) syncInventorySummaryUnsafe(characterId, physical.inventory);
     if (physical.pvpKills?.length) {
         if (physical.pvpKills.length > 18) throw Error('cold PvP: too many kills');
@@ -1771,8 +1960,9 @@ function applyColdPhysicalStateUnsafe(characterId, physical = {}) {
         }
         write('UPDATE characters SET pvp = ?, pk = ?, karma = ? WHERE id = ?',
             [current.pvp, current.pk, current.karma, characterId]);
-        write("UPDATE bot_life_state SET statsJson = json_set(statsJson, '$.karma', ?) WHERE characterId = ?",
-            [current.karma, characterId]);
+        write(`UPDATE bot_life_state SET statsJson = json_set(
+            COALESCE(statsJson, '{}'), '$.karma', ?, '$.pkCount', ?
+        ) WHERE characterId = ?`, [current.karma, current.pk, characterId]);
     }
 }
 
@@ -4104,14 +4294,24 @@ const Database = {
         }, 'pet:mount-food'));
     },
     applyPetQuestStep(characterId, questId, expected, next, takes, gives) {
+        if (![420, 421].includes(questId)) return Promise.reject(new Error('Unsupported pet quest'));
+        return this.applyQuestStep(characterId, questId, expected, next, takes, gives);
+    },
+    applyQuestStep(characterId, questId, expected, next, takes, gives, experience = null) {
         return withCharacterFlush(characterId, () => inTransaction(() => {
-            if (![420, 421].includes(questId)) throw new Error('Unsupported pet quest');
+            if (!require('./GameServer/Quest/QuestRegistry').entries.some(e => e.id === questId && e.status === 'active')) throw new Error('Unsupported quest');
             const row = one('SELECT state, variables FROM character_quests WHERE characterId = ? AND questId = ?', [characterId, questId]);
             const current = row ? JSON.parse(row.variables || '{}') : {};
             if ((row?.state || 'created') !== expected.state || JSON.stringify(current) !== JSON.stringify(expected.variables)) throw new Error('Pet quest step changed');
+            const profession = require('./GameServer/Quest/FirstProfessionProof').forQuest(questId);
+            if (profession && next.state === 'completed') {
+                const character = one('SELECT classId, level FROM characters WHERE id = ?', [characterId]);
+                if (character?.classId !== profession.fromClassId || character.level < 19) throw new Error('Profession eligibility changed');
+            }
             const changed = new Set();
             for (const take of takes) {
-                const items = all('SELECT id, amount FROM items WHERE characterId = ? AND selfId = ? AND equipped = 0 ORDER BY id', [characterId, take.selfId]);
+                const unequipped = [420,421].includes(questId) ? ' AND equipped = 0' : '';
+                const items = all(`SELECT id, amount FROM items WHERE characterId = ? AND selfId = ?${unequipped} ORDER BY id`, [characterId, take.selfId]);
                 if (!Number.isSafeInteger(take.amount) || take.amount < 1 || items.reduce((sum, item) => sum + item.amount, 0) < take.amount) throw new Error('Required quest items missing');
                 let remaining = take.amount;
                 for (const item of items) {
@@ -4130,8 +4330,48 @@ const Database = {
                 else changed.add(Number(write('INSERT INTO items(selfId, name, amount, characterId) VALUES (?, ?, ?, ?)', [give.selfId, give.name, give.amount, characterId]).insertId));
             }
             write(UPSERT_CHARACTER_QUEST, [characterId, questId, next.state, JSON.stringify(next.variables)]);
-            return [...changed].map(id => one('SELECT * FROM items WHERE id = ? AND characterId = ?', [id, characterId]) || { id, amount: 0 });
-        }, 'pet:quest-step'));
+            const rows = [...changed].map(id => one('SELECT * FROM items WHERE id = ? AND characterId = ?', [id, characterId]) || { id, amount: 0 });
+            if (experience) {
+                if (![experience.exp, experience.sp].every(n => Number.isSafeInteger(n) && n >= 0)) throw new Error('Invalid quest experience');
+                const actor = one('SELECT exp, sp, level FROM characters WHERE id = ?', [characterId]);
+                const cap = require('./GameServer/Progression/ProgressionCap');
+                const award = cap.applyAward(actor.exp, experience.exp);
+                const level = Math.max(actor.level, cap.levelForExperience(award.totalExp, actor.level));
+                const totalSp = actor.sp + experience.sp;
+                write('UPDATE characters SET exp = ?, sp = ?, level = ? WHERE id = ?', [award.totalExp, totalSp, level, characterId]);
+                rows.experience = { totalExp: award.totalExp, totalSp, level, grantedExp: award.accepted, grantedSp: experience.sp };
+            }
+            return rows;
+        }, 'quest:step'));
+    },
+    transferFirstProfession(characterId, targetClassId) {
+        return withCharacterFlush(characterId, () => inTransaction(() => {
+            const spec = require('./GameServer/Quest/FirstProfessionProof').forTarget(targetClassId);
+            if (!spec) return { ok: false, reason: 'wrong_profession' };
+            const actor = one('SELECT classId, level FROM characters WHERE id = ?', [characterId]);
+            const quest = one('SELECT state, variables FROM character_quests WHERE characterId = ? AND questId = ?', [characterId, spec.questId]);
+            const variables = JSON.parse(quest?.variables || '{}');
+            if (actor?.classId === spec.toClassId && Number(variables.professionConsumed) === spec.toClassId) return { ok: true, alreadyTransferred: true, targetClassId: spec.toClassId };
+            if (actor?.classId !== spec.fromClassId) return { ok: false, reason: 'wrong_profession' };
+            if (actor.level < 20) return { ok: false, reason: 'level', requiredLevel: 20 };
+            if (quest?.state !== 'completed' || Number(variables.professionProof) !== spec.itemId || variables.professionConsumed) return { ok: false, reason: 'proof' };
+            const item = one('SELECT id, amount FROM items WHERE characterId = ? AND selfId = ? AND amount >= 1 ORDER BY id LIMIT 1', [characterId, spec.itemId]);
+            if (!item) return { ok: false, reason: 'proof' };
+            if (item.amount === 1) write('DELETE FROM items WHERE id = ?', [item.id]);
+            else write('UPDATE items SET amount = amount - 1 WHERE id = ?', [item.id]);
+            variables.professionConsumed = String(spec.toClassId);
+            write(UPSERT_CHARACTER_QUEST, [characterId, spec.questId, 'completed', JSON.stringify(variables)]);
+            write('UPDATE characters SET classId = ? WHERE id = ?', [spec.toClassId, characterId]);
+            return { ok: true, targetClassId: spec.toClassId, requiredLevel: 20, consumedItemId: item.id, remaining: item.amount - 1 };
+        }, 'quest:first-profession-transfer'));
+    },
+    chooseFirstProfessionPath(characterId, fromClassId, toClassId) {
+        return withCharacterFlush(characterId, () => inTransaction(() => {
+            const spec = require('./GameServer/Quest/FirstProfessionProof').forTarget(toClassId);
+            if (!spec || spec.fromClassId !== fromClassId) throw new Error('Invalid profession branch');
+            write('INSERT OR IGNORE INTO character_profession_paths(characterId, fromClassId, toClassId) VALUES (?, ?, ?)', [characterId, fromClassId, toClassId]);
+            return one('SELECT fromClassId, toClassId FROM character_profession_paths WHERE characterId = ?', [characterId]);
+        }, 'quest:profession-branch'));
     },
     evolveHatchling(characterId, controlId) {
         return withCharacterFlush(characterId, () => inTransaction(() => {
@@ -6686,6 +6926,59 @@ const Database = {
                 [state.level, state.exp, state.sp, id]);
             syncColdDeathExperienceUnsafe(id, state.stats?.deathExperience, Number(state.updatedAt || now()));
         }, 'character:cold-progression'));
+    },
+    applyCharacterDeathItemDrop(record) {
+        const characterId = Number(record.characterId || 0);
+        return withCharacterFlush(characterId, () => inTransaction(
+            () => applyCharacterDeathItemDropUnsafe(record),
+            'character:death-item-drop'
+        ));
+    },
+    fetchCharacterDeathItemDrops(characterId) {
+        return select('character_death_item_drop', ['*'], 'characterId = ?',
+            [Number(characterId)], 'character:death-item-drop-list');
+    },
+    fetchPendingDeathWorldItems() {
+        return select('death_world_items', ['*'], "status = 'ground'", [], 'death-world-item:list');
+    },
+    recoverPendingColdDeathItemDrops() {
+        return inTransaction(recoverPendingColdDeathItemDropsUnsafe, 'death-world-item:recover-cold');
+    },
+    claimDeathWorldItem(dropId, characterId) {
+        const recipientId = Number(characterId || 0);
+        return withCharacterFlush(recipientId, () => inTransaction(() => {
+            const drop = one(`SELECT * FROM death_world_items
+                WHERE id = ? AND status = 'ground'`, [Number(dropId)]);
+            if (!drop) return { claimed: false, reason: 'already_claimed_or_missing' };
+            let targetItemId = Number(drop.sourceItemId);
+            let stacked = false;
+            if (Number(drop.stackable) === 1) {
+                const target = one(`SELECT id, amount FROM items
+                    WHERE characterId = ? AND selfId = ? AND amount > 0 ORDER BY id LIMIT 1`,
+                [recipientId, drop.selfId]);
+                if (target) {
+                    targetItemId = Number(target.id);
+                    write('UPDATE items SET amount = ? WHERE id = ? AND characterId = ?',
+                        [Number(target.amount) + Number(drop.amount), targetItemId, recipientId]);
+                    stacked = true;
+                }
+            }
+            if (!stacked) {
+                write(`INSERT INTO items
+                    (id, selfId, name, amount, enchant, equipped, slot, petData, characterId)
+                    VALUES (?, ?, ?, ?, ?, 0, ?, ?, ?)`, [
+                    targetItemId, drop.selfId, drop.name, drop.amount, drop.enchant,
+                    drop.slot, drop.petData || null, recipientId
+                ]);
+            }
+            const claimedAt = now();
+            const claimed = write(`UPDATE death_world_items SET status = 'claimed',
+                claimedBy = ?, claimedItemId = ?, claimedAt = ?
+                WHERE id = ? AND status = 'ground'`,
+            [recipientId, targetItemId, claimedAt, drop.id]);
+            if (Number(claimed.affectedRows) !== 1) throw new Error('death world item claim raced');
+            return { claimed: true, stacked, targetItemId, ...drop, claimedBy: recipientId, claimedAt };
+        }, 'death-world-item:claim'));
     },
     applyCharacterDeathExperience(record) {
         const id = Number(record.characterId);

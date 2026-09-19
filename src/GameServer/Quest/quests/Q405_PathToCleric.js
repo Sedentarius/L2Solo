@@ -90,16 +90,10 @@ module.exports = {
         return page("Zigaunt", "Take this second Letter of Order to Lionel.");
       }
       if (count(state, LETTER_OF_ORDER_2) && count(state, LIONEL_COVENANT)) {
-        const profession = await quest.awardFirstProfession(state, 15);
+        const profession = await quest.awardFirstProfession(state, 15, [[LETTER_OF_ORDER_2, 1], [LIONEL_COVENANT, 1]]);
         if (!profession.ok) {
           return page("Zigaunt", profession.reason === "level" ? `Reach level ${profession.requiredLevel} to become a Cleric.` : "Your profession could not be granted. Keep Lionel's Covenant and try again.");
-        }
-        await quest.takeItem(state.session, LETTER_OF_ORDER_2);
-        await quest.takeItem(state.session, LIONEL_COVENANT);
-        await quest.giveItem(state.session, MARK_OF_FAITH, 1);
-        state.playSound(FINISH);
-        await state.exit(false);
-        return page("Zigaunt", "You have completed the Path to Cleric and become a Cleric.");
+        } state.playSound(FINISH); return page("Zigaunt", "You have completed the Path to Cleric. Present your proof for class transfer at level 20.");
       }
       return page("Zigaunt", "Continue your trial.");
     }

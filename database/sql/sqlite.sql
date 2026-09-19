@@ -69,6 +69,50 @@ CREATE TABLE IF NOT EXISTS character_death_experience (
     resolutionReason TEXT NOT NULL DEFAULT ''
 );
 
+CREATE TABLE IF NOT EXISTS character_death_item_drop (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    characterId INTEGER NOT NULL,
+    deathSequence INTEGER NOT NULL,
+    deathKey TEXT NOT NULL,
+    mode TEXT NOT NULL CHECK(mode IN ('hot', 'cold')),
+    reason TEXT NOT NULL DEFAULT '',
+    karma INTEGER NOT NULL DEFAULT 0,
+    pkCount INTEGER NOT NULL DEFAULT 0,
+    candidateCount INTEGER NOT NULL DEFAULT 0,
+    selectedCount INTEGER NOT NULL DEFAULT 0,
+    contextJson TEXT NOT NULL DEFAULT '{}',
+    createdAt INTEGER NOT NULL,
+    UNIQUE(characterId, deathSequence),
+    UNIQUE(characterId, deathKey)
+);
+CREATE INDEX IF NOT EXISTS character_death_item_drop_recent
+    ON character_death_item_drop(characterId, createdAt DESC);
+
+CREATE TABLE IF NOT EXISTS death_world_items (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    resolutionId INTEGER NOT NULL REFERENCES character_death_item_drop(id) ON DELETE CASCADE,
+    sourceCharacterId INTEGER NOT NULL,
+    sourceItemId INTEGER NOT NULL,
+    selfId INTEGER NOT NULL,
+    name TEXT NOT NULL,
+    amount INTEGER NOT NULL CHECK(amount > 0),
+    enchant INTEGER NOT NULL DEFAULT 0,
+    slot INTEGER NOT NULL DEFAULT 0,
+    stackable INTEGER NOT NULL DEFAULT 0 CHECK(stackable IN (0, 1)),
+    petData TEXT,
+    locX INTEGER NOT NULL DEFAULT 0,
+    locY INTEGER NOT NULL DEFAULT 0,
+    locZ INTEGER NOT NULL DEFAULT 0,
+    status TEXT NOT NULL DEFAULT 'ground' CHECK(status IN ('ground', 'claimed')),
+    claimedBy INTEGER,
+    claimedItemId INTEGER,
+    createdAt INTEGER NOT NULL,
+    claimedAt INTEGER
+);
+CREATE INDEX IF NOT EXISTS death_world_items_ground ON death_world_items(status, id);
+CREATE UNIQUE INDEX IF NOT EXISTS death_world_items_active_source
+    ON death_world_items(sourceItemId) WHERE status = 'ground';
+
 CREATE TABLE IF NOT EXISTS clans (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL COLLATE NOCASE UNIQUE,

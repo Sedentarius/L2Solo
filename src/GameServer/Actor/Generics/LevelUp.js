@@ -30,7 +30,8 @@ function levelUp(session, actor, nextLevel) {
             characterId: id,
             classId,
             level,
-            seed: id
+            seed: id,
+            session
         }).then((progression) => {
             if (Number(progression.classId) !== Number(classId)) actor.setClassId(progression.classId);
             return new Promise((resolve) => actor.skillset.populate(id, resolve));

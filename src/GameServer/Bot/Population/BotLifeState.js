@@ -184,6 +184,7 @@ function inventorySummaryFromItems(items = []) {
             : Number(previousEnchant) === currentEnchant ? currentEnchant : null;
         summary[key] = {
             selfId,
+            id: Number(summary[key]?.id || (item.fetchId ? item.fetchId() : item.id)) || null,
             name: item.fetchName ? item.fetchName() : item.name || itemName(selfId),
             amount: Number(summary[key]?.amount || 0) + amount,
             equipped: equippedSlots.length > 0,
@@ -517,6 +518,7 @@ function recordFromSession(session, phase, reason = '') {
         role: session.botStatus?.role || null,
         deathExperience: actor.deathExperience ? { ...actor.deathExperience } : null,
         karma: Number(actor.fetchKarma?.() || 0),
+        pkCount: Number(actor.fetchPk?.() || 0),
         pvpEncounter: session.pvpEncounter || cache.get(characterId)?.stats?.pvpEncounter || null,
         coldPvp: { ...(cache.get(characterId)?.stats?.coldPvp || {}),
             ...invoke('GameServer/Social/CombatHelpMemory').threatSnapshot(actor, timestamp),
@@ -2235,6 +2237,25 @@ const BotLifeState = {
                 timestamp,
                 cold: true
             }).state;
+            const deathCount = Number(result.patch?.deathCount ?? state.stats?.deaths ?? 0);
+            const dropContext = {
+                timestamp,
+                cold: true,
+                deathCount,
+                deathKey: `cold:${state.characterId}:${deathCount}`,
+                killerPlayable: result.debug?.killerPlayable === true,
+                clanWar: result.debug?.clanWar === true,
+                festival: result.debug?.festival === true,
+                event: result.debug?.event === true,
+                pvpZone: result.debug?.pvpZone === true,
+                siegeZone: result.debug?.siegeZone === true,
+                siegeParticipant: result.debug?.siegeParticipant === true,
+                killerSiegeNpc: result.debug?.killerSiegeNpc === true
+            };
+            const dropRng = typeof options.rng === 'function' ? options.rng
+                : require('./ColdCompetitionMonitor').seeded(dropContext.deathKey);
+            progressionState = invoke('GameServer/Progression/DeathItemDrop')
+                .applyColdDeath(progressionState, dropContext, dropRng).state;
         } else if (result.patch?.restoreExpPercent !== undefined) {
             progressionState = invoke('GameServer/Progression/DeathExperience').restoreCold(progressionState, {
                 restoreExpPercent: result.patch.restoreExpPercent,
@@ -2331,7 +2352,7 @@ const BotLifeState = {
             };
         }
 
-        const equippedInventory = GearAcquisitionPlanner.equipInventoryUpgrades({
+        const equippedInventory = newDeath ? inventory : GearAcquisitionPlanner.equipInventoryUpgrades({
             ...state,
             level,
             stats: { ...(state.stats || {}), ...(result.patch?.stats || {}) }
@@ -2457,6 +2478,15 @@ const BotLifeState = {
                         return Number(state.stats?.karma || 0) > 0
                             ? Database.updateColdCharacterExperience(row.characterId, row.level, row.exp, row.sp)
                             : Database.updateCharacterExperience(row.characterId, row.level, row.exp, row.sp);
+                    })
+                    .then(() => {
+                        const deathItemDrop = profiledState.stats?.deathItemDrop;
+                        return newDeath && deathItemDrop?.deathKey
+                            ? Database.applyCharacterDeathItemDrop(deathItemDrop).then((stored) => {
+                                invoke('GameServer/Progression/DeathItemDrop').spawnRows(null, stored?.drops || []);
+                                return stored;
+                            })
+                            : null;
                     })
                     .then(() => Database.updateCharacterVitals(row.characterId, row.hp, row.maxHp, row.mp, row.maxMp))
                     .then(() => syncInventorySummary(row.characterId, profiledState.inventory))

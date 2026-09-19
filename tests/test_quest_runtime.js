@@ -237,6 +237,8 @@ async function main() {
   const originalGive = QuestService.giveItem;
   const originalRewardAdena = QuestService.rewardAdena;
   const originalAwardFirstProfession = QuestService.awardFirstProfession;
+  const QuestStep = require('../src/GameServer/Quest/QuestStep');
+  const originalStep = QuestStep.apply;
   const calls = [];
   QuestService.takeItem = async (session, itemId) => {
     assert.ok(session.actor, "takeItem requires the player session, not QuestState");
@@ -338,7 +340,22 @@ async function main() {
       setItem(id, current - remove);
       return true;
     };
-    QuestService.awardFirstProfession = async () => ({ ok: true, targetClassId: 1 });
+    let awardedClassId = null;
+    QuestStep.apply = async (state, {takes=[],gives=[],variables}) => {
+      for(const [id,amount] of takes) assert(await QuestService.takeItem(state.session,id,amount));
+      for(const [id,amount] of gives) await QuestService.giveItem(state.session,id,amount);
+      await state.setState('started');
+      for(const [key,value] of Object.entries(variables)) await state.set(key,value);
+    };
+    QuestService.awardFirstProfession = async (state, targetClassId, takes, cleanup = []) => {
+      awardedClassId = targetClassId;
+      for (const [id, amount] of takes) assert(await QuestService.takeItem(state.session, id, amount));
+      for (const id of cleanup) await QuestService.takeItem(state.session, id, -1);
+      const spec = require('../src/GameServer/Quest/FirstProfessionProof').forTarget(targetClassId);
+      await QuestService.giveItem(state.session, spec.itemId, 1);
+      await state.exit(false);
+      return { ok: true, targetClassId };
+    };
     await Q401.onEvent(questState, "start");
     assert.strictEqual(items.get(1138), 1, "Q401 must issue Auron's Letter");
     await Q401.onEvent(questState, "guild");
@@ -373,7 +390,6 @@ async function main() {
     questState.started = false;
     questState.completed = false;
     questState.cond = 0;
-    QuestService.awardFirstProfession = async () => ({ ok: true, targetClassId: 4 });
     await Q402.onEvent(questState, "start");
     assert.strictEqual(items.get(1271), 1, "Q402 must issue the Mark of Esquire");
     const knightAssignments = [
@@ -424,7 +440,6 @@ async function main() {
     questState.completed = false;
     questState.cond = 0;
     equippedWeapon = 0;
-    QuestService.awardFirstProfession = async () => ({ ok: true, targetClassId: 7 });
     await Q403.onEvent(questState, "start");
     assert.strictEqual(items.get(1180), 1, "Q403 must issue Bezique's Letter");
     await Q403.onEvent(questState, "neti");
@@ -466,7 +481,6 @@ async function main() {
     questState.completed = false;
     questState.cond = 0;
     classId = 10;
-    QuestService.awardFirstProfession = async () => ({ ok: true, targetClassId: 11 });
     await Q404.onEvent(questState, "start");
     await Q404.onTalk(questState, { fetchSelfId: () => 7411 });
     assert.strictEqual(items.get(1280), 1, "Q404 must issue the Map of Luster");
@@ -503,11 +517,8 @@ async function main() {
     questState.completed = false;
     questState.cond = 0;
     classId = 10;
-    let awardedClassId = null;
-    QuestService.awardFirstProfession = async (_, targetClassId) => {
-      awardedClassId = targetClassId;
-      return { ok: true, targetClassId };
-    };
+    awardedClassId = null;
+
     await Q405.onEvent(questState, "start");
     assert.strictEqual(items.get(1191), 1, "Q405 must issue the first Letter of Order");
     await Q405.onTalk(questState, { fetchSelfId: () => 7253 });
@@ -541,10 +552,7 @@ async function main() {
     questState.cond = 0;
     classId = 18;
     awardedClassId = null;
-    QuestService.awardFirstProfession = async (_, targetClassId) => {
-      awardedClassId = targetClassId;
-      return { ok: true, targetClassId };
-    };
+
     await Q406.onEvent(questState, "start");
     setItem(1205, 19);
     const originalRandomForKnight = Math.random;
@@ -582,10 +590,7 @@ async function main() {
     questState.cond = 0;
     classId = 18;
     awardedClassId = null;
-    QuestService.awardFirstProfession = async (_, targetClassId) => {
-      awardedClassId = targetClassId;
-      return { ok: true, targetClassId };
-    };
+
     await Q407.onEvent(questState, "start");
     assert.strictEqual(items.get(1207), 1, "Q407 must issue Reisa's Letter");
     await Q407.onEvent(questState, "moretti");
@@ -622,10 +627,7 @@ async function main() {
     questState.cond = 0;
     classId = 25;
     awardedClassId = null;
-    QuestService.awardFirstProfession = async (_, targetClassId) => {
-      awardedClassId = targetClassId;
-      return { ok: true, targetClassId };
-    };
+
     await Q408.onEvent(questState, "start");
     assert.strictEqual(items.get(1229), 1, "Q408 must issue the Fertility Peridot");
     await Q408.onEvent(questState, "ruby");
@@ -678,10 +680,7 @@ async function main() {
     const spawnedQuestNpcs = [];
     questState.addSpawn = (selfId) => spawnedQuestNpcs.push(selfId);
     awardedClassId = null;
-    QuestService.awardFirstProfession = async (_, targetClassId) => {
-      awardedClassId = targetClassId;
-      return { ok: true, targetClassId };
-    };
+
     await Q409.onEvent(questState, "start");
     assert.strictEqual(items.get(1231), 1, "Q409 must issue the Crystal Medallion");
     await Q409.onEvent(questState, "lizardmen");
@@ -712,10 +711,7 @@ async function main() {
     questState.cond = 0;
     classId = 31;
     awardedClassId = null;
-    QuestService.awardFirstProfession = async (_, targetClassId) => {
-      awardedClassId = targetClassId;
-      return { ok: true, targetClassId };
-    };
+
     await Q410.onEvent(questState, "start");
     setItem(1238, 12);
     await Q410.onKill(questState, { fetchSelfId: () => 49 });
@@ -734,7 +730,7 @@ async function main() {
     assert.strictEqual(items.get(1244), 1, "Q410 must retain the source Gaze of Abyss reward");
 
     items.clear(); questState.started = false; questState.completed = false; questState.cond = 0; classId = 31; awardedClassId = null;
-    QuestService.awardFirstProfession = async (_, targetClassId) => { awardedClassId = targetClassId; return { ok: true, targetClassId }; };
+
     await Q411.onEvent(questState, "start");
     await Q411.onEvent(questState, "arkenia");
     await Q411.onEvent(questState, "leikan");
@@ -748,7 +744,7 @@ async function main() {
     assert.strictEqual(items.get(1252), 1, "Q411 must retain the source Iron Heart reward");
 
     items.clear(); questState.started = false; questState.completed = false; questState.cond = 0; classId = 38; awardedClassId = null;
-    QuestService.awardFirstProfession = async (_, targetClassId) => { awardedClassId = targetClassId; return { ok: true, targetClassId }; };
+
     await Q412.onEvent(questState, "start");
     await Q412.onEvent(questState, "key"); setItem(1257, 3); await Q412.onTalk(questState, { fetchSelfId: () => 7415 });
     await Q412.onEvent(questState, "candle"); setItem(1259, 2); await Q412.onTalk(questState, { fetchSelfId: () => 7418 });
@@ -759,7 +755,7 @@ async function main() {
     assert.strictEqual(items.get(1261), 1, "Q412 must retain the source Jewel of Darkness reward");
 
     items.clear(); questState.started = false; questState.completed = false; questState.cond = 0; classId = 38; awardedClassId = null;
-    QuestService.awardFirstProfession = async (_, targetClassId) => { awardedClassId = targetClassId; return { ok: true, targetClassId }; };
+
     await Q413.onEvent(questState, "start");
     await Q413.onEvent(questState, "sheets");
     setItem(1263, 1); setItem(1264, 4); await Q413.onKill(questState, { fetchSelfId: () => 776 });
@@ -777,7 +773,7 @@ async function main() {
     questState.addSpawn = (selfId) => raiderSpawns.push(selfId);
     questState.addRadar = (...coords) => raiderRadars.push(["add", ...coords]);
     questState.removeRadar = (...coords) => raiderRadars.push(["remove", ...coords]);
-    QuestService.awardFirstProfession = async (_, targetClassId) => { awardedClassId = targetClassId; return { ok: true, targetClassId }; };
+
     await Q414.onEvent(questState, "start");
     setItem(1578, 21);
     const originalRandomForRaider = Math.random; Math.random = () => 0;
@@ -793,7 +789,7 @@ async function main() {
     assert.strictEqual(items.get(1592), 1, "Q414 must retain the source Mark of Raider reward");
 
     items.clear(); questState.started = false; questState.completed = false; questState.cond = 0; classId = 44; awardedClassId = null;
-    QuestService.awardFirstProfession = async (_, targetClassId) => { awardedClassId = targetClassId; return { ok: true, targetClassId }; };
+
     await Q415.onEvent(questState, "start"); await Q415.onTalk(questState, { fetchSelfId: () => 7590 });
     setItem(1600, 4); await Q415.onKill(questState, { fetchSelfId: () => 479 }); await Q415.onTalk(questState, { fetchSelfId: () => 7590 });
     setItem(1601, 4); await Q415.onKill(questState, { fetchSelfId: () => 478 }); await Q415.onTalk(questState, { fetchSelfId: () => 7590 });
@@ -810,7 +806,7 @@ async function main() {
 
     items.clear(); questState.started = false; questState.completed = false; questState.cond = 0; classId = 49; awardedClassId = null;
     const shamanSpawns = []; questState.addSpawn = (selfId) => shamanSpawns.push(selfId);
-    QuestService.awardFirstProfession = async (_, targetClassId) => { awardedClassId = targetClassId; return { ok: true, targetClassId }; };
+
     await Q416.onEvent(questState, "start"); await Q416.onKill(questState, { fetchSelfId: () => 479 }); await Q416.onKill(questState, { fetchSelfId: () => 478 }); await Q416.onKill(questState, { fetchSelfId: () => 415 });
     await Q416.onTalk(questState, { fetchSelfId: () => 7585 }); await Q416.onEvent(questState, "claw"); await Q416.onEvent(questState, "letter");
     await Q416.onTalk(questState, { fetchSelfId: () => 7502 }); setItem(1625, 2); await Q416.onKill(questState, { fetchSelfId: () => 335 }); await Q416.onTalk(questState, { fetchSelfId: () => 7502 });
@@ -822,7 +818,7 @@ async function main() {
     assert.strictEqual(items.get(1631), 1, "Q416 must retain the source Mask of Medium reward");
 
     items.clear(); questState.started = false; questState.completed = false; questState.cond = 0; questState.values = {}; classId = 53; awardedClassId = null;
-    QuestService.awardFirstProfession = async (_, targetClassId) => { awardedClassId = targetClassId; return { ok: true, targetClassId }; };
+
     const originalRandomForScavenger = Math.random; Math.random = () => 0;
     try {
       await Q417.onEvent(questState, "start");
@@ -837,7 +833,7 @@ async function main() {
     assert.strictEqual(items.get(1642), 1, "Q417 must retain the source Ring of Raven reward");
 
     items.clear(); questState.started = false; questState.completed = false; questState.cond = 0; questState.values = {}; classId = 53; awardedClassId = null;
-    QuestService.awardFirstProfession = async (_, targetClassId) => { awardedClassId = targetClassId; return { ok: true, targetClassId }; };
+
     await Q418.onEvent(questState, "start");
     setItem(1636, 9); setItem(1637, 2); const originalRandomForArtisan = Math.random; Math.random = () => 0;
     try { await Q418.onKill(questState, { fetchSelfId: () => 389 }); } finally { Math.random = originalRandomForArtisan; }
@@ -853,6 +849,7 @@ async function main() {
     QuestService.giveItem = originalGive;
     QuestService.rewardAdena = originalRewardAdena;
     QuestService.awardFirstProfession = originalAwardFirstProfession;
+    QuestStep.apply = originalStep;
   }
 
   const deleted = [];

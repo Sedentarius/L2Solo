@@ -90,15 +90,10 @@ module.exports = {
       }
       if ([3, 4, 5].includes(cond)) return page("Sorius", "Complete Kluto's request.");
       if (cond === 6 && count(state, KLUTO_BOX)) {
-        const profession = await quest.awardFirstProfession(state, 19);
+        const profession = await quest.awardFirstProfession(state, 19, [[KLUTO_BOX, 1]]);
         if (!profession.ok) {
           return page("Sorius", profession.reason === "level" ? `Reach level ${profession.requiredLevel} to become an Elven Knight.` : "Your profession could not be granted. Keep Kluto's Box and try again.");
-        }
-        await quest.takeItem(state.session, KLUTO_BOX, -1);
-        if (!count(state, ELVEN_KNIGHT_BROOCH)) await quest.giveItem(state.session, ELVEN_KNIGHT_BROOCH, 1);
-        state.playSound(FINISH);
-        await state.exit(false);
-        return page("Sorius", "You have completed the Path to Elven Knight and become an Elven Knight.");
+        } state.playSound(FINISH); return page("Sorius", "You have completed the Path to Elven Knight. Present your proof for class transfer at level 20.");
       }
       return page("Sorius", "Continue your trial.");
     }
