@@ -1751,7 +1751,8 @@ function applyColdPhysicalStateUnsafe(characterId, physical = {}) {
         const level = Number(skill.level || 0);
         if (!selfId || !level) return;
         write(`INSERT INTO skills (selfId, name, passive, level, characterId) VALUES (?, ?, ?, ?, ?)
-            ON CONFLICT(characterId, selfId) DO UPDATE SET name = excluded.name, passive = excluded.passive, level = excluded.level`, [
+            ON CONFLICT(characterId, selfId) DO UPDATE SET name = excluded.name, passive = excluded.passive,
+                level = MAX(skills.level, excluded.level)`, [
             selfId, String(skill.name || `Skill ${selfId}`), skill.passive ? 1 : 0, level, characterId
         ]);
     });

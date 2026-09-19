@@ -269,6 +269,29 @@ async function run() {
     }, timestamp), false, 'a staggered session expiry must override the nominal party age');
     assert.strictEqual(PopulationService.partySessionExpired({ stats: { sessionExpiresAt: timestamp - 1 } }, timestamp), true, 'an explicit staggered session expiry must rotate the party');
     assert.strictEqual(PopulationService.partySessionExpired({ partyId: 'missing-session-metadata' }, timestamp), false, 'missing session metadata must not expire a party immediately');
+    GearPlanner.planFor = originals.planFor;
+    SpotProfiles.findForState = (candidate) => {
+        assert.strictEqual(candidate.stats.equipmentPlan.phase, 'leveling');
+        return fallbackSpot;
+    };
+    const deleveled = { ...state, level: 29, exp: 90, stats: {
+        equipmentPlan: { status: 'active', strategy: 'direct_drop', grade: 'd',
+            plannedForLevel: 30, target: { selfId: 88 },
+            next: { spotId: 'unsafe_target', npcId: 77, itemId: 88 },
+            partyNeed: 'required', requiresParty: true },
+        deathExperience: { expBeforeDeath: 100, expLost: 10, penaltyAppliedAt: timestamp }
+    } };
+    const recovered = await PopulationService.resolveColdState(deleveled);
+    assert.strictEqual(recovered.ok, true);
+    assert.strictEqual(recovered.state.stats.equipmentPlan.reason, 'level_regression');
+    assert.strictEqual(resolverOptions.targetNpcId, 0,
+        'the production solo resolve must stop forcing the acquisition NPC after delevel');
+    assert.strictEqual(resolverOptions.spot.id, fallbackSpot.id);
+    assert.strictEqual(recovered.state.stats.partyRequest, undefined);
+    const nextTick = await PopulationService.resolveColdState(recovered.state);
+    assert.strictEqual(nextTick.state.stats.equipmentPlan.phase, 'leveling',
+        'a subsequent production resolve must not immediately recreate the failed objective');
+
     console.log('Bot party request fallback checks passed');
 }
 

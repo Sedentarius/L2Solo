@@ -396,6 +396,12 @@ function skillRecordsFromTree(classId, level) {
 function treeSnapshot(state = {}, timestamp = Date.now()) {
     const existing = state.stats?.coldCombat || {};
     const classId = number(state.stats?.classId, number(state.classId));
+    // Learning at a lower level after a death must not erase previously
+    // learned skills or lower their ranks (including Expertise).
+    const skills = new Map((existing.skills || []).map((skill) => [number(skill.selfId), skill]));
+    for (const skill of skillsFromTree(classId, Math.max(1, number(state.level, 1)))) {
+        if (number(skills.get(skill.selfId)?.level) < number(skill.level)) skills.set(skill.selfId, skill);
+    }
     return {
         ...existing,
         version: PROFILE_VERSION,
@@ -403,7 +409,7 @@ function treeSnapshot(state = {}, timestamp = Date.now()) {
         capturedAt: timestamp,
         classId,
         effects: existing.effects || [],
-        skills: skillsFromTree(classId, Math.max(1, number(state.level, 1)))
+        skills: [...skills.values()]
     };
 }
 

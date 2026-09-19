@@ -340,6 +340,10 @@ const SpotProfiles = {
     },
 
     findForState(state, options = {}) {
+        const timestamp = Number(options.timestamp || Date.now());
+        if (GearAcquisitionPlanner.levelingRecoveryFor(state, state?.stats?.equipmentPlan, timestamp)) {
+            state = { ...state, stats: { ...(state.stats || {}), equipmentPlan: null } };
+        }
         const acquisitionPlan = state?.stats?.equipmentPlan;
         const protectedStarterCohort = isProtectedStarterCohort(state);
         const profiles = this.ensure();
@@ -347,7 +351,6 @@ const SpotProfiles = {
         const savedSpot = state?.spotId ? this.findById(state.spotId) : null;
         const currentSpot = physicalSpot || savedSpot;
         const targetLevel = LevelingRoutes.targetLevelForState(state);
-        const timestamp = Number(options.timestamp || Date.now());
         const excludedSpotIds = new Set([
             ...(options.mode === 'party' ? [] : SpotRiskPolicy.excludedSpotIdsForStates([state], timestamp)),
             ...((options.excludedSpotIds instanceof Set || Array.isArray(options.excludedSpotIds))
