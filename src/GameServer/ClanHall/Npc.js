@@ -28,7 +28,6 @@ const messages = {
         'There is not enough unreserved clan warehouse Adena after protected development and upkeep funds.',
     no_bid: 'Your clan has no active bid.',
     invalid_function: 'This service level is unavailable.',
-    manager_needs_mp: 'The manager needs time to recover MP.',
     manager_busy: 'The manager is helping another member. Please try again in a moment.'
 };
 const link = (command, label) => `<a action="bypass -h clan-hall ${command}">${esc(label)}</a><br>`;

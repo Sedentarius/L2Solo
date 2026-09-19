@@ -137,7 +137,7 @@ async function main() {
         assert.equal(effect.skill.fetchLevel(), 1, 'hall haste is level one, not the generic level-two buffer');
         assert.strictEqual(effect.caster, npc);
         assert.strictEqual(effect.target, session.actor);
-        assert(mp < 1000);
+        assert.equal(mp, 1000, 'manager support does not consume MP');
         effect = null;
         await NpcUi.handle(session, ['clan-hall', 'buff', '1217']);
         assert.equal(effect, null, 'arbitrary skills cannot be requested');

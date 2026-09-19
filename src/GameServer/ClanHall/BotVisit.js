@@ -110,14 +110,10 @@ function tick(session, actor, timestamp = Date.now()) {
     }
     Approach.reset(session);
     Navigation.clear(session);
-    const skill = Services.missing(actor, hall, timestamp)[0];
-    if (skill) {
-        if (timestamp < Number(session.clanHallVisit.nextCastAt || 0)) return true;
-        const result = Services.cast(session, actor, npc, skill.fetchSelfId(), timestamp);
-        session.clanHallVisit.nextCastAt = result.retryAt || timestamp + 5000;
-        if (!result.ok && !['manager_needs_mp', 'manager_busy'].includes(result.code))
-            finish(session, actor, timestamp + RETRY_MS);
-        return true;
+    const result = Services.buffBot(session, actor, npc, timestamp);
+    if (!result.ok) {
+        finish(session, actor, timestamp + RETRY_MS);
+        return false;
     }
     if (!grouped && Runtime.Policy.inside(hall, actor) && Services.recovery(actor, hall)) {
         if (!actor.state?.fetchSeated?.()) {

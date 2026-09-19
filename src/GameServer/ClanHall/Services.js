@@ -115,8 +115,6 @@ function cast(session, actor, npc, id, timestamp = Date.now(), cold = false) {
     const entry = support[hall.functions.support]?.find((b) => b.id === Number(id));
     const skill = entry && skillFor(entry);
     if (!skill) return { ok: false, code: 'invalid_function' };
-    const mp = Number(skill.fetchConsumedMp()) || 0;
-    if (npc.fetchMp() < mp) return { ok: false, code: 'manager_needs_mp' };
     const readyAt = castReadyAt.get(npc) || 0;
     if (timestamp < readyAt) return { ok: false, code: 'manager_busy', retryAt: readyAt };
     const retryAt = timestamp + Math.max(1500, Number(skill.fetchCalculatedHitTime()) || 0);
@@ -132,8 +130,6 @@ function cast(session, actor, npc, id, timestamp = Date.now(), cold = false) {
         ? Effects.apply(actor, effectFor(skill, timestamp))
         : invoke('GameServer/Skills/C4SkillEffects').execute(session, npc, actor, skill, { magicSkill: true })?.effect;
     if (!effect && cold) return { ok: false, code: 'stronger_effect' };
-    npc.setMp(npc.fetchMp() - mp);
-    npc.automation?.replenishVitals(npc);
     return { ok: true, effect, skill, retryAt };
 }
 function recovery(actor, hall) {
@@ -144,6 +140,30 @@ function recovery(actor, hall) {
             invoke('GameServer/Bot/AI/BotRoles').shouldRestForMana(actor) &&
             actor.fetchMp() < actor.fetchMaxMp() * 0.95)
     );
+}
+function buffBot(session, actor, npc, timestamp = Date.now(), cold = false) {
+    const hall = Runtime.forActor(actor);
+    if (!authorized(actor, npc, hall, timestamp)) return { ok: false, code: 'not_authorized' };
+    // One service operation grants the whole useful loadout. Bot visits do not
+    // reserve the manual player cast window. Manager support never costs MP.
+    const granted = [];
+    for (const skill of missing(actor, hall, timestamp)) {
+        const effect = cold
+            ? Effects.apply(actor, effectFor(skill, timestamp))
+            : invoke('GameServer/Skills/C4SkillEffects').execute(session, npc, actor, skill, { magicSkill: true })?.effect;
+        if (effect) granted.push(skill);
+    }
+    if (!cold && granted.length && session?.dataSendToMeAndOthers) {
+        // A single instant animation represents the batch, avoiding overlapping
+        // timed casts on the same NPC when several bots arrive together.
+        const visual = Object.create(granted[0]);
+        visual.fetchCalculatedHitTime = () => 0;
+        visual.fetchReuseTime = () => 0;
+        const response = invoke('GameServer/Network/Response');
+        session.dataSendToMeAndOthers(response.skillStarted(npc, actor.fetchId(), visual), npc);
+        session.dataSendToMeAndOthers(response.magicSkillLaunched(npc, visual, [actor]), npc);
+    }
+    return { ok: true, count: granted.length };
 }
 module.exports = {
     REFRESH_MS,
@@ -156,5 +176,6 @@ module.exports = {
     missing,
     authorized,
     cast,
+    buffBot,
     recovery
 };

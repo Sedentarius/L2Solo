@@ -170,55 +170,62 @@ async function main() {
             dataSendToMeAndOthers(packet, caster) { broadcasts.push({ packet, caster }); }
         };
         physical.session = session;
-        const beforeMp = mp;
-        assert(Hot.tick(session, physical, at));
-        assert(mp < beforeMp, 'real hot casting consumes manager MP');
-        assert(Effects.list(physical).length > 3, 'native hot effect pipeline applies a hall buff');
-        assert.deepEqual(broadcasts.map(b => b.packet[0]), [0x48, 0x76], 'each NPC cast has a start and launch');
+        // A player cast reserves the manual cast window; bots bypass it even at zero MP.
+        assert(Services.cast(session, magic, npc, 1059, at).ok);
+        broadcasts.length = 0;
+        mp = 0;
+        const requested = Services.missing(physical, Runtime.owned(1), at).map(skill => skill.fetchSelfId());
+        Hot.tick(session, physical, at);
+        assert.equal(mp, 0, 'bot support is independent of manager MP');
+        assert.equal(Services.missing(physical, Runtime.owned(1), at).length, 0, 'one tick grants the whole requested set');
+        for (const id of requested) assert(Effects.list(physical).some(effect => effect.id === id));
+        assert.equal(session.clanHallVisit, null, 'a healthy bot finishes service in the same tick');
+        assert.deepEqual(broadcasts.map(b => b.packet[0]), [0x48, 0x76], 'one completed animation for the entire batch');
+        assert.equal(broadcasts[0].packet.readInt32LE(17), 0, 'batch animation has no cast delay');
         for (const { packet, caster } of broadcasts) {
-            assert.strictEqual(caster, npc, 'both packets reach observers of the same manager');
+            assert.strictEqual(caster, npc);
             assert.equal(packet.readInt32LE(1), npc.fetchId());
         }
         assert.equal(broadcasts[0].packet.readInt32LE(5), physical.fetchId());
         assert.equal(broadcasts[1].packet.readInt32LE(17), physical.fetchId());
-        const afterFirstMp = mp;
-        const magicEffects = Effects.list(magic).length;
-        const contention = Services.cast(session, magic, npc, 1059, at + 1);
-        assert.equal(contention.code, 'manager_busy', 'all recipients share one manager cast window');
-        assert.equal(mp, afterFirstMp, 'a busy manager does not consume MP');
-        assert.equal(Effects.list(magic).length, magicEffects, 'a busy manager grants no effect');
-        assert.equal(broadcasts.length, 2, 'no overlapping animation for another recipient');
-        assert.equal(Services.cast(null, magic, npc, 1059, at + 1, true).code, 'manager_busy',
-            'cold recipients use the same manager budget');
-        const waiting = { ...session, actor: magic, clanHallVisit: null };
-        assert(Hot.tick(waiting, magic, at + 1));
-        assert(waiting.clanHallVisit, 'a busy manager does not cancel the bot visit');
-        assert.equal(waiting.clanHallVisit.nextCastAt, contention.retryAt);
+        const waiting = { ...session, actor: magic, clanHallVisit: null, clanHallRetryAt: 0 };
+        Hot.tick(waiting, magic, at);
+        assert.equal(Services.missing(magic, Runtime.owned(1), at).length, 0,
+            'a second bot receives its full set at the same timestamp, even during a player cast');
+        assert.equal(waiting.clanHallVisit, null);
+        const packetCount = broadcasts.length;
+        assert.equal(Services.buffBot(session, physical, npc, at).count, 0);
+        assert.equal(broadcasts.length, packetCount, 'fresh buffs do not trigger repeated animation');
+        mp = 10000;
         const hotExpiry = Effects.list(physical).find((e) => e.id === 1204).expiresAt;
-        const blocked = { ...session, clanHallVisit: null, currentTargetId: 55 };
+        const blocked = { ...session, clanHallVisit: null, clanHallRetryAt: 0, currentTargetId: 55 };
         assert.equal(Hot.tick(blocked, physical, at + 2000), false, 'combat target takes priority');
-        assert.equal(Hot.tick({ ...session, clanHallVisit: null, clanAllianceQuest: {} }, physical, at), false);
+        assert.equal(Hot.tick({ ...session, clanHallVisit: null, clanHallRetryAt: 0, clanAllianceQuest: {} }, physical, at), false);
         const remote = hotActor({ ...state, loc: { locX: 0, locY: 0, locZ: 0 } });
         actors.push(remote);
         assert.equal(
-            Hot.tick({ ...session, actor: remote, clanHallVisit: null }, remote, at),
+            Hot.tick({ ...session, actor: remote, clanHallVisit: null, clanHallRetryAt: 0 }, remote, at),
             false,
             'no cross-map detours'
         );
         assert.equal(
-            Hot.tick({ ...session, actor: remote, clanHallVisit: null, followPlayerSession: {} }, remote, at),
+            Hot.tick({ ...session, actor: remote, clanHallVisit: null, clanHallRetryAt: 0, followPlayerSession: {} }, remote, at),
             false,
             'do not abandon a party'
         );
         const nearby = hotActor({ ...state, loc: { ...def.spawn, locX: def.spawn.locX + 900 } });
         actors.push(nearby);
-        assert(Hot.tick({ ...session, actor: nearby, clanHallVisit: null }, nearby, at));
+        assert(Hot.tick({ ...session, actor: nearby, clanHallVisit: null, clanHallRetryAt: 0 }, nearby, at));
         assert(moved > 0, 'visible bot approaches the manager instead of receiving remote buffs');
         mp = 0;
         const unbuffed = hotActor(state);
         actors.push(unbuffed);
-        assert.equal(Services.cast(null, unbuffed, npc, 1086, at, true).code, 'manager_needs_mp');
-        assert.equal(Effects.list(unbuffed).length, 0);
+        assert(Services.cast(null, unbuffed, npc, 1086, at + 10000, true).ok,
+            'manual support also works with zero manager MP');
+        assert.equal(mp, 0, 'manual support never consumes manager MP');
+        assert(Effects.list(unbuffed).some(effect => effect.id === 1086));
+        assert.equal(Services.cast(null, unbuffed, npc, 1086, at + 10000, true).code, 'manager_busy',
+            'manual casts retain their cast interval');
         mp = 10000;
         assert(Cold.needed(state, at));
         assert.equal(Cold.needed({ ...state, stats: { ...state.stats, pveEncounter: { hp: 10 } } }, at), false);
@@ -263,8 +270,14 @@ async function main() {
         global.invoke = (name) => name === 'GameServer/Actor/Generics/TeleportTo'
             ? (_session, _actor, destination) => { hotDestination = destination; return true; }
             : originalInvoke(name);
-        const departing = { ...session, actor: full, clanHallVisit: { hallId: def.id, expiresAt: at + 180000 } };
-        assert(Hot.tick(departing, full, at + 1000));
+        const departingActor = hotActor(state);
+        actors.push(departingActor);
+        const departing = { ...session, actor: departingActor, clanHallVisit: { hallId: def.id, expiresAt: at + 180000 } };
+        departingActor.session = departing;
+        mp = 0;
+        assert(Hot.tick(departing, departingActor, at + 1000));
+        assert.equal(Services.missing(departingActor, Runtime.owned(1), at + 1000).length, 0,
+            'all buffs and departure happen in one hot tick');
         assert.deepEqual(hotDestination, returnSpot.center, 'a serviced hot bot teleports directly to hunting');
         assert.equal(departing.currentSpot.id, returnSpot.id);
         assert.equal(departing.spotRelocation.method, 'clan_hall');
@@ -275,12 +288,13 @@ async function main() {
         assert.equal(Hot.tick(grouped, full, at + 1000), false);
         assert.equal(hotDestination, null, 'party members stay with their party after support');
         global.invoke = originalInvoke;
-        for (let i = 0; i < 30; i++) {
-            const outcome = await Cold.resolve(state, at + i * 2000);
-            assert(outcome?.ok, 'cold service snapshot persists');
-            state = outcome.state;
-            if (!state.stats.clanHallVisit) break;
-        }
+        const outcome = await Cold.resolve(state, at);
+        assert(outcome?.ok, 'cold service snapshot persists');
+        state = outcome.state;
+        assert.equal(mp, 0, 'cold batch also works without manager MP');
+        assert.equal(Services.missing(Cold.actorFor(state, Runtime.owned(1)), Runtime.owned(1), at).length, 0,
+            'one cold resolve grants the entire loadout and persists it before departure');
+        mp = 10000;
         assert.equal(state.activity, 'hunting');
         assert.equal(state.stats.clanHallVisit, null, 'completed visit resumes hunting');
         assert.deepEqual(state.loc, returnSpot.center, 'cold departure persists an immediate teleport');
@@ -300,6 +314,27 @@ async function main() {
             haste.expiresAt,
             'cold-to-hot activation keeps the original expiry, without a fresh 20 minutes'
         );
+        Runtime.applyRows([{ ...hallRow, functionsJson: '{"support":8,"hp":100}' }]);
+        const wounded = {
+            ...state,
+            loc: { ...def.spawn },
+            vitals: { ...state.vitals, hp: 10 },
+            stats: { ...state.stats, clanHallRetryAt: 0, coldCombat: { effects: [] } }
+        };
+        const woundedActor = hotActor(wounded);
+        actors.push(woundedActor);
+        const restingSession = { ...session, actor: woundedActor, clanHallVisit: null, clanHallRetryAt: 0 };
+        woundedActor.session = restingSession;
+        assert(Hot.tick(restingSession, woundedActor, at + 30000));
+        assert.equal(Services.missing(woundedActor, Runtime.owned(1), at + 30000).length, 0);
+        assert(restingSession.clanHallVisit && woundedActor.state.fetchSeated(),
+            'instant hot buffs still allow the bot to stay for health recovery');
+        const recovering = await Cold.resolve(wounded, at + 30000);
+        assert(recovering.ok && recovering.state.stats.clanHallVisit);
+        assert.equal(recovering.state.activity, 'clan_hall', 'cold bots also stay to recover after receiving all buffs');
+        assert.equal(Services.missing(Cold.actorFor(recovering.state, Runtime.owned(1)), Runtime.owned(1), at + 30000).length, 0);
+        assert.deepEqual(recovering.state.loc, def.spawn);
+        Runtime.applyRows([hallRow]);
         const travelStart = {
             ...state,
             activity: 'hunting',
@@ -344,6 +379,7 @@ async function main() {
         Runtime.applyRows([{ ...hallRow, serviceDueAt: at - 1 }]);
         assert.equal(Services.missing(magic, Runtime.owned(1), at).length, 0);
         assert.equal(Services.cast(null, magic, npc, 1059, at, true).code, 'not_authorized');
+        assert.equal(Services.buffBot(null, magic, npc, at, true).code, 'not_authorized');
         const Resolver = invoke('GameServer/Bot/Population/BackgroundResolver');
         const weak = {
             ...state,

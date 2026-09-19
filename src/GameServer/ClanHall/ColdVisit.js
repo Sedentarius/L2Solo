@@ -207,8 +207,7 @@ async function resolve(state, timestamp = Date.now()) {
                 'walking_to_clan_hall'
             );
         } else {
-            const skill = Services.missing(actor, hall, timestamp)[0];
-            const cast = skill ? Services.cast(null, actor, npc, skill.fetchSelfId(), timestamp, true) : null;
+            const buffs = Services.buffBot(null, actor, npc, timestamp, true);
             const elapsedMs = Math.min(30000, Math.max(0, timestamp - Number(visit?.lastServiceAt || timestamp)));
             const inside = Runtime.Policy.inside(hall, actor);
             const recovered = Resolver.resolveRest(
@@ -220,9 +219,21 @@ async function resolve(state, timestamp = Date.now()) {
                     mpMultiplier: inside ? 1 + Number(hall.functions.mp || 0) / 100 : 1
                 }
             );
-            if (!skill && (!inside || !Services.recovery(actor, hall))) {
-                next = finish(state, timestamp, 'clan_hall_services_complete');
-                const departure = require('./Departure').plan(state, hall, timestamp);
+            const serviced = {
+                ...state,
+                vitals: recovered.patch.vitals,
+                stats: {
+                    ...state.stats,
+                    coldCombat: {
+                        ...state.stats?.coldCombat,
+                        effects: Effects.list(actor).map(e => ({ ...e }))
+                    }
+                }
+            };
+            if (!inside || !Services.recovery(actorFor(serviced, hall), hall)) {
+                next = finish(serviced, timestamp, 'clan_hall_services_complete');
+                next.patch.vitals = serviced.vitals;
+                const departure = require('./Departure').plan(serviced, hall, timestamp);
                 if (departure) {
                     next.patch.loc = departure.destination;
                     next.patch.spotId = departure.spot.id;
@@ -249,8 +260,8 @@ async function resolve(state, timestamp = Date.now()) {
                         }
                     },
                     timestamp,
-                    cast?.retryAt || timestamp + 5000,
-                    cast?.ok ? 'clan_hall_buff_received' : 'clan_hall_recovery'
+                    timestamp + 5000,
+                    buffs.count ? 'clan_hall_buff_received' : 'clan_hall_recovery'
                 );
         }
     }
