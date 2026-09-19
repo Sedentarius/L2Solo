@@ -911,7 +911,7 @@
     }
   },
   "_certification": {
-    "generatedAt": "2026-09-19T23:47:27.939Z",
+    "generatedAt": "2026-09-19T23:58:41.364Z",
     "sourceHashes": {
       "config/default.ini": "96c5b1a32a804077d614935524645d3a5b1d4ed4ef5fe104a78b02a12e7d1625",
       "config/local.example.ini": "cb13f57c7e72f2b6f55e342378bb9acc974e7f7c0ab6708a6ed8f5d0dc8f8fa0",
@@ -1232,7 +1232,7 @@
       "scripts/mixed-runtime-load-test.js": "16d52ec3e952256b53583557621fe77620b78d279d4da1b89d58bca399f738a8",
       "scripts/run-server.js": "f76068740f8964d09db0c995235295d12d614463e4e3ce600c7879d8b1c8f9a9",
       "scripts/run-simulations.js": "641e48daac78a8a78f9b668b8f0b9c343075d119fdc503eb1b2e96b9d70ceee7",
-      "scripts/run-tests-a6.js": "7690d516cfeb78b772d0a942d12be55cdc86fc15af0ba9518678821bb5c104ce",
+      "scripts/run-tests-a6.js": "b25c109703824533df0ed1e2707435130c133b5de1873f2226e597535616fc15",
       "scripts/run-tests-after-known-worker.js": "0b239b16a40b2e898d51c1875cc83271ba43ebc9e9497d327cf86c6214d00dea",
       "scripts/run-tests-p0-b1.js": "512184552482e1fbc44fcd5ae5cbf3e2e0f101c858bdf70f4be711ff1ba3792b",
       "scripts/run-tests-p0-b2.js": "f2148197744ace5d86fdc6b069a563cbd721580fd9e43283538fa9b630ac1c97",
