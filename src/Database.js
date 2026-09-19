@@ -6690,6 +6690,11 @@ const Database = {
                 if (!clan) return { ok: false, code: 'clan_missing' };
                 if (Number(clan.leaderId) !== leader) return { ok: false, code: 'not_leader' };
 
+                if (one("SELECT name FROM sqlite_master WHERE type='table' AND name='clan_halls'")
+                    && (one('SELECT id FROM clan_halls WHERE ownerId=?', [id])
+                        || one('SELECT clanId FROM clan_hall_bids WHERE clanId=?', [id]))) {
+                    return { ok: false, code: 'clan_hall_owned_or_bid' };
+                }
                 const currentMembers = all('SELECT id FROM characters WHERE clanId = ? ORDER BY id', [id]);
                 write(`UPDATE characters
                     SET clanId = 0,
@@ -6824,5 +6829,9 @@ const Database = {
 };
 
 Object.assign(Database, require('./GameServer/Clan/ClanAllianceRepository')({ one, all, write, inTransaction, withCharacterFlushes }));
+
+Object.assign(Database, require('./GameServer/ClanHall/Repository')({
+    one, all, write, inTransaction, withCharacterFlush, updateColdInventorySnapshotUnsafe, syncInventorySummaryUnsafe
+}));
 
 module.exports = Database;

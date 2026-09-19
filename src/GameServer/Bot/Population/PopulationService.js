@@ -3243,6 +3243,10 @@ const PopulationService = {
 
     resolveColdState(state, workerRequest = null) {
         const startedAt = Date.now();
+        const hallVisit = invoke('GameServer/ClanHall/ColdVisit');
+        if (!joinedBackgroundParty(state) && (hallVisit.needed(state, startedAt) || state.stats?.clanHallVisit)) {
+            return hallVisit.resolve(state, startedAt);
+        }
         if (PartyMarketBreak.ready(state)) return resumePartyMarketBreak(state, startedAt);
         const karmaPolicy = invoke('GameServer/Bot/Population/ColdKarmaPolicy');
         const karmaPlan = karmaPolicy.active(state) ? karmaPolicy.plan(state, SpotProfiles.ensure(), startedAt) : null;

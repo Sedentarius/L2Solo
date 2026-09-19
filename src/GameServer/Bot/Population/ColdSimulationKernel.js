@@ -250,6 +250,7 @@ function lifecycleKind(state = {}, context = {}) {
     if ((state.activity === 'merchant' && state.stats?.marketStore)
         || (state.activity === 'crafting' && state.stats?.craftShop)) return 'event_driven';
     const stats = state.stats || {};
+    if (context.clanHallServices || stats.clanHallVisit) return 'command';
     // Finite travel/rest/death transitions are completely represented by the
     // pure resolver result and the owner CAS proposal. Economy follow-up, if
     // any, is selected on the next state after the transition is durable.
@@ -652,7 +653,7 @@ class ColdSimulationKernel {
             const elapsedMs = current.state.timing?.lastResolvedAt
                 ? Math.max(1000, timestamp - Number(current.state.timing.lastResolvedAt))
                 : 60000;
-            const lifecyclePlan = this.planLifecycle
+            const lifecyclePlan = !current.context.clanHallServices && !current.state.stats?.clanHallVisit && this.planLifecycle
                 ? await this.planLifecycle({
                     state: current.state,
                     context: current.context,
@@ -660,7 +661,9 @@ class ColdSimulationKernel {
                 })
                 : null;
             const resolveState = lifecyclePlan?.plannedState || current.state;
-            const result = await this.resolveSolo({
+            const result = current.context.clanHallServices || current.state.stats?.clanHallVisit
+                ? { patch: {}, events: [], materialize: { exp: 0, sp: 0, adena: 0, items: [] }, nextResolveAt: timestamp + 30000 }
+                : await this.resolveSolo({
                 assessRelationship: this.interactionMemory.assess.bind(this.interactionMemory),
                 state: resolveState,
                 spot: current.context.spot || null,

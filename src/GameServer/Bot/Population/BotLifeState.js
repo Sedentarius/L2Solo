@@ -532,6 +532,8 @@ function recordFromSession(session, phase, reason = '') {
         classProgressionLevel: actor.fetchLevel(),
         classProgressionClassId: actor.fetchClassId ? Number(actor.fetchClassId()) : null,
         clanId: actor.fetchClanId ? Number(actor.fetchClanId()) || 0 : 0,
+        clanHallVisit: session.clanHallVisit === undefined ? session.coldLifeState?.stats?.clanHallVisit || null : session.clanHallVisit,
+        clanHallRetryAt: session.clanHallRetryAt ?? session.coldLifeState?.stats?.clanHallRetryAt ?? 0,
         route: currentSpot?.route || null,
         build: GearSkillHints.forCharacter(actor, { role: session.botStatus?.role || null }),
         equipment: equipmentSummaryFromInventory(inventory),
@@ -1124,7 +1126,7 @@ function clearPassivePartyRequests() {
             updatedAt = ?
         WHERE phase = 'cold'
         AND (partyId IS NULL OR partyId = '')
-        AND activity IN ('traveling', 'shopping', 'merchant', 'crafting', 'dead')
+        AND activity IN ('traveling', 'shopping', 'merchant', 'crafting', 'dead', 'clan_hall')
         AND partyRequestStatus = 'open'`,
         [timestamp]
     ]).then((result) => {
@@ -1719,7 +1721,7 @@ const BotLifeState = {
                 -- Replan active combat before it can continue using a stale
                 -- target level or drop-rate estimate.
                 WHEN ${staleRateModelPlan} THEN 0
-                WHEN activity IN ('traveling', 'shopping', 'crafting') THEN 1
+                WHEN activity IN ('traveling', 'shopping', 'crafting', 'clan_hall') THEN 1
                 -- An active equipment plan whose next source is elsewhere
                 -- must get a chance to start gatekeeper travel before the
                 -- ordinary hunting backlog keeps resolving the old spot.
@@ -2509,6 +2511,7 @@ const BotLifeState = {
                 WHERE states.phase = 'cold'
                 AND (states.partyId IS NULL OR states.partyId = '')
                 AND states.activity NOT IN ('traveling', 'shopping', 'merchant', 'crafting', 'dead', 'pk_hunting')
+                AND states.activity <> 'clan_hall'
                 AND COALESCE(CAST(json_extract(states.statsJson, '$.marketSellRetryAfter') AS INTEGER), 0) <= ?
                 AND (states.updatedAt > ?
                     OR (states.updatedAt = ? AND states.characterId > ?))
@@ -2733,6 +2736,7 @@ const BotLifeState = {
                 WHERE states.phase = 'cold'
                 AND (states.partyId IS NULL OR states.partyId = '')
                 AND states.activity NOT IN ('traveling', 'shopping', 'merchant', 'crafting')
+                AND states.activity <> 'clan_hall'
                 AND COALESCE(CAST(json_extract(goals.goalJson, '$.nextReviewAt') AS INTEGER), 0) <= ?
                 ORDER BY goals.updatedAt ASC, states.updatedAt ASC
                 LIMIT ${safeLimit}

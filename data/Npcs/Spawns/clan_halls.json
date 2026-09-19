@@ -1,0 +1,428 @@
+[
+  {
+    "selfId": "auction_clan_halls",
+    "bounds": [],
+    "spawns": [
+      {
+        "selfId": 12861,
+        "name": "Seth",
+        "coords": [
+          {
+            "locX": 19996,
+            "locY": 146216,
+            "locZ": -3112,
+            "head": 57344
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 12893,
+        "name": "Korgen",
+        "coords": [
+          {
+            "locX": 144237,
+            "locY": 27172,
+            "locZ": -2256,
+            "head": 33000
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 12894,
+        "name": "DiMaggio",
+        "coords": [
+          {
+            "locX": 144243,
+            "locY": 28252,
+            "locZ": -2240,
+            "head": 33000
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 12891,
+        "name": "Crissy",
+        "coords": [
+          {
+            "locX": 145473,
+            "locY": 25295,
+            "locZ": -2112,
+            "head": 0
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 7767,
+        "name": "Auctioneer",
+        "coords": [
+          {
+            "locX": 148571,
+            "locY": 27095,
+            "locZ": -2200,
+            "head": 32000
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 12892,
+        "name": "Albert",
+        "coords": [
+          {
+            "locX": 150532,
+            "locY": 26500,
+            "locZ": -2248,
+            "head": 0
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 12890,
+        "name": "Dianne",
+        "coords": [
+          {
+            "locX": 150416,
+            "locY": 23605,
+            "locZ": -2112,
+            "head": 0
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 12889,
+        "name": "Carey",
+        "coords": [
+          {
+            "locX": 149358,
+            "locY": 23189,
+            "locZ": -2128,
+            "head": 33500
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 12835,
+        "name": "Emma",
+        "coords": [
+          {
+            "locX": 78652,
+            "locY": 148280,
+            "locZ": -3584,
+            "head": 46703
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 12836,
+        "name": "Gladys",
+        "coords": [
+          {
+            "locX": 81133,
+            "locY": 151537,
+            "locZ": -3520,
+            "head": 29124
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 12834,
+        "name": "Bianca",
+        "coords": [
+          {
+            "locX": 83568,
+            "locY": 145264,
+            "locZ": -3392,
+            "head": 35307
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 12833,
+        "name": "Adrienne",
+        "coords": [
+          {
+            "locX": 81876,
+            "locY": 145392,
+            "locZ": -3512,
+            "head": 60088
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 12837,
+        "name": "Regina",
+        "coords": [
+          {
+            "locX": 81920,
+            "locY": 151968,
+            "locZ": -3512,
+            "head": 61174
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      },
+      {
+        "selfId": 12850,
+        "name": "Winker",
+        "coords": [
+          {
+            "locX": -84282,
+            "locY": 155597,
+            "locZ": -3160,
+            "head": 48512
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 12849,
+        "name": "Kalis",
+        "coords": [
+          {
+            "locX": -84276,
+            "locY": 153321,
+            "locZ": -3160,
+            "head": 0
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 12848,
+        "name": "Bremmer",
+        "coords": [
+          {
+            "locX": -84596,
+            "locY": 152253,
+            "locZ": -3120,
+            "head": 53248
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 12847,
+        "name": "Horner",
+        "coords": [
+          {
+            "locX": -79587,
+            "locY": 151436,
+            "locZ": -3040,
+            "head": 8192
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 12846,
+        "name": "Ruben",
+        "coords": [
+          {
+            "locX": -79357,
+            "locY": 150232,
+            "locZ": -3040,
+            "head": 40000
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 7767,
+        "name": "Auctioneer",
+        "coords": [
+          {
+            "locX": -81376,
+            "locY": 151715,
+            "locZ": -3128,
+            "head": 49152
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 12851,
+        "name": "Black",
+        "coords": [
+          {
+            "locX": -16159,
+            "locY": 123728,
+            "locZ": -3096,
+            "head": 53248
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 12852,
+        "name": "Dillon",
+        "coords": [
+          {
+            "locX": -12866,
+            "locY": 124166,
+            "locZ": -3096,
+            "head": 57344
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 12853,
+        "name": "Boyer",
+        "coords": [
+          {
+            "locX": -14852,
+            "locY": 125413,
+            "locZ": -3128,
+            "head": 16384
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 12854,
+        "name": "Tim",
+        "coords": [
+          {
+            "locX": -13745,
+            "locY": 125573,
+            "locZ": -3128,
+            "head": 32768
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 7767,
+        "name": "Auctioneer",
+        "coords": [
+          {
+            "locX": -14767,
+            "locY": 122955,
+            "locZ": -3112,
+            "head": 0
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 12862,
+        "name": "Ron",
+        "coords": [
+          {
+            "locX": 17621,
+            "locY": 144920,
+            "locZ": -3032,
+            "head": 12288
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 12863,
+        "name": "Flynn",
+        "coords": [
+          {
+            "locX": 18634,
+            "locY": 143342,
+            "locZ": -3008,
+            "head": 64500
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 7767,
+        "name": "Auctioneer",
+        "coords": [
+          {
+            "locX": 18853,
+            "locY": 145939,
+            "locZ": -3072,
+            "head": 49152
+          }
+        ],
+        "total": 1,
+        "respawn": 5,
+        "bias": 0
+      },
+      {
+        "selfId": 7767,
+        "name": "Auctioneer",
+        "coords": [
+          {
+            "locX": 81424,
+            "locY": 149728,
+            "locZ": -3464,
+            "head": 49000
+          }
+        ],
+        "total": 1,
+        "respawn": 60,
+        "bias": 0
+      }
+    ]
+  }
+]

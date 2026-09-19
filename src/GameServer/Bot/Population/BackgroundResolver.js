@@ -128,7 +128,7 @@ function coldPassiveRegenAdd(state, skillId, stat) {
     return Number(C4SkillRules.resolve({ selfId: skillId, level: skillLevel }).stats?.[stat]) || 0;
 }
 
-function coldRestRegenPerTick(state) {
+function coldRestRegenPerTick(state, options = {}) {
     const level = Math.max(1, Number(state.level || midpointBand(state.levelBand)) || 1);
     const classId = Number(state.stats?.classId ?? state.classId);
     const template = (DataCache.classTemplates || []).find((entry) => Number(entry.classId) === classId) || {};
@@ -140,7 +140,7 @@ function coldRestRegenPerTick(state) {
     const mp = ((mpBase * Formulas.calcLevelMod(level) * Formulas.calcBaseMod.MEN(Number(baseStats.men) || 1))
         + coldPassiveRegenAdd(state, 229, 'regMpAdd')) * 1.5;
 
-    return { hp: Math.max(0, hp), mp: Math.max(0, mp) };
+    return { hp: Math.max(0, hp) * (options.hpMultiplier || 1), mp: Math.max(0, mp) * (options.mpMultiplier || 1) };
 }
 
 function requiresManaRecovery(state, options = {}) {
@@ -162,7 +162,7 @@ function estimateRestMs(state, vitals, options = {}) {
     const maxMp = Number(vitals.maxMp || vitals.mp || 1);
     const missingHp = Math.max(0, maxHp - Number(vitals.hp || 0));
     const missingMp = Math.max(0, maxMp - Number(vitals.mp || 0));
-    const regen = coldRestRegenPerTick(state);
+    const regen = coldRestRegenPerTick(state, options);
     const hpSeconds = missingHp / Math.max(0.01, regen.hp / 3);
     const mpSeconds = requiresManaRecovery(state, options)
         ? missingMp / Math.max(0.01, regen.mp / 3)
@@ -196,7 +196,7 @@ function resolveRest(state, elapsedMs, timestamp, options = {}) {
         mp: Math.max(0, Number(state.vitals?.mp || 0)),
         maxMp: combat.maxMp
     };
-    const regen = coldRestRegenPerTick(state);
+    const regen = coldRestRegenPerTick(state, options);
     const ticks = Math.max(0, Number(elapsedMs) || 0) / 3000;
     vitals.hp = Math.min(vitals.maxHp, vitals.hp + regen.hp * ticks);
     vitals.mp = Math.min(vitals.maxMp, vitals.mp + regen.mp * ticks);

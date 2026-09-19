@@ -96,6 +96,7 @@ Database.init(() => {
     }).then(() => ClanService.init()).then(async () => {
         GeodataEngine.init();
         await World.init();
+        await invoke('GameServer/ClanHall/Runtime').start();
         const AfkTrade = invoke('GameServer/AfkTrade/AfkTradeService');
         await AfkTrade.init();
 

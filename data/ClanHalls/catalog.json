@@ -1,0 +1,661 @@
+{
+  "revision": "fdc7e33af5d69067b41a6ee7cc7c07fe7aa35975",
+  "source": "https://gitlab.com/TheDnR/l2j-lisvus",
+  "halls": [
+    {
+      "id": 22,
+      "name": "Moonstone Hall",
+      "town": "Gludio",
+      "grade": 2,
+      "minimumBid": 20000000,
+      "weeklyRent": 500000,
+      "spawn": {
+        "locX": -15975,
+        "locY": 123562,
+        "locZ": -3101
+      },
+      "bounds": {
+        "minX": -16400,
+        "maxX": -15551,
+        "minY": 123275,
+        "maxY": 123850,
+        "minZ": -3200,
+        "maxZ": -3000
+      },
+      "managerIds": [
+        12851
+      ]
+    },
+    {
+      "id": 23,
+      "name": "Onyx Hall",
+      "town": "Gludio",
+      "grade": 2,
+      "minimumBid": 20000000,
+      "weeklyRent": 500000,
+      "spawn": {
+        "locX": -14950,
+        "locY": 125575,
+        "locZ": -3128
+      },
+      "bounds": {
+        "minX": -15100,
+        "maxX": -14800,
+        "minY": 125350,
+        "maxY": 125800,
+        "minZ": -3200,
+        "maxZ": -3000
+      },
+      "managerIds": [
+        12853
+      ]
+    },
+    {
+      "id": 24,
+      "name": "Topaz Hall",
+      "town": "Gludio",
+      "grade": 2,
+      "minimumBid": 20000000,
+      "weeklyRent": 500000,
+      "spawn": {
+        "locX": -13875,
+        "locY": 125375,
+        "locZ": -3128
+      },
+      "bounds": {
+        "minX": -14050,
+        "maxX": -13700,
+        "minY": 125050,
+        "maxY": 125700,
+        "minZ": -3200,
+        "maxZ": -3000
+      },
+      "managerIds": [
+        12854
+      ]
+    },
+    {
+      "id": 25,
+      "name": "Ruby Hall",
+      "town": "Gludio",
+      "grade": 2,
+      "minimumBid": 20000000,
+      "weeklyRent": 500000,
+      "spawn": {
+        "locX": -12625,
+        "locY": 124075,
+        "locZ": -3096
+      },
+      "bounds": {
+        "minX": -12950,
+        "maxX": -12300,
+        "minY": 123900,
+        "maxY": 124250,
+        "minZ": -3200,
+        "maxZ": -3000
+      },
+      "managerIds": [
+        12852
+      ]
+    },
+    {
+      "id": 26,
+      "name": "Crystal Hall",
+      "town": "Gludin",
+      "grade": 2,
+      "minimumBid": 20000000,
+      "weeklyRent": 500000,
+      "spawn": {
+        "locX": -84475,
+        "locY": 151950,
+        "locZ": -3123
+      },
+      "bounds": {
+        "minX": -84700,
+        "maxX": -84250,
+        "minY": 151550,
+        "maxY": 152350,
+        "minZ": -3200,
+        "maxZ": -3000
+      },
+      "managerIds": [
+        12848
+      ]
+    },
+    {
+      "id": 27,
+      "name": "Onyx Hall",
+      "town": "Gludin",
+      "grade": 2,
+      "minimumBid": 20000000,
+      "weeklyRent": 500000,
+      "spawn": {
+        "locX": -83875,
+        "locY": 153325,
+        "locZ": -3159
+      },
+      "bounds": {
+        "minX": -84200,
+        "maxX": -83550,
+        "minY": 153050,
+        "maxY": 153600,
+        "minZ": -3200,
+        "maxZ": -3000
+      },
+      "managerIds": [
+        12849
+      ]
+    },
+    {
+      "id": 28,
+      "name": "Sapphire Hall",
+      "town": "Gludin",
+      "grade": 2,
+      "minimumBid": 20000000,
+      "weeklyRent": 500000,
+      "spawn": {
+        "locX": -83800,
+        "locY": 155500,
+        "locZ": -3160
+      },
+      "bounds": {
+        "minX": -84100,
+        "maxX": -83500,
+        "minY": 155300,
+        "maxY": 155700,
+        "minZ": -3200,
+        "maxZ": -3000
+      },
+      "managerIds": [
+        12850
+      ]
+    },
+    {
+      "id": 29,
+      "name": "Moonstone Hall",
+      "town": "Gludin",
+      "grade": 2,
+      "minimumBid": 20000000,
+      "weeklyRent": 500000,
+      "spawn": {
+        "locX": -79800,
+        "locY": 149625,
+        "locZ": -3038
+      },
+      "bounds": {
+        "minX": -80100,
+        "maxX": -79500,
+        "minY": 149400,
+        "maxY": 149850,
+        "minZ": -3200,
+        "maxZ": -3000
+      },
+      "managerIds": [
+        12846
+      ]
+    },
+    {
+      "id": 30,
+      "name": "Emerald Hall",
+      "town": "Gludin",
+      "grade": 2,
+      "minimumBid": 20000000,
+      "weeklyRent": 500000,
+      "spawn": {
+        "locX": -79500,
+        "locY": 151800,
+        "locZ": -3041
+      },
+      "bounds": {
+        "minX": -79700,
+        "maxX": -79300,
+        "minY": 151350,
+        "maxY": 152250,
+        "minZ": -3200,
+        "maxZ": -3000
+      },
+      "managerIds": [
+        12847
+      ]
+    },
+    {
+      "id": 31,
+      "name": "The Atramental Barracks",
+      "town": "Dion",
+      "grade": 1,
+      "minimumBid": 8000000,
+      "weeklyRent": 200000,
+      "spawn": {
+        "locX": 17700,
+        "locY": 145075,
+        "locZ": -3036
+      },
+      "bounds": {
+        "minX": 17400,
+        "maxX": 18000,
+        "minY": 144800,
+        "maxY": 145350,
+        "minZ": -3200,
+        "maxZ": -3000
+      },
+      "managerIds": [
+        12862
+      ]
+    },
+    {
+      "id": 32,
+      "name": "The Scarlet Barracks",
+      "town": "Dion",
+      "grade": 1,
+      "minimumBid": 8000000,
+      "weeklyRent": 200000,
+      "spawn": {
+        "locX": 18725,
+        "locY": 143350,
+        "locZ": -3010
+      },
+      "bounds": {
+        "minX": 18600,
+        "maxX": 18850,
+        "minY": 143100,
+        "maxY": 143600,
+        "minZ": -3200,
+        "maxZ": -3000
+      },
+      "managerIds": [
+        12863
+      ]
+    },
+    {
+      "id": 33,
+      "name": "The Viridian Barracks",
+      "town": "Dion",
+      "grade": 1,
+      "minimumBid": 8000000,
+      "weeklyRent": 200000,
+      "spawn": {
+        "locX": 20175,
+        "locY": 146150,
+        "locZ": -3111
+      },
+      "bounds": {
+        "minX": 19950,
+        "maxX": 20400,
+        "minY": 146000,
+        "maxY": 146300,
+        "minZ": -3200,
+        "maxZ": -3000
+      },
+      "managerIds": [
+        12861
+      ]
+    },
+    {
+      "id": 36,
+      "name": "The Golden Chamber",
+      "town": "Aden",
+      "grade": 3,
+      "minimumBid": 50000000,
+      "weeklyRent": 1000000,
+      "spawn": {
+        "locX": 149134,
+        "locY": 23139,
+        "locZ": -2160
+      },
+      "bounds": {
+        "minX": 148844,
+        "maxX": 149424,
+        "minY": 22709,
+        "maxY": 23569,
+        "minZ": -2200,
+        "maxZ": -2000
+      },
+      "managerIds": [
+        12889
+      ]
+    },
+    {
+      "id": 37,
+      "name": "The Silver Chamber",
+      "town": "Aden",
+      "grade": 3,
+      "minimumBid": 50000000,
+      "weeklyRent": 1000000,
+      "spawn": {
+        "locX": 150643,
+        "locY": 23653,
+        "locZ": -2150
+      },
+      "bounds": {
+        "minX": 150343,
+        "maxX": 150943,
+        "minY": 23193,
+        "maxY": 24113,
+        "minZ": -2200,
+        "maxZ": -2000
+      },
+      "managerIds": [
+        12890
+      ]
+    },
+    {
+      "id": 38,
+      "name": "The Mithril Chamber",
+      "town": "Aden",
+      "grade": 3,
+      "minimumBid": 50000000,
+      "weeklyRent": 1000000,
+      "spawn": {
+        "locX": 145667,
+        "locY": 25355,
+        "locZ": -2150
+      },
+      "bounds": {
+        "minX": 145362,
+        "maxX": 145972,
+        "minY": 24890,
+        "maxY": 25820,
+        "minZ": -2200,
+        "maxZ": -2000
+      },
+      "managerIds": [
+        12891
+      ]
+    },
+    {
+      "id": 39,
+      "name": "Silver Manor",
+      "town": "Aden",
+      "grade": 3,
+      "minimumBid": 50000000,
+      "weeklyRent": 1000000,
+      "spawn": {
+        "locX": 150748,
+        "locY": 26540,
+        "locZ": -2280
+      },
+      "bounds": {
+        "minX": 150460,
+        "maxX": 151036,
+        "minY": 26108,
+        "maxY": 26972,
+        "minZ": -2300,
+        "maxZ": -2000
+      },
+      "managerIds": [
+        12892
+      ]
+    },
+    {
+      "id": 40,
+      "name": "Gold Manor",
+      "town": "Aden",
+      "grade": 3,
+      "minimumBid": 50000000,
+      "weeklyRent": 1000000,
+      "spawn": {
+        "locX": 143991,
+        "locY": 27091,
+        "locZ": -2290
+      },
+      "bounds": {
+        "minX": 143701,
+        "maxX": 144281,
+        "minY": 26661,
+        "maxY": 27521,
+        "minZ": -2300,
+        "maxZ": -2000
+      },
+      "managerIds": [
+        12893
+      ]
+    },
+    {
+      "id": 41,
+      "name": "The Bronze Chamber",
+      "town": "Aden",
+      "grade": 3,
+      "minimumBid": 50000000,
+      "weeklyRent": 1000000,
+      "spawn": {
+        "locX": 144014,
+        "locY": 28202,
+        "locZ": -2280
+      },
+      "bounds": {
+        "minX": 143704,
+        "maxX": 144324,
+        "minY": 27734,
+        "maxY": 28670,
+        "minZ": -2300,
+        "maxZ": -2000
+      },
+      "managerIds": [
+        12894
+      ]
+    },
+    {
+      "id": 42,
+      "name": "The Golden Chamber",
+      "town": "Giran",
+      "grade": 3,
+      "minimumBid": 50000000,
+      "weeklyRent": 1000000,
+      "spawn": {
+        "locX": 78590,
+        "locY": 148101,
+        "locZ": -3581
+      },
+      "bounds": {
+        "minX": 78059,
+        "maxX": 79122,
+        "minY": 147906,
+        "maxY": 148296,
+        "minZ": -3600,
+        "maxZ": -3400
+      },
+      "managerIds": [
+        12835
+      ]
+    },
+    {
+      "id": 43,
+      "name": "The Silver Chamber",
+      "town": "Giran",
+      "grade": 3,
+      "minimumBid": 50000000,
+      "weeklyRent": 1000000,
+      "spawn": {
+        "locX": 82056,
+        "locY": 145336,
+        "locZ": -3520
+      },
+      "bounds": {
+        "minX": 81859,
+        "maxX": 82254,
+        "minY": 144802,
+        "maxY": 145870,
+        "minZ": -3600,
+        "maxZ": -3400
+      },
+      "managerIds": [
+        12833
+      ]
+    },
+    {
+      "id": 44,
+      "name": "The Mithril Chamber",
+      "town": "Giran",
+      "grade": 3,
+      "minimumBid": 50000000,
+      "weeklyRent": 1000000,
+      "spawn": {
+        "locX": 83393,
+        "locY": 145313,
+        "locZ": -3389
+      },
+      "bounds": {
+        "minX": 83195,
+        "maxX": 83591,
+        "minY": 144779,
+        "maxY": 145847,
+        "minZ": -3500,
+        "maxZ": -3357
+      },
+      "managerIds": [
+        12834
+      ]
+    },
+    {
+      "id": 45,
+      "name": "The Bronze Chamber",
+      "town": "Giran",
+      "grade": 3,
+      "minimumBid": 50000000,
+      "weeklyRent": 1000000,
+      "spawn": {
+        "locX": 80971,
+        "locY": 151587,
+        "locZ": -3517
+      },
+      "bounds": {
+        "minX": 80773,
+        "maxX": 81169,
+        "minY": 151053,
+        "maxY": 152121,
+        "minZ": -3600,
+        "maxZ": -3400
+      },
+      "managerIds": [
+        12836
+      ]
+    },
+    {
+      "id": 46,
+      "name": "Silver Manor",
+      "town": "Giran",
+      "grade": 3,
+      "minimumBid": 50000000,
+      "weeklyRent": 1000000,
+      "spawn": {
+        "locX": 82101,
+        "locY": 151911,
+        "locZ": -3520
+      },
+      "bounds": {
+        "minX": 81903,
+        "maxX": 82299,
+        "minY": 151377,
+        "maxY": 152445,
+        "minZ": -3600,
+        "maxZ": -3400
+      },
+      "managerIds": [
+        12837
+      ]
+    },
+    {
+      "id": 47,
+      "name": "Moonstone Hall",
+      "town": "Goddard",
+      "grade": 3,
+      "minimumBid": 50000000,
+      "weeklyRent": 1000000,
+      "spawn": {
+        "locX": 146025,
+        "locY": -55534,
+        "locZ": -2765
+      },
+      "bounds": {
+        "minX": 145606,
+        "maxX": 146439,
+        "minY": -55883,
+        "maxY": -55288,
+        "minZ": -2800,
+        "maxZ": -2600
+      },
+      "managerIds": [
+        12898
+      ]
+    },
+    {
+      "id": 48,
+      "name": "Onyx Hall",
+      "town": "Goddard",
+      "grade": 3,
+      "minimumBid": 50000000,
+      "weeklyRent": 1000000,
+      "spawn": {
+        "locX": 146901,
+        "locY": -56857,
+        "locZ": -2765
+      },
+      "bounds": {
+        "minX": 146486,
+        "maxX": 147299,
+        "minY": -57388,
+        "maxY": -56438,
+        "minZ": -2800,
+        "maxZ": -2600
+      },
+      "managerIds": [
+        12897
+      ]
+    },
+    {
+      "id": 49,
+      "name": "Emerald Hall",
+      "town": "Goddard",
+      "grade": 3,
+      "minimumBid": 50000000,
+      "weeklyRent": 1000000,
+      "spawn": {
+        "locX": 148479,
+        "locY": -56874,
+        "locZ": -2765
+      },
+      "bounds": {
+        "minX": 148120,
+        "maxX": 148958,
+        "minY": -57355,
+        "maxY": -56409,
+        "minZ": -2800,
+        "maxZ": -2600
+      },
+      "managerIds": [
+        12896
+      ]
+    },
+    {
+      "id": 50,
+      "name": "Sapphire Hall",
+      "town": "Goddard",
+      "grade": 3,
+      "minimumBid": 50000000,
+      "weeklyRent": 1000000,
+      "spawn": {
+        "locX": 149390,
+        "locY": -55587,
+        "locZ": -2765
+      },
+      "bounds": {
+        "minX": 148970,
+        "maxX": 149852,
+        "minY": -55874,
+        "maxY": -55291,
+        "minZ": -2800,
+        "maxZ": -2600
+      },
+      "managerIds": [
+        12895
+      ]
+    }
+  ],
+  "auctioneerIds": [
+    7767,
+    7768,
+    7769,
+    7770,
+    7771
+  ]
+}

@@ -68,8 +68,9 @@ class Automation extends SelectedModel {
             && typeof creature.fetchMaxCp === 'function'
             && typeof creature.setCp === 'function';
         const maxCp = hasCp ? creature.fetchMaxCp() : 0;
-        const minHp = Math.min(creature.fetchHp() + this.fetchRevHpAmount(creature), maxHp);
-        const minMp = Math.min(creature.fetchMp() + this.fetchRevMpAmount(creature), maxMp);
+        const hall = require('./ClanHall/Runtime');
+        const minHp = Math.min(creature.fetchHp() + this.fetchRevHpAmount(creature) * hall.regen(creature, 'hp'), maxHp);
+        const minMp = Math.min(creature.fetchMp() + this.fetchRevMpAmount(creature) * hall.regen(creature, 'mp'), maxMp);
         const minCp = hasCp
             ? Math.min(creature.fetchCp() + this.fetchRevCpAmount(creature), maxCp)
             : 0;

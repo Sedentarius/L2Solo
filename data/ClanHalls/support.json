@@ -1,0 +1,468 @@
+{
+  "1": [
+    {
+      "id": 1204,
+      "level": 1,
+      "name": "Wind Walk Lvl.1"
+    },
+    {
+      "id": 1257,
+      "level": 1,
+      "name": "Decrease Weight Lvl.1"
+    },
+    {
+      "id": 1040,
+      "level": 1,
+      "name": "Shield Lvl.1"
+    },
+    {
+      "id": 1035,
+      "level": 1,
+      "name": "Mental Shield Lvl.1"
+    },
+    {
+      "id": 1068,
+      "level": 1,
+      "name": "Might Lvl.1"
+    }
+  ],
+  "2": [
+    {
+      "id": 1204,
+      "level": 2,
+      "name": "Wind Walk Lvl.2"
+    },
+    {
+      "id": 1257,
+      "level": 3,
+      "name": "Decrease Weight Lvl.3"
+    },
+    {
+      "id": 1040,
+      "level": 3,
+      "name": "Shield Lvl.3"
+    },
+    {
+      "id": 1035,
+      "level": 4,
+      "name": "Mental Shield Lvl.4"
+    },
+    {
+      "id": 1068,
+      "level": 3,
+      "name": "Might Lvl.3"
+    }
+  ],
+  "3": [
+    {
+      "id": 1204,
+      "level": 2,
+      "name": "Wind Walk Lvl.2"
+    },
+    {
+      "id": 1257,
+      "level": 3,
+      "name": "Decrease Weight Lvl.3"
+    },
+    {
+      "id": 1040,
+      "level": 3,
+      "name": "Shield Lvl.3"
+    },
+    {
+      "id": 1035,
+      "level": 4,
+      "name": "Mental Shield Lvl.4"
+    },
+    {
+      "id": 1068,
+      "level": 3,
+      "name": "Might Lvl.3"
+    }
+  ],
+  "4": [
+    {
+      "id": 1204,
+      "level": 2,
+      "name": "Wind Walk Lvl.2"
+    },
+    {
+      "id": 1257,
+      "level": 3,
+      "name": "Decrease Weight Lvl.3"
+    },
+    {
+      "id": 1040,
+      "level": 3,
+      "name": "Shield Lvl.3"
+    },
+    {
+      "id": 1035,
+      "level": 4,
+      "name": "Mental Shield Lvl.4"
+    },
+    {
+      "id": 1068,
+      "level": 3,
+      "name": "Might Lvl.3"
+    },
+    {
+      "id": 1045,
+      "level": 2,
+      "name": "Bless The Body Lvl.2"
+    },
+    {
+      "id": 1036,
+      "level": 1,
+      "name": "Magic Barrier Lvl.1"
+    },
+    {
+      "id": 1259,
+      "level": 1,
+      "name": "Resist Shock Lvl.1"
+    },
+    {
+      "id": 1048,
+      "level": 2,
+      "name": "Bless the Soul Lvl.2"
+    }
+  ],
+  "5": [
+    {
+      "id": 1204,
+      "level": 2,
+      "name": "Wind Walk Lvl.2"
+    },
+    {
+      "id": 1257,
+      "level": 3,
+      "name": "Decrease Weight Lvl.3"
+    },
+    {
+      "id": 1040,
+      "level": 3,
+      "name": "Shield Lvl.3"
+    },
+    {
+      "id": 1035,
+      "level": 4,
+      "name": "Mental Shield Lvl.4"
+    },
+    {
+      "id": 1068,
+      "level": 3,
+      "name": "Might Lvl.3"
+    },
+    {
+      "id": 1045,
+      "level": 2,
+      "name": "Bless The Body Lvl.2"
+    },
+    {
+      "id": 1036,
+      "level": 1,
+      "name": "Magic Barrier Lvl.1"
+    },
+    {
+      "id": 1259,
+      "level": 1,
+      "name": "Resist Shock Lvl.1"
+    },
+    {
+      "id": 1048,
+      "level": 2,
+      "name": "Bless the Soul Lvl.2"
+    },
+    {
+      "id": 1078,
+      "level": 2,
+      "name": "Greater Concentration Lvl.2"
+    },
+    {
+      "id": 1062,
+      "level": 1,
+      "name": "Berserker Spirit Lvl.1"
+    },
+    {
+      "id": 1243,
+      "level": 2,
+      "name": "Bless Shield Lvl.2"
+    },
+    {
+      "id": 1240,
+      "level": 1,
+      "name": "Guidance Lvl.1"
+    },
+    {
+      "id": 1268,
+      "level": 1,
+      "name": "Vampiric Rage Lvl.1"
+    }
+  ],
+  "6": [
+    {
+      "id": 1204,
+      "level": 2,
+      "name": "Wind Walk Lvl.2"
+    },
+    {
+      "id": 1257,
+      "level": 3,
+      "name": "Decrease Weight Lvl.3"
+    },
+    {
+      "id": 1040,
+      "level": 3,
+      "name": "Shield Lvl.3"
+    },
+    {
+      "id": 1035,
+      "level": 4,
+      "name": "Mental Shield Lvl.4"
+    },
+    {
+      "id": 1068,
+      "level": 3,
+      "name": "Might Lvl.3"
+    },
+    {
+      "id": 1045,
+      "level": 2,
+      "name": "Bless The Body Lvl.2"
+    },
+    {
+      "id": 1036,
+      "level": 1,
+      "name": "Magic Barrier Lvl.1"
+    },
+    {
+      "id": 1259,
+      "level": 1,
+      "name": "Resist Shock Lvl.1"
+    },
+    {
+      "id": 1048,
+      "level": 2,
+      "name": "Bless the Soul Lvl.2"
+    },
+    {
+      "id": 1078,
+      "level": 2,
+      "name": "Greater Concentration Lvl.2"
+    },
+    {
+      "id": 1062,
+      "level": 1,
+      "name": "Berserk Spirit Lvl.1"
+    },
+    {
+      "id": 1243,
+      "level": 2,
+      "name": "Bless Shield Lvl.2"
+    },
+    {
+      "id": 1240,
+      "level": 1,
+      "name": "Guidance Lvl.1"
+    },
+    {
+      "id": 1268,
+      "level": 1,
+      "name": "Vampiric Rage Lvl.1"
+    },
+    {
+      "id": 1085,
+      "level": 1,
+      "name": "Acumen Lvl.1"
+    },
+    {
+      "id": 1059,
+      "level": 1,
+      "name": "Empower Lvl.1"
+    },
+    {
+      "id": 1086,
+      "level": 1,
+      "name": "Haste Lvl.1"
+    },
+    {
+      "id": 1077,
+      "level": 1,
+      "name": "Focus Lvl.1"
+    },
+    {
+      "id": 1242,
+      "level": 1,
+      "name": "Death Whisper Lvl.1"
+    }
+  ],
+  "7": [
+    {
+      "id": 1204,
+      "level": 2,
+      "name": "Wind Walk Lvl.2"
+    },
+    {
+      "id": 1257,
+      "level": 3,
+      "name": "Decrease Weight Lvl.3"
+    },
+    {
+      "id": 1040,
+      "level": 3,
+      "name": "Shield Lvl.3"
+    },
+    {
+      "id": 1035,
+      "level": 4,
+      "name": "Mental Shield Lvl.4"
+    },
+    {
+      "id": 1068,
+      "level": 3,
+      "name": "Might Lvl.3"
+    },
+    {
+      "id": 1045,
+      "level": 6,
+      "name": "Bless The Body Lvl.6"
+    },
+    {
+      "id": 1036,
+      "level": 2,
+      "name": "Magic Barrier Lvl.2"
+    },
+    {
+      "id": 1259,
+      "level": 4,
+      "name": "Resist Shock Lvl.4"
+    },
+    {
+      "id": 1048,
+      "level": 6,
+      "name": "Bless the Soul Lvl.6"
+    },
+    {
+      "id": 1078,
+      "level": 6,
+      "name": "Greater Concentration Lvl.6"
+    },
+    {
+      "id": 1062,
+      "level": 2,
+      "name": "Berserk Spirit Lvl.2"
+    },
+    {
+      "id": 1243,
+      "level": 6,
+      "name": "Bless Shield Lvl.6"
+    },
+    {
+      "id": 1240,
+      "level": 3,
+      "name": "Guidance Lvl.3"
+    },
+    {
+      "id": 1268,
+      "level": 4,
+      "name": "Vampiric Rage Lvl.4"
+    }
+  ],
+  "8": [
+    {
+      "id": 1204,
+      "level": 2,
+      "name": "Wind Walk Lvl.2"
+    },
+    {
+      "id": 1257,
+      "level": 3,
+      "name": "Decrease Weight Lvl.3"
+    },
+    {
+      "id": 1040,
+      "level": 3,
+      "name": "Shield Lvl.3"
+    },
+    {
+      "id": 1035,
+      "level": 4,
+      "name": "Mental Shield Lvl.4"
+    },
+    {
+      "id": 1068,
+      "level": 3,
+      "name": "Might Lvl.3"
+    },
+    {
+      "id": 1045,
+      "level": 6,
+      "name": "Bless The Body Lvl.6"
+    },
+    {
+      "id": 1036,
+      "level": 2,
+      "name": "Magic Barrier Lvl.2"
+    },
+    {
+      "id": 1259,
+      "level": 4,
+      "name": "Resist Shock Lvl.4"
+    },
+    {
+      "id": 1048,
+      "level": 6,
+      "name": "Bless the Soul Lvl.6"
+    },
+    {
+      "id": 1078,
+      "level": 6,
+      "name": "Greater Concentration Lvl.6"
+    },
+    {
+      "id": 1062,
+      "level": 2,
+      "name": "Berserk Spirit Lvl.2"
+    },
+    {
+      "id": 1243,
+      "level": 6,
+      "name": "Bless Shield Lvl.6"
+    },
+    {
+      "id": 1240,
+      "level": 3,
+      "name": "Guidance Lvl.3"
+    },
+    {
+      "id": 1268,
+      "level": 4,
+      "name": "Vampiric Rage Lvl.4"
+    },
+    {
+      "id": 1085,
+      "level": 1,
+      "name": "Acumen Lvl.1"
+    },
+    {
+      "id": 1059,
+      "level": 1,
+      "name": "Empower Lvl.1"
+    },
+    {
+      "id": 1086,
+      "level": 1,
+      "name": "Haste Lvl.1"
+    },
+    {
+      "id": 1077,
+      "level": 1,
+      "name": "Focus Lvl.1"
+    },
+    {
+      "id": 1242,
+      "level": 1,
+      "name": "Death Whisper Lvl.1"
+    }
+  ]
+}

@@ -14,6 +14,12 @@ function npcTalk(session, npc) {
         title
     };
 
+    const ClanHallNpc = require('../../ClanHall/Npc');
+    if (ClanHallNpc.handles(npc.fetchSelfId())) {
+        ClanHallNpc.render(session).catch(error => utils.infoWarn('ClanHall', 'NPC dialog failed: %s', error.message));
+        return;
+    }
+
     if (Number(npc.fetchSelfId()) === 8126) {
         invoke('GameServer/Items/MammonUnsealService').menu(session);
         return;

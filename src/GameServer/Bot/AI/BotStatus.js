@@ -129,6 +129,7 @@ function findTarget(session, bot) {
 function inferIntent(session, bot, vitals, target) {
     if (session.pvpDefense) return session.pvpDefense.action === 'fight' ? 'defend_self_and_party' : 'escape_player';
     if (bot.state.fetchDead()) return 'revive';
+    if (session.clanHallVisit) return 'refresh_buffs';
     if (session.plan === 'resting') return 'recover';
     if (session.plan === 'shopping') return 'restock';
     if (session.plan === 'getting_buffed') {

@@ -15,7 +15,7 @@ function pledgeShowMemberListAll(clan, activeActor) {
         .writeD(clan.crestId || 0)
         .writeD(clan.level || 0)
         .writeD(0) // Castle
-        .writeD(0) // Hideout / Clan Hall
+        .writeD(require('../../ClanHall/Runtime').owned(clan.id)?.id || 0) // Clan Hall
         .writeD(0)
         .writeD(Number(activeActor?.fetchLevel?.() || 0))
         .writeD(clan.dissolvingExpiryTime > Date.now() ? 3 : 0)

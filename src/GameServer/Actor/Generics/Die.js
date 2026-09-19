@@ -51,7 +51,7 @@ function die(session, actor, context = {}) {
     // have been cancelled.
     actor.state.destructor();
     actor.state.setDead(true);
-    session.dataSendToMeAndOthers(ServerResponse.die(actor.fetchId()), actor);
+    session.dataSendToMeAndOthers(ServerResponse.die(actor.fetchId(), false, !!require('../../ClanHall/Runtime').destination(actor)), actor);
     invoke('GameServer/Clan/ClanAllianceService').onDeath(victimSession);
     // ReceivedHit is invoked with the attacker's session, while the actor
     // being killed owns the authoritative victim session. Arena death must
