@@ -67,6 +67,9 @@ const Q417 = require("../src/GameServer/Quest/quests/Q417_PathToScavenger");
 const Q418 = require("../src/GameServer/Quest/quests/Q418_PathToArtisan");
 
 async function main() {
+  // Reviewed declarative definitions render NPC/item names, so the datapack
+  // must be loaded before any of them answer a talk.
+  invoke("GameServer/DataCache").init();
   assert.strictEqual(Q001.eventNpc("start"), 7048);
   assert.strictEqual(Q002.eventNpc("reward"), 7223);
   assert.strictEqual(Q003.eventNpc("start"), 7141);
@@ -216,21 +219,36 @@ async function main() {
   await Promise.all([first, second]);
   assert.deepStrictEqual(order, ["first-start", "first-end", "second"]);
 
+  // Q003 now completes through the shared atomic quest step. The invariant is
+  // unchanged: a cond-2 player whose hand-in items vanished is never rewarded,
+  // and no quest transaction is attempted for them.
+  const QuestStepModule = require('../src/GameServer/Quest/QuestStep');
+  const guardedApply = QuestStepModule.apply;
+  let guardedSteps = 0;
+  QuestStepModule.apply = async (...args) => { guardedSteps += 1; return guardedApply(...args); };
   const state = {
     session: {
       actor: {
-        backpack: { fetchItemFromSelfId: () => null },
+        backpack: { fetchItems: () => [], fetchItemFromSelfId: () => null },
       },
     },
     isCompleted: () => false,
     isStarted: () => true,
     getInt: () => 2,
+    get: () => undefined,
+    variables: {},
   };
   const html = await Q003.onTalk(state, { fetchSelfId: () => 7141 });
+  QuestStepModule.apply = guardedApply;
   assert.match(
     html,
-    /all three ritual ingredients/,
+    /Bring all required quest items/,
     "Q003 must not reward a player whose hand-in items disappeared",
+  );
+  assert.strictEqual(
+    guardedSteps,
+    0,
+    "Q003 must not open a quest transaction when the hand-in items are missing",
   );
 
   const originalTake = QuestService.takeItem;
@@ -248,57 +266,62 @@ async function main() {
     calls.push(["give", itemId, amount]);
   QuestService.rewardAdena = async (_, amount) => calls.push(["adena", amount]);
   try {
-    let q002Condition = 1;
-    const q002State = {
-      session: { actor: { fetchLevel: () => 2, fetchRace: () => 1 } },
+    // Q001 and Q002 are reviewed declarative definitions now. Their hand-ins must
+    // commit through a single QuestStep transaction instead of the old sequence
+    // of independent takeItem/giveItem/set writes, so a crash between writes can
+    // no longer duplicate or destroy a quest item.
+    const fakeBackpack = (contents) => {
+      const rows = new Map(contents);
+      return {
+        fetchItems: () => [...rows].filter(([, n]) => n > 0)
+          .map(([selfId, amount]) => ({ fetchSelfId: () => selfId, fetchAmount: () => amount })),
+        fetchItemFromSelfId: (id) => (rows.get(id) ? { fetchAmount: () => rows.get(id) } : null),
+        fetchItemRaw: () => null,
+      };
+    };
+    const declarativeState = (cond, contents) => ({
+      session: { actor: { fetchId: () => 1, fetchLevel: () => 2, fetchRace: () => 1,
+        backpack: fakeBackpack(contents) }, dataSendToMe() {} },
+      state: 'started',
+      variables: { cond: String(cond) },
       isCompleted: () => false,
       isStarted: () => true,
-      getInt: () => q002Condition,
-      set: async (key, value) => {
-        assert.strictEqual(key, "cond");
-        q002Condition = Number(value);
-      },
+      get(key) { return this.variables[key]; },
+      getInt(key) { return Number(this.variables[key]) || 0; },
       playSound: (sound) => calls.push(["sound", sound]),
-    };
-    await Q002.onTalk(q002State, { fetchSelfId: () => 7146 });
-    await Q002.onTalk(q002State, { fetchSelfId: () => 7150 });
-    assert.deepStrictEqual(
-      calls,
-      [
-        ["take", 1092],
-        ["give", 1093, 1],
-        ["sound", "ItemSound.quest_middle"],
-        ["take", 1093],
-        ["give", 1094, 1],
-        ["sound", "ItemSound.quest_middle"],
-      ],
-      "Q002 must replace the gatekeeper letter and issue Herbiel's church letter",
-    );
-    calls.length = 0;
+    });
 
-    let completed = false;
-    await Q001.onTalk(
-      {
-        session: { actor: { fetchLevel: () => 2 } },
-        isCompleted: () => completed,
-        isStarted: () => true,
-        getInt: () => 4,
-        playSound: (sound) => calls.push(["sound", sound]),
-        exit: async () => {
-          completed = true;
-        },
-      },
-      { fetchSelfId: () => 7048 },
-    );
-    assert.deepStrictEqual(
-      calls,
-      [
-        ["take", 1080],
-        ["give", 906, 1],
-        ["sound", "ItemSound.quest_finish"],
-      ],
-      "Q001 must grant one unscaled Necklace of Knowledge and the completion sound",
-    );
+    const steps = [];
+    QuestStep.apply = async (state, options) => {
+      steps.push(options);
+      state.variables = { ...state.variables, ...options.variables };
+      if (options.status) state.state = options.status;
+      return { ok: true };
+    };
+
+    await Q002.onTalk(declarativeState(1, [[1092, 1]]), { fetchSelfId: () => 7146 });
+    assert.strictEqual(steps.length, 1, "Q002's Mirabel hand-in must be one transaction");
+    assert.deepStrictEqual(steps[0].takes, [[1092, 1]], "Q002 consumes Arujien's first letter");
+    assert.deepStrictEqual(steps[0].gives, [[1093, 1]], "Q002 issues the gatekeeper letter");
+    assert.strictEqual(steps[0].variables.cond, "2", "Q002 advances cond in the same transaction");
+
+    steps.length = 0;
+    await Q002.onTalk(declarativeState(2, [[1093, 1]]), { fetchSelfId: () => 7150 });
+    assert.strictEqual(steps.length, 1, "Q002's Herbiel hand-in must be one transaction");
+    assert.deepStrictEqual(steps[0].takes, [[1093, 1]], "Q002 consumes the gatekeeper letter");
+    assert.deepStrictEqual(steps[0].gives, [[1094, 1]], "Q002 issues Herbiel's church letter");
+
+    steps.length = 0;
+    const finalState = declarativeState(4, [[1080, 1]]);
+    await Q001.onTalk(finalState, { fetchSelfId: () => 7048 });
+    assert.strictEqual(steps.length, 1, "Q001's final hand-in must be one transaction");
+    assert.deepStrictEqual(steps[0].takes, [[1080, 1]], "Q001 consumes Baulro's potion");
+    assert.deepStrictEqual(steps[0].gives, [[906, 1]],
+      "Q001 must grant one unscaled Necklace of Knowledge");
+    assert.strictEqual(steps[0].status, "completed", "Q001 completes in the same transaction");
+    assert.deepStrictEqual(calls.filter(([kind]) => kind === "take" || kind === "give"), [],
+      "Q001 and Q002 must no longer issue independent item writes");
+    QuestStep.apply = originalStep;
 
     calls.length = 0;
     const items = new Map();

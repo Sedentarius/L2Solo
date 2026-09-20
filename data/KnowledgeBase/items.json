@@ -560629,6 +560629,31 @@
     }
   },
   {
+    "grade": "none",
+    "id": 7574,
+    "kind": "Other.Quest",
+    "name": "Very Expensive Necklace",
+    "sources": {
+      "drops": [],
+      "spoils": []
+    },
+    "template": {
+      "etc": {
+        "consumable": false,
+        "stackable": true
+      },
+      "selfId": 7574,
+      "template": {
+        "class1": 4,
+        "class2": 3,
+        "kind": "Other.Quest",
+        "mass": 0,
+        "name": "Very Expensive Necklace",
+        "price": 0
+      }
+    }
+  },
+  {
     "grade": "s",
     "id": 7575,
     "kind": "Weapon.Bow",

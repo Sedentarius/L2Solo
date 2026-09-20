@@ -3,7 +3,7 @@
 const page = (name, text) => `<html><body>${name}:<br>${text}</body></html>`;
 const count = (state, id) => state.session.actor.backpack.fetchItems()
     .filter(item => item.fetchSelfId() === id).reduce((sum,item) => sum + item.fetchAmount(), 0);
-const TYPES = new Set(['TALK', 'DELIVER', 'KILL_COLLECT', 'COLLECT', 'COMPLETE', 'CHOICE']);
+const TYPES = new Set(['TALK', 'DELIVER', 'KILL_COLLECT', 'COLLECT', 'COMPLETE', 'CHOICE', 'GATHER']);
 const objectives = stage => stage.objectives || (stage.item ? [[stage.item,stage.count]] : []);
 
 function validate(definition) {
@@ -13,6 +13,9 @@ function validate(definition) {
         if(stage.type==='CHOICE' && (!stage.choices?.length || stage.choices.some(c=>!c.event||!Number.isInteger(c.npc)||(!c.finish&&(!Number.isInteger(c.next)||c.next<1||c.next>definition.stages.length))))) throw new Error('Unresolved quest choice');
         if (stage.type === 'KILL_COLLECT' && (!stage.drops?.length || !objectives(stage).length || objectives(stage).some(([id,n])=>!Number.isInteger(id)||!Number.isInteger(n)||n<1))) throw new Error('Unresolved collection mechanic');
         if (stage.type === 'COLLECT' && (!stage.drops?.length || !stage.prices?.length || !stage.npc)) throw new Error('Unresolved bounty mechanic');
+        // GATHER hands out one authored parcel per NPC, in any order, once each.
+        if (stage.type === 'GATHER' && (!stage.sources?.length || !objectives(stage).length
+            || stage.sources.some(src => !Number.isInteger(src.npc) || !src.gives?.length))) throw new Error('Unresolved gather set');
         if(stage.deliveries && (stage.type!=='DELIVER' || !stage.deliveries.length || !stage.objectives?.length || stage.deliveries.some(d=>!Number.isInteger(d.npc)||!d.takes?.length))) throw new Error('Unresolved delivery set');
         for (const drop of stage.drops || []) {
             if (!Number.isInteger(drop.npc) || !Number.isFinite(drop.chance) || drop.chance <= 0 || drop.chance > 1) throw new Error('Unresolved quest drop');
@@ -25,17 +28,25 @@ function create(definition) {
     const exchanges=d.exchanges||[];
     const choices=d.stages.flatMap(s=>s.choices||[]);
     const deliveries=d.stages.flatMap(s=>s.deliveries||[]);
+    const sources=d.stages.flatMap(s=>s.sources||[]);
+    // A delivery stage may name the NPC who re-issues a lost carried document.
+    const recoveries=d.stages.map(s=>s.recover).filter(Boolean);
     const rewardReceipts=[...d.stages,...deliveries].filter(s=>s.onceReward).map(s=>`reward:${s.onceReward.key}`);
-    const npcs = [...new Set([d.startNpc, ...exchanges.map(e=>e.npc), ...choices.map(c=>c.npc), ...deliveries.map(s=>s.npc), ...d.stages.map(s => s.npc).filter(Boolean)])];
-    const allowed = state => Number(state.session.actor.fetchLevel()) >= d.minLevel &&
+    const npcs = [...new Set([d.startNpc, ...exchanges.map(e=>e.npc), ...choices.map(c=>c.npc), ...deliveries.map(s=>s.npc), ...sources.map(s=>s.npc), ...recoveries.map(s=>s.npc), ...d.stages.map(s => s.npc).filter(Boolean)])];
+    // Identity decides whether this NPC speaks about the quest at all; a missing
+    // prerequisite item still lets the NPC explain what is needed.
+    const identity = state => Number(state.session.actor.fetchLevel()) >= d.minLevel &&
         (d.race === undefined || Number(state.session.actor.fetchRace()) === d.race) &&
-        (!d.classes || d.classes.includes(Number(state.session.actor.fetchClassId()))) &&
-        (!d.requiredAny || d.requiredAny.some(id=>count(state,id)>0));
+        (!d.races || d.races.includes(Number(state.session.actor.fetchRace()))) &&
+        (!d.classes || d.classes.includes(Number(state.session.actor.fetchClassId())));
+    const holdsPrerequisite = state => !d.requiredAny || d.requiredAny.some(id=>count(state,id)>0);
+    const allowed = state => identity(state) && holdsPrerequisite(state);
     const step = (state, options) => require('./QuestStep').apply(state, options);
     const stageFor = state => d.stages[state.getInt('cond') - 1];
     const itemName=id=>invoke('GameServer/DataCache').items.find(x=>x.selfId===id)?.template?.name||`item ${id}`;
     const npcName=id=>invoke('GameServer/DataCache').npcs.find(x=>x.selfId===id)?.template?.name||`NPC ${id}`;
-    const describe=stage=>stage?.deliveries ? `Deliver the supplies to ${stage.deliveries.map(c=>npcName(c.npc)).join(', ')}.`
+    const describe=stage=>stage?.sources ? `Collect what you need from ${stage.sources.map(c=>npcName(c.npc)).join(', ')}.`
+        : stage?.deliveries ? `Deliver the supplies to ${stage.deliveries.map(c=>npcName(c.npc)).join(', ')}.`
         : stage?.choices ? `Consult ${[...new Set(stage.choices.map(c=>npcName(c.npc)))].join(' and ')}.` : stage?.drops
         ? `Hunt ${[...new Set(stage.drops.map(x=>npcName(x.npc)))].join(', ')}. ${objectives(stage).map(([id,n])=>`Collect ${n} ${itemName(id)}.`).join(' ')} Return to ${npcName(d.startNpc)}.`
         : `Visit ${npcName(stage?.npc||d.startNpc)}. ${(stage?.takes||[]).map(([id,n])=>`Bring ${n} ${itemName(id)}.`).join(' ')}`;
@@ -57,6 +68,7 @@ function create(definition) {
     };
     const questItemIds=[...new Set([...(d.questItems||[]), ...(d.startItems||[]).map(x=>x[0]),
         ...deliveries.flatMap(s=>[...(s.takes||[]),...(s.gives||[])].map(x=>x[0])),
+        ...sources.flatMap(s=>[...(s.takes||[]),...(s.gives||[])].map(x=>x[0])),
         ...d.stages.flatMap(s=>[s.item,...(s.drops||[]).flatMap(x=>[x.item,...(x.outcomes||[]).map(o=>o.item)]),
             ...(s.transforms||[]).map(x=>x.to),...(s.sideDrops||[]).map(x=>x.item),
             ...(s.gives||[]).map(x=>x[0]),...(s.takes||[]).map(x=>x[0])]).filter(Boolean)])];
@@ -79,6 +91,30 @@ function create(definition) {
         if(finish) takes=cleanup(state);
         await step(state,{takes,...rewards(state,{adena}),status:finish?'created':'started',variables:{...state.variables,
             cond:String(finish?0:next),cashouts:String(state.getInt('cashouts')+(paid?1:0))}});
+    }
+    async function gather(state,stage,source) {
+        const takes=source.takes||[];
+        // Each source hands out its parcel exactly once, and only once its own
+        // price is payable. The cond advance shares the hand-out transaction.
+        if(source.gives.every(([id,n])=>count(state,id)>=n)) return null;
+        if(!takes.every(([id,n])=>count(state,id)>=n)) return null;
+        const delta=(rows,id)=>rows.filter(([item])=>item===id).reduce((sum,[,n])=>sum+n,0);
+        const complete=objectives(stage).every(([id,n])=>
+            count(state,id)-delta(takes,id)+delta(source.gives,id)>=n);
+        await step(state,{takes,gives:source.gives,variables:{...state.variables,
+            cond:String(state.getInt('cond')+(complete?1:0))}});
+        state.playSound(complete?'ItemSound.quest_middle':'ItemSound.quest_itemget');
+        return page(d.name,complete?describe(stageFor(state)):describe(stage));
+    }
+    // Databases written before quest steps became atomic can hold a delivery
+    // stage whose carried document was never persisted. The authored giver
+    // re-issues it once; the stage never advances and no reward is paid.
+    async function reissue(state,stage) {
+        const missing=(stage.takes||[]).filter(([id,n])=>count(state,id)<n);
+        if(!missing.length) return null;
+        await step(state,{gives:stage.recover.gives,variables:{...state.variables}});
+        state.playSound('ItemSound.quest_itemget');
+        return page(d.name,describe(stage));
     }
     async function deliver(state,stage,offer=stage) {
         const takes=[...(offer.takes||[]),...(offer.consumeAll||[]).map(id=>[id,count(state,id)]).filter(([,n])=>n>0)];
@@ -103,12 +139,17 @@ function create(definition) {
         id: d.id, name: d.name, definition: d, npcs, startNpcs: [d.startNpc],
         killNpcs: [...new Set(d.stages.flatMap(s => (s.drops || []).map(x => x.npc)))],
         eventNpc: event => choices.find(c=>c.event===event)?.npc ?? exchanges.find(e=>e.event===event)?.npc
-            ?? deliveries.find(s=>s.event===event)?.npc ?? d.stages.find(s=>s.event===event)?.npc
+            ?? deliveries.find(s=>s.event===event)?.npc ?? sources.find(s=>s.event===event)?.npc
+            ?? recoveries.find(s=>s.event===event)?.npc
+            ?? d.stages.find(s=>s.event===event)?.npc
             ?? d.stages.find(s=>s.cashoutEvent===event)?.npc
             ?? (event==='start'?d.startNpc:event==='quit' && d.stages.some(s=>s.type==='COLLECT')?(d.quitNpc||d.startNpc):null),
-        canTalk: state => state.isStarted() || state.isCompleted() || allowed(state),
+        canTalk: state => state.isStarted() || state.isCompleted() || identity(state),
         async onEvent(state, event) {
             const current=state.isStarted() && stageFor(state);
+            const source=current && current.type==='GATHER' && current.sources.find(s=>s.event===event);
+            if(source) return gather(state,current,source);
+            if(current && current.recover?.event===event) return reissue(state,current);
             const delivery=current && (current.event===event ? current : current.deliveries?.find(s=>s.event===event));
             if(event && delivery) return deliver(state,current,delivery);
             const choice=state.isStarted() && stageFor(state)?.choices?.find(c=>c.event===event);
@@ -153,8 +194,13 @@ function create(definition) {
             const id = Number(npc.fetchSelfId());
             if (!npcs.includes(id)) return null;
             if (state.isCompleted()) return page(d.name, 'You have already completed this quest.');
-            if (!state.isStarted()) return page(d.name, allowed(state) && id === d.startNpc
-                ? `<a action="bypass -h quest ${d.id} start">Accept.</a>` : `This task requires level ${d.minLevel} and the appropriate race or class.`);
+            if (!state.isStarted()) {
+                if (allowed(state) && id === d.startNpc) return page(d.name, `<a action="bypass -h quest ${d.id} start">Accept.</a>`);
+                if (identity(state) && !holdsPrerequisite(state)) {
+                    return page(d.name, `You must first bring ${d.requiredAny.map(itemName).join(' or ')}.`);
+                }
+                return page(d.name, `This task requires level ${d.minLevel} and the appropriate race or class.`);
+            }
             const stage = stageFor(state);
             if (!stage) return null;
             const offers=exchanges.filter(e=>e.npc===id && e.cond===state.getInt('cond'));
@@ -168,7 +214,20 @@ function create(definition) {
                 if(offer.event) return page(d.name,`<a action="bypass -h quest ${d.id} ${offer.event}">Deliver supplies.</a>`);
                 return deliver(state,stage,offer);
             }
+            if(stage.type==='GATHER') {
+                const source=stage.sources.find(s=>s.npc===id);
+                if(!source) return page(d.name,describe(stage));
+                if(source.gives.every(([item,n])=>count(state,item)>=n)) return page(d.name,'You already have that.');
+                if((source.takes||[]).some(([item,n])=>count(state,item)<n)) return page(d.name,describe(stage));
+                if(source.event) return page(d.name,`<a action="bypass -h quest ${d.id} ${source.event}">${source.label||'Continue.'}</a>`);
+                return (await gather(state,stage,source)) || page(d.name,describe(stage));
+            }
             if (stage.type === 'KILL_COLLECT') return page(d.name, `${describe(stage)}<br>${objectives(stage).map(([id,n])=>`${itemName(id)}: ${count(state,id)}/${n}`).join('<br>')}`);
+            if(stage.recover && id===stage.recover.npc
+                && (stage.takes||[]).some(([item,n])=>count(state,item)<n)) {
+                if(stage.recover.event) return page(d.name,`<a action="bypass -h quest ${d.id} ${stage.recover.event}">${stage.recover.label||'Continue.'}</a>`);
+                return (await reissue(state,stage)) || page(d.name,describe(stage));
+            }
             if (id !== stage.npc) return page(d.name, stage.text || 'Continue your task.');
             if(stage.event) return page(d.name,`<a action="bypass -h quest ${d.id} ${stage.event}">Continue.</a>`);
             if (stage.type === 'COLLECT') {

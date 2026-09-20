@@ -7,6 +7,7 @@ const tests = [
     'tests/test_c4_inventory_validation.js',
     'tests/test_first_profession_proof.js',
     'tests/test_c4_declarative_quests.js',
+    'tests/test_c4_starter_quests.js',
     'tests/test_bot_quest_bridge_foundation.js',
     'tests/test_bot_quest_bridge_kill_collect.js',
     'tests/test_bot_quest_bridge_deliver_complete.js',

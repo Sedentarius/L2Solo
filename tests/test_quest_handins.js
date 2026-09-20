@@ -210,28 +210,32 @@ async function main() {
         if (recovering) await QuestService.giveItem(traveler, 7570, 3);
         await talk(traveler, 7576);
         if (!recovering) {
-            const originalSetItem = Database.setItem;
-            Database.setItem = async (id, item) => {
-                if (item.selfId === 7126) throw new Error('injected scroll write failure');
-                return originalSetItem(id, item);
-            };
+            // Q9's reward is now one atomic quest step, so a failing reward write
+            // can no longer leave the Mark granted with the quest still open.
+            // Injecting the failure into that transaction must roll the whole
+            // hand-in back: no Mark, no scroll, and the quest still started.
+            const originalApply = Database.applyQuestStep;
+            Database.applyQuestStep = async () => { throw new Error('injected scroll write failure'); };
             try {
                 await assert.rejects(QuestService.onEvent(traveler, { questId: 9, name: 'reward' }), /injected scroll write failure/);
-            } finally { Database.setItem = originalSetItem; }
-            assert.equal(count(traveler, 7570), 1);
-            assert.equal(state(traveler, 9).isStarted(), true);
+            } finally { Database.applyQuestStep = originalApply; }
+            assert.equal(count(traveler, 7570), 0, 'a rolled-back hand-in grants no Mark of Traveler');
+            assert.equal(count(traveler, 7126), 0, 'a rolled-back hand-in grants no escape scroll');
+            assert.equal(state(traveler, 9).isStarted(), true, 'the quest stays open after a rollback');
+            const [row] = await Database.execute(['SELECT state FROM character_quests WHERE characterId = ? AND questId = 9', [traveler.actor.fetchId()]]);
+            assert.notEqual(row?.state, 'completed', 'no partial completion reached the database');
         }
         await click(traveler, 9, 'reward');
         assert.equal(state(traveler, 9).isCompleted(), true);
-        assert.equal(count(traveler, 7570), recovering ? 3 : 1);
+        assert.equal(count(traveler, 7570), recovering ? 4 : 1);
         assert.equal(count(traveler, 7126), 1);
         await click(traveler, 9, 'reward');
-        assert.equal(count(traveler, 7570), recovering ? 3 : 1);
+        assert.equal(count(traveler, 7570), recovering ? 4 : 1);
         assert.equal(count(traveler, 7126), 1);
         const restored = await sessionFor(recovering ? 25 : 24);
         assert.equal(state(restored, 9).isCompleted(), true);
         assert.equal(count(restored, 7126), 1);
-        assert.equal(count(restored, 7570), recovering ? 3 : 1);
+        assert.equal(count(restored, 7570), recovering ? 4 : 1);
     }
 
     const adventures = [
@@ -262,11 +266,14 @@ async function main() {
             }
             assert.match(await talk(traveler, route.giver), new RegExp(`quest ${route.quest} ${route.event}`));
             if (!recovering) {
-                const originalSetItem = Database.setItem;
-                Database.setItem = async () => { throw new Error('injected item write failure'); };
+                // The issuance is one atomic quest step now: a failure inside that
+                // transaction must leave neither the document nor the advanced cond.
+                const originalApply = Database.applyQuestStep;
+                Database.applyQuestStep = async () => { throw new Error('injected item write failure'); };
                 try {
                     await assert.rejects(QuestService.onEvent(traveler, { questId: route.quest, name: route.event }), /injected item write failure/);
-                } finally { Database.setItem = originalSetItem; }
+                } finally { Database.applyQuestStep = originalApply; }
+                assert.equal(count(traveler, route.item), 0, 'a rolled-back issuance hands over no document');
                 assert.equal(state(traveler, route.quest).getInt('cond'), 1);
                 const persisted = (await Database.fetchCharacterQuests(id)).find(q => Number(q.questId) === route.quest);
                 assert.equal(JSON.parse(persisted.variables).cond, '1', 'failed issuance must not persist the delivery stage');

@@ -5,7 +5,7 @@ const {spawnSync}=require('child_process');
 const root=path.resolve(__dirname,'..');
 const {audit,hash}=require('./check-c4-quests');
 const tests=[
-    'tests/test_c4_inventory_validation.js','tests/test_c4_declarative_quests.js','tests/test_first_profession_proof.js',
+    'tests/test_c4_inventory_validation.js','tests/test_c4_declarative_quests.js','tests/test_c4_starter_quests.js','tests/test_first_profession_proof.js',
     'tests/test_quest_registry_integrity.js','tests/test_quest_availability.js','tests/test_quest_packets.js','tests/test_quest_runtime.js',
     'tests/test_change_class.js','tests/test_bot_class_progression.js','tests/test_bot_population_state.js',
     'tests/test_bot_quest_bridge_foundation.js','tests/test_bot_quest_bridge_kill_collect.js',

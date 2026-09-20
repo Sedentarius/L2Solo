@@ -1,6 +1,2 @@
-module.exports = require("./TravelerRoute")({
-  id: 46,
-  name: "Once More In the Arms of the Mother Tree",
-  race: 1,
-  reward: 7555,
-});
+// Compatibility entry point; gameplay uses shared atomic quest steps.
+module.exports = require('../DeclarativeQuest').create(require('../StarterQuestDefinitions').find(d => d.id === 46));
