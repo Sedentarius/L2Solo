@@ -260,6 +260,41 @@ try {
         'rejecting stale travel must preserve the newly selected equipment alternative');
     assert.strictEqual(rejectedRoute.state.timing.nextResolveAt, 3000,
         'a rejected route should retry promptly instead of entering an unbounded wait');
+    const Risk = invoke('GameServer/Bot/Population/SpotRiskPolicy');
+    assert.strictEqual(rejectedRoute.state.stats.lastReason, 'route_capacity_full');
+    assert(Risk.excludedSpotIdsForStates([rejectedRoute.state], 3000).has(targetSpot.id),
+        'a rejected capacity claim must not select the same destination on its immediate retry');
+    assert(!Risk.excludedSpotIdsForStates([rejectedRoute.state], 2000 + Risk.CAPACITY_BACKOFF_MS).has(targetSpot.id),
+        'temporary congestion must expire after one minute, without death-backoff escalation');
+    assert.strictEqual(rejectedRoute.state.stats.spotBackoffs, undefined);
+    for (const intent of [
+        { equipmentPlan: { status: 'active', strategy: 'craft', next: { spotId: targetSpot.id } } },
+        { partyRequest: { status: 'open', spotId: targetSpot.id } },
+        { clanPartyObjective: { status: 'deferred', spotId: targetSpot.id } }
+    ]) {
+        const waiting = { activity: 'hunting', stats: { ...intent,
+            capacityBackoffs: rejectedRoute.state.stats.capacityBackoffs } };
+        assert.strictEqual(SpotProfiles.farmIntentSpotId(waiting, 3000), null,
+            'rejected intents must not retain a phantom capacity reservation');
+        assert.strictEqual(SpotProfiles.farmIntentSpotId(waiting, 62000), targetSpot.id);
+    }
+
+    const originalCache = SpotProfiles.cache;
+    const savedFind = SpotProfiles.findForState;
+    const savedPhysical = SpotService.findCurrentSpot;
+    try {
+        const free = { ...targetSpot, id: 'free-destination' };
+        SpotProfiles.cache = [targetSpot, free];
+        SpotProfiles.findForState = originalFindForState;
+        SpotService.findCurrentSpot = () => null;
+        const rerouted = SpotProfiles.findForState({ ...rejectedRoute.state, level: 16 },
+            { timestamp: 3000, occupancy: {} });
+        assert.strictEqual(rerouted?.id, free.id, 'the next route must use a free alternative even with an older occupancy snapshot');
+    } finally {
+        SpotProfiles.cache = originalCache;
+        SpotProfiles.findForState = savedFind;
+        SpotService.findCurrentSpot = savedPhysical;
+    }
 
     const safetyRouteState = {
         ...proposedRouteState,

@@ -9,6 +9,7 @@ const BotBuffs       = invoke('GameServer/Bot/AI/BotBuffs');
 const PartyAwareness = invoke('GameServer/Bot/AI/PartyAwareness');
 const BotTargetScorer = invoke('GameServer/Bot/AI/BotTargetScorer');
 const TargetMatchup = invoke('GameServer/Bot/AI/BotTargetMatchup');
+const EncounterReadiness = invoke('GameServer/Bot/AI/BotEncounterReadiness');
 const BotPvpRisk      = invoke('GameServer/Bot/AI/BotPvpRisk');
 const BotRoles        = invoke('GameServer/Bot/AI/BotRoles');
 const SummonerTactics = invoke('GameServer/Bot/AI/SummonerTactics');
@@ -40,8 +41,6 @@ const MAX_SPOT_RELOCATION_MS = 120000;
 const FAILED_SPOT_RETRY_MS = 60000;
 const FULL_TARGET_CANDIDATE_LIMIT = 96;
 const VISIBLE_TARGET_CANDIDATE_LIMIT = 32;
-const ENCOUNTER_BASE_HP_RATIO = 0.70;
-const ENCOUNTER_BASE_MP_RATIO = 0.45;
 
 function isSoloHunter(session) {
     return session.plan === 'hunting' && session.partyCompanion !== true && !session.followPlayerSession;
@@ -134,6 +133,11 @@ function findPreferredMonster(session, bot, radius, options = {}) {
             const npcSpotId = spotIdAt(npc);
             const clan = npc.fetchClanName?.();
             const matchupTarget = TargetMatchup.targetView(npc, matchupStats);
+            const targetMatchup = TargetMatchup.evaluate(matchupProfiles, matchupTarget);
+            if (isSoloHunter(session) && partyActors.length <= 1) {
+                const survival = TargetMatchup.soloSurvival(matchupProfiles, matchupTarget);
+                if (targetMatchup.eligible && !survival.eligible) Object.assign(targetMatchup, survival);
+            }
             const scoreContext = {
                 attackable: npc.fetchAttackable(),
                 raidEntity: BotRaidSafety.isProtectedRaidEntity(npc),
@@ -152,7 +156,7 @@ function findPreferredMonster(session, bot, radius, options = {}) {
                 botOffenseRatio: matchupProfiles.length > 1 ? matchupProfiles.reduce((sum, profile) => sum
                     + (profile.role === 'mage' ? Number(profile.mAtk || 0) / Math.max(1, matchupTarget.mDef || 1)
                         : Number(profile.pAtk || 0) / Math.max(1, matchupTarget.pDef || 1)), 0) : undefined,
-                targetMatchup: TargetMatchup.evaluate(matchupProfiles, matchupTarget),
+                targetMatchup,
                 botPAtk: botCombatStats.pAtk,
                 botMAtk: botCombatStats.mAtk,
                 botPDef: botCombatStats.pDef,
@@ -229,42 +233,10 @@ function clamp(value, min, max) {
 }
 
 function encounterReadiness(bot, target) {
-    const hpRatio = bot.fetchHp() / Math.max(1, bot.fetchMaxHp());
-    const mpRatio = bot.fetchMp() / Math.max(1, bot.fetchMaxMp());
-    const levelGap = Number(target?.fetchLevel?.() || bot.fetchLevel()) - Number(bot.fetchLevel());
-    const targetHpRatio = clamp(
-        Number(target?.fetchHp?.() ?? target?.fetchMaxHp?.() ?? 1) /
-            Math.max(1, Number(target?.fetchMaxHp?.() ?? target?.fetchHp?.() ?? 1)),
-        0,
-        1
-    );
-    const fullTargetHpNeed = clamp(
-        ENCOUNTER_BASE_HP_RATIO + (Math.max(0, levelGap) * 0.04) + (Math.min(0, levelGap) * 0.025),
-        0.55,
-        0.90
-    );
-    const hpNeeded = clamp(0.40 + ((fullTargetHpNeed - 0.40) * targetHpRatio), 0.40, 0.90);
-    const manaDependent = BotRoles.shouldRestForMana(bot);
-    const fullTargetMpNeed = clamp(
-        ENCOUNTER_BASE_MP_RATIO + (Math.max(0, levelGap) * 0.03),
-        0.35,
-        0.70
-    );
-    const mpNeeded = manaDependent
-        ? clamp(0.20 + ((fullTargetMpNeed - 0.20) * targetHpRatio), 0.20, 0.70)
-        : 0;
-    const ready = hpRatio >= hpNeeded && (!manaDependent || mpRatio >= mpNeeded);
-
-    return {
-        ready,
-        reason: hpRatio < hpNeeded ? 'hp_reserve' : (!ready ? 'mp_reserve' : 'ready'),
-        hpRatio,
-        hpNeeded,
-        mpRatio,
-        mpNeeded,
-        targetHpRatio,
-        levelGap
-    };
+    return EncounterReadiness.evaluate({
+        hp: bot.fetchHp(), maxHp: bot.fetchMaxHp(), mp: bot.fetchMp(), maxMp: bot.fetchMaxMp(),
+        level: bot.fetchLevel(), manaDependent: BotRoles.shouldRestForMana(bot)
+    }, { hp: target?.fetchHp?.(), maxHp: target?.fetchMaxHp?.(), level: target?.fetchLevel?.() });
 }
 
 function rememberEncounterReadiness(session, target, readiness) {
@@ -742,6 +714,7 @@ module.exports = {
                     spotRetryAfter: session.spotRetryAfter,
                     minDistance: 1,
                     mode: 'solo',
+                    matchupProfiles: TargetMatchup.actorProfiles([bot]),
                     equipment: equippedItems(bot)
                 });
                 session.lastDecision = {

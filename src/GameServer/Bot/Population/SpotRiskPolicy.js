@@ -6,23 +6,29 @@ const MAX_LOW_WIN_RATE = 0.25;
 const BACKOFF_MS = 60 * 60 * 1000;
 const MAX_BACKOFF_MS = 6 * 60 * 60 * 1000;
 const MAX_BACKOFFS = 8;
+const CAPACITY_BACKOFF_MS = 60000;
+const MAX_FAILED_HUNTS = 3;
+const FAILED_HUNT_RECOVERY_WINS = 3;
 
 function normalizedSpotId(value) {
     const spotId = String(value || '').trim();
     return spotId || null;
 }
 
-function pressureForWindow({ spotId, fights = 0, wins = 0, deaths = 0 } = {}) {
+function pressureForWindow({ spotId, fights = 0, wins = 0, deaths = 0, unrecoveredDeaths = 0, failedHunts = 0 } = {}) {
     const resolved = Math.max(0, Number(fights || 0));
     const won = Math.max(0, Math.min(resolved, Number(wins || 0)));
     const dead = Math.max(0, Number(deaths || 0));
     const deathRate = dead / Math.max(1, resolved);
-    if (dead >= MIN_DEATHS_AT_SPOT && deathRate >= MIN_DEATH_RATE) {
-        return { spotId, deaths: dead, fights: resolved, wins: won, deathRate, winRate: won / Math.max(1, resolved), reason: 'death_pressure' };
+    if ((dead >= MIN_DEATHS_AT_SPOT && deathRate >= MIN_DEATH_RATE) || unrecoveredDeaths >= MIN_DEATHS_AT_SPOT) {
+        return { spotId, deaths: Math.max(dead, unrecoveredDeaths), fights: resolved, wins: won, deathRate, winRate: won / Math.max(1, resolved), reason: 'death_pressure' };
     }
     const winRate = won / Math.max(1, resolved);
     if (resolved >= RISK_WINDOW_FIGHTS && winRate <= MAX_LOW_WIN_RATE) {
         return { spotId, deaths: dead, fights: resolved, wins: won, deathRate, winRate, reason: 'low_win_rate' };
+    }
+    if (failedHunts >= MAX_FAILED_HUNTS) {
+        return { spotId, deaths: dead, fights: resolved, wins: won, deathRate, winRate, reason: 'failed_hunts' };
     }
     return null;
 }
@@ -36,7 +42,9 @@ function recordResolve(previous = {}, sample = {}) {
             spotId,
             fights: previous.windowFights,
             wins: previous.windowWins,
-            deaths: previous.windowDeaths
+            deaths: previous.windowDeaths,
+            unrecoveredDeaths: previous.unrecoveredDeaths,
+            failedHunts: previous.failedHunts
         })
         : null;
     // Keep a failed sample stable until the existing routing pass consumes it.
@@ -47,6 +55,14 @@ function recordResolve(previous = {}, sample = {}) {
         && Number(previous.version || 0) === RISK_WINDOW_VERSION
         && Number(previous.windowFights || 0) < RISK_WINDOW_FIGHTS;
     const base = continueWindow ? previous : {};
+    const deaths = Math.max(0, Number(sample.deaths || 0));
+    const recoveryWins = deaths ? 0 : Math.min(RISK_WINDOW_FIGHTS,
+        (sameSpot ? Number(previous.recoveryWins || 0) : 0) + Math.max(0, Number(sample.wins || 0)));
+    const unrecoveredDeaths = recoveryWins >= RISK_WINDOW_FIGHTS ? 0 : Math.min(MIN_DEATHS_AT_SPOT,
+        (sameSpot ? Number(previous.unrecoveredDeaths ?? previous.windowDeaths ?? 0) : 0) + deaths);
+
+    const failedHuntRecoveryWins = deaths || sample.failedHunts ? 0 : Math.min(FAILED_HUNT_RECOVERY_WINS,
+        (sameSpot ? Number(previous.failedHuntRecoveryWins || 0) : 0) + Math.max(0, Number(sample.wins || 0)));
 
     return {
         version: RISK_WINDOW_VERSION,
@@ -65,7 +81,14 @@ function recordResolve(previous = {}, sample = {}) {
             : Math.max(0, Number(sample.totalWins || 0)),
         windowFights: Math.max(0, Number(base.windowFights || 0)) + Math.max(0, Number(sample.fights || 0)),
         windowWins: Math.max(0, Number(base.windowWins || 0)) + Math.max(0, Number(sample.wins || 0)),
-        windowDeaths: Math.max(0, Number(base.windowDeaths || 0)) + Math.max(0, Number(sample.deaths || 0))
+        windowDeaths: Math.max(0, Number(base.windowDeaths || 0)) + Math.max(0, Number(sample.deaths || 0)),
+        recoveryWins, unrecoveredDeaths,
+        failedHuntRecoveryWins,
+        // A lucky kill must not erase repeated abandoned fights. Require a
+        // short run of clean wins before trusting the same ground again.
+        failedHunts: Math.min(MAX_FAILED_HUNTS,
+            (sameSpot && failedHuntRecoveryWins < FAILED_HUNT_RECOVERY_WINS && !deaths ? Number(previous.failedHunts || 0) : 0)
+            + Math.max(0, Number(sample.failedHunts || 0)))
     };
 }
 
@@ -79,7 +102,9 @@ function deathPressure(state = {}, spotId = state.spotId) {
             spotId: expectedSpotId,
             fights: risk.windowFights,
             wins: risk.windowWins,
-            deaths: risk.windowDeaths
+            deaths: risk.windowDeaths,
+            unrecoveredDeaths: risk.unrecoveredDeaths,
+            failedHunts: risk.failedHunts
         });
     }
 
@@ -88,6 +113,30 @@ function deathPressure(state = {}, spotId = state.spotId) {
     const deathRate = deaths / Math.max(1, fights);
     if (deaths < MIN_DEATHS_AT_SPOT || deathRate < MIN_DEATH_RATE) return null;
     return { spotId: expectedSpotId, deaths, fights, deathRate };
+}
+
+function recoveryFor(state = {}) {
+    if (state.party?.partyId || state.partyId) return null;
+    if (state.stats?.huntingRecovery) return state.stats.huntingRecovery;
+    // Adopt a persisted failed visit on the first routing pass after upgrade.
+    const deaths = Number(state.stats?.spotRisk?.unrecoveredDeaths ?? state.stats?.spotRisk?.windowDeaths ?? 0);
+    if (!deaths && !deathPressure(state)) return null;
+    return { levelPenalty: Math.min(6, Math.max(2, deaths * 2)), cleanWins: 0,
+        resumeExp: Math.max(Number(state.exp || 0), Number(state.stats?.deathExperience?.expBeforeDeath || 0)) };
+}
+
+function recordRecovery(state, { deaths = 0, wins = 0, exp, expBeforeDeath, pressure } = {}) {
+    let recovery = recoveryFor(state);
+    if (deaths || pressure) {
+        recovery = { levelPenalty: Math.min(6, Math.max(2, Number(recovery?.levelPenalty || 0) + (deaths ? 2 : 0))),
+            cleanWins: 0, resumeExp: Math.max(Number(recovery?.resumeExp || 0), Number(expBeforeDeath ?? state.exp ?? 0)) };
+    } else if (recovery?.levelPenalty > 0) {
+        recovery = { ...recovery, cleanWins: Math.min(RISK_WINDOW_FIGHTS, Number(recovery.cleanWins || 0) + wins) };
+        if (recovery.cleanWins >= RISK_WINDOW_FIGHTS && exp >= recovery.resumeExp) {
+            recovery = { ...recovery, levelPenalty: Math.max(0, recovery.levelPenalty - 2), cleanWins: 0 };
+        }
+    }
+    return recovery;
 }
 
 function activeBackoffs(state = {}, timestamp = Date.now()) {
@@ -127,12 +176,24 @@ function excludedSpotIdsForStates(states = [], timestamp = Date.now()) {
     const excluded = new Set();
     (states || []).forEach((state) => {
         activeBackoffs(state, timestamp).forEach((entry) => excluded.add(entry.spotId));
+        (state.stats?.capacityBackoffs || []).filter(entry => Number(entry.until) > timestamp)
+            .forEach(entry => excluded.add(String(entry.spotId)));
         const avoid = state.stats?.coldCompetition?.avoid;
         if (normalizedSpotId(avoid?.spotId) && Number(avoid.until) > timestamp) excluded.add(normalizedSpotId(avoid.spotId));
         const pressure = deathPressure(state);
         if (pressure) excluded.add(pressure.spotId);
     });
     return excluded;
+}
+
+function withCapacityBackoff(state, spotId, timestamp = Date.now()) {
+    const retained = (state.stats?.capacityBackoffs || [])
+        .filter(entry => entry.until > timestamp && String(entry.spotId) !== String(spotId));
+    return { ...state, stats: { ...state.stats,
+        lastReason: 'route_capacity_full',
+        capacityBackoffs: [...retained, { spotId: String(spotId), until: timestamp + CAPACITY_BACKOFF_MS }]
+            .slice(-MAX_BACKOFFS)
+    } };
 }
 
 function withBackoff(state = {}, backoff = null, timestamp = Date.now()) {
@@ -184,7 +245,13 @@ module.exports = {
     BACKOFF_MS,
     MAX_BACKOFF_MS,
     MAX_BACKOFFS,
+    CAPACITY_BACKOFF_MS,
+    MAX_FAILED_HUNTS,
+    FAILED_HUNT_RECOVERY_WINS,
+    withCapacityBackoff,
     recordResolve,
+    recoveryFor,
+    recordRecovery,
     deathPressure,
     activeBackoffs,
     backoffForStates,

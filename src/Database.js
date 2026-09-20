@@ -1802,7 +1802,7 @@ function coldSimulationPartition(row, options = {}) {
     }
     if (stats.warehouseWorkflow || stats.warehouseErrand) return { ok: false, reason: 'warehouse_state' };
     if (stats.marketStore || stats.marketReturn) return { ok: false, reason: 'market_state' };
-    if (stats.craftShop || stats.craftStationId || stats.craftReturn) return { ok: false, reason: 'craft_state' };
+    if (stats.craftShop || stats.craftStationId) return { ok: false, reason: 'craft_state' };
     if (stats.supplyErrand) return { ok: false, reason: 'player_workflow' };
     return { ok: true, reason: row.partyId ? 'background_party_cold' : 'simple_solo_cold' };
 }
@@ -3124,11 +3124,21 @@ const Database = {
         if (!batch.length) return Promise.resolve([]);
         return inTransaction(() => batch.map((request) => {
             const characterId = Number(request.characterId);
-            const expectedRevision = Number(request.expectedRevision);
+            let expectedRevision = Number(request.expectedRevision);
             const ownerId = String(request.ownerId || COLD_SIMULATION_OWNER);
             const leaseId = String(request.leaseId || '');
             const timestamp = Number(request.timestamp || now());
             const row = coldSimulationRow(characterId);
+            // A clan inventory write can advance the row while retaining the
+            // same lease. Its rejected proposal must still relinquish that
+            // lease; otherwise renewal keeps an abandoned owner alive forever.
+            // This opt-in path changes ownership only, never character data.
+            if (request.releaseInvalidated === true && row?.phase === 'cold'
+                && leaseId && row.simulationLeaseId === leaseId
+                && row.simulationOwner === ownerId
+                && Number(row.simulationRevision) > expectedRevision) {
+                expectedRevision = Number(row.simulationRevision);
+            }
             const conflict = coldSimulationConflict(row, { expectedRevision, ownerId, leaseId }, timestamp);
             if (conflict !== 'cas_failed') return { ok: false, characterId, reason: conflict };
             const revision = expectedRevision + 1;

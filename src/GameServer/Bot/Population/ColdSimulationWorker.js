@@ -163,12 +163,14 @@ function startKernel(config = {}) {
             const previousPlan = state.stats?.equipmentPlan || null;
             const spots = planningSpots;
             const occupancy = currentPlanningOccupancy(timestamp);
-            const npcPlanningOptions = planningNpcCatalog.plannerOptions;
+            const excludedSpotIds = invoke('GameServer/Bot/Population/SpotRiskPolicy')
+                .excludedSpotIdsForStates([state], timestamp);
+            const npcPlanningOptions = { ...planningNpcCatalog.plannerOptions, excludedSpotIds };
             const replanContext = GearAcquisitionPlanner.replanContextFor(state, previousPlan, timestamp);
             const clanGoalLocked = GearAcquisitionPlanner.clanGoalPlanLocked(state, previousPlan);
             const availabilitySource = !replanContext.failure && previousPlan?.status === 'active'
                 && ['direct_drop', 'craft'].includes(previousPlan.strategy)
-                ? GearAcquisitionPlanner.bestSourceForPlan(state, previousPlan, spots, { occupancy })
+                ? GearAcquisitionPlanner.bestSourceForPlan(state, previousPlan, spots, { occupancy, excludedSpotIds })
                 : null;
             const availabilityRouteChanged = availabilitySource && (
                 String(availabilitySource.spotId || '') !== String(previousPlan?.next?.spotId || '')
@@ -238,7 +240,7 @@ function startKernel(config = {}) {
                     || (partyRequest?.status === 'deferred'
                         && (acquisitionPlan.partyNeed === 'required' || acquisitionPlan.requiresParty === true)));
             const plannedPartyFallback = partyRouteWaiting
-                ? GearAcquisitionPlanner.safeFallbackForPlan(state, acquisitionPlan, spots, { occupancy })
+                ? GearAcquisitionPlanner.safeFallbackForPlan(state, acquisitionPlan, spots, { occupancy, excludedSpotIds })
                 : null;
             const plannedFallbackSpot = plannedPartyFallback
                 ? spots.find((spot) => String(spot.id) === String(plannedPartyFallback.spotId)) || null
@@ -258,7 +260,7 @@ function startKernel(config = {}) {
                 ? LevelingRoutes.bestSpot(spots.filter((spot) => (
                     Number(spot.minLevel || 1) <= fallbackLevel + 4
                     && Number(spot.maxLevel || spot.minLevel || 1) >= fallbackLevel - 4
-                )), fallbackState, { occupancy })?.spot || null
+                )), fallbackState, { occupancy, excludedSpotIds })?.spot || null
                 : null;
             const fallbackSpot = safePlannedFallback || genericFallback;
             const partyFallback = safePlannedFallback ? plannedPartyFallback : null;

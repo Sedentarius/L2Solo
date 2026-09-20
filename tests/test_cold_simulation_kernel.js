@@ -229,6 +229,15 @@ function state(characterId = 1, overrides = {}) {
     assert.strictEqual(routeStates[0].stats.travel.spotId, 'mid-level-field');
 
     assert.strictEqual(lifecycleKind(state(2, { activity: 'crafting' })), 'command');
+    for (const plan of [{ status: 'complete' }, { status: 'deferred', strategy: 'none' },
+        { status: 'active', strategy: 'craft' }]) {
+        assert.strictEqual(lifecycleKind(state(2, { stats: {
+            craftReturn: { loc: { locX: 1, locY: 2 } }, equipmentPlan: plan
+        } })), 'resolver', 'a saved craft return point must not divert hunting into the command queue');
+    }
+    assert.strictEqual(lifecycleKind(state(2, { stats: { craftReturn: { loc: {} },
+        equipmentPlan: { strategy: 'craft', status: 'ready_to_craft' } } })), 'command',
+    'ready crafting still uses the main-thread crafting workflow');
     assert.strictEqual(lifecycleKind(state(2, { stats: { equipmentPlan: { strategy: 'market' } } })), 'resolver');
     assert.strictEqual(lifecycleKind(state(2, {
         adena: 1000,
@@ -271,6 +280,38 @@ function state(characterId = 1, overrides = {}) {
     assert.strictEqual(commandKernel.scheduleTokens.has(3), true,
         'a same-revision command ACK must restore the consumed due token');
     assert.strictEqual(commandKernel.snapshot().commanding, 0);
+
+    const commandPressureMessages = [];
+    const commandPressureKernel = new ColdSimulationKernel({ resolveSolo: resolver, now: () => now,
+        maxInFlight: 2, maxAtomicPartySize: 9,
+        emit: (type, payload) => commandPressureMessages.push({ type, payload }) });
+    const blockedCommands = [710, 711, 712].map(id => state(id, { activity: 'shopping',
+        timing: { nextResolveAt: now - 2000 } }));
+    blockedCommands.forEach(s => commandPressureKernel.upsert({ state: s }));
+    const waitingMembers = [720, 721, 722].map(id => state(id, { party: { partyId: 'after-commands' },
+        timing: { nextResolveAt: now - 1000 } }));
+    const waitingParty = { partyId: 'after-commands', leaderId: 720, memberIds: [720, 721, 722] };
+    waitingMembers.forEach((s, i) => commandPressureKernel.upsert({ state: s,
+        context: { isPartyLeader: i === 0, party: waitingParty, partyMembers: waitingMembers } }));
+    commandPressureKernel.tick();
+    assert.strictEqual(commandPressureKernel.commanding.size, 2,
+        'lifecycle commands must share the ownership limit with combat claims');
+    await commandPressureKernel.resolveChain;
+    for (const s of blockedCommands.slice(0, 2)) {
+        commandPressureKernel.completeCommand({ characterId: s.characterId, ok: false,
+            reason: 'missing_spot', retryAfterMs: 30000, state: s, context: {} });
+        commandPressureKernel.upsert({ state: s, context: { refreshed: true } });
+        assert.strictEqual(commandPressureKernel.scheduleTokens.get(s.characterId).dueAt, now + 30000,
+            'a failed command with an unchanged state must respect retry delay after a catalog refresh');
+    }
+    commandPressureKernel.tick();
+    await commandPressureKernel.resolveChain;
+    commandPressureKernel.completeCommand({ characterId: 712, ok: false, reason: 'missing_spot',
+        retryAfterMs: 30000, state: blockedCommands[2], context: {} });
+    commandPressureKernel.tick();
+    const resumedParty = commandPressureMessages.find(m => m.type === 'claim_request');
+    assert.deepStrictEqual(resumedParty?.payload.candidates.map(c => c.characterId), [720, 721, 722],
+        'rejected commands must drain so an overdue atomic party can progress');
 
     const transitionKernel = new ColdSimulationKernel({
         resolveSolo: resolver,

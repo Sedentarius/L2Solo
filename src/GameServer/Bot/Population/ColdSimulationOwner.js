@@ -34,7 +34,7 @@ function eligibility(state = {}, options = {}) {
             && invoke('GameServer/Items/C4Unseal').options(item.selfId).length))) return { ok:false, reason:'craft_state' };
     if (stats.warehouseWorkflow || stats.warehouseErrand) return { ok: false, reason: 'warehouse_state' };
     if (stats.marketStore || stats.marketReturn) return { ok: false, reason: 'market_state' };
-    if (stats.craftShop || stats.craftStationId || stats.craftReturn) return { ok: false, reason: 'craft_state' };
+    if (stats.craftShop || stats.craftStationId) return { ok: false, reason: 'craft_state' };
     if (stats.supplyErrand) return { ok: false, reason: 'player_workflow' };
     if (stats.backgroundPartyId && options.allowParty !== true) return { ok: false, reason: 'background_party' };
     if (LEGACY_PLAN_STRATEGIES.has(String(stats.equipmentPlan?.strategy || ''))) {
@@ -357,6 +357,7 @@ function releaseBatch(tokens = [], options = {}) {
         expectedRevision: Number(token.revision),
         ownerId: OWNER_ID,
         leaseId: token.leaseId,
+        releaseInvalidated: options.releaseInvalidated === true,
         timestamp
     }));
     if (!requests.length) return Promise.resolve([]);

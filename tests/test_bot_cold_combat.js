@@ -541,11 +541,16 @@ const focusedResult = BackgroundResolver.resolveSolo({
 assert.deepStrictEqual(focusedResult.debug.foughtNpcIds, [1], 'solo direct-drop farming must fight the requested NPC, not a random spot entry');
 
 const musicSpot = { ...spot, npcSelfIds: [], mob: { hp: 100000, damage: 1 } };
-const singerResult = BackgroundResolver.resolveSolo({ state: singer, spot: musicSpot, elapsedMs: 12000, timestamp, rng: () => 0.1 });
+// Level-75 solo actors must start ready; the old 1000-HP fixture represents
+// an injured singer who now correctly rests before pulling another target.
+const readyMusician = (state, profile) => ({ ...state, vitals: {
+    hp: profile.maxHp, maxHp: profile.maxHp, mp: profile.maxMp, maxMp: profile.maxMp
+} });
+const singerResult = BackgroundResolver.resolveSolo({ state: readyMusician(singer, singerProfile), spot: musicSpot, elapsedMs: 12000, timestamp, rng: () => 0.1 });
 assert(singerResult.debug.musicUses >= 2, 'cold solo combat must cast the Swordsinger songs it learned');
 assert(singerResult.patch.stats.coldCombat.effects.some((effect) => effect.id === 264),
     'a cold solo song must persist on the singer after the fight');
-const dancerResult = BackgroundResolver.resolveSolo({ state: dancer, spot: musicSpot, elapsedMs: 12000, timestamp, rng: () => 0.1 });
+const dancerResult = BackgroundResolver.resolveSolo({ state: readyMusician(dancer, dancerProfile), spot: musicSpot, elapsedMs: 12000, timestamp, rng: () => 0.1 });
 assert(dancerResult.debug.musicUses >= 2, 'cold solo combat must cast the Bladedancer dances it learned');
 assert(dancerResult.patch.stats.coldCombat.effects.some((effect) => effect.id === 271),
     'a cold solo dance must persist on the dancer after the fight');

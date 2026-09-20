@@ -2295,8 +2295,18 @@ const BotLifeState = {
             totalWins: Number(state.stats?.fightsWon || 0),
             deaths: Math.max(0, nextDeaths - previousDeaths),
             fights: Number(result.debug?.fights || 0),
-            wins: Number(result.debug?.wins || 0)
+            wins: Number(result.debug?.wins || 0),
+            // Only completed, abandoned hunts count. Pending encounter slices
+            // and pre-fight recovery have zero completed fights.
+            failedHunts: Math.max(0, Number(result.debug?.fights || 0)
+                - Number(result.debug?.wins || 0) - Math.max(0, nextDeaths - previousDeaths))
         });
+        const soloRiskState = { ...state, spotId: nextSpotId, stats: { ...state.stats, spotRisk } };
+        const soloPressure = !(state.party?.partyId || state.partyId) && SpotRiskPolicy.deathPressure(soloRiskState);
+        const newlyFailedSpot = soloPressure && !SpotRiskPolicy.activeBackoffs(state, timestamp)
+            .some(entry => entry.spotId === nextSpotId);
+        const failedSpotState = newlyFailedSpot ? SpotRiskPolicy.withBackoff(soloRiskState,
+            SpotRiskPolicy.backoffForStates([soloRiskState], nextSpotId, timestamp), timestamp) : null;
         // Resolver patches often carry a projected copy of the previous
         // stats so they can add lifecycle-specific fields such as cooldowns,
         // rest deadlines, travel state, or party affinity.  Merge that copy
@@ -2398,6 +2408,26 @@ const BotLifeState = {
                 // Resolver patches commonly start from the prior state. Keep
                 // the baseline stamped for this resolve's actual destination.
                 spotRisk,
+                // Save the failed ground before revival/physical movement can
+                // change the routing origin and lose its exclusion.
+                ...(failedSpotState ? { spotBackoffs: failedSpotState.stats.spotBackoffs } : {}),
+                ...(!(state.party?.partyId || state.partyId) ? {
+                    huntingRecovery: SpotRiskPolicy.recordRecovery(state, {
+                        deaths: Math.max(0, nextDeaths - previousDeaths),
+                        wins: Number(result.debug?.wins || 0), exp,
+                        expBeforeDeath: experienceAward.totalExp,
+                        pressure: soloPressure
+                    }),
+                    ...(Number(result.debug?.combatMs) > 0 ? {
+                        // The lifecycle owns actual death penalties and capped XP.
+                        // Replace the resolver's provisional gross reward sample.
+                        huntEfficiency: invoke('GameServer/Bot/AI/BotHuntEfficiency').record(state, {
+                            spotId: nextSpotId, timestamp, exp: exp - Number(state.exp || 0),
+                            combatMs: result.debug.combatMs,
+                            recoveryMs: Math.max(0, Number(result.patch?.stats?.restUntil || timestamp) - timestamp)
+                        })
+                    } : {})
+                } : {}),
                 // Party combat carries a projected combat snapshot in patch.stats.
                 // Keep lifecycle telemetry from this resolve authoritative over
                 // that snapshot, which still contains the previous tick's data.

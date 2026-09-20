@@ -637,12 +637,20 @@ function npcForSpot(spot = {}, rng = Math.random, options = {}) {
     const encounterEntries = entries;
     const Matchup = invoke('GameServer/Bot/AI/BotTargetMatchup');
     if (options.matchupProfiles?.length) {
+        let resisted = 0;
         entries = entries.map(entry => {
             const npc = (DataCache.npcs || []).find(n => number(n.selfId) === number(entry.selfId));
-            const match = Matchup.evaluate(options.matchupProfiles, npcCombatStats(npc));
+            const target = npcCombatStats(npc);
+            const match = Matchup.evaluate(options.matchupProfiles, target);
+            if (!match.eligible) resisted += 1;
+            if (options.soloSafety) {
+                match.eligible &&= Matchup.soloSurvival(options.matchupProfiles, target).eligible
+                    && (!options.maxTargetLevel || Number(npc.template?.level || 0) <= options.maxTargetLevel);
+            }
             return { ...entry, match };
         }).filter(entry => entry.match.eligible);
-        if (!entries.length) return { avoided: true, reason: 'target_resistance' };
+        if (!entries.length) return { avoided: true,
+            reason: resisted === encounterEntries.length ? 'target_resistance' : 'no_safe_solo_target' };
     }
     const pickEntry = (candidates) => {
         const weight = entry => Math.max(1, number(entry.count, 1)) * Math.min(1, entry.match?.efficiency ?? 1) ** 2;
@@ -673,6 +681,7 @@ function npcForSpot(spot = {}, rng = Math.random, options = {}) {
     const combat = npcCombatStats(npc);
     return {
         selfId: number(npc.selfId),
+        aggressiveInterruption: !!preferred && selected !== preferred,
         ...combat
     };
 }
