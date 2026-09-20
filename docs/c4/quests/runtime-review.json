@@ -1,0 +1,678 @@
+{
+  "1": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_starter_quests.js"
+    ]
+  },
+  "2": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_starter_quests.js"
+    ]
+  },
+  "3": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_starter_quests.js"
+    ]
+  },
+  "4": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_starter_quests.js"
+    ]
+  },
+  "5": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_starter_quests.js"
+    ]
+  },
+  "6": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_starter_quests.js"
+    ]
+  },
+  "7": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_starter_quests.js"
+    ]
+  },
+  "8": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_starter_quests.js"
+    ]
+  },
+  "9": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_starter_quests.js"
+    ]
+  },
+  "10": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_starter_quests.js"
+    ]
+  },
+  "38": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_lizardman_invader_quests.js"
+    ]
+  },
+  "39": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_lizardman_invader_quests.js"
+    ]
+  },
+  "45": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_starter_quests.js"
+    ]
+  },
+  "46": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_starter_quests.js"
+    ]
+  },
+  "47": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_starter_quests.js"
+    ]
+  },
+  "48": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_starter_quests.js"
+    ]
+  },
+  "49": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_starter_quests.js"
+    ]
+  },
+  "101": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_class_quests.js"
+    ]
+  },
+  "102": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_class_quests.js"
+    ]
+  },
+  "103": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_class_quests.js"
+    ]
+  },
+  "104": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_class_quests.js"
+    ]
+  },
+  "105": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_class_quests.js"
+    ]
+  },
+  "106": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_class_quests.js"
+    ]
+  },
+  "107": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_class_quests.js"
+    ]
+  },
+  "108": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_class_quests.js"
+    ]
+  },
+  "151": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "152": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_village_quests.js"
+    ]
+  },
+  "153": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "154": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_village_quests.js"
+    ]
+  },
+  "155": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "156": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "157": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_village_quests.js"
+    ]
+  },
+  "159": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_village_quests.js"
+    ]
+  },
+  "160": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "161": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "162": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_village_quests.js"
+    ]
+  },
+  "163": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_village_quests.js"
+    ]
+  },
+  "165": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_shilens_hunt.js"
+    ]
+  },
+  "166": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_village_quests.js"
+    ]
+  },
+  "167": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_village_quests.js"
+    ]
+  },
+  "168": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "169": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_village_quests.js"
+    ]
+  },
+  "255": {
+    "certified": false,
+    "tests": [],
+    "blocker": {
+      "code": "QUARANTINED_CHRONICLE_STATUS"
+    }
+  },
+  "257": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_beginner_quests.js"
+    ]
+  },
+  "258": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "259": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "260": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_beginner_quests.js"
+    ]
+  },
+  "261": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "262": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "263": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "264": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "265": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_beginner_quests.js"
+    ]
+  },
+  "266": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_elven_forest_quests.js"
+    ]
+  },
+  "267": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_elven_forest_quests.js"
+    ]
+  },
+  "271": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "272": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "273": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_beginner_quests.js"
+    ]
+  },
+  "274": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "275": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_orc_bounty_quests.js"
+    ]
+  },
+  "276": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_orc_bounty_quests.js"
+    ]
+  },
+  "277": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "291": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "292": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "293": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_beginner_quests.js"
+    ]
+  },
+  "294": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "295": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "296": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_bounty_target_quests.js",
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "297": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "303": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "306": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_bounty_target_quests.js",
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "313": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "316": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "317": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "319": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "320": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "324": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "325": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "340": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_lizardmen_quest.js"
+    ]
+  },
+  "341": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "347": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "362": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_music_feast_quests.js"
+    ]
+  },
+  "363": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_music_feast_quests.js"
+    ]
+  },
+  "364": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_music_feast_quests.js"
+    ]
+  },
+  "378": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_music_feast_quests.js"
+    ]
+  },
+  "379": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_music_feast_quests.js"
+    ]
+  },
+  "385": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_catacomb_quests.js"
+    ]
+  },
+  "401": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_profession_routes.js"
+    ],
+    "professionProofContract": "PASS"
+  },
+  "402": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_profession_routes.js"
+    ],
+    "professionProofContract": "PASS"
+  },
+  "403": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_profession_routes.js"
+    ],
+    "professionProofContract": "PASS"
+  },
+  "404": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_profession_routes.js"
+    ],
+    "professionProofContract": "PASS"
+  },
+  "405": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_profession_routes.js"
+    ],
+    "professionProofContract": "PASS"
+  },
+  "406": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_profession_routes.js"
+    ],
+    "professionProofContract": "PASS"
+  },
+  "407": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_profession_routes.js"
+    ],
+    "professionProofContract": "PASS"
+  },
+  "408": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_profession_routes.js"
+    ],
+    "professionProofContract": "PASS"
+  },
+  "409": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_profession_routes.js"
+    ],
+    "professionProofContract": "PASS"
+  },
+  "410": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_profession_routes.js"
+    ],
+    "professionProofContract": "PASS"
+  },
+  "411": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_profession_routes.js"
+    ],
+    "professionProofContract": "PASS"
+  },
+  "412": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_profession_routes.js"
+    ],
+    "professionProofContract": "PASS"
+  },
+  "413": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_profession_routes.js"
+    ],
+    "professionProofContract": "PASS"
+  },
+  "414": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_profession_routes.js"
+    ],
+    "professionProofContract": "PASS"
+  },
+  "415": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_profession_routes.js"
+    ],
+    "professionProofContract": "PASS"
+  },
+  "416": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_profession_routes.js"
+    ],
+    "professionProofContract": "PASS"
+  },
+  "417": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_profession_routes.js"
+    ],
+    "professionProofContract": "PASS"
+  },
+  "418": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_profession_routes.js"
+    ],
+    "professionProofContract": "PASS"
+  },
+  "419": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_orc_bounty_quests.js"
+    ]
+  },
+  "422": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_sin_eater_quest.js"
+    ]
+  },
+  "634": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_catacomb_quests.js"
+    ]
+  },
+  "635": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_dimensional_rift_quest.js"
+    ]
+  },
+  "999": {
+    "certified": false,
+    "tests": [],
+    "blocker": {
+      "code": "QUARANTINED_CHRONICLE_STATUS"
+    }
+  }
+}

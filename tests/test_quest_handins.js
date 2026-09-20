@@ -210,28 +210,32 @@ async function main() {
         if (recovering) await QuestService.giveItem(traveler, 7570, 3);
         await talk(traveler, 7576);
         if (!recovering) {
-            const originalSetItem = Database.setItem;
-            Database.setItem = async (id, item) => {
-                if (item.selfId === 7126) throw new Error('injected scroll write failure');
-                return originalSetItem(id, item);
-            };
+            // Q9's reward is now one atomic quest step, so a failing reward write
+            // can no longer leave the Mark granted with the quest still open.
+            // Injecting the failure into that transaction must roll the whole
+            // hand-in back: no Mark, no scroll, and the quest still started.
+            const originalApply = Database.applyQuestStep;
+            Database.applyQuestStep = async () => { throw new Error('injected scroll write failure'); };
             try {
                 await assert.rejects(QuestService.onEvent(traveler, { questId: 9, name: 'reward' }), /injected scroll write failure/);
-            } finally { Database.setItem = originalSetItem; }
-            assert.equal(count(traveler, 7570), 1);
-            assert.equal(state(traveler, 9).isStarted(), true);
+            } finally { Database.applyQuestStep = originalApply; }
+            assert.equal(count(traveler, 7570), 0, 'a rolled-back hand-in grants no Mark of Traveler');
+            assert.equal(count(traveler, 7126), 0, 'a rolled-back hand-in grants no escape scroll');
+            assert.equal(state(traveler, 9).isStarted(), true, 'the quest stays open after a rollback');
+            const [row] = await Database.execute(['SELECT state FROM character_quests WHERE characterId = ? AND questId = 9', [traveler.actor.fetchId()]]);
+            assert.notEqual(row?.state, 'completed', 'no partial completion reached the database');
         }
         await click(traveler, 9, 'reward');
         assert.equal(state(traveler, 9).isCompleted(), true);
-        assert.equal(count(traveler, 7570), recovering ? 3 : 1);
+        assert.equal(count(traveler, 7570), recovering ? 4 : 1);
         assert.equal(count(traveler, 7126), 1);
         await click(traveler, 9, 'reward');
-        assert.equal(count(traveler, 7570), recovering ? 3 : 1);
+        assert.equal(count(traveler, 7570), recovering ? 4 : 1);
         assert.equal(count(traveler, 7126), 1);
         const restored = await sessionFor(recovering ? 25 : 24);
         assert.equal(state(restored, 9).isCompleted(), true);
         assert.equal(count(restored, 7126), 1);
-        assert.equal(count(restored, 7570), recovering ? 3 : 1);
+        assert.equal(count(restored, 7570), recovering ? 4 : 1);
     }
 
     const adventures = [
@@ -262,11 +266,14 @@ async function main() {
             }
             assert.match(await talk(traveler, route.giver), new RegExp(`quest ${route.quest} ${route.event}`));
             if (!recovering) {
-                const originalSetItem = Database.setItem;
-                Database.setItem = async () => { throw new Error('injected item write failure'); };
+                // The issuance is one atomic quest step now: a failure inside that
+                // transaction must leave neither the document nor the advanced cond.
+                const originalApply = Database.applyQuestStep;
+                Database.applyQuestStep = async () => { throw new Error('injected item write failure'); };
                 try {
                     await assert.rejects(QuestService.onEvent(traveler, { questId: route.quest, name: route.event }), /injected item write failure/);
-                } finally { Database.setItem = originalSetItem; }
+                } finally { Database.applyQuestStep = originalApply; }
+                assert.equal(count(traveler, route.item), 0, 'a rolled-back issuance hands over no document');
                 assert.equal(state(traveler, route.quest).getInt('cond'), 1);
                 const persisted = (await Database.fetchCharacterQuests(id)).find(q => Number(q.questId) === route.quest);
                 assert.equal(JSON.parse(persisted.variables).cond, '1', 'failed issuance must not persist the delivery stage');
@@ -307,31 +314,39 @@ async function main() {
     await click(nightmare, 169, 'start');
     const nightmareRandom = Math.random;
     try {
-        Math.random = () => 0.3;
+        // The reference cascades two independent rolls: the perfect skull first,
+        // then a cracked one. A roll of 0.25 misses the 20% perfect tier and
+        // lands inside the 30% cracked tier.
+        Math.random = () => 0.25;
         await QuestService.onKill(nightmare, { fetchSelfId: () => 25 });
         assert.equal(count(nightmare, 1030), 1);
-        assert.match(await talk(nightmare, 7145), /skull is still missing/);
         Math.random = () => 0;
         await QuestService.onKill(nightmare, { fetchSelfId: () => 105 });
     } finally { Math.random = nightmareRandom; }
     assert.equal(count(nightmare, 1031), 1);
     assert.equal(state(nightmare, 169).getInt('cond'), 2);
-    await QuestService.onKill(nightmare, { fetchSelfId: () => 25 });
-    assert.equal(count(nightmare, 1031), 1, 'drops stop after the perfect skull');
+    try {
+        // Once the perfect skull is held its tier is capped, and the reference
+        // keeps paying out cracked skulls until the quest is handed in.
+        Math.random = () => 0.25;
+        await QuestService.onKill(nightmare, { fetchSelfId: () => 25 });
+    } finally { Math.random = nightmareRandom; }
+    assert.equal(count(nightmare, 1031), 1, 'the perfect skull never drops twice');
+    assert.equal(count(nightmare, 1030), 2, 'cracked skulls keep dropping after cond 2');
     await WriteQueue.flushAll();
     nightmare = await sessionFor(12);
     assert.equal(state(nightmare, 169).getInt('cond'), 2);
-    assert.match(await talk(nightmare, 7145), /nightmare is ended/);
+    assert.match(await talk(nightmare, 7145), /task is complete/);
     assert.equal(state(nightmare, 169).isCompleted(), true);
     assert.equal(count(nightmare, 1031), 0);
     assert.equal(count(nightmare, 31), 1);
     assert.equal(count(nightmare, 1030), 0);
-    assert.equal(count(nightmare, 57), 17020);
+    assert.equal(count(nightmare, 57), 17000 + 2 * 20, 'two cracked skulls pay 20 adena each');
     assert.match(await talk(nightmare, 7145), /already completed/);
     await click(nightmare, 169, 'start');
     assert.equal(state(nightmare, 169).isCompleted(), true, 'a stale start link cannot restart the quest');
     assert.equal(count(nightmare, 31), 1);
-    assert.equal(count(nightmare, 57), 17020);
+    assert.equal(count(nightmare, 57), 17000 + 2 * 20);
 
     // Hand-in follows actual inventory, including interrupted stage updates.
     for (const [id, cond, skulls] of [[13, '1', 1], [14, '2', 0]]) {
@@ -381,17 +396,32 @@ async function main() {
     assert.equal(state(seduction, 170).isCompleted(), true);
     assert.equal(count(seduction, 57), 102680);
 
-    for (const [id, recipient, event, total] of [
-        [16, 7255, 'haprock_finish', 5000],
-        [17, 7210, 'norman_finish', 22000]
-    ]) {
-        let kin = await sessionFor(id);
+    // Q167 has exactly the reference's three branches. Selling Carlon's letter
+    // outright ends the quest for 3000; forwarding it pays 2000 and only Norman
+    // can settle the remaining 20000. The old local extra payout at Haprock
+    // after forwarding does not exist in C4 and is gone.
+    {
+        let kin = await sessionFor(16);
         kin.actor.fetchLevel = () => 19;
         await talk(kin, 7350);
         await click(kin, 167, 'start');
         assert.equal(count(kin, 1076), 1);
         await click(kin, 167, 'haprock');
-        assert.equal(count(kin, 1076), 1, 'letter cannot be delivered at the starting NPC');
+        assert.equal(count(kin, 1076), 1, 'letter cannot be handed over at the starting NPC');
+        assert.match(await talk(kin, 7255), /quest 167 haprock_sell/);
+        await click(kin, 167, 'haprock_sell');
+        assert.equal(state(kin, 167).isCompleted(), true, 'the outright sale ends the quest');
+        assert.equal(count(kin, 1076), 0);
+        assert.equal(count(kin, 1106), 0, 'the outright sale issues no Norman letter');
+        assert.equal(count(kin, 57), 3000);
+        await click(kin, 167, 'haprock_sell');
+        assert.equal(count(kin, 57), 3000, 'the sale cannot be replayed');
+    }
+    {
+        let kin = await sessionFor(17);
+        kin.actor.fetchLevel = () => 19;
+        await talk(kin, 7350);
+        await click(kin, 167, 'start');
         assert.match(await talk(kin, 7255), /quest 167 haprock/);
         await click(kin, 167, 'haprock');
         assert.equal(state(kin, 167).getInt('cond'), 2);
@@ -399,25 +429,28 @@ async function main() {
         assert.equal(count(kin, 1106), 1);
         assert.equal(count(kin, 57), 2000);
         await click(kin, 167, 'haprock');
-        assert.equal(count(kin, 1106), 1);
+        assert.equal(count(kin, 1106), 1, 'forwarding cannot be replayed');
         assert.equal(count(kin, 57), 2000);
-        await click(kin, 167, 'norman_finish');
-        assert.equal(state(kin, 167).isCompleted(), false, 'Norman delivery cannot run at Haprock');
+        await click(kin, 167, 'haprock_sell');
+        assert.equal(count(kin, 57), 2000, "Carlon's letter is gone, so it cannot be sold again");
+        assert.equal(state(kin, 167).isCompleted(), false);
+
         await WriteQueue.flushAll();
-        kin = await sessionFor(id);
+        kin = await sessionFor(17);
         kin.actor.fetchLevel = () => 19;
-        assert.match(await talk(kin, recipient), new RegExp(`quest 167 ${event}`));
-        await click(kin, 167, event);
+        assert.match(await talk(kin, 7210), /quest 167 norman_finish/);
+        await click(kin, 167, 'norman_finish');
         assert.equal(state(kin, 167).isCompleted(), true);
         assert.equal(count(kin, 1106), 0);
-        assert.equal(count(kin, 57), total);
-        await click(kin, 167, event);
+        assert.equal(count(kin, 57), 22000);
+        await click(kin, 167, 'norman_finish');
         await talk(kin, 7350);
         await click(kin, 167, 'start');
         assert.equal(state(kin, 167).isCompleted(), true);
         assert.equal(count(kin, 1076), 0);
-        assert.equal(count(kin, 57), total);
+        assert.equal(count(kin, 57), 22000);
     }
+
     const lostLetter = await sessionFor(18);
     lostLetter.actor.fetchLevel = () => 19;
     await talk(lostLetter, 7350);
@@ -521,7 +554,7 @@ async function main() {
     const restoredNightmare = await sessionFor(12);
     assert.equal(state(restoredNightmare, 169).isCompleted(), true);
     assert.equal(count(restoredNightmare, 31), 1);
-    assert.equal(count(restoredNightmare, 57), 17020);
+    assert.equal(count(restoredNightmare, 57), 17000 + 2 * 20);
     assert.equal(count(restoredNightmare, 1030), 0);
     assert.equal(count(restoredNightmare, 1031), 0);
     const restoredCraftsman = await sessionFor(11);

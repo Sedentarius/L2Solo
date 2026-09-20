@@ -1,0 +1,906 @@
+{
+  "1": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_starter_quests.js"
+    ]
+  },
+  "2": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_starter_quests.js"
+    ]
+  },
+  "3": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_starter_quests.js"
+    ]
+  },
+  "4": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_starter_quests.js"
+    ]
+  },
+  "5": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_starter_quests.js"
+    ]
+  },
+  "6": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_starter_quests.js"
+    ]
+  },
+  "7": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_starter_quests.js"
+    ]
+  },
+  "8": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_starter_quests.js"
+    ]
+  },
+  "9": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_starter_quests.js"
+    ]
+  },
+  "10": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_starter_quests.js"
+    ]
+  },
+  "38": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_lizardman_invader_quests.js"
+    ]
+  },
+  "39": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_lizardman_invader_quests.js"
+    ]
+  },
+  "45": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_starter_quests.js"
+    ]
+  },
+  "46": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_starter_quests.js"
+    ]
+  },
+  "47": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_starter_quests.js"
+    ]
+  },
+  "48": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_starter_quests.js"
+    ]
+  },
+  "49": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_starter_quests.js"
+    ]
+  },
+  "101": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_class_quests.js"
+    ]
+  },
+  "102": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_class_quests.js"
+    ]
+  },
+  "103": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_class_quests.js"
+    ]
+  },
+  "104": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_class_quests.js"
+    ]
+  },
+  "105": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_class_quests.js"
+    ]
+  },
+  "106": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_class_quests.js"
+    ]
+  },
+  "107": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_class_quests.js"
+    ]
+  },
+  "108": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_class_quests.js"
+    ]
+  },
+  "151": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "152": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_village_quests.js"
+    ]
+  },
+  "153": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "154": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_village_quests.js"
+    ]
+  },
+  "155": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "156": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "157": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_village_quests.js"
+    ]
+  },
+  "159": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_village_quests.js"
+    ]
+  },
+  "160": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "161": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "162": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_village_quests.js"
+    ]
+  },
+  "163": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_village_quests.js"
+    ]
+  },
+  "165": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_shilens_hunt.js"
+    ]
+  },
+  "166": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_village_quests.js"
+    ]
+  },
+  "167": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_village_quests.js"
+    ]
+  },
+  "168": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "169": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_village_quests.js"
+    ]
+  },
+  "255": {
+    "certified": false,
+    "tests": [],
+    "blocker": {
+      "code": "QUARANTINED_CHRONICLE_STATUS"
+    }
+  },
+  "257": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_beginner_quests.js"
+    ]
+  },
+  "258": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "259": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "260": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_beginner_quests.js"
+    ]
+  },
+  "261": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "262": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "263": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "264": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "265": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_beginner_quests.js"
+    ]
+  },
+  "266": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_elven_forest_quests.js"
+    ]
+  },
+  "267": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_elven_forest_quests.js"
+    ]
+  },
+  "271": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "272": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "273": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_beginner_quests.js"
+    ]
+  },
+  "274": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "275": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_orc_bounty_quests.js"
+    ]
+  },
+  "276": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_orc_bounty_quests.js"
+    ]
+  },
+  "277": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "291": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "292": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "293": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_beginner_quests.js"
+    ]
+  },
+  "294": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "295": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "296": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_bounty_target_quests.js",
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "297": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "303": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "306": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_bounty_target_quests.js",
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "313": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "316": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "317": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "319": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "320": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "324": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "325": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "340": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_lizardmen_quest.js"
+    ]
+  },
+  "341": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "347": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_declarative_quests.js"
+    ]
+  },
+  "362": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_music_feast_quests.js"
+    ]
+  },
+  "363": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_music_feast_quests.js"
+    ]
+  },
+  "364": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_music_feast_quests.js"
+    ]
+  },
+  "378": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_music_feast_quests.js"
+    ]
+  },
+  "379": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_music_feast_quests.js"
+    ]
+  },
+  "385": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_catacomb_quests.js"
+    ]
+  },
+  "401": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_profession_routes.js"
+    ],
+    "professionProofContract": "PASS"
+  },
+  "402": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_profession_routes.js"
+    ],
+    "professionProofContract": "PASS"
+  },
+  "403": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_profession_routes.js"
+    ],
+    "professionProofContract": "PASS"
+  },
+  "404": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_profession_routes.js"
+    ],
+    "professionProofContract": "PASS"
+  },
+  "405": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_profession_routes.js"
+    ],
+    "professionProofContract": "PASS"
+  },
+  "406": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_profession_routes.js"
+    ],
+    "professionProofContract": "PASS"
+  },
+  "407": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_profession_routes.js"
+    ],
+    "professionProofContract": "PASS"
+  },
+  "408": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_profession_routes.js"
+    ],
+    "professionProofContract": "PASS"
+  },
+  "409": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_profession_routes.js"
+    ],
+    "professionProofContract": "PASS"
+  },
+  "410": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_profession_routes.js"
+    ],
+    "professionProofContract": "PASS"
+  },
+  "411": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_profession_routes.js"
+    ],
+    "professionProofContract": "PASS"
+  },
+  "412": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_profession_routes.js"
+    ],
+    "professionProofContract": "PASS"
+  },
+  "413": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_profession_routes.js"
+    ],
+    "professionProofContract": "PASS"
+  },
+  "414": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_profession_routes.js"
+    ],
+    "professionProofContract": "PASS"
+  },
+  "415": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_profession_routes.js"
+    ],
+    "professionProofContract": "PASS"
+  },
+  "416": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_profession_routes.js"
+    ],
+    "professionProofContract": "PASS"
+  },
+  "417": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_profession_routes.js"
+    ],
+    "professionProofContract": "PASS"
+  },
+  "418": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_profession_routes.js"
+    ],
+    "professionProofContract": "PASS"
+  },
+  "419": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_orc_bounty_quests.js"
+    ]
+  },
+  "422": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_sin_eater_quest.js"
+    ]
+  },
+  "634": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_catacomb_quests.js"
+    ]
+  },
+  "635": {
+    "certified": true,
+    "tests": [
+      "tests/test_c4_dimensional_rift_quest.js"
+    ]
+  },
+  "999": {
+    "certified": false,
+    "tests": [],
+    "blocker": {
+      "code": "QUARANTINED_CHRONICLE_STATUS"
+    }
+  },
+  "_certification": {
+    "generatedAt": "2026-09-20T21:53:39.320Z",
+    "sourceHashes": {
+      "data/Npcs/Rewards/c4_quest_content.json": "971a3fc71ffb74f6f4438289b875b3c7fd7f77c272de419e01c08583159de7fe",
+      "data/Npcs/Spawns/c4_quest_content.json": "1f0e40a10798e502fb687f0e8e5dd009c89e2020145f48418ab707ba647df051",
+      "data/Npcs/c4_quest_content.json": "e3c773d1dac0a60fc397e1bd1f1c219d93209272e94920cd5fa96a9a4578e441",
+      "src/GameServer/Quest/BeginnerQuestDefinitions.js": "dd507787a04ccb99d792539f11b193baad04ce3bf3b15710374c530d52d49c8a",
+      "src/GameServer/Quest/BeginnerReward.js": "282f4d6b53a65aecdc7a3c2c93298dfef6f14777ca48d20c88e1dae4c3e84e5a",
+      "src/GameServer/Quest/ClassQuestReward.js": "245d4bca4f9a73983deb9cb0e19821810bee0e5bc831842ec96e6377916f6ea3",
+      "src/GameServer/Quest/DeclarativeQuest.js": "f55d951d6a1a9ecde5b90a3a704305392d16e6d99c4d8597a8f29235941636f3",
+      "src/GameServer/Quest/FirstProfessionProof.js": "836445225f11c0b25f3b30e1549adfdaecf1c3ee750a087b5442d786f4ecef2a",
+      "src/GameServer/Quest/LowLevelDefinitions.js": "f30832d4dd03a5d8d0025927142c6ff8a2acc658904fbd6ecab689b9743aa432",
+      "src/GameServer/Quest/QuestStep.js": "8e23c3b873a54dc6cd083b3f3cae470ada26957cb8651a95372c19081572a1b3",
+      "src/GameServer/Quest/RecoveredLowLevelDefinitions.js": "82b2fe72bed05e35b4806e4bf8a8a4864f5a62e7e73e4a145eb6e6114b0073f5",
+      "src/GameServer/Quest/StarterQuestDefinitions.js": "dfee921b7cc816002b790c88602bf381487b284f0f4c47ac0bae077a02890cce",
+      "src/GameServer/Quest/VillageQuestDefinitions.js": "6328d880a45a43bff207460cc0394950fd7dd69fbd51a187a6e758420de06d04",
+      "src/GameServer/Quest/quests/Q257_TheGuardIsBusy.js": "cc140813b138bcc5bcccb74c5a1d8411f249340288e080fab112c45e71964153",
+      "src/GameServer/Quest/quests/Q260_OrcHunting.js": "c4c30fd066a5a2922887ed23d3d1b33586f6837870832f72006e29e702286c2d",
+      "src/GameServer/Quest/quests/Q265_BondsOfSlavery.js": "00a074ed743ecc46396d00810fe86678e7e3139ec01bdc8975c6ff0c21594dfd",
+      "src/GameServer/Quest/quests/Q267_WrathOfVerdure.js": "9f2117f21c1a5a62beb2ab358c77d1a9de1f49103a6887e737c8e3d4b22ed6e2",
+      "src/GameServer/Quest/quests/Q273_InvadersOfTheHolyLand.js": "a7cec38cc11041f635885d7b29528773fc0d603c908fb0f4234a1d62710b94af",
+      "src/GameServer/Quest/quests/Q275_DarkWingedSpies.js": "7ec6699c4db6e3ff71f5ed5f5a10cc997fe8d48ec63a9e6fbe0525813a6320aa",
+      "src/GameServer/Quest/quests/Q276_TotemOfTheHestui.js": "5b0a8fa876546a216bd5e0c78e5c51a828409bdfdb59b71a5664cfc53808161d",
+      "src/GameServer/Quest/quests/Q293_TheHiddenVeins.js": "851f75d8b9f9bd7fd60e4b53f68c611608bc456828ab18ebaac8afaf3252701e",
+      "src/GameServer/Quest/quests/Q340_SubjugationOfLizardmen.js": "5397794aeaed442b619d67f3cada05e937ed95060075c43fec226fecc3c1e3a1",
+      "src/GameServer/Quest/quests/Q363_SorrowfulSoundOfFlute.js": "a43a91c925fb4e12bb7cbb4f04867461e69f81cccf68f958a36f501c4f59fdec",
+      "src/GameServer/Quest/quests/Q364_JovialAccordion.js": "9fab34805dfce5791eb2577b54f90b43069b380844ddd59c3721155981c8ecd2",
+      "src/GameServer/Quest/quests/Q378_GrandFeast.js": "7046ac383bbf8a49cd38b670e1f30c123fa366127b3011de4262f3decb274d58",
+      "src/GameServer/Quest/quests/Q385_YokeOfThePast.js": "8e662a4e231d5181a6272a29bc847c7061a92c97b89d777710548552e9ff0725",
+      "src/GameServer/Quest/quests/Q422_RepentYourSins.js": "b37366af26e5b1f194f17df8e9d121d85bb4e0ffbdca6e6d606738a8b626cac8",
+      "src/GameServer/Quest/quests/Q634_InSearchOfFragmentsOfDimension.js": "18fcc81951fe60cb4997bb8a1ed535520f69b93e9a1d13bd4fa175dfc159d798",
+      "src/GameServer/Quest/quests/Q635_IntoTheDimensionalRift.js": "3f5ca43de6bb82edec482d00a4738c462cbd9d7d53ffb84fb56d58d33d4f6f90",
+      "tests/helpers/c4QuestHarness.js": "4354fb4ed6c62034d7bb2f4bd2a120497fad5b691236fc855f723cd9006163e1",
+      "tests/helpers/legacyCharacterSchema.js": "457b9931fbebc1f87afbe2025b1aa44cb65228b0b91a87ce70d86c3f712ae6cc",
+      "config/default.ini": "76610159d092890e05f941b25f57e35f230f2c50c8180801adcee202a56f722e",
+      "data/Items/Others/others.json": "fc77a4794faa5b1658f86e209f00678c3897885488f2aa44d48992a5e637643c",
+      "data/Items/Weapons/weapons.json": "d13b2f46484f007fba892bdfd230ce96ba3dd253bdd21cfd08919c6cdeb1254a",
+      "data/Npcs/Spawns/spawns.json": "a0c93be2d303069a5d0fc10838e52d1ec9aeeda8e7b38fc27ba20a207df3a479",
+      "database/sql/sqlite.sql": "a63aad60757d671b03dbe4fd7760d6ebd480b93c58ea074c6dc0bf69f4745c15",
+      "src/Database.js": "ed62ea19733ea733ed424ebf5f5df3a697b78121cbe02e6d8eb2c1103106d425",
+      "src/GameServer/ClassTransfer.js": "c7da6df093556f851be0d39a185794d102b9e975bb8ffc7df4b3bb21b839272b",
+      "src/GameServer/DataCache.js": "060f8eef83478012b4e3cb485a0ff87b4314843a7e2eaedb8cd0293f876b4270",
+      "src/GameServer/Quest/QuestRegistry.js": "0b8e8423da00bc46e21dd25291d7d8370d49e85172733e24d7b9e66d35e77dd7",
+      "src/GameServer/Quest/QuestService.js": "a401f95f5e9d5f5fdd04d13a372071950d00ad7872e01255b9442cab8acd635d",
+      "src/GameServer/Quest/QuestState.js": "d764e7fac7367002c151fd44e0006e6e8b27556d8586af4f40b73e4703d69e46",
+      "src/GameServer/Quest/quests/FormalWear.js": "3a28863c3a0c18e03eae081fdf967dcefa99a8aa0875510a8a4ab2749d2493c1",
+      "src/GameServer/Quest/quests/PetTicketQuest.js": "864ffb702c0985556a5f996cb88d63c637ce4b37ae1e36146f9bf6dc4cbc62de",
+      "src/GameServer/Quest/quests/Q001_LettersOfLove.js": "9b7390a003e272cd39d8975eeab945ea95d22d767974e782c0f9a571d96703fd",
+      "src/GameServer/Quest/quests/Q002_WhatWomenWant.js": "c8abf39fb0edd894c009eb58ad947d8766f04ba2116d3fd15476a353e2ff0f7a",
+      "src/GameServer/Quest/quests/Q003_WillTheSealBeBroken.js": "573bd5641b69a2c778214ea1378e9120d018e85370426e29f3cf657b02ce273a",
+      "src/GameServer/Quest/quests/Q004_LongLiveThePaagrioLord.js": "283043644005258851e535e097edcb7c17f1421eb97d94eda1ad9e45767ac06c",
+      "src/GameServer/Quest/quests/Q005_MinersFavor.js": "fed7d99aefab4e7d715e97ec81797ac219e9d7915bd37c631ef62b81c8658bc6",
+      "src/GameServer/Quest/quests/Q006_StepIntoTheFuture.js": "1d39b7d5c70a68bdd1780ad2ab9ee3b8f258d2a16e222dee09bb98ce8c899cdf",
+      "src/GameServer/Quest/quests/Q007_ATripBegins.js": "2c69ab8d56ea4e3034c047e3b51a846338d1c600018dac9a16c85f87050ca6fe",
+      "src/GameServer/Quest/quests/Q008_AnAdventureBegins.js": "c4b3252f6b583c2e96c2d8200630e824a4437bc1f9878cfa2dd4498744f98aaa",
+      "src/GameServer/Quest/quests/Q009_IntoTheCityOfHumans.js": "e19c41a2bc87e3e1071be40f5571d39b06df3c12a9ecc1eb912fdc307a1e4eb1",
+      "src/GameServer/Quest/quests/Q010_IntoTheWorld.js": "5a98e7d170dfe8eacd700e9e65ef2fd7f56c6c6ee17d32e72498967862ee91c2",
+      "src/GameServer/Quest/quests/Q011_SecretMeetingWithKetraOrcs.js": "ee8b9cebb5c33d8ae562e18669e6da9de49d66be19324d7c9c3978cdf38d23ec",
+      "src/GameServer/Quest/quests/Q012_SecretMeetingWithVarkaSilenos.js": "e5fa99c1ea593147ae8fc35fb15ee085bdc466f3f576fdba4f8a50ac91f2ccde",
+      "src/GameServer/Quest/quests/Q013_ParcelDelivery.js": "82787e8e9253f65543cfecc62ad08e19ac792f681c130a2620c8533556500b2c",
+      "src/GameServer/Quest/quests/Q014_WhereaboutsOfTheArchaeologist.js": "bd440afd5f8cdb1b448ecd3307a723d0d41d168600ea75e8e6cefe457d1d6fc7",
+      "src/GameServer/Quest/quests/Q015_SweetWhispers.js": "80b905d5c5df8309f165fddef97316293109a36be8252f41d479caf504456de2",
+      "src/GameServer/Quest/quests/Q016_TheComingDarkness.js": "00b749a9d531bd1f886ad5d0923bb0fa39e275b9b4dfb9f1383682e615661dfc",
+      "src/GameServer/Quest/quests/Q017_LightAndDarkness.js": "85ba09e47e67dfe9cc5e449697459d3b0974e3c01de66eb9a814a041d0e9bf3a",
+      "src/GameServer/Quest/quests/Q018_MeetingWithTheGoldenRam.js": "c778c0c3095766a54df405bde3e03043619bf6303d05f34a8f70e95b45b118f9",
+      "src/GameServer/Quest/quests/Q019_GoToThePastureland.js": "a6c0417509b69f3865c071876d88babbaa496a0f3d1256e957912f6ec3fe699f",
+      "src/GameServer/Quest/quests/Q031_SecretBuriedInTheSwamp.js": "56f1f058252f8cc114aa688b605342c8db4275781c6dd30650b83ec0e6f590aa",
+      "src/GameServer/Quest/quests/Q032_AnObviousLie.js": "f7441f3ba630d9bddbf8949c1fb46781114a05bc4807c4896bc45786dc14aa46",
+      "src/GameServer/Quest/quests/Q033_MakeAPairOfDressShoes.js": "e00a18ccab592f5cfec3124d68616513afa3db78b1ad0d5a09b4fbdc59f91899",
+      "src/GameServer/Quest/quests/Q034_InSearchOfCloth.js": "c6b18ea58ffa9519e8b120eea1b8127fc68675ab3836ff354cee9f72e90cf54c",
+      "src/GameServer/Quest/quests/Q035_FindGlitteringJewelry.js": "cab47eb8297ea79ae5fa66933bca805410ed761b7c0f414016d4399645cfa9c5",
+      "src/GameServer/Quest/quests/Q036_MakeASewingKit.js": "ef1da8b8783f1ad21d893e9638f72c8a2566a690725d4450aca8bb5a3a65a555",
+      "src/GameServer/Quest/quests/Q037_MakeFormalWear.js": "37ec51ad991f4a6b2a027974269886185eb2a8b3c71958153439c99008903821",
+      "src/GameServer/Quest/quests/Q038_DragonFangs.js": "fbc360b70b282064a3a872116dd18eecc2082b8cbeae3dee5c0393f721b4463d",
+      "src/GameServer/Quest/quests/Q039_RedEyedInvaders.js": "715338b97ac85fbf754e9a2816cd0e236dfe10201489622872b882b6504863ae",
+      "src/GameServer/Quest/quests/Q042_HelpTheUncle.js": "6e17ad356999e801650fcef28aaaaadfd01e52866e5cf6102504c2bbcbe6e641",
+      "src/GameServer/Quest/quests/Q043_HelpTheSister.js": "ddec6ebd440ff7a53c69443917455ad414d7775b317fd332c96ad9cd4a202c17",
+      "src/GameServer/Quest/quests/Q044_HelpTheSon.js": "ad0ffc7eaf7579fdec05cee602290b89bcd810dabc5e9d29fe0886477310e4b0",
+      "src/GameServer/Quest/quests/Q045_ToTalkingIsland.js": "8992ff9c7c8bd01e6d2edf4b8596179d464b77f6c38d82de30973c4eb1c9e13b",
+      "src/GameServer/Quest/quests/Q046_OnceMoreInTheArmsOfTheMotherTree.js": "b9b9bf7afb2a9acf816d5083f38fefb8313385f5ea49b70e58b8c82231eef931",
+      "src/GameServer/Quest/quests/Q047_IntoTheDarkForest.js": "43faae4ed9eb9a126f884b84b843ed1d0b3f5cf9c38f3669dcbea697409d4cd1",
+      "src/GameServer/Quest/quests/Q048_ToTheImmortalPlateau.js": "2b85130c8579bdf27de3f48b4f08844c13c1a25d6e206790dc0b3f9a039fa3c6",
+      "src/GameServer/Quest/quests/Q049_TheRoadHome.js": "b34a8e027820ffa806a706cff74e0e875931a75572c51d4eb93772b4dcb9f0d3",
+      "src/GameServer/Quest/quests/Q101_SwordOfSolidarity.js": "eb4963d12e445762cd0d36117083ecb95c56dde43037c158d10584f2f9ef408b",
+      "src/GameServer/Quest/quests/Q102_FungusFever.js": "9795cf27ee33ac339a15233f147ca377bb6a30c6e49adca083194c2ef49a7bff",
+      "src/GameServer/Quest/quests/Q103_SpiritOfCraftsman.js": "4abe62da25926b7f8558939d27e211be4392b3335575a4d96397f4e18d397480",
+      "src/GameServer/Quest/quests/Q104_SpiritOfMirrors.js": "0a8a5323320171bfb8044495edf407b39c06a49aa799b86dfe90cc2200853c3e",
+      "src/GameServer/Quest/quests/Q105_SkirmishWithTheOrcs.js": "370fb934b595d40bc3ecaf5d56fdd861f647407af17d711b1cecced9e56cd6e9",
+      "src/GameServer/Quest/quests/Q106_ForgottenTruth.js": "85b06545308973e42726c53249c0f09a60284ecb857cc24d868b2926f892f6e4",
+      "src/GameServer/Quest/quests/Q107_MercilessPunishment.js": "6f140d620bfb771f09cb463ab0b7c5a81f9b2416d8b2b55aec2a25311178c785",
+      "src/GameServer/Quest/quests/Q108_JumbleTumbleDiamondFuss.js": "e58cc6ce30ae64e3d5e7d8e219b456e4907d22b6a9aca0e3143c6b6a147d56f9",
+      "src/GameServer/Quest/quests/Q151_CureForFeverDisease.js": "a8ad0c58fc32e1df51b42499c5bb353ffd5c1630ac93d9ea35fd8afcfb78616b",
+      "src/GameServer/Quest/quests/Q152_ShardsOfGolem.js": "2489730b12e0481d4f16cc2e41457cd6bfec1e6006c661120439f66f6bc36cbf",
+      "src/GameServer/Quest/quests/Q153_DeliverGoods.js": "6d7aa04d935a8eec8323b5beb10af3185c912b7f7b091a79997cd509837989b6",
+      "src/GameServer/Quest/quests/Q154_SacrificeToTheSea.js": "f1dc72bbb4e7b9c30098f828d828946828ae4c4091b7fed5517b5faa5941ac01",
+      "src/GameServer/Quest/quests/Q155_FindSirWindawood.js": "f85a2ea9deb2429b306260d0faf586282a1e98af73736f72f45e25f8ba36bc8a",
+      "src/GameServer/Quest/quests/Q156_MillenniumLove.js": "e3330faac21a98659967577433dcd5a24202c37730edbc2176fef896e474f0cd",
+      "src/GameServer/Quest/quests/Q157_RecoverSmuggledGoods.js": "9f285920c426c9c42d90335b41912a9665fdaaca8826f0b51ad109bb6333e828",
+      "src/GameServer/Quest/quests/Q158_SeedOfEvil.js": "5773cfe69579245e0c81ac4a3cdd51d90de9a774d1485f1147a80fd02f0402cb",
+      "src/GameServer/Quest/quests/Q159_ProtectTheWaterSource.js": "806618017a106189e314e147092140d74ea4739b7e9d8df51d1b6d4a0972f75c",
+      "src/GameServer/Quest/quests/Q160_NerupasRequest.js": "a22af7f801d078bd2a75a5b3ee02313ba86b49cc43e4bd18ea8e72ac0f459adc",
+      "src/GameServer/Quest/quests/Q161_FruitOfTheMotherTree.js": "fffc75e63bbeb19aaa48247b0fced397192fbf38f43d5f8e07b9aaca0275e7fb",
+      "src/GameServer/Quest/quests/Q162_CurseOfTheUndergroundFortress.js": "619ca6d46eb86c303d6f927f460a4f8450e38b1a11540534df67f11d1ee9605e",
+      "src/GameServer/Quest/quests/Q163_LegacyOfThePoet.js": "5c1edbcb03694e49a7736f39135d3352c9effc86dc94cc2d7f44d6b74f0fa6ac",
+      "src/GameServer/Quest/quests/Q164_BloodFiend.js": "cff64e492ff45367675f752db7f566265d704e63bea49017e1a190d6110331ed",
+      "src/GameServer/Quest/quests/Q165_ShilensHunt.js": "87a2bd495faa8c40633cacbff44bbf02db38538f282e0b14a4a4f2eede8e13d9",
+      "src/GameServer/Quest/quests/Q166_MassOfDarkness.js": "810beeb1bdd4b5f213044650ea8e9f1efab2ce7efb6c0764c3af9e1fc76d97bd",
+      "src/GameServer/Quest/quests/Q167_DwarvenKinship.js": "2335303c33f7a5358534dcd9e2eb8e97cdf093cf3cb3a22ced380e6e6c686ccd",
+      "src/GameServer/Quest/quests/Q168_DeliverSupplies.js": "b69e7c4b57eec0ba25cee9762787428c88260dedac8355f2a07d9be3810f7e2d",
+      "src/GameServer/Quest/quests/Q169_OffspringOfNightmares.js": "63bd9d1c6ab4403b89ae78aad4c27b6c4ddc07e6e87070e5f37da8c602a5802d",
+      "src/GameServer/Quest/quests/Q170_DangerousSeduction.js": "bfb26303001e6229d8ce1c87a3f7f76c74f95b4389a8e8bcba3e9dad908781b9",
+      "src/GameServer/Quest/quests/Q401_PathToWarrior.js": "ecce5421f89c063a41bcaa8840a664820b36c1d9b479cce38ffc2f41c9b9a912",
+      "src/GameServer/Quest/quests/Q402_PathToKnight.js": "43d562b15dc44a74b6ad80dd85c6c2d3bdb4f24395abd806e142a0155a3093b4",
+      "src/GameServer/Quest/quests/Q403_PathToRogue.js": "303ac2437695649ebd9020ee5a344b28108d621f431b7f5abaaf38d8fd90052b",
+      "src/GameServer/Quest/quests/Q404_PathToWizard.js": "297384a3924894d0f9c0d39a54c3a5f6679143c9b6192ec1cbe7270e2713ee09",
+      "src/GameServer/Quest/quests/Q405_PathToCleric.js": "d1ef861beef9f793885fbdeae17edc38b244ef9a6d8fc95cfc08bda515525636",
+      "src/GameServer/Quest/quests/Q406_PathToElvenKnight.js": "0b2beb0e3594614bace598975b52c5c99a63d8da6041835bb198102d22895047",
+      "src/GameServer/Quest/quests/Q407_PathToElvenScout.js": "cc18f815381a9a4124596da4ab3ecac7d8d6f627acb3aec96ac3ef5584bf33a1",
+      "src/GameServer/Quest/quests/Q408_PathToElvenWizard.js": "c332f079e74ec5671547826a255fd67126e6473110bba0ee67cc1b49095ea642",
+      "src/GameServer/Quest/quests/Q409_PathToElvenOracle.js": "08783fd13b2b8ab8f910002e6f95b1835202d8888aa36523c9a891bfa405eef4",
+      "src/GameServer/Quest/quests/Q410_PathToPalusKnight.js": "93517184479f176940902e8d366edbc949f70a991c0d7ecc7c68c566b5d08c3d",
+      "src/GameServer/Quest/quests/Q411_PathToAssassin.js": "40c4fc7e72ae2d7462c0547f88ff7a4d8026d9e97ca12d3c404ea3d76b3f9016",
+      "src/GameServer/Quest/quests/Q412_PathToDarkWizard.js": "76ab438fb3962600563c765668de9a4eed9e2dbc969c6d0345c1e22e723fed83",
+      "src/GameServer/Quest/quests/Q413_PathToShillienOracle.js": "4c22a2c8fe4b48e89a89ea27dfe306e42ff2f684645fbf839d9d3807b424445d",
+      "src/GameServer/Quest/quests/Q414_PathToOrcRaider.js": "5ef4976ce1e8c41eb8b2f11653a74679a4c44562e04fef7eb380b40b1d2226fb",
+      "src/GameServer/Quest/quests/Q415_PathToOrcMonk.js": "84558b0a451143dbaa70313ca9d8e65bf1b9d69062dba568aceab9d8380bbdb3",
+      "src/GameServer/Quest/quests/Q416_PathToOrcShaman.js": "f5302863ec2492fd818067684df19086bdaa31140e4865dab5bf380c630a5064",
+      "src/GameServer/Quest/quests/Q417_PathToScavenger.js": "a8cb4242a3fd3076d0aae34f8e8e20de3570c0b3df63dcfb4530094623b5c3b9",
+      "src/GameServer/Quest/quests/Q418_PathToArtisan.js": "13540985700599802018aa1f8092ea848f43cd1fd37f84147b9dbe6e8b0a6a73",
+      "src/GameServer/Quest/quests/Q419_GetAPet.js": "c780cf1f76a500cc3386f23c0dd5e8dd36c3085d37dfafc29c614e6b6790f9ff",
+      "src/GameServer/Quest/quests/Q420_LittleWing.js": "64a85c60b6ecca4e2a791d08e43f3e793c841a55bf31300fd478e5a48998743b",
+      "src/GameServer/Quest/quests/Q421_LittleWingsBigAdventure.js": "244c61e3a23236405989e25495e4de6aa3274ff792c03529a4534764711d3a41",
+      "src/GameServer/Quest/quests/Q501_ProofOfClanAlliance.js": "eaa99b8b4e23cb732d3659d5e8a951c4b6c65f3f07b0f53698e1883c4bdc5960",
+      "src/GameServer/Quest/quests/TravelerRoute.js": "bef978b36ce6eba943b9c81dc582c004c5ac331afd66b62ca5d0680eb0a1c283",
+      "tests/test_c4_inventory_validation.js": "08484fca72186acf18b07a2471d88df2095dcb8223d3a7526cd7b2efb43d7a97",
+      "tests/test_c4_declarative_quests.js": "79147aa84937bd302ed55dd1c16f9956a67d45bb32080f477b42e26333ee2ce3",
+      "tests/test_c4_starter_quests.js": "3931ad1f69126ef74ce26754cf164ebb99b24d8d41981c432b8d214e31296f1e",
+      "tests/test_c4_beginner_quests.js": "56a8ca8ffba30b6d747a094321eeecc003cfb1abde4a0eeca700be996774246b",
+      "tests/test_c4_class_quests.js": "2701cf4c8a5f6a8e2411393ae58843ed20bc1c520e23848c408cb26905616a72",
+      "tests/test_c4_village_quests.js": "9aae910194cd619c642b95a6a2e0a28ba711fb92bb0c153102666d4d94605b6c",
+      "tests/test_c4_profession_routes.js": "4a6fcaeef0a6d6948d42431f75c09a36a9b3a374f180bf1246bce4c69b24973d",
+      "tests/test_c4_orc_bounty_quests.js": "9d897f5a5faa20e63336f6d835bd7cab71ca3cd23f18261c6948b1212864bc05",
+      "tests/test_c4_lizardmen_quest.js": "1022ce62fcf3597c17d8877ae770749e11b58fc6c995579033a0847dcc9bdaad",
+      "tests/test_c4_music_feast_quests.js": "c1218882aba915f496e24d9ef03ba8b2fbfba49a80276adb83dbccd4c34fccf2",
+      "tests/test_c4_lizardman_invader_quests.js": "1a7ea190dcb17c0afb51a23a2a12dde82e6e43d2594d4f1fe8ffbfe6fd794034",
+      "tests/test_c4_elven_forest_quests.js": "923b0e9059eef322cdab0d296121e7a16990a1705e5dba4ea566c88b5551d0c3",
+      "tests/test_c4_bounty_target_quests.js": "ed25ffebe95ae9ebc9306d5cea58a9f8acb47d1ffeafe026014a2eb5b7d497ca",
+      "tests/test_c4_catacomb_quests.js": "7a1b08b535de23bcdfa4e998259d4fb658d1dc141b4611d9ca0aaef88a9aa56a",
+      "tests/test_c4_sin_eater_quest.js": "71b502e63800579f7a9cc9fa18f6ba210dc074d1d03bdd861e6481069a328ea9",
+      "tests/test_c4_dimensional_rift_quest.js": "0edb4e77ec98e834782a9988c7cb4977e483eb574397dd0cf517d73ef262b741",
+      "tests/test_c4_shilens_hunt.js": "f994c11eeea7643995d7dd51d61a49132603ac7c3e6801a874f8c09d52139c1e",
+      "scripts/check-c4-quests.js": "120ac34f006fdac5b61bba2fbb4174f4711067e788e74120f0499f739cb2e8e2",
+      "scripts/certify-c4-quests.js": "28c6e3752cab15e2a6bb2f9b635d7e82a2d601ed1ba2adde0352b2a938651326",
+      "docs/c4/quests/runtime-review.json": "461e10d98cf2bc019b2c6b47e69534ac45598bbe4e044d5a2aab2f285038709a",
+      "docs/c4/quests/C4_QUEST_MASTER_INVENTORY.jsonl": "9f63e96d5fe25e0ce21f81027b805d8a4cc556e25e8f17b74a179ff316befc86"
+    },
+    "tests": [
+      {
+        "path": "tests/test_c4_inventory_validation.js",
+        "exitCode": 0
+      },
+      {
+        "path": "tests/test_c4_declarative_quests.js",
+        "exitCode": 0
+      },
+      {
+        "path": "tests/test_c4_starter_quests.js",
+        "exitCode": 0
+      },
+      {
+        "path": "tests/test_c4_beginner_quests.js",
+        "exitCode": 0
+      },
+      {
+        "path": "tests/test_c4_class_quests.js",
+        "exitCode": 0
+      },
+      {
+        "path": "tests/test_c4_village_quests.js",
+        "exitCode": 0
+      },
+      {
+        "path": "tests/test_c4_profession_routes.js",
+        "exitCode": 0
+      },
+      {
+        "path": "tests/test_c4_orc_bounty_quests.js",
+        "exitCode": 0
+      },
+      {
+        "path": "tests/test_c4_lizardmen_quest.js",
+        "exitCode": 0
+      },
+      {
+        "path": "tests/test_c4_music_feast_quests.js",
+        "exitCode": 0
+      },
+      {
+        "path": "tests/test_c4_lizardman_invader_quests.js",
+        "exitCode": 0
+      },
+      {
+        "path": "tests/test_c4_elven_forest_quests.js",
+        "exitCode": 0
+      },
+      {
+        "path": "tests/test_c4_bounty_target_quests.js",
+        "exitCode": 0
+      },
+      {
+        "path": "tests/test_c4_catacomb_quests.js",
+        "exitCode": 0
+      },
+      {
+        "path": "tests/test_c4_sin_eater_quest.js",
+        "exitCode": 0
+      },
+      {
+        "path": "tests/test_c4_dimensional_rift_quest.js",
+        "exitCode": 0
+      },
+      {
+        "path": "tests/test_c4_shilens_hunt.js",
+        "exitCode": 0
+      }
+    ],
+    "scope": "C4 quests with minimum level 1-20. Player/runtime certification only; bot autonomy is outside this PR."
+  }
+}

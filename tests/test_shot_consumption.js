@@ -109,8 +109,20 @@ assert.strictEqual(guildMemberClubTemplate.etc.spiritshot, 1, 'Guild Member\'s C
 assert.strictEqual(buffaloHornTemplate.etc.soulshot, 1, 'Buffalo\'s Horn should preserve Lisvus Soulshot cost');
 assert.strictEqual(buffaloHornTemplate.etc.spiritshot, 1, 'Buffalo\'s Horn should preserve Lisvus Spiritshot cost');
 
-const weaponTemplates = DataCache.items.filter((entry) => entry.template?.kind?.startsWith('Weapon.'));
+// The Baby Duck Rod is the datapack's one weapon the source marks
+// isAttackWeapon="false": it cannot launch a general attack and consumes
+// Fishing Shots rather than soul or spirit shots. Giving it a shot cost would
+// contradict the source, so it is excluded from the blanket rule instead.
+const NON_ATTACK_WEAPONS = new Set([6529]);
+const weaponTemplates = DataCache.items.filter((entry) => entry.template?.kind?.startsWith('Weapon.')
+    && !NON_ATTACK_WEAPONS.has(entry.selfId));
 assert(weaponTemplates.length > 0, 'datapack should contain weapons');
+for (const selfId of NON_ATTACK_WEAPONS) {
+    const weapon = DataCache.items.find((entry) => entry.selfId === selfId);
+    assert(weapon, `non-attack weapon ${selfId} should still exist in the datapack`);
+    assert.strictEqual(weapon.etc.soulshot, 0, `${weapon.template.name} consumes no Soulshot`);
+    assert.strictEqual(weapon.etc.spiritshot, 0, `${weapon.template.name} consumes no Spiritshot`);
+}
 for (const weapon of weaponTemplates) {
     assert(weapon.etc.soulshot >= 1, `${weapon.template.name} (${weapon.selfId}) should consume at least one Soulshot`);
     assert(weapon.etc.spiritshot >= 1, `${weapon.template.name} (${weapon.selfId}) should consume at least one Spiritshot`);

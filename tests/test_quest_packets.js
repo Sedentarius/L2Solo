@@ -8,16 +8,19 @@ const QuestService = invoke("GameServer/Quest/QuestService");
 assert.deepStrictEqual(
   QuestService.quests().map((quest) => quest.id),
   [
-    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 34, 36, 42, 43, 44, 45, 46, 47, 48, 49, 101, 102, 103,
+    ...require('../src/GameServer/Quest/LowLevelDefinitions').filter(d=>!d.blocked).map(d => d.id),
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 34, 36, 38, 39, 42, 43, 44, 45, 46, 47, 48, 49, 101, 102, 103,
     104, 105, 106, 107, 108, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160,
     161, 162, 163, 164, 165, 166, 167, 168, 169, 170,
+    257, 260, 265, 267, 273, 275, 276, 293, 340, 363, 364, 378,
+    385,
     401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415,
-    416, 417, 418, 419, 420, 421, 501,
+    416, 417, 418, 419, 420, 421, 422, 501, 634, 635,
   ],
   "early C4 quests register in deterministic order",
 );
 assert.deepStrictEqual(
-  QuestService.quests()[0].startNpcs,
+  QuestService.quests().find(q => q.id === 1).startNpcs,
   [7048],
   "only Darin starts Q001; Roxxy keeps her normal dialog before it begins",
 );

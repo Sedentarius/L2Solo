@@ -4,7 +4,12 @@ const { auditQuestRegistry } = require("../scripts/check-quest-registry");
 
 const result = auditQuestRegistry();
 assert.deepStrictEqual(result.errors, []);
-assert.strictEqual(result.active, 70);
+// 70 legacy script entries, the five reviewed beginner bounties, the two
+// reviewed Orc bounties Q275/Q276, Q340 Subjugation of Lizardmen, the three
+// scripted music/feast quests Q363/Q364/Q378, the two restored lizardman
+// quests Q38/Q39, Q267 Wrath of Verdure, the two catacomb errands Q385/Q634,
+// Q422 Repent Your Sins and Q635 In the Dimensional Rift.
+assert.strictEqual(result.active, 88 + require('../src/GameServer/Quest/LowLevelDefinitions').filter(d=>!d.blocked).length);
 
 const QuestService = invoke("GameServer/Quest/QuestService");
 const Database = invoke("Database");
