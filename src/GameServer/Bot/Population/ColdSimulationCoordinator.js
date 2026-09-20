@@ -668,32 +668,38 @@ class ColdSimulationCoordinator {
             // blocked dungeon forever. Only for this rare safety evacuation,
             // choose the least-bad allowed field and let admission exceed its
             // soft capacity by one.
-            const emergencyCandidates = (index.profiles || [...index.spots.values()])
+            const emergencyOptions = { ...options, mode: 'solo' };
+            const candidatesWithRoom = (index.profiles || [...index.spots.values()])
                 .filter((profile) => String(profile.id) !== String(currentId || ''))
                 .filter((profile) => !excludedSpotIds.has(String(profile.id)))
-                .filter((profile) => LevelingRoutes.isSpotAllowedForState(
-                    profile,
-                    state,
-                    { ...options, mode: 'solo' }
+                .filter((profile) => (
+                    Number(profile.minLevel || 1) <= Number(state.level || 1) + 4
+                    && Number(profile.maxLevel || profile.minLevel || 1) >= Number(state.level || 1) - 4
                 ))
                 .filter((profile) => SpotProfiles.hasCapacityForStates(
                     profile,
                     routedMembers,
                     index.occupancy,
                     { maxOverflowUnits: 1 }
-                ))
-                .filter((profile) => (
-                    Number(profile.minLevel || 1) <= Number(state.level || 1) + 4
-                    && Number(profile.maxLevel || profile.minLevel || 1) >= Number(state.level || 1) - 4
                 ));
+            // These profiles depend on the bot, not the candidate spot. Keep
+            // them local to this decision so skill/equipment changes remain
+            // visible without rebuilding every skill for the entire catalog.
+            if (candidatesWithRoom.length) {
+                emergencyOptions.matchupProfiles = invoke('GameServer/Bot/AI/BotTargetMatchup')
+                    .stateProfiles(state, emergencyOptions);
+            }
+            const emergencyCandidates = candidatesWithRoom.filter((profile) => (
+                LevelingRoutes.isSpotAllowedForState(profile, state, emergencyOptions)
+            ));
             const suitable = emergencyCandidates.filter((profile) => (
                 SpotService.isSuitable(profile, Number(state.level || 1), options)
             ));
-            selected = LevelingRoutes.bestSpot(
+            selected = emergencyCandidates.length ? LevelingRoutes.bestSpot(
                 suitable.length ? suitable : emergencyCandidates,
                 state,
-                { ...options, mode: 'solo' }
-            )?.spot || null;
+                emergencyOptions
+            )?.spot || null : null;
         }
         if (!selected) return null;
 
