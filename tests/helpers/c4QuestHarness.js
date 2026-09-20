@@ -40,6 +40,9 @@ async function createWorld(characters, label = 'c4-quest') {
             Number(character.level || 20), Number(character.exp || 0),
             // -1 is the migration's "eligibility cannot be proven" default.
             Number(character.newbie ?? -1), Number(character.newbieShotsReceived || 0));
+        if (character.pk) {
+            seed.prepare('UPDATE characters SET pk = ? WHERE id = ?').run(Number(character.pk), character.id);
+        }
     }
     seed.close();
     Database.init();
@@ -79,6 +82,11 @@ class World {
             // ClassTransfer commits through the database and then refreshes the
             // live actor; these are the pieces of that refresh a quest test needs.
             setClassId(classId) { this.classId = Number(classId); },
+            // Karma bookkeeping, for the one quest that is allowed to change it.
+            fetchPk() { return Number(this.pk) || 0; },
+            setPk(value) { this.pk = Number(value) || 0; },
+            fetchPvp() { return Number(this.pvp) || 0; },
+            fetchKarma() { return Number(this.karma) || 0; },
             isDead: () => false,
             fillupVitals() { this.hp = this.maxHp; this.mp = this.maxMp; },
             skillset: { skills: [], fetchSkills() { return this.skills; }, awardSkills: async () => [] },

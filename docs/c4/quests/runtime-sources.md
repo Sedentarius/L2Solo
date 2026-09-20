@@ -403,3 +403,73 @@ already spawned; the test asserts that rather than assuming it.
 spawn anywhere in the pinned datapack, and no local template at all. Q385's own
 chance table omits exactly the same seven. Both quests therefore hunt the same
 forty-one targets a player can actually meet.
+
+## Q422: the Sin Eater was already here
+
+`SIN_EATER_PROGRESSION` turned out to name work that was already done. The
+server's pet runtime already knows this pet completely: `PetRules.TYPES` maps the
+Penitent's Manacles (4425) to summon 12564 and names it "Sin Eater",
+`C4ItemSkills` gives the collar its non-consuming summon skill, `c4-stats.json`
+carries eighty levels of Sin Eater stat rows, `Backpack.petNpcFallback` supplies
+its display template, and `PetRules.normalize` gives a freshly issued Sin Eater
+the owner's own level. No pet code was written for this quest.
+
+What the quest owns is the errand and the reckoning:
+
+* The Black Judge sentences by level band — the reference's bands overlap at 20,
+  30 and 40 and the first match wins, so they really are ≤20, 21-30, 31-40 and
+  above — sending the character to Katari, Piotur, Casian or Joan for ten ratman
+  skulls, ten war hound tails, one kingpin heart or three venom sacs.
+* Pushkin forges the manacles from the Manual plus ten silver nuggets, two
+  adamantite nuggets, ten cokes, five steel and one blacksmith's frame.
+* The Black Judge exchanges the forged pair for the collar and **records the
+  owner's level in the same commit**.
+* The reckoning requires that the Sin Eater's level has passed that recorded
+  level, and that it is not currently summoned. It then spends the collar, issues
+  the spent pair (4426) and strikes off `getRandom(10) + 1` sins. If that clears
+  the record the sentence is discharged; otherwise a new level is recorded and
+  the reckoning can be earned again. The spent pair buys a fresh collar.
+
+Where the reference reads the Sin Eater's level off the collar's *enchant level*,
+this server keeps a pet's saved state on its collar, so the level is read from
+`fetchPetData().level`. That is the same fact in this server's own storage.
+
+**This is the only authoritative way a PK count falls**, so every guard is
+asserted: no reckoning without a grown Sin Eater, none while it is summoned, none
+twice from one collar, none for a character with a clean record, and the PK write
+commits with the item transaction rather than beside it.
+
+Native 7981 Black Judge was absent and is restored from the reference's own stats
+and all three of its authored positions. Items 4326-4331 were authored
+non-stackable while the pinned source makes them stackable; they are corrected,
+following the same rule as elsewhere in this task — correct exactly the quest
+items this catalogue's quests hand out or collect.
+
+## Q635: the Dimension Rift quest is a passage, not an instance
+
+`DIMENSION_RIFT_INSTANCE_LIFECYCLE` was the most over-broad blocker of them all.
+The pinned C4 handler has **no rooms, no timers, no party admission, no encounter
+spawning, no early exit and no cleanup**. It is a two-way passage:
+
+* A Dimension Keeper outside a catacomb checks level 20, a Fragment of Dimension
+  in the pack (required, never consumed) and no more than twenty-three other
+  active quests, then remembers which keeper you used and teleports you to the
+  rift outpost at (−114790, −180576, −6781).
+* Any of the six Rift Post ranks at the outpost sends you back to that same
+  keeper's catacomb and closes the passage behind you.
+
+That is the whole quest. It is implemented on the server's own
+`Generics/TeleportTo` and ordinary durable quest state; no instance runtime was
+built, and none is needed.
+
+**One reference bug is corrected.** The handler computes `id = npcId - 31493`
+and then returns the player to `COORD[id]`, which is off by one: the first
+keeper would send you to the *second* catacomb, and the last two ids would index
+past the end of a fourteen-entry table. The keeper spawns settle it — 31494
+stands at the Necropolis of Sacrifice, which is `COORD[0]`, 31495 at the Catacomb
+of the Heretic, which is `COORD[1]`, and so on — so the destination is indexed
+from the keeper's own position in the list. All fourteen round trips are
+certified.
+
+The reference's fifteenth start id, 31508, is not spawned anywhere in the pinned
+datapack and has no destination in the table; it is not a keeper here either.

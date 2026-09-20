@@ -897,11 +897,12 @@
     "reviewedRequirements": []
   },
   "422": {
-    "certified": false,
-    "runtimeBlocker": {
-      "code": "SIN_EATER_PROGRESSION",
-      "detail": "Needs Sin Eater pet progression and authoritative PK reduction; ordinary collection would misrepresent the quest."
-    }
+    "certified": true,
+    "tests": [
+      "tests/test_c4_sin_eater_quest.js"
+    ],
+    "bridge": "REVIEWED_DELIVERY_ROUTE",
+    "reviewedRequirements": []
   },
   "634": {
     "certified": true,
@@ -912,11 +913,12 @@
     "reviewedRequirements": []
   },
   "635": {
-    "certified": false,
-    "runtimeBlocker": {
-      "code": "DIMENSION_RIFT_INSTANCE_LIFECYCLE",
-      "detail": "Needs party instance admission, timed rooms, encounter ownership and restart/handoff semantics."
-    }
+    "certified": true,
+    "tests": [
+      "tests/test_c4_dimensional_rift_quest.js"
+    ],
+    "bridge": "REVIEWED_DELIVERY_ROUTE",
+    "reviewedRequirements": []
   },
   "999": {
     "certified": false,

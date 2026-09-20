@@ -116,8 +116,10 @@ const entries = [
     [419, "Q419_GetAPet"],
     [420, "Q420_LittleWing"],
     [421, "Q421_LittleWingsBigAdventure"],
+    [422, "Q422_RepentYourSins"],
     [501, "Q501_ProofOfClanAlliance"],
     [634, "Q634_InSearchOfFragmentsOfDimension"],
+    [635, "Q635_IntoTheDimensionalRift"],
   ].map(([id, name]) => ({
     id,
     modulePath: `./quests/${name}`,

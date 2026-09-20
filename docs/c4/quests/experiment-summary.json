@@ -238,5 +238,136 @@
     "failed": 1,
     "total": 509
   },
-  "sourceHashDigest": "5a5c21c2a7446b527334453e536f2d50ea1f5ede030164c4201e7c1bfc714d6b"
+  "sourceHashDigest": "5a5c21c2a7446b527334453e536f2d50ea1f5ede030164c4201e7c1bfc714d6b",
+  "completion": {
+    "note": "Every field outside this object is the original experiment's snapshot at baseline aed7d6bf and is preserved as written.",
+    "branch": "prewipe-c4-quests-complete",
+    "resumedFrom": "5ac5b355",
+    "confirmed": 107,
+    "counts": {
+      "VERIFIED": 107,
+      "IMPLEMENTED": 0,
+      "PARTIAL/BLOCKED": 0,
+      "MISSING": 0
+    },
+    "proofContractsPassing": 18,
+    "registeredInScope": 107,
+    "auditErrors": [],
+    "resolvedBlockers": {
+      "ENCOUNTER_HANDOFF_UNCERTIFIED": {
+        "quests": [
+          340
+        ],
+        "resolution": "Over-broad. The pinned handler uses a plain transient addSpawn; Q340's chest is spawnQuestNpc with despawnDelay 30000. No encounter subsystem was added."
+      },
+      "MISSING_NPC_TEMPLATES": {
+        "quests": [
+          38,
+          39,
+          362,
+          363,
+          364
+        ],
+        "resolution": "Genuine datapack gaps. Templates, spawns and drop tables restored from the pinned reference's own stats and coordinates."
+      },
+      "MISSING_ITEM_TEMPLATES": {
+        "quests": [
+          379
+        ],
+        "resolution": "Genuine datapack gap. Items restored with the source's own stackability, weight and price."
+      },
+      "BRANCH_DEFINITION_PENDING": {
+        "quests": [
+          378
+        ],
+        "resolution": "Implemented verbatim. The banquet is scored, not random: nine reward rows, each certified for item, amount and adena."
+      },
+      "NPC_ID_MAPPING_UNRESOLVED": {
+        "quests": [
+          266,
+          267
+        ],
+        "resolution": "Settled by evidence. The reference ships stats/npcs/CT0_to_C4_ids.txt, which states 31852;12091 and 31853;12092 outright; 12091's local spawn is byte-identical to the reference's."
+      },
+      "OPTIONAL_KILL_TARGET_UNSPAWNED": {
+        "quests": [
+          296
+        ],
+        "resolution": "Not a gap. The pinned C4 datapack never spawns Crimson Tarantula 20394 either, so the local state already reproduced C4."
+      },
+      "OPTIONAL_KILL_TARGETS_UNSPAWNED": {
+        "quests": [
+          306
+        ],
+        "resolution": "Genuine gap. The four higher variants are now spawned from the reference's own 21_25 points and carry its own 40%/50% chances."
+      },
+      "PARTY_SEVEN_SIGNS_INTEGRATION": {
+        "quests": [
+          385,
+          634
+        ],
+        "resolution": "Over-broad. Neither pinned handler contains a Seven Signs condition of any kind. The only party-shaped call is getRandomPartyMemberState; this server's stated policy attributes the quest kill callback to the actual killer."
+      },
+      "SIN_EATER_PROGRESSION": {
+        "quests": [
+          422
+        ],
+        "resolution": "Already present. PetRules, C4ItemSkills and the pet stat rows already summon, level and persist the Sin Eater. The quest adds its errand and its PK reckoning; no pet code was written."
+      },
+      "DIMENSION_RIFT_INSTANCE_LIFECYCLE": {
+        "quests": [
+          635
+        ],
+        "resolution": "Over-broad. The pinned handler is a two-way teleport with no rooms, timers, party admission, encounter spawning or cleanup."
+      }
+    },
+    "sourceDefectsCorrected": [
+      {
+        "questId": 340,
+        "defect": "The relic roll is guarded on not holding the Holy Symbol, so nine players in ten whose nested rosary roll fails are stranded at condition 3 forever. The guard is widened to 'does not hold both'; the rates are unchanged."
+      },
+      {
+        "questId": 635,
+        "defect": "The return teleport indexes COORD one place past the keeper the player used, and the last two ids index past the table. The destination is indexed from the keeper's own position, which the keeper spawns confirm."
+      },
+      {
+        "questId": 39,
+        "defect": "The local handler dropped necklaces at half chance where the reference always drops them, and advanced on the sum of the pair rather than on both stacks being full."
+      }
+    ],
+    "newDatapackContent": {
+      "npcTemplates": 31,
+      "spawnEntries": 34,
+      "spawnPoints": 142,
+      "dropTables": 3,
+      "items": 21,
+      "stackabilityCorrections": [
+        4255,
+        4326,
+        4327,
+        4328,
+        4329,
+        4330,
+        4331
+      ],
+      "spawnCorrections": [
+        12092
+      ],
+      "invented": "none"
+    },
+    "newRuntimePrimitives": [
+      "QuestService.onEvent accepts an array from eventNpc, so an errand offered by many interchangeable NPCs can name the whole set (Q385, Q634, Q635)."
+    ],
+    "migrations": [],
+    "newTestFiles": [
+      "tests/test_c4_lizardmen_quest.js",
+      "tests/test_c4_music_feast_quests.js",
+      "tests/test_c4_lizardman_invader_quests.js",
+      "tests/test_c4_elven_forest_quests.js",
+      "tests/test_c4_bounty_target_quests.js",
+      "tests/test_c4_catacomb_quests.js",
+      "tests/test_c4_sin_eater_quest.js",
+      "tests/test_c4_dimensional_rift_quest.js"
+    ]
+  }
 }

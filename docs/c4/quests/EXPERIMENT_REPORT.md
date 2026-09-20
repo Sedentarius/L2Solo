@@ -65,3 +65,69 @@ The last complete regression, on the Q325 implementation snapshot (07412719), ex
 ## Scaling conclusion
 
 This supports scaling the same reviewed-definition architecture: 27 newly playable quests plus seven recovered quests use shared transactions and existing QuestService/Bridge, with no new Bridge primitive. It covers more than simple collection: variable rewards, ongoing bounty payments, barter and explicit choices also fit. It does not support blindly executing the inventory or claiming that all remaining catalogue mechanics fit this pattern. Datapack completeness, ambiguous evidence, account-wide reward flags, scripted encounters and party/instance systems remain separate engineering work. Nine missing implementations and seventeen uncertified profession routes are concrete remaining scope, not hidden behind the VERIFIED count.
+
+## Completion: the catalogue is finished
+
+The sections above are the original experiment's record at baseline `aed7d6bf`
+and are left as written. This section records the end state.
+
+All 107 confirmed Chronicle 4 quests with a minimum level of 1–20 are now
+VERIFIED, with no IMPLEMENTED, PARTIAL/BLOCKED or MISSING remainder, and
+`check-c4-quests` reports `errors: []`. The eighteen first-profession proof
+contracts still pass.
+
+| Repository-derived measure | Experiment | Now |
+|---|---:|---:|
+| Confirmed quests, minimum level 1–20 | 107 | 107 |
+| VERIFIED | 34 | 107 |
+| IMPLEMENTED, full certification pending | 50 | 0 |
+| PARTIAL/BLOCKED | 14 | 0 |
+| MISSING | 9 | 0 |
+| Shared profession proof contracts passing | 18 / 18 | 18 / 18 |
+
+### Every blocker, and what it turned out to be
+
+Four of the six blocker codes named subsystems that the pinned C4 sources do not
+actually contain. Reading them, rather than building to their names, is what
+finished the catalogue.
+
+* `ENCOUNTER_HANDOFF_UNCERTIFIED` (Q340, and earlier Q275/Q276) — the handlers
+  use a plain transient `addSpawn`. Q340's chest is `spawnQuestNpc` with
+  `despawnDelay: 30000`. No encounter subsystem was needed.
+* `PARTY_SEVEN_SIGNS_INTEGRATION` (Q385, Q634) — neither handler contains a
+  Seven Signs condition of any kind. The only party-shaped call is
+  `getRandomPartyMemberState`, and this server already has a stated attribution
+  policy for quest kill callbacks.
+* `SIN_EATER_PROGRESSION` (Q422) — the Sin Eater was already wired into the pet
+  runtime. The quest needed its errand and its PK reckoning, not pet code.
+* `DIMENSION_RIFT_INSTANCE_LIFECYCLE` (Q635) — the handler is a two-way
+  teleport with no rooms, timers, party admission or cleanup.
+* `MISSING_NPC_TEMPLATES` / `MISSING_ITEM_TEMPLATES` (Q38, Q39, Q362–Q364,
+  Q379) — genuine datapack gaps, filled from the reference's own stats, spawn
+  coordinates and drop tables.
+* `NPC_ID_MAPPING_UNRESOLVED` (Q266, Q267) — settled by evidence. The reference
+  ships `stats/npcs/CT0_to_C4_ids.txt`, which states the mapping outright.
+* `OPTIONAL_KILL_TARGET(S)_UNSPAWNED` (Q296, Q306) — Q306's four variants were a
+  real gap and are now spawned; Q296's third target is unspawned in Chronicle 4
+  itself, so the local state was already faithful.
+
+### Two source defects were corrected, and both are recorded
+
+Q340's relic roll strands nine players in ten at condition 3, and Q635's return
+teleport is indexed one place past the catacomb the player came from. Both
+corrections are minimal, keep the authored rates and destinations, and are
+written up in `runtime-sources.md` as implementation choices rather than source
+facts.
+
+### What was added
+
+Thirty-one NPC templates, thirty-four spawn entries covering a hundred and
+forty-two authored points, three full drop and spoil tables, and twenty-one
+items — all taken from the pinned reference. Seven existing quest items had
+their stackability corrected to match the source, and one spawn position was
+corrected. No coordinate was invented anywhere in this work.
+
+One reusable runtime primitive was added, because three confirmed quests require
+it: `QuestService.onEvent` now accepts an array from `eventNpc`, so an errand
+offered by many interchangeable NPCs can name the whole set. No database
+migration or schema change was needed.

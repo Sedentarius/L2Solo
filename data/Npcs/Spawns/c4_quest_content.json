@@ -1133,6 +1133,33 @@
                 "total": 1,
                 "respawn": 60,
                 "bias": 0
+            },
+            {
+                "selfId": 7981,
+                "name": "Black Judge",
+                "coords": [
+                    {
+                        "locX": 15520,
+                        "locY": 174572,
+                        "locZ": -3637,
+                        "head": 57344
+                    },
+                    {
+                        "locX": 106131,
+                        "locY": 105979,
+                        "locZ": -3482,
+                        "head": 28672
+                    },
+                    {
+                        "locX": -18960,
+                        "locY": 209834,
+                        "locZ": -3656,
+                        "head": 0
+                    }
+                ],
+                "total": 1,
+                "respawn": 60,
+                "bias": 0
             }
         ]
     }

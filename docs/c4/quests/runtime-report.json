@@ -2,9 +2,9 @@
   "errors": [],
   "confirmedInScope": 107,
   "counts": {
-    "VERIFIED": 105,
+    "VERIFIED": 107,
     "IMPLEMENTED": 0,
-    "PARTIAL/BLOCKED": 2,
+    "PARTIAL/BLOCKED": 0,
     "MISSING": 0
   },
   "capabilities": {
@@ -14,7 +14,7 @@
     "partyQuestSharing": "NOT_CERTIFIED",
     "note": "Existing NPC spawns and script events do not certify cold encounter ownership, timers or party credit."
   },
-  "registeredInScope": 105,
+  "registeredInScope": 107,
   "proofContracts": 18,
   "driftCount": 296,
   "scopeDriftCount": 107,
@@ -6688,25 +6688,26 @@
       "name": "Repent Your Sins",
       "inScope": true,
       "quarantined": false,
-      "status": "PARTIAL/BLOCKED",
-      "script": null,
+      "status": "VERIFIED",
+      "script": "Q422_RepentYourSins.js",
       "definitionId": null,
-      "registered": false,
-      "tests": [],
-      "blocker": {
-        "code": "SIN_EATER_PROGRESSION",
-        "detail": "Needs Sin Eater pet progression and authoritative PK reduction; ordinary collection would misrepresent the quest."
-      },
+      "registered": true,
+      "tests": [
+        "tests/test_c4_sin_eater_quest.js"
+      ],
+      "blocker": null,
       "certificationBlocker": null,
       "professionProofContract": null,
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "NOT_CERTIFIED",
-        "reviewedRequirements": null,
+        "questAdapter": "REVIEWED_DELIVERY_ROUTE",
+        "reviewedRequirements": [],
         "requirementsNeedingReview": []
       },
       "drift": [
-        "status:MISSING->PARTIAL/BLOCKED",
+        "script_existence",
+        "registration",
+        "status:MISSING->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -7726,27 +7727,26 @@
       "name": "In the Dimension Rift",
       "inScope": true,
       "quarantined": false,
-      "status": "PARTIAL/BLOCKED",
-      "script": null,
+      "status": "VERIFIED",
+      "script": "Q635_IntoTheDimensionalRift.js",
       "definitionId": null,
-      "registered": false,
-      "tests": [],
-      "blocker": {
-        "code": "DIMENSION_RIFT_INSTANCE_LIFECYCLE",
-        "detail": "Needs party instance admission, timed rooms, encounter ownership and restart/handoff semantics."
-      },
+      "registered": true,
+      "tests": [
+        "tests/test_c4_dimensional_rift_quest.js"
+      ],
+      "blocker": null,
       "certificationBlocker": null,
       "professionProofContract": null,
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "NOT_CERTIFIED",
-        "reviewedRequirements": null,
-        "requirementsNeedingReview": [
-          "DEFEND_PRIMITIVE"
-        ]
+        "questAdapter": "REVIEWED_DELIVERY_ROUTE",
+        "reviewedRequirements": [],
+        "requirementsNeedingReview": []
       },
       "drift": [
-        "status:MISSING->PARTIAL/BLOCKED",
+        "script_existence",
+        "registration",
+        "status:MISSING->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
