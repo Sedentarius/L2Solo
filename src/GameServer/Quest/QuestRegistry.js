@@ -85,6 +85,7 @@ const entries = [
     [257, "Q257_TheGuardIsBusy"],
     [260, "Q260_OrcHunting"],
     [265, "Q265_BondsOfSlavery"],
+    [267, "Q267_WrathOfVerdure"],
     [273, "Q273_InvadersOfTheHolyLand"],
     [275, "Q275_DarkWingedSpies"],
     [276, "Q276_TotemOfTheHestui"],

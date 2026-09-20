@@ -417,18 +417,20 @@
     "reviewedRequirements": []
   },
   "266": {
-    "certified": false,
-    "runtimeBlocker": {
-      "code": "NPC_ID_MAPPING_UNRESOLVED",
-      "detail": "Technical reference NPCs 31852/31853 have no local native 8852/8853 templates. Multiple Murika/Bremec templates exist; do not guess a replacement. No evidence that Q266 requires DEFEND."
-    }
+    "certified": true,
+    "tests": [
+      "tests/test_c4_elven_forest_quests.js"
+    ],
+    "bridge": "REVIEWED_DELIVERY_ROUTE",
+    "reviewedRequirements": []
   },
   "267": {
-    "certified": false,
-    "runtimeBlocker": {
-      "code": "NPC_ID_MAPPING_UNRESOLVED",
-      "detail": "Technical reference NPCs 31852/31853 have no local native 8852/8853 templates. Multiple Murika/Bremec templates exist; do not guess a replacement. No evidence that Q266 requires DEFEND."
-    }
+    "certified": true,
+    "tests": [
+      "tests/test_c4_elven_forest_quests.js"
+    ],
+    "bridge": "REVIEWED_DELIVERY_ROUTE",
+    "reviewedRequirements": []
   },
   "271": {
     "certified": true,

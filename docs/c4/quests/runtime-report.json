@@ -2,9 +2,9 @@
   "errors": [],
   "confirmedInScope": 107,
   "counts": {
-    "VERIFIED": 99,
+    "VERIFIED": 101,
     "IMPLEMENTED": 0,
-    "PARTIAL/BLOCKED": 8,
+    "PARTIAL/BLOCKED": 6,
     "MISSING": 0
   },
   "capabilities": {
@@ -14,7 +14,7 @@
     "partyQuestSharing": "NOT_CERTIFIED",
     "note": "Existing NPC spawns and script events do not certify cold encounter ownership, timers or party credit."
   },
-  "registeredInScope": 101,
+  "registeredInScope": 103,
   "proofContracts": 18,
   "driftCount": 296,
   "scopeDriftCount": 107,
@@ -3948,27 +3948,26 @@
       "name": "Pleas of Pixies",
       "inScope": true,
       "quarantined": false,
-      "status": "PARTIAL/BLOCKED",
+      "status": "VERIFIED",
       "script": null,
-      "definitionId": null,
-      "registered": false,
-      "tests": [],
-      "blocker": {
-        "code": "NPC_ID_MAPPING_UNRESOLVED",
-        "detail": "Technical reference NPCs 31852/31853 have no local native 8852/8853 templates. Multiple Murika/Bremec templates exist; do not guess a replacement. No evidence that Q266 requires DEFEND."
-      },
+      "definitionId": 266,
+      "registered": true,
+      "tests": [
+        "tests/test_c4_elven_forest_quests.js"
+      ],
+      "blocker": null,
       "certificationBlocker": null,
       "professionProofContract": null,
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "NOT_CERTIFIED",
-        "reviewedRequirements": null,
-        "requirementsNeedingReview": [
-          "DEFEND_PRIMITIVE"
-        ]
+        "questAdapter": "REVIEWED_DELIVERY_ROUTE",
+        "reviewedRequirements": [],
+        "requirementsNeedingReview": []
       },
       "drift": [
-        "status:MISSING->PARTIAL/BLOCKED",
+        "implemented_as_reviewed_definition",
+        "registration",
+        "status:MISSING->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -3977,25 +3976,26 @@
       "name": "Wrath of Verdure",
       "inScope": true,
       "quarantined": false,
-      "status": "PARTIAL/BLOCKED",
-      "script": null,
+      "status": "VERIFIED",
+      "script": "Q267_WrathOfVerdure.js",
       "definitionId": null,
-      "registered": false,
-      "tests": [],
-      "blocker": {
-        "code": "NPC_ID_MAPPING_UNRESOLVED",
-        "detail": "Technical reference NPCs 31852/31853 have no local native 8852/8853 templates. Multiple Murika/Bremec templates exist; do not guess a replacement. No evidence that Q266 requires DEFEND."
-      },
+      "registered": true,
+      "tests": [
+        "tests/test_c4_elven_forest_quests.js"
+      ],
+      "blocker": null,
       "certificationBlocker": null,
       "professionProofContract": null,
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "NOT_CERTIFIED",
-        "reviewedRequirements": null,
+        "questAdapter": "REVIEWED_DELIVERY_ROUTE",
+        "reviewedRequirements": [],
         "requirementsNeedingReview": []
       },
       "drift": [
-        "status:MISSING->PARTIAL/BLOCKED",
+        "script_existence",
+        "registration",
+        "status:MISSING->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },

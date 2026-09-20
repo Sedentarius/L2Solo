@@ -77,6 +77,21 @@ const definitions = [
             {type:'TALK',npc:7956,takes:[[4316,1],[4317,1]]},
             {type:'COMPLETE',npc:7957}],
         reward:{adena:10000,items:[[4410,1]]} },
+    // Pixy Murika's fangs. Each target has its own chance and its own amount:
+    // the grey wolf always yields two or three, the elder keltir always two, the
+    // young red keltir one at 80%, and the red keltir at 60% yields one on a
+    // getRandom(3) of zero and two otherwise. The reward is the reference's own
+    // getRandom(100) split: under 10 the emerald, under 30 the blue onyx, under
+    // 60 the onyx, otherwise a glass shard.
+    { id:266,name:'Pleas of Pixies',minLevel:3,race:1,startNpc:12091,repeatable:true,
+        stages:[{type:'KILL_COLLECT',item:1334,count:100,drops:[
+                {npc:525,chance:1,amounts:[{amount:2,chance:.5},{amount:3,chance:.5}]},
+                {npc:537,chance:1,amount:2},
+                {npc:530,chance:.8,amount:1},
+                {npc:534,chance:.6,amounts:[{amount:1,chance:1/3},{amount:2,chance:2/3}]}]},
+            {type:'COMPLETE',npc:12091,takes:[[1334,100]]}],
+        reward:{choices:[{weight:10,items:[[1337,1]]},{weight:20,items:[[1338,1]]},
+            {weight:30,items:[[1339,1]]},{weight:40,items:[[1336,1]]}]} },
     { id:263,name:'Orc Subjugation',minLevel:8,race:2,startNpc:7346,repeatable:true,
         stages:[{type:'COLLECT',npc:7346,prices:[[1116,20],[1117,30]],bonusAt:10,bonusAdena:1000,
             drops:[385,386,387,388].map(npc=>({npc,item:npc===385?1116:1117,chance:.5}))}] },

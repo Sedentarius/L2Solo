@@ -265,3 +265,66 @@ Both quests also gained the same recovery the declarative engine already has: a
 collection that is already full advances when its NPC is next talked to, so a
 character whose database predates atomic quest steps is not stranded at the
 collecting condition.
+
+## Q266 and Q267: the Murika and Bremec mapping, resolved by spawn evidence
+
+The earlier experiment refused to guess these, and it was right to: two local
+templates carry each name. Native **195** and **12091** are both "Pixy Murika";
+native **196** and **12092** are both "Treant Bremec". Reference 31852 and 31853
+have no 8852/8853 counterparts, so the catalogue's usual −23000 arithmetic does
+not reach them and a name match alone proves nothing.
+
+The evidence that settles it is the world, not the name. **12091 Pixy Murika is
+spawned at (49262, 53607, −3216) heading 53248 — byte-identical to the pinned
+reference's `ElvenVillageNPCs.xml` entry for 31852.** The 195 alias has no world
+spawn at all. The rest of that same reference block matches locally too (Newbie
+Guide 30599→7599 and Rizraell 30361→7361 both at the reference's own X/Y), which
+establishes the block as the local source. So:
+
+* Q266 Pleas of Pixies starts at native **12091**.
+* Q267 Wrath of Verdure starts at native **12092** — the same id block as its
+  proven sibling, the same name, and the only Bremec with a world spawn.
+
+Native 195 and 196 are left in place as unspawned legacy aliases. Removing them
+would be a larger change than the mapping needs, and the certification test
+asserts directly that they carry the same names and no world spawn, so the
+ambiguity is recorded rather than hidden.
+
+**One spawn was corrected.** Local 12092 stood at (35689, 47039, −3609), which
+corresponds to nothing in the pinned reference and is out in the forest, far from
+a level-4 Elf's village. Every other NPC in the reference's Elven Village block
+matches locally, including Bremec's own quest partner. Its position is therefore
+corrected to the pinned C4 coordinates (50592, 54896, −3352, heading 40960). That
+is the smallest correction that makes both quest-givers reachable where C4 puts
+them, and it changes one spawn entry and nothing else.
+
+**The mechanics.** Q266 is a reviewed definition: each of its four targets has
+its own chance *and* its own amount — the grey wolf always yields two or three,
+the elder red keltir always two, the young red keltir one at 80%, and the red
+keltir at 60% yields one on a `getRandom(3)` of zero and two otherwise. The
+reward is the reference's own `getRandom(100)` split (under 10 emerald, under 30
+blue onyx, under 60 onyx, otherwise a glass shard), expressed as 10/20/30/40
+choice weights.
+
+Q267 stays a script because it pays **one Silvery Leaf per club** rather than a
+flat sum, and the declarative cash-out pays adena, not a token per item. It keeps
+the reference's half-chance drop, its uncapped collection, its 600-adena bonus at
+ten clubs, and its explicit end-the-task branch, which surrenders unpaid clubs
+and releases the quest rather than completing it.
+
+### The reference ships its own ID table
+
+While resolving Q296's target it turned out the pinned reference carries an
+explicit mapping file, `stats/npcs/CT0_to_C4_ids.txt`, with 5780 `reference;local`
+pairs. It confirms independently every mapping this task derived by other means:
+
+```
+20925;925      21100;1100     21101;1101
+25146;10146    30989;7989     30956;7956 … 30961;7961
+31852;12091    31853;12092
+```
+
+In particular the Murika and Bremec mapping is a **stated source fact**, not an
+inference from spawn coordinates, and the raid-boss offset that made Q340's
+25146 land on 10146 rather than 5146 is confirmed there too. This file is the
+first thing to consult for any future ID question in this catalogue.
