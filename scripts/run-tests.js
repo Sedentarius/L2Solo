@@ -9,6 +9,7 @@ const tests = [
     'tests/test_c4_declarative_quests.js',
     'tests/test_c4_starter_quests.js',
     'tests/test_c4_beginner_quests.js',
+    'tests/test_c4_class_quests.js',
     'tests/test_bot_quest_bridge_foundation.js',
     'tests/test_bot_quest_bridge_kill_collect.js',
     'tests/test_bot_quest_bridge_deliver_complete.js',

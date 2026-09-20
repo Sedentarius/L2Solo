@@ -1,3 +1,4 @@
+const ClassQuestReward = require('../ClassQuestReward');
 const G = 7523,
   R = 7516,
   M = 7521,
@@ -85,17 +86,10 @@ module.exports = {
     if (id === A && c === 10)
       return move([I[10]], [I[11]], 11, "Hunt Blade Bats for the diamond.");
     if (id === G && c === 12) {
-      await q.takeItem(s.session, I[12], -1);
-      for (const [z, c] of [[1511, 1], [1060, 100], ...E.map((z) => [z, 10])])
-        await q.giveItem(s.session, z, c);
-      if (a.isNewbie?.())
-        await q.giveItem(
-          s.session,
-          a.isSpellcaster?.() ? 5790 : 5789,
-          a.isSpellcaster?.() ? 3000 : 6000,
-        );
-      s.playSound("ItemSound.quest_finish");
-      await s.exit(false);
+      await ClassQuestReward.complete(s, {
+        takes: n(s, I[12]) ? [[I[12], n(s, I[12])]] : [],
+        weapon: 1511, noGradeShots: false,
+      });
       return p("Gouph", "The diamond is safe.");
     }
     return p("Quest", "Continue your task.");

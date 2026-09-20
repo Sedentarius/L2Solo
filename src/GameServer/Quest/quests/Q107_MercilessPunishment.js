@@ -1,3 +1,4 @@
+const ClassQuestReward = require('../ClassQuestReward');
 const H = 7568,
   P = 7580,
   O = [1553, 1554, 1555],
@@ -6,6 +7,8 @@ const H = 7568,
   HP = 1060,
   E = [4412, 4413, 4414, 4415, 4416];
 const Q = () => invoke("GameServer/Quest/QuestService");
+const n = (s, id) =>
+  s.session.actor.backpack.fetchItemFromSelfId(id)?.fetchAmount() || 0;
 const p = (t, x, a = "") =>
   `<html><body>${t}:<br>${x}<br><br>${a}</body></html>`;
 module.exports = {
@@ -62,17 +65,11 @@ module.exports = {
       return p("Hatos", "The next target awaits.");
     }
     if (id === H && c === 7) {
-      for (const z of [...O, ...L]) await q.takeItem(s.session, z, -1);
-      for (const [z, c] of [[W, 1], [HP, 100], ...E.map((z) => [z, 10])])
-        await q.giveItem(s.session, z, c);
-      if (a.isNewbie?.())
-        await q.giveItem(
-          s.session,
-          a.isSpellcaster?.() ? 5790 : 5789,
-          a.isSpellcaster?.() ? 3000 : 6000,
-        );
-      s.playSound("ItemSound.quest_finish");
-      await s.exit(false);
+      // The reference pays this Orc route in soulshots only.
+      await ClassQuestReward.complete(s, {
+        takes: [...O, ...L].filter((z) => n(s, z)).map((z) => [z, n(s, z)]),
+        weapon: W, noGradeShots: false, soulshotsOnly: true,
+      });
       return p("Hatos", "You have served the tribe.");
     }
     return p(id === P ? "Parugon" : "Hatos", "Continue your task.");

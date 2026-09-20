@@ -1,3 +1,4 @@
+const ClassQuestReward = require('../ClassQuestReward');
 const R = 7008,
   A = 7283,
   RL = 796,
@@ -41,21 +42,23 @@ module.exports = {
       handle: [4, 5, N, H],
     }[e];
     if (x && s.getInt("cond") === x[0]) {
-      for (const z of e === "note" ? [DIR, T, B] : [x[2]])
-        if (!(await q.takeItem(s.session, z))) return null;
-      await q.giveItem(s.session, x[3], 1);
-      await s.set("cond", x[1]);
+      const takes = (e === "note" ? [DIR, T, B] : [x[2]]).map((z) => [z, 1]);
+      if (takes.some(([z, c]) => n(s, z) < c)) return null;
+      // Consume the carried items, issue the next one and advance in one step.
+      await require("../QuestStep").apply(s, {
+        takes,
+        gives: [[x[3], 1]],
+        variables: { ...s.variables, cond: String(x[1]) },
+      });
       s.playSound("ItemSound.quest_middle");
       return p("Quest", "Continue the task.");
     }
     if (e === "reward" && s.getInt("cond") === 5) {
-      if (!(await q.takeItem(s.session, H))) return null;
-      const mage = Boolean(a.isSpellcaster?.());
-      const rewards = [[S, 1], [HP, 100], ...E.map((id) => [id, 10])];
-      if (a.isNewbie?.()) rewards.push([mage ? SP : SS, mage ? 3000 : 7000]);
-      for (const [id, c] of rewards) await q.giveItem(s.session, id, c);
-      s.playSound("ItemSound.quest_finish");
-      await s.exit(false);
+      if (!n(s, H)) return null;
+      // One transaction: the handle is consumed and the whole bundle is paid.
+      await ClassQuestReward.complete(s, {
+        takes: [[H, 1]], weapon: S, noGradeShots: false,
+      });
       return p("Altran", "The Sword of Solidarity is yours.");
     }
     return null;
@@ -100,10 +103,12 @@ module.exports = {
     if (s.getInt("cond") !== 2 || Math.random() >= 0.2) return;
     const id = n(s, T) ? B : T;
     if (n(s, id)) return;
-    await Q().giveItem(s.session, id, 1);
-    if (n(s, T) && n(s, B)) {
-      await s.set("cond", 3);
-      s.playSound("ItemSound.quest_middle");
-    } else s.playSound("ItemSound.quest_itemget");
+    const complete = Boolean(n(s, id === T ? B : T));
+    // The fragment and the cond it completes are written together.
+    await require("../QuestStep").apply(s, {
+      gives: [[id, 1]],
+      variables: { ...s.variables, cond: String(complete ? 3 : 2) },
+    });
+    s.playSound(complete ? "ItemSound.quest_middle" : "ItemSound.quest_itemget");
   },
 };

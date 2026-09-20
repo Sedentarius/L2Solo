@@ -120,6 +120,19 @@ class World {
         return Service.onKill(session, { fetchSelfId: () => npcId, fetchId: () => objectId });
     }
 
+    // Equips a carried item the way the paperdoll would, for quests that only
+    // progress while their trial weapon is wielded.
+    async equip(session, selfId) {
+        const id = session.actor.fetchId();
+        const [row] = await Database.execute(
+            ['SELECT id, slot FROM items WHERE characterId = ? AND selfId = ? ORDER BY id LIMIT 1', [id, selfId]]);
+        if (!row) throw new Error(`character ${id} does not carry item ${selfId}`);
+        await Database.execute(['UPDATE items SET equipped = 1, slot = 7 WHERE id = ?', [row.id]]);
+        const item = session.actor.backpack.fetchItemFromSelfId(selfId);
+        if (item?.setEquipped) { item.setEquipped(true); item.setSlot?.(7); }
+        return item;
+    }
+
     state(session, questId) {
         return session.questStates.get(questId);
     }
