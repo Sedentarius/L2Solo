@@ -2,9 +2,9 @@
   "errors": [],
   "confirmedInScope": 107,
   "counts": {
-    "VERIFIED": 101,
+    "VERIFIED": 103,
     "IMPLEMENTED": 0,
-    "PARTIAL/BLOCKED": 6,
+    "PARTIAL/BLOCKED": 4,
     "MISSING": 0
   },
   "capabilities": {
@@ -4340,29 +4340,27 @@
       "name": "Tarantula's Spider Silk",
       "inScope": true,
       "quarantined": false,
-      "status": "PARTIAL/BLOCKED",
+      "status": "VERIFIED",
       "script": null,
       "definitionId": 296,
       "registered": true,
       "tests": [
+        "tests/test_c4_bounty_target_quests.js",
         "tests/test_c4_declarative_quests.js"
       ],
-      "blocker": {
-        "code": "OPTIONAL_KILL_TARGET_UNSPAWNED",
-        "detail": "The reference lists Crimson Tarantula 20394 (native 394), but it has no local world spawn and is absent from the reviewed DwarvenStarting.xml. Active handlers support the two authored, spawned alternatives 403 and 508; all payment/extraction paths pass. No location has been invented."
-      },
+      "blocker": null,
       "certificationBlocker": null,
       "professionProofContract": null,
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+        "questAdapter": "REVIEWED_DELIVERY_ROUTE",
         "reviewedRequirements": [],
         "requirementsNeedingReview": []
       },
       "drift": [
         "implemented_as_reviewed_definition",
         "registration",
-        "status:MISSING->PARTIAL/BLOCKED",
+        "status:MISSING->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -4502,29 +4500,27 @@
       "name": "Crystals of Fire and Ice",
       "inScope": true,
       "quarantined": false,
-      "status": "PARTIAL/BLOCKED",
+      "status": "VERIFIED",
       "script": null,
       "definitionId": 306,
       "registered": true,
       "tests": [
+        "tests/test_c4_bounty_target_quests.js",
         "tests/test_c4_declarative_quests.js"
       ],
-      "blocker": {
-        "code": "OPTIONAL_KILL_TARGETS_UNSPAWNED",
-        "detail": "Reference targets 20112–20115 (native 112–115) have templates but no authored local world spawns. Both quest items remain obtainable from active targets 109/110 with their supported 30% chances; higher-variant content is explicitly incomplete."
-      },
+      "blocker": null,
       "certificationBlocker": null,
       "professionProofContract": null,
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+        "questAdapter": "REVIEWED_DELIVERY_ROUTE",
         "reviewedRequirements": [],
         "requirementsNeedingReview": []
       },
       "drift": [
         "implemented_as_reviewed_definition",
         "registration",
-        "status:MISSING->PARTIAL/BLOCKED",
+        "status:MISSING->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },

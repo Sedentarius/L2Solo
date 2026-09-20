@@ -328,3 +328,32 @@ In particular the Murika and Bremec mapping is a **stated source fact**, not an
 inference from spawn coordinates, and the raid-boss offset that made Q340's
 25146 land on 10146 rather than 5146 is confirmed there too. This file is the
 first thing to consult for any future ID question in this catalogue.
+
+## Q296 and Q306: which targets a player can actually reach
+
+Both blockers were about availability, and they resolve in opposite directions.
+
+**Q306's four missing variants were a real local gap.** Salamander Elder 112,
+Undine Elder 113, Salamander Noble 114 and Undine Noble 115 had local templates
+but no world spawn, while the pinned reference spawns all four in `21_25` (three,
+three, five and five authored points). They are added to
+`data/Npcs/Spawns/c4_quest_content.json` at the reference's own coordinates, and
+the definition now carries all six targets with the reference's own chances: 30%
+for the plain pair, 40% for the elders, 50% for the nobles. Katerina's payment is
+unchanged and was already faithful - sixty adena a shard, plus five thousand once
+ten shards of either element are handed in together.
+
+**Q296's missing target is not a gap at all.** The reference registers Crimson
+Tarantula 20394 (native 394) as a third kill target, but the pinned C4 datapack
+**never spawns it**: its template exists in `stats/npcs`, it appears in
+`CT0_to_C4_ids.txt`, and no spawn file in the entire reference tree mentions it.
+A Chronicle 4 player could not kill one either. The local state therefore
+reproduces C4 exactly, and the two authored targets 403 and 508 are all there
+ever was to hunt. The certification test checks this against the pinned spawn
+tree itself when it is available rather than taking the claim on trust, and the
+quest's other mechanics - the 4%/50% single-roll drop, Nathan's fifteen-to-
+twenty-four silk extraction per spinnerette, Mion's twenty adena a silk with two
+thousand more from ten, the prerequisite ring and the quit path - were already
+faithful and are now certified end to end.
+
+No coordinate was invented for either quest.

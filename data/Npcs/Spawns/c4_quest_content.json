@@ -701,6 +701,138 @@
                 "total": 1,
                 "respawn": 32,
                 "bias": 0
+            },
+            {
+                "selfId": 112,
+                "name": "Salamander Elder",
+                "coords": [
+                    {
+                        "locX": 46398,
+                        "locY": 243131,
+                        "locZ": -6604,
+                        "head": 0
+                    },
+                    {
+                        "locX": 46802,
+                        "locY": 243487,
+                        "locZ": -6604,
+                        "head": 0
+                    },
+                    {
+                        "locX": 47103,
+                        "locY": 243309,
+                        "locZ": -6604,
+                        "head": 0
+                    }
+                ],
+                "total": 1,
+                "respawn": 100,
+                "bias": 0
+            },
+            {
+                "selfId": 113,
+                "name": "Undine Elder",
+                "coords": [
+                    {
+                        "locX": 45174,
+                        "locY": 242779,
+                        "locZ": -6502,
+                        "head": 0
+                    },
+                    {
+                        "locX": 45577,
+                        "locY": 242779,
+                        "locZ": -6502,
+                        "head": 0
+                    },
+                    {
+                        "locX": 45932,
+                        "locY": 242794,
+                        "locZ": -6464,
+                        "head": 0
+                    }
+                ],
+                "total": 1,
+                "respawn": 100,
+                "bias": 0
+            },
+            {
+                "selfId": 114,
+                "name": "Salamander Noble",
+                "coords": [
+                    {
+                        "locX": 45046,
+                        "locY": 245580,
+                        "locZ": -6663,
+                        "head": 0
+                    },
+                    {
+                        "locX": 45247,
+                        "locY": 245580,
+                        "locZ": -6663,
+                        "head": 0
+                    },
+                    {
+                        "locX": 45649,
+                        "locY": 245580,
+                        "locZ": -6663,
+                        "head": 0
+                    },
+                    {
+                        "locX": 46724,
+                        "locY": 245079,
+                        "locZ": -6656,
+                        "head": 0
+                    },
+                    {
+                        "locX": 46724,
+                        "locY": 245435,
+                        "locZ": -6656,
+                        "head": 0
+                    }
+                ],
+                "total": 1,
+                "respawn": 100,
+                "bias": 0
+            },
+            {
+                "selfId": 115,
+                "name": "Undine Noble",
+                "coords": [
+                    {
+                        "locX": 45046,
+                        "locY": 245936,
+                        "locZ": -6663,
+                        "head": 0
+                    },
+                    {
+                        "locX": 45157,
+                        "locY": 246173,
+                        "locZ": -6608,
+                        "head": 49873
+                    },
+                    {
+                        "locX": 45550,
+                        "locY": 246114,
+                        "locZ": -6663,
+                        "head": 0
+                    },
+                    {
+                        "locX": 46786,
+                        "locY": 246075,
+                        "locZ": -6662,
+                        "head": 0
+                    },
+                    {
+                        "locX": 46988,
+                        "locY": 246431,
+                        "locZ": -6662,
+                        "head": 0
+                    }
+                ],
+                "total": 1,
+                "respawn": 100,
+                "bias": 0
             }
         ]
     }

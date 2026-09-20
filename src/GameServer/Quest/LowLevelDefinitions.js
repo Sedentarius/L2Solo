@@ -30,9 +30,11 @@ const definitions = [
                 {item:npc===323?1484:npc===528?1485:1483,chance:.4},...(!hasContract?[{item:1486,chance:.1}]:[])]})),
             ...(!hasContract?{transforms:[{from:1486,count:3,to:1487,consumeAll:true,next:2}]}:{})})),
         exchanges:[{npc:7533,event:'sell_contract',cond:2,next:1,label:'Sell the suspicious contract for 1500 Adena',takes:[[1487,1]],reward:{adena:1500}}]},
+    // The reference registers a third target, Crimson Tarantula 20394 (native
+    // 394), but the pinned C4 datapack never spawns it anywhere - its template
+    // exists and no spawn file mentions it. The two targets below are therefore
+    // all a C4 player can actually kill. See docs/c4/quests/runtime-sources.md.
     {id:296,name:"Tarantula's Spider Silk",minLevel:15,startNpc:7519,repeatable:true,requiredAny:[1508,1509],
-        // Reference also names 394, but neither the local world nor reviewed
-        // DwarvenStarting.xml spawns it. Keep that content gap in runtime-review.
         stages:[{type:'COLLECT',npc:7519,prices:[[1493,20]],bonusAt:10,bonusAdena:2000,
             drops:[403,508].map(npc=>({npc,chance:1,outcomes:[{item:1494,chance:.04},{item:1493,chance:.5}]}))}],
         exchanges:[{npc:7548,event:'spin_silk',cond:1,label:'Extract silk from all spinnerettes',convertAll:{from:1494,to:1493,min:15,max:24}}]},
@@ -95,10 +97,13 @@ const definitions = [
     { id:263,name:'Orc Subjugation',minLevel:8,race:2,startNpc:7346,repeatable:true,
         stages:[{type:'COLLECT',npc:7346,prices:[[1116,20],[1117,30]],bonusAt:10,bonusAdena:1000,
             drops:[385,386,387,388].map(npc=>({npc,item:npc===385?1116:1117,chance:.5}))}] },
+    // Every variant pair drops its own shard at its own chance: the plain
+    // salamander and undine at 30%, the elders at 40% and the nobles at 50%.
+    // The elders and nobles are now spawned from the reference's own 21_25
+    // points, so all six targets are reachable.
     { id:306,name:'Crystals of Fire and Ice',minLevel:17,startNpc:7004,repeatable:true,
         stages:[{type:'COLLECT',npc:7004,prices:[[1020,60],[1021,60]],bonusAt:10,bonusAdena:5000,
-            // Higher variants 112–115 have templates but no authored world spawns.
-            drops:[[109,1020,.3],[110,1021,.3]]
+            drops:[[109,1020,.3],[110,1021,.3],[112,1020,.4],[113,1021,.4],[114,1020,.5],[115,1021,.5]]
                 .map(([npc,item,chance])=>({npc,item,chance}))}] },
     { id:317,name:'Catch the Wind',minLevel:18,startNpc:7361,repeatable:true,
         stages:[{type:'COLLECT',npc:7361,prices:[[1078,40]],bonusAt:10,bonusAdena:2988,
