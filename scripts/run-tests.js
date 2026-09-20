@@ -302,6 +302,7 @@ const tests = [
     'tests/test_cold_claim_rebase.js',
     'tests/test_cold_owner_scheduler.js',
     'tests/test_cold_simulation_kernel.js',
+    'tests/test_cold_snapshot_coordinator.js',
     'tests/test_cold_worker_routing.js',
     'tests/test_cold_commit_queue.js',
     'tests/test_cold_worker_isolation.js',
