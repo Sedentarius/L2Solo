@@ -133,14 +133,17 @@ module.exports = {
     if (!state.isStarted() || !hasNetiWeapon(state)) return;
     const npcId = Number(npc.fetchSelfId());
     const chance = BONE_CHANCE.get(npcId);
-    if (chance !== undefined && state.getInt('cond') > 0) {
+    // The reference collects bones only while the trial is at that stage. A
+    // looser guard keeps dropping them for the rest of the quest, leaving ten
+    // unconsumed bones behind at completion.
+    if (chance !== undefined && state.getInt('cond') === 2) {
       if (await collectBones(state, chance)) {
         await state.set('cond', 3);
         state.playSound(MIDDLE);
       } else if (count(state, SPARTOI_BONES)) state.playSound(ITEM);
       return;
     }
-    if (npcId !== CATS_EYE_BANDIT || !count(state, WANTED_BILL)) return;
+    if (npcId !== CATS_EYE_BANDIT || state.getInt('cond') !== 5 || !count(state, WANTED_BILL)) return;
     const item = STOLEN_ITEMS[Math.floor(Math.random() * STOLEN_ITEMS.length)];
     if (count(state, item)) return;
     await service().giveItem(state.session, item, 1);

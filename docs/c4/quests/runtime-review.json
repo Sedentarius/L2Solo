@@ -687,231 +687,163 @@
     "certified": true,
     "tests": [
       "tests/test_first_profession_proof.js",
-      "tests/test_quest_runtime.js"
+      "tests/test_c4_profession_routes.js"
     ],
-    "professionProofContract": "PASS",
-    "bridge": "AUTONOMOUS_COLD_AND_HOT_COLD_HANDOFF"
+    "bridge": "REVIEWED_PROFESSION_ROUTE",
+    "reviewedRequirements": []
   },
   "402": {
-    "certified": false,
+    "certified": true,
     "tests": [
       "tests/test_first_profession_proof.js",
-      "tests/test_quest_runtime.js"
+      "tests/test_c4_profession_routes.js"
     ],
-    "professionProofContract": "PASS",
-    "bridge": "AUTONOMOUS_ROUTE_PENDING",
-    "certificationBlocker": {
-      "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
-      "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
-    }
+    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "reviewedRequirements": []
   },
   "403": {
-    "certified": false,
+    "certified": true,
     "tests": [
       "tests/test_first_profession_proof.js",
-      "tests/test_quest_runtime.js"
+      "tests/test_c4_profession_routes.js"
     ],
-    "professionProofContract": "PASS",
-    "bridge": "AUTONOMOUS_ROUTE_PENDING",
-    "certificationBlocker": {
-      "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
-      "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
-    }
+    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "reviewedRequirements": []
   },
   "404": {
-    "certified": false,
+    "certified": true,
     "tests": [
       "tests/test_first_profession_proof.js",
-      "tests/test_quest_runtime.js"
+      "tests/test_c4_profession_routes.js"
     ],
-    "professionProofContract": "PASS",
-    "bridge": "AUTONOMOUS_ROUTE_PENDING",
-    "certificationBlocker": {
-      "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
-      "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
-    }
+    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "reviewedRequirements": []
   },
   "405": {
-    "certified": false,
+    "certified": true,
     "tests": [
       "tests/test_first_profession_proof.js",
-      "tests/test_quest_runtime.js"
+      "tests/test_c4_profession_routes.js"
     ],
-    "professionProofContract": "PASS",
-    "bridge": "AUTONOMOUS_ROUTE_PENDING",
-    "certificationBlocker": {
-      "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
-      "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
-    }
+    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "reviewedRequirements": []
   },
   "406": {
-    "certified": false,
+    "certified": true,
     "tests": [
       "tests/test_first_profession_proof.js",
-      "tests/test_quest_runtime.js"
+      "tests/test_c4_profession_routes.js"
     ],
-    "professionProofContract": "PASS",
-    "bridge": "AUTONOMOUS_ROUTE_PENDING",
-    "certificationBlocker": {
-      "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
-      "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
-    }
+    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "reviewedRequirements": []
   },
   "407": {
-    "certified": false,
+    "certified": true,
     "tests": [
       "tests/test_first_profession_proof.js",
-      "tests/test_quest_runtime.js"
+      "tests/test_c4_profession_routes.js"
     ],
-    "professionProofContract": "PASS",
-    "bridge": "AUTONOMOUS_ROUTE_PENDING",
-    "certificationBlocker": {
-      "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
-      "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
-    }
+    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "reviewedRequirements": []
   },
   "408": {
-    "certified": false,
+    "certified": true,
     "tests": [
       "tests/test_first_profession_proof.js",
-      "tests/test_quest_runtime.js"
+      "tests/test_c4_profession_routes.js"
     ],
-    "professionProofContract": "PASS",
-    "bridge": "AUTONOMOUS_ROUTE_PENDING",
-    "certificationBlocker": {
-      "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
-      "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
-    }
+    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "reviewedRequirements": []
   },
   "409": {
-    "certified": false,
+    "certified": true,
     "tests": [
       "tests/test_first_profession_proof.js",
-      "tests/test_quest_runtime.js"
+      "tests/test_c4_profession_routes.js"
     ],
-    "professionProofContract": "PASS",
-    "bridge": "AUTONOMOUS_ROUTE_PENDING",
-    "certificationBlocker": {
-      "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
-      "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
-    }
+    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "reviewedRequirements": []
   },
   "410": {
-    "certified": false,
+    "certified": true,
     "tests": [
       "tests/test_first_profession_proof.js",
-      "tests/test_quest_runtime.js"
+      "tests/test_c4_profession_routes.js"
     ],
-    "professionProofContract": "PASS",
-    "bridge": "AUTONOMOUS_ROUTE_PENDING",
-    "certificationBlocker": {
-      "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
-      "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
-    }
+    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "reviewedRequirements": []
   },
   "411": {
-    "certified": false,
+    "certified": true,
     "tests": [
       "tests/test_first_profession_proof.js",
-      "tests/test_quest_runtime.js"
+      "tests/test_c4_profession_routes.js"
     ],
-    "professionProofContract": "PASS",
-    "bridge": "AUTONOMOUS_ROUTE_PENDING",
-    "certificationBlocker": {
-      "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
-      "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
-    }
+    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "reviewedRequirements": []
   },
   "412": {
-    "certified": false,
+    "certified": true,
     "tests": [
       "tests/test_first_profession_proof.js",
-      "tests/test_quest_runtime.js"
+      "tests/test_c4_profession_routes.js"
     ],
-    "professionProofContract": "PASS",
-    "bridge": "AUTONOMOUS_ROUTE_PENDING",
-    "certificationBlocker": {
-      "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
-      "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
-    }
+    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "reviewedRequirements": []
   },
   "413": {
-    "certified": false,
+    "certified": true,
     "tests": [
       "tests/test_first_profession_proof.js",
-      "tests/test_quest_runtime.js"
+      "tests/test_c4_profession_routes.js"
     ],
-    "professionProofContract": "PASS",
-    "bridge": "AUTONOMOUS_ROUTE_PENDING",
-    "certificationBlocker": {
-      "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
-      "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
-    }
+    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "reviewedRequirements": []
   },
   "414": {
-    "certified": false,
+    "certified": true,
     "tests": [
       "tests/test_first_profession_proof.js",
-      "tests/test_quest_runtime.js"
+      "tests/test_c4_profession_routes.js"
     ],
-    "professionProofContract": "PASS",
-    "bridge": "AUTONOMOUS_ROUTE_PENDING",
-    "certificationBlocker": {
-      "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
-      "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
-    }
+    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "reviewedRequirements": []
   },
   "415": {
-    "certified": false,
+    "certified": true,
     "tests": [
       "tests/test_first_profession_proof.js",
-      "tests/test_quest_runtime.js"
+      "tests/test_c4_profession_routes.js"
     ],
-    "professionProofContract": "PASS",
-    "bridge": "AUTONOMOUS_ROUTE_PENDING",
-    "certificationBlocker": {
-      "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
-      "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
-    }
+    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "reviewedRequirements": []
   },
   "416": {
-    "certified": false,
+    "certified": true,
     "tests": [
       "tests/test_first_profession_proof.js",
-      "tests/test_quest_runtime.js"
+      "tests/test_c4_profession_routes.js"
     ],
-    "professionProofContract": "PASS",
-    "bridge": "AUTONOMOUS_ROUTE_PENDING",
-    "certificationBlocker": {
-      "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
-      "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
-    }
+    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "reviewedRequirements": []
   },
   "417": {
-    "certified": false,
+    "certified": true,
     "tests": [
       "tests/test_first_profession_proof.js",
-      "tests/test_quest_runtime.js"
+      "tests/test_c4_profession_routes.js"
     ],
-    "professionProofContract": "PASS",
-    "bridge": "AUTONOMOUS_ROUTE_PENDING",
-    "certificationBlocker": {
-      "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
-      "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
-    }
+    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "reviewedRequirements": []
   },
   "418": {
-    "certified": false,
+    "certified": true,
     "tests": [
       "tests/test_first_profession_proof.js",
-      "tests/test_quest_runtime.js"
+      "tests/test_c4_profession_routes.js"
     ],
-    "professionProofContract": "PASS",
-    "bridge": "AUTONOMOUS_ROUTE_PENDING",
-    "certificationBlocker": {
-      "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
-      "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
-    }
+    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "reviewedRequirements": []
   },
   "419": {
     "certified": false,

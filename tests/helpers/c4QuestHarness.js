@@ -56,6 +56,15 @@ class World {
     async session(id) {
         const [row] = await Database.execute(['SELECT * FROM characters WHERE id = ?', [id]]);
         if (!row) throw new Error(`character ${id} missing`);
+        // Quests that only progress while a trial weapon is wielded read the
+        // persisted paperdoll, so it is rebuilt the way the server does.
+        const carried = await Database.fetchItems(id);
+        const paperdoll = utils.tupleAlloc(16, {});
+        for (const item of carried) {
+            if (!item.equipped) continue;
+            paperdoll[item.slot] = { id: item.id, selfId: item.selfId };
+            if (item.slot === 15) paperdoll[10] = paperdoll[15];
+        }
         const actor = {
             ...row,
             fetchId: () => id,
@@ -67,7 +76,13 @@ class World {
             fetchExp() { return this.exp; },
             fetchSp() { return this.sp; },
             setExpSp(exp, sp) { this.exp = exp; this.sp = sp; },
-            backpack: new Backpack({ items: await Database.fetchItems(id), paperdoll: {} })
+            // ClassTransfer commits through the database and then refreshes the
+            // live actor; these are the pieces of that refresh a quest test needs.
+            setClassId(classId) { this.classId = Number(classId); },
+            isDead: () => false,
+            fillupVitals() { this.hp = this.maxHp; this.mp = this.maxMp; },
+            skillset: { skills: [], fetchSkills() { return this.skills; }, awardSkills: async () => [] },
+            backpack: new Backpack({ items: carried, paperdoll })
         };
         const session = { actor, packets: [], dataSendToMe(packet) { this.packets.push(packet); } };
         await Service.ensureLoaded(session);
@@ -110,14 +125,35 @@ class World {
         return Service.onTalk(session, { fetchSelfId: () => npcId, fetchId: () => objectId });
     }
 
+    // The NPC HTML page the client would have been shown by the last talk.
+    page(session) {
+        return session.packets.filter(packet => packet[0] === 0x0f).at(-1)
+            ?.subarray(5).toString('utf16le') || '';
+    }
+
+    // The quest bypass links that page offers, exactly as a player could click them.
+    async links(session, npcId, questId) {
+        session.packets.length = 0;
+        await this.talk(session, npcId);
+        const pattern = new RegExp(`bypass -h quest ${questId} ([A-Za-z0-9_]+)`, 'g');
+        return [...new Set([...this.page(session).matchAll(pattern)].map(match => match[1]))];
+    }
+
     // Quest link clicks route through QuestService's bypass handler.
     event(session, questId, name, npcId) {
         if (npcId !== undefined) session.activeNpcTalk = { selfId: npcId, objectId: 1 };
         return Service.onEvent(session, { questId, name });
     }
 
-    kill(session, npcId, objectId = 900000) {
-        return Service.onKill(session, { fetchSelfId: () => npcId, fetchId: () => objectId });
+    // `spoil` marks the corpse as spoiled, which is what a Scavenger's Spoil
+    // skill produces and what the sweep-based quest steps actually read.
+    kill(session, npcId, options = {}) {
+        const objectId = options.objectId ?? 900000;
+        return Service.onKill(session, {
+            fetchSelfId: () => npcId,
+            fetchId: () => objectId,
+            isSpoil: () => options.spoil === true
+        });
     }
 
     // Equips a carried item the way the paperdoll would, for quests that only
@@ -131,6 +167,19 @@ class World {
         const item = session.actor.backpack.fetchItemFromSelfId(selfId);
         if (item?.setEquipped) { item.setEquipped(true); item.setSlot?.(7); }
         return item;
+    }
+
+    // Equips whatever weapon the character is carrying, the way a player would
+    // wield a trial weapon a quest just handed them.
+    async equipCarriedWeapon(session) {
+        const id = session.actor.fetchId();
+        const carried = await Database.fetchItems(id);
+        const weapon = carried.find(item => !item.equipped
+            && DataCache.items.find(entry => entry.selfId === item.selfId)?.template?.kind?.startsWith('Weapon.'));
+        if (!weapon) return false;
+        await Database.execute(['UPDATE items SET equipped = 0 WHERE characterId = ? AND slot = 7', [id]]);
+        await Database.execute(['UPDATE items SET equipped = 1, slot = 7 WHERE id = ?', [weapon.id]]);
+        return true;
     }
 
     state(session, questId) {
@@ -148,4 +197,19 @@ function withRandom(values, body) {
         .finally(() => { Math.random = original; });
 }
 
-module.exports = { createWorld, withRandom, Service, Database, DataCache };
+// A deterministic generator for walks that must exercise real probability
+// branches: a constant value would always pick the same random branch and could
+// never reach the others.
+function withSeededRandom(seed, body) {
+    const original = Math.random;
+    let state = seed >>> 0;
+    Math.random = () => {
+        state = (state * 1664525 + 1013904223) >>> 0;
+        return state / 4294967296;
+    };
+    return Promise.resolve()
+        .then(body)
+        .finally(() => { Math.random = original; });
+}
+
+module.exports = { createWorld, withRandom, withSeededRandom, Service, Database, DataCache };
