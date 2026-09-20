@@ -2,8 +2,8 @@
   "errors": [],
   "confirmedInScope": 107,
   "counts": {
-    "VERIFIED": 34,
-    "IMPLEMENTED": 50,
+    "VERIFIED": 49,
+    "IMPLEMENTED": 35,
     "PARTIAL/BLOCKED": 14,
     "MISSING": 9
   },
@@ -24,26 +24,25 @@
       "name": "Letters of Love",
       "inScope": true,
       "quarantined": false,
-      "status": "IMPLEMENTED",
+      "status": "VERIFIED",
       "script": "Q001_LettersOfLove.js",
       "definitionId": null,
       "registered": true,
       "tests": [
-        "tests/test_quest_runtime.js"
+        "tests/test_quest_runtime.js",
+        "tests/test_c4_starter_quests.js"
       ],
       "blocker": null,
-      "certificationBlocker": {
-        "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-        "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-      },
+      "certificationBlocker": null,
       "professionProofContract": null,
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "NOT_CERTIFIED",
-        "reviewedRequirements": null,
+        "questAdapter": "REVIEWED_DELIVERY_ROUTE",
+        "reviewedRequirements": [],
         "requirementsNeedingReview": []
       },
       "drift": [
+        "status:IMPLEMENTED->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -52,26 +51,25 @@
       "name": "What Women Want",
       "inScope": true,
       "quarantined": false,
-      "status": "IMPLEMENTED",
+      "status": "VERIFIED",
       "script": "Q002_WhatWomenWant.js",
       "definitionId": null,
       "registered": true,
       "tests": [
-        "tests/test_quest_runtime.js"
+        "tests/test_quest_runtime.js",
+        "tests/test_c4_starter_quests.js"
       ],
       "blocker": null,
-      "certificationBlocker": {
-        "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-        "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-      },
+      "certificationBlocker": null,
       "professionProofContract": null,
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "NOT_CERTIFIED",
-        "reviewedRequirements": null,
+        "questAdapter": "REVIEWED_DELIVERY_ROUTE",
+        "reviewedRequirements": [],
         "requirementsNeedingReview": []
       },
       "drift": [
+        "status:IMPLEMENTED->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -80,28 +78,25 @@
       "name": "Will the Seal be Broken?",
       "inScope": true,
       "quarantined": false,
-      "status": "IMPLEMENTED",
+      "status": "VERIFIED",
       "script": "Q003_WillTheSealBeBroken.js",
       "definitionId": null,
       "registered": true,
       "tests": [
-        "tests/test_quest_runtime.js"
+        "tests/test_quest_runtime.js",
+        "tests/test_c4_starter_quests.js"
       ],
       "blocker": null,
-      "certificationBlocker": {
-        "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-        "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-      },
+      "certificationBlocker": null,
       "professionProofContract": null,
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "NOT_CERTIFIED",
-        "reviewedRequirements": null,
-        "requirementsNeedingReview": [
-          "PARTY_QUEST_PRIMITIVE"
-        ]
+        "questAdapter": "REVIEWED_DELIVERY_ROUTE",
+        "reviewedRequirements": [],
+        "requirementsNeedingReview": []
       },
       "drift": [
+        "status:IMPLEMENTED->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -110,26 +105,25 @@
       "name": "Long Live the Paagrio Lord",
       "inScope": true,
       "quarantined": false,
-      "status": "IMPLEMENTED",
+      "status": "VERIFIED",
       "script": "Q004_LongLiveThePaagrioLord.js",
       "definitionId": null,
       "registered": true,
       "tests": [
-        "tests/test_quest_runtime.js"
+        "tests/test_quest_runtime.js",
+        "tests/test_c4_starter_quests.js"
       ],
       "blocker": null,
-      "certificationBlocker": {
-        "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-        "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-      },
+      "certificationBlocker": null,
       "professionProofContract": null,
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "NOT_CERTIFIED",
-        "reviewedRequirements": null,
+        "questAdapter": "REVIEWED_DELIVERY_ROUTE",
+        "reviewedRequirements": [],
         "requirementsNeedingReview": []
       },
       "drift": [
+        "status:IMPLEMENTED->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -138,26 +132,25 @@
       "name": "Miner's Favor",
       "inScope": true,
       "quarantined": false,
-      "status": "IMPLEMENTED",
+      "status": "VERIFIED",
       "script": "Q005_MinersFavor.js",
       "definitionId": null,
       "registered": true,
       "tests": [
-        "tests/test_quest_runtime.js"
+        "tests/test_quest_runtime.js",
+        "tests/test_c4_starter_quests.js"
       ],
       "blocker": null,
-      "certificationBlocker": {
-        "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-        "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-      },
+      "certificationBlocker": null,
       "professionProofContract": null,
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "NOT_CERTIFIED",
-        "reviewedRequirements": null,
+        "questAdapter": "REVIEWED_DELIVERY_ROUTE",
+        "reviewedRequirements": [],
         "requirementsNeedingReview": []
       },
       "drift": [
+        "status:IMPLEMENTED->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -166,26 +159,25 @@
       "name": "Step into the Future",
       "inScope": true,
       "quarantined": false,
-      "status": "IMPLEMENTED",
+      "status": "VERIFIED",
       "script": "Q006_StepIntoTheFuture.js",
       "definitionId": null,
       "registered": true,
       "tests": [
-        "tests/test_quest_runtime.js"
+        "tests/test_quest_runtime.js",
+        "tests/test_c4_starter_quests.js"
       ],
       "blocker": null,
-      "certificationBlocker": {
-        "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-        "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-      },
+      "certificationBlocker": null,
       "professionProofContract": null,
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "NOT_CERTIFIED",
-        "reviewedRequirements": null,
+        "questAdapter": "REVIEWED_DELIVERY_ROUTE",
+        "reviewedRequirements": [],
         "requirementsNeedingReview": []
       },
       "drift": [
+        "status:IMPLEMENTED->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -194,26 +186,25 @@
       "name": "A Trip Begins",
       "inScope": true,
       "quarantined": false,
-      "status": "IMPLEMENTED",
+      "status": "VERIFIED",
       "script": "Q007_ATripBegins.js",
       "definitionId": null,
       "registered": true,
       "tests": [
-        "tests/test_quest_runtime.js"
+        "tests/test_quest_runtime.js",
+        "tests/test_c4_starter_quests.js"
       ],
       "blocker": null,
-      "certificationBlocker": {
-        "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-        "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-      },
+      "certificationBlocker": null,
       "professionProofContract": null,
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "NOT_CERTIFIED",
-        "reviewedRequirements": null,
+        "questAdapter": "REVIEWED_DELIVERY_ROUTE",
+        "reviewedRequirements": [],
         "requirementsNeedingReview": []
       },
       "drift": [
+        "status:IMPLEMENTED->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -222,26 +213,25 @@
       "name": "An Adventure Begins",
       "inScope": true,
       "quarantined": false,
-      "status": "IMPLEMENTED",
+      "status": "VERIFIED",
       "script": "Q008_AnAdventureBegins.js",
       "definitionId": null,
       "registered": true,
       "tests": [
-        "tests/test_quest_runtime.js"
+        "tests/test_quest_runtime.js",
+        "tests/test_c4_starter_quests.js"
       ],
       "blocker": null,
-      "certificationBlocker": {
-        "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-        "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-      },
+      "certificationBlocker": null,
       "professionProofContract": null,
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "NOT_CERTIFIED",
-        "reviewedRequirements": null,
+        "questAdapter": "REVIEWED_DELIVERY_ROUTE",
+        "reviewedRequirements": [],
         "requirementsNeedingReview": []
       },
       "drift": [
+        "status:IMPLEMENTED->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -250,26 +240,25 @@
       "name": "Into the City of Humans",
       "inScope": true,
       "quarantined": false,
-      "status": "IMPLEMENTED",
+      "status": "VERIFIED",
       "script": "Q009_IntoTheCityOfHumans.js",
       "definitionId": null,
       "registered": true,
       "tests": [
-        "tests/test_quest_runtime.js"
+        "tests/test_quest_runtime.js",
+        "tests/test_c4_starter_quests.js"
       ],
       "blocker": null,
-      "certificationBlocker": {
-        "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-        "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-      },
+      "certificationBlocker": null,
       "professionProofContract": null,
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "NOT_CERTIFIED",
-        "reviewedRequirements": null,
+        "questAdapter": "REVIEWED_DELIVERY_ROUTE",
+        "reviewedRequirements": [],
         "requirementsNeedingReview": []
       },
       "drift": [
+        "status:IMPLEMENTED->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -278,26 +267,25 @@
       "name": "Into the World",
       "inScope": true,
       "quarantined": false,
-      "status": "IMPLEMENTED",
+      "status": "VERIFIED",
       "script": "Q010_IntoTheWorld.js",
       "definitionId": null,
       "registered": true,
       "tests": [
-        "tests/test_quest_runtime.js"
+        "tests/test_quest_runtime.js",
+        "tests/test_c4_starter_quests.js"
       ],
       "blocker": null,
-      "certificationBlocker": {
-        "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-        "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-      },
+      "certificationBlocker": null,
       "professionProofContract": null,
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "NOT_CERTIFIED",
-        "reviewedRequirements": null,
+        "questAdapter": "REVIEWED_DELIVERY_ROUTE",
+        "reviewedRequirements": [],
         "requirementsNeedingReview": []
       },
       "drift": [
+        "status:IMPLEMENTED->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -1106,26 +1094,25 @@
       "name": "To Talking Island",
       "inScope": true,
       "quarantined": false,
-      "status": "IMPLEMENTED",
+      "status": "VERIFIED",
       "script": "Q045_ToTalkingIsland.js",
       "definitionId": null,
       "registered": true,
       "tests": [
-        "tests/test_quest_runtime.js"
+        "tests/test_quest_runtime.js",
+        "tests/test_c4_starter_quests.js"
       ],
       "blocker": null,
-      "certificationBlocker": {
-        "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-        "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-      },
+      "certificationBlocker": null,
       "professionProofContract": null,
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "NOT_CERTIFIED",
-        "reviewedRequirements": null,
+        "questAdapter": "REVIEWED_DELIVERY_ROUTE",
+        "reviewedRequirements": [],
         "requirementsNeedingReview": []
       },
       "drift": [
+        "status:IMPLEMENTED->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -1134,26 +1121,25 @@
       "name": "Once More In the Arms of the Mother Tree",
       "inScope": true,
       "quarantined": false,
-      "status": "IMPLEMENTED",
+      "status": "VERIFIED",
       "script": "Q046_OnceMoreInTheArmsOfTheMotherTree.js",
       "definitionId": null,
       "registered": true,
       "tests": [
-        "tests/test_quest_runtime.js"
+        "tests/test_quest_runtime.js",
+        "tests/test_c4_starter_quests.js"
       ],
       "blocker": null,
-      "certificationBlocker": {
-        "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-        "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-      },
+      "certificationBlocker": null,
       "professionProofContract": null,
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "NOT_CERTIFIED",
-        "reviewedRequirements": null,
+        "questAdapter": "REVIEWED_DELIVERY_ROUTE",
+        "reviewedRequirements": [],
         "requirementsNeedingReview": []
       },
       "drift": [
+        "status:IMPLEMENTED->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -1162,26 +1148,25 @@
       "name": "Into the Dark Forest",
       "inScope": true,
       "quarantined": false,
-      "status": "IMPLEMENTED",
+      "status": "VERIFIED",
       "script": "Q047_IntoTheDarkForest.js",
       "definitionId": null,
       "registered": true,
       "tests": [
-        "tests/test_quest_runtime.js"
+        "tests/test_quest_runtime.js",
+        "tests/test_c4_starter_quests.js"
       ],
       "blocker": null,
-      "certificationBlocker": {
-        "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-        "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-      },
+      "certificationBlocker": null,
       "professionProofContract": null,
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "NOT_CERTIFIED",
-        "reviewedRequirements": null,
+        "questAdapter": "REVIEWED_DELIVERY_ROUTE",
+        "reviewedRequirements": [],
         "requirementsNeedingReview": []
       },
       "drift": [
+        "status:IMPLEMENTED->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -1190,26 +1175,25 @@
       "name": "To the Immortal Plateau",
       "inScope": true,
       "quarantined": false,
-      "status": "IMPLEMENTED",
+      "status": "VERIFIED",
       "script": "Q048_ToTheImmortalPlateau.js",
       "definitionId": null,
       "registered": true,
       "tests": [
-        "tests/test_quest_runtime.js"
+        "tests/test_quest_runtime.js",
+        "tests/test_c4_starter_quests.js"
       ],
       "blocker": null,
-      "certificationBlocker": {
-        "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-        "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-      },
+      "certificationBlocker": null,
       "professionProofContract": null,
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "NOT_CERTIFIED",
-        "reviewedRequirements": null,
+        "questAdapter": "REVIEWED_DELIVERY_ROUTE",
+        "reviewedRequirements": [],
         "requirementsNeedingReview": []
       },
       "drift": [
+        "status:IMPLEMENTED->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -1218,26 +1202,25 @@
       "name": "The Road Home",
       "inScope": true,
       "quarantined": false,
-      "status": "IMPLEMENTED",
+      "status": "VERIFIED",
       "script": "Q049_TheRoadHome.js",
       "definitionId": null,
       "registered": true,
       "tests": [
-        "tests/test_quest_runtime.js"
+        "tests/test_quest_runtime.js",
+        "tests/test_c4_starter_quests.js"
       ],
       "blocker": null,
-      "certificationBlocker": {
-        "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-        "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-      },
+      "certificationBlocker": null,
       "professionProofContract": null,
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "NOT_CERTIFIED",
-        "reviewedRequirements": null,
+        "questAdapter": "REVIEWED_DELIVERY_ROUTE",
+        "reviewedRequirements": [],
         "requirementsNeedingReview": []
       },
       "drift": [
+        "status:IMPLEMENTED->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
