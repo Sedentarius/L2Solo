@@ -687,231 +687,199 @@
     "certified": true,
     "tests": [
       "tests/test_first_profession_proof.js",
-      "tests/test_quest_runtime.js"
+      "tests/test_quest_runtime.js",
+      "tests/test_c4_profession_routes.js"
     ],
     "professionProofContract": "PASS",
-    "bridge": "AUTONOMOUS_COLD_AND_HOT_COLD_HANDOFF"
+    "bridge": "AUTONOMOUS_COLD_AND_HOT_COLD_HANDOFF",
+    "reviewedRequirements": []
   },
   "402": {
-    "certified": false,
+    "certified": true,
     "tests": [
       "tests/test_first_profession_proof.js",
-      "tests/test_quest_runtime.js"
+      "tests/test_quest_runtime.js",
+      "tests/test_c4_profession_routes.js"
     ],
     "professionProofContract": "PASS",
-    "bridge": "AUTONOMOUS_ROUTE_PENDING",
-    "certificationBlocker": {
-      "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
-      "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
-    }
+    "bridge": "REVIEWED_PROFESSION_ROUTE",
+    "reviewedRequirements": []
   },
   "403": {
-    "certified": false,
+    "certified": true,
     "tests": [
       "tests/test_first_profession_proof.js",
-      "tests/test_quest_runtime.js"
+      "tests/test_quest_runtime.js",
+      "tests/test_c4_profession_routes.js"
     ],
     "professionProofContract": "PASS",
-    "bridge": "AUTONOMOUS_ROUTE_PENDING",
-    "certificationBlocker": {
-      "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
-      "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
-    }
+    "bridge": "REVIEWED_PROFESSION_ROUTE",
+    "reviewedRequirements": []
   },
   "404": {
-    "certified": false,
+    "certified": true,
     "tests": [
       "tests/test_first_profession_proof.js",
-      "tests/test_quest_runtime.js"
+      "tests/test_quest_runtime.js",
+      "tests/test_c4_profession_routes.js"
     ],
     "professionProofContract": "PASS",
-    "bridge": "AUTONOMOUS_ROUTE_PENDING",
-    "certificationBlocker": {
-      "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
-      "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
-    }
+    "bridge": "REVIEWED_PROFESSION_ROUTE",
+    "reviewedRequirements": []
   },
   "405": {
-    "certified": false,
+    "certified": true,
     "tests": [
       "tests/test_first_profession_proof.js",
-      "tests/test_quest_runtime.js"
+      "tests/test_quest_runtime.js",
+      "tests/test_c4_profession_routes.js"
     ],
     "professionProofContract": "PASS",
-    "bridge": "AUTONOMOUS_ROUTE_PENDING",
-    "certificationBlocker": {
-      "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
-      "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
-    }
+    "bridge": "REVIEWED_PROFESSION_ROUTE",
+    "reviewedRequirements": []
   },
   "406": {
-    "certified": false,
+    "certified": true,
     "tests": [
       "tests/test_first_profession_proof.js",
-      "tests/test_quest_runtime.js"
+      "tests/test_quest_runtime.js",
+      "tests/test_c4_profession_routes.js"
     ],
     "professionProofContract": "PASS",
-    "bridge": "AUTONOMOUS_ROUTE_PENDING",
-    "certificationBlocker": {
-      "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
-      "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
-    }
+    "bridge": "REVIEWED_PROFESSION_ROUTE",
+    "reviewedRequirements": []
   },
   "407": {
-    "certified": false,
+    "certified": true,
     "tests": [
       "tests/test_first_profession_proof.js",
-      "tests/test_quest_runtime.js"
+      "tests/test_quest_runtime.js",
+      "tests/test_c4_profession_routes.js"
     ],
     "professionProofContract": "PASS",
-    "bridge": "AUTONOMOUS_ROUTE_PENDING",
-    "certificationBlocker": {
-      "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
-      "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
-    }
+    "bridge": "REVIEWED_PROFESSION_ROUTE",
+    "reviewedRequirements": []
   },
   "408": {
-    "certified": false,
+    "certified": true,
     "tests": [
       "tests/test_first_profession_proof.js",
-      "tests/test_quest_runtime.js"
+      "tests/test_quest_runtime.js",
+      "tests/test_c4_profession_routes.js"
     ],
     "professionProofContract": "PASS",
-    "bridge": "AUTONOMOUS_ROUTE_PENDING",
-    "certificationBlocker": {
-      "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
-      "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
-    }
+    "bridge": "REVIEWED_PROFESSION_ROUTE",
+    "reviewedRequirements": []
   },
   "409": {
-    "certified": false,
+    "certified": true,
     "tests": [
       "tests/test_first_profession_proof.js",
-      "tests/test_quest_runtime.js"
+      "tests/test_quest_runtime.js",
+      "tests/test_c4_profession_routes.js"
     ],
     "professionProofContract": "PASS",
-    "bridge": "AUTONOMOUS_ROUTE_PENDING",
-    "certificationBlocker": {
-      "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
-      "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
-    }
+    "bridge": "REVIEWED_PROFESSION_ROUTE",
+    "reviewedRequirements": []
   },
   "410": {
-    "certified": false,
+    "certified": true,
     "tests": [
       "tests/test_first_profession_proof.js",
-      "tests/test_quest_runtime.js"
+      "tests/test_quest_runtime.js",
+      "tests/test_c4_profession_routes.js"
     ],
     "professionProofContract": "PASS",
-    "bridge": "AUTONOMOUS_ROUTE_PENDING",
-    "certificationBlocker": {
-      "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
-      "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
-    }
+    "bridge": "REVIEWED_PROFESSION_ROUTE",
+    "reviewedRequirements": []
   },
   "411": {
-    "certified": false,
+    "certified": true,
     "tests": [
       "tests/test_first_profession_proof.js",
-      "tests/test_quest_runtime.js"
+      "tests/test_quest_runtime.js",
+      "tests/test_c4_profession_routes.js"
     ],
     "professionProofContract": "PASS",
-    "bridge": "AUTONOMOUS_ROUTE_PENDING",
-    "certificationBlocker": {
-      "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
-      "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
-    }
+    "bridge": "REVIEWED_PROFESSION_ROUTE",
+    "reviewedRequirements": []
   },
   "412": {
-    "certified": false,
+    "certified": true,
     "tests": [
       "tests/test_first_profession_proof.js",
-      "tests/test_quest_runtime.js"
+      "tests/test_quest_runtime.js",
+      "tests/test_c4_profession_routes.js"
     ],
     "professionProofContract": "PASS",
-    "bridge": "AUTONOMOUS_ROUTE_PENDING",
-    "certificationBlocker": {
-      "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
-      "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
-    }
+    "bridge": "REVIEWED_PROFESSION_ROUTE",
+    "reviewedRequirements": []
   },
   "413": {
-    "certified": false,
+    "certified": true,
     "tests": [
       "tests/test_first_profession_proof.js",
-      "tests/test_quest_runtime.js"
+      "tests/test_quest_runtime.js",
+      "tests/test_c4_profession_routes.js"
     ],
     "professionProofContract": "PASS",
-    "bridge": "AUTONOMOUS_ROUTE_PENDING",
-    "certificationBlocker": {
-      "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
-      "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
-    }
+    "bridge": "REVIEWED_PROFESSION_ROUTE",
+    "reviewedRequirements": []
   },
   "414": {
-    "certified": false,
+    "certified": true,
     "tests": [
       "tests/test_first_profession_proof.js",
-      "tests/test_quest_runtime.js"
+      "tests/test_quest_runtime.js",
+      "tests/test_c4_profession_routes.js"
     ],
     "professionProofContract": "PASS",
-    "bridge": "AUTONOMOUS_ROUTE_PENDING",
-    "certificationBlocker": {
-      "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
-      "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
-    }
+    "bridge": "REVIEWED_PROFESSION_ROUTE",
+    "reviewedRequirements": []
   },
   "415": {
-    "certified": false,
+    "certified": true,
     "tests": [
       "tests/test_first_profession_proof.js",
-      "tests/test_quest_runtime.js"
+      "tests/test_quest_runtime.js",
+      "tests/test_c4_profession_routes.js"
     ],
     "professionProofContract": "PASS",
-    "bridge": "AUTONOMOUS_ROUTE_PENDING",
-    "certificationBlocker": {
-      "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
-      "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
-    }
+    "bridge": "REVIEWED_PROFESSION_ROUTE",
+    "reviewedRequirements": []
   },
   "416": {
-    "certified": false,
+    "certified": true,
     "tests": [
       "tests/test_first_profession_proof.js",
-      "tests/test_quest_runtime.js"
+      "tests/test_quest_runtime.js",
+      "tests/test_c4_profession_routes.js"
     ],
     "professionProofContract": "PASS",
-    "bridge": "AUTONOMOUS_ROUTE_PENDING",
-    "certificationBlocker": {
-      "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
-      "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
-    }
+    "bridge": "REVIEWED_PROFESSION_ROUTE",
+    "reviewedRequirements": []
   },
   "417": {
-    "certified": false,
+    "certified": true,
     "tests": [
       "tests/test_first_profession_proof.js",
-      "tests/test_quest_runtime.js"
+      "tests/test_quest_runtime.js",
+      "tests/test_c4_profession_routes.js"
     ],
     "professionProofContract": "PASS",
-    "bridge": "AUTONOMOUS_ROUTE_PENDING",
-    "certificationBlocker": {
-      "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
-      "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
-    }
+    "bridge": "REVIEWED_PROFESSION_ROUTE",
+    "reviewedRequirements": []
   },
   "418": {
-    "certified": false,
+    "certified": true,
     "tests": [
       "tests/test_first_profession_proof.js",
-      "tests/test_quest_runtime.js"
+      "tests/test_quest_runtime.js",
+      "tests/test_c4_profession_routes.js"
     ],
     "professionProofContract": "PASS",
-    "bridge": "AUTONOMOUS_ROUTE_PENDING",
-    "certificationBlocker": {
-      "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
-      "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
-    }
+    "bridge": "REVIEWED_PROFESSION_ROUTE",
+    "reviewedRequirements": []
   },
   "419": {
     "certified": false,
@@ -948,7 +916,7 @@
     }
   },
   "_certification": {
-    "generatedAt": "2026-09-20T01:19:31.039Z",
+    "generatedAt": "2026-09-20T01:32:30.033Z",
     "sourceHashes": {
       "config/default.ini": "14f3852373656b264d1e9f367252519f82072cb0dea69e465c968a775acb29c3",
       "config/local.example.ini": "cb13f57c7e72f2b6f55e342378bb9acc974e7f7c0ab6708a6ed8f5d0dc8f8fa0",
@@ -1213,7 +1181,7 @@
       "database/sql/sqlite.sql": "546a3888eb03901ccb1d4a52aa75349c3cebd96a201d2f0526d353f49f3f177b",
       "scripts/benchmark-interaction-memory.js": "d196e3f8dfb3fb49554d5081f339228a16a01c5ee606c2eca3f2987f45d3327b",
       "scripts/benchmark-town-navigation.js": "a03ca379db4ea4d1f55a50a4eea637962970f240c4557c7903ae925d5ea4d211",
-      "scripts/certify-c4-quests.js": "37c168acb314089ac33cc2b7a34fa6d5cd6b154414d1909fba4c8b8824fa5c52",
+      "scripts/certify-c4-quests.js": "3f3712ec6bf19ca4fdf0deee114425baccb8e4130cbd1984b88581d4bc4d894a",
       "scripts/check-c4-quests.js": "094eec7789f23d33445e3d00452eb7d2640c7fdbc3d342d38997f25db218c0b2",
       "scripts/check-quest-registry.js": "a05ecd2fe1e6f62d6c7eed1629dad48be13a2023682a11201c2a89d07ed46da2",
       "scripts/check-syntax.js": "f18315645fba6bbdb1b80b103fc5006970e56f804f9c72759be6dea1f067b9b5",
@@ -1276,7 +1244,7 @@
       "scripts/run-tests-p0-b3.js": "07046504ac2f221826f1fdf599c30f0f53b61c44ec50f57371b3f1bc52982cc6",
       "scripts/run-tests-p0-b4.js": "309423b431c59b4f612c6041156952e5fe63cf65fff1256c5b10c3fb165a0af4",
       "scripts/run-tests-p0-b5.js": "a3f8e96312ed5ac1fe873005a8db1b7f008aa6db9df60f8d17780c509e94e71e",
-      "scripts/run-tests.js": "26075a30b88f93c0ed9cf251444ba7aab8c2079b1791e9b063e7077dcaa7085e",
+      "scripts/run-tests.js": "aaa2a72de000aad024dba945ea7fd5ee4b4da1521e691b4af365bded9d66a00e",
       "scripts/saved-games.js": "9d2f0c14084ad5403231e4e99e03388909c7fda432ff9c0ea7f44d829cf7b388",
       "scripts/simulate-bot-chat.js": "8b15f0e010fd24aca99c7cbc1e769cb40af0671afd45d9401a24b3b7e845bb01",
       "scripts/start.js": "4b47531f68f1733a1b4a9bb03626626cb83802594dd59a7aa20a2e61241a21b4",
@@ -2022,13 +1990,13 @@
       "src/GameServer/Quest/quests/Q293_TheHiddenVeins.js": "851f75d8b9f9bd7fd60e4b53f68c611608bc456828ab18ebaac8afaf3252701e",
       "src/GameServer/Quest/quests/Q401_PathToWarrior.js": "ecce5421f89c063a41bcaa8840a664820b36c1d9b479cce38ffc2f41c9b9a912",
       "src/GameServer/Quest/quests/Q402_PathToKnight.js": "43d562b15dc44a74b6ad80dd85c6c2d3bdb4f24395abd806e142a0155a3093b4",
-      "src/GameServer/Quest/quests/Q403_PathToRogue.js": "c85b93ec68b8f0a51fb02c8a90c435be8e58294ceed822bda318133471221113",
+      "src/GameServer/Quest/quests/Q403_PathToRogue.js": "303ac2437695649ebd9020ee5a344b28108d621f431b7f5abaaf38d8fd90052b",
       "src/GameServer/Quest/quests/Q404_PathToWizard.js": "297384a3924894d0f9c0d39a54c3a5f6679143c9b6192ec1cbe7270e2713ee09",
       "src/GameServer/Quest/quests/Q405_PathToCleric.js": "d1ef861beef9f793885fbdeae17edc38b244ef9a6d8fc95cfc08bda515525636",
       "src/GameServer/Quest/quests/Q406_PathToElvenKnight.js": "0b2beb0e3594614bace598975b52c5c99a63d8da6041835bb198102d22895047",
       "src/GameServer/Quest/quests/Q407_PathToElvenScout.js": "cc18f815381a9a4124596da4ab3ecac7d8d6f627acb3aec96ac3ef5584bf33a1",
       "src/GameServer/Quest/quests/Q408_PathToElvenWizard.js": "c332f079e74ec5671547826a255fd67126e6473110bba0ee67cc1b49095ea642",
-      "src/GameServer/Quest/quests/Q409_PathToElvenOracle.js": "d8fb7d3daf01de0d06500e3eabb251c6bc219b1c981da018fe9b3ce49c2390a0",
+      "src/GameServer/Quest/quests/Q409_PathToElvenOracle.js": "08783fd13b2b8ab8f910002e6f95b1835202d8888aa36523c9a891bfa405eef4",
       "src/GameServer/Quest/quests/Q410_PathToPalusKnight.js": "93517184479f176940902e8d366edbc949f70a991c0d7ecc7c68c566b5d08c3d",
       "src/GameServer/Quest/quests/Q411_PathToAssassin.js": "40c4fc7e72ae2d7462c0547f88ff7a4d8026d9e97ca12d3c404ea3d76b3f9016",
       "src/GameServer/Quest/quests/Q412_PathToDarkWizard.js": "76ab438fb3962600563c765668de9a4eed9e2dbc969c6d0345c1e22e723fed83",
@@ -2037,7 +2005,7 @@
       "src/GameServer/Quest/quests/Q415_PathToOrcMonk.js": "84558b0a451143dbaa70313ca9d8e65bf1b9d69062dba568aceab9d8380bbdb3",
       "src/GameServer/Quest/quests/Q416_PathToOrcShaman.js": "f5302863ec2492fd818067684df19086bdaa31140e4865dab5bf380c630a5064",
       "src/GameServer/Quest/quests/Q417_PathToScavenger.js": "a8cb4242a3fd3076d0aae34f8e8e20de3570c0b3df63dcfb4530094623b5c3b9",
-      "src/GameServer/Quest/quests/Q418_PathToArtisan.js": "988362f723e367b525c1863b5c36ed62cd340ae6a8c0416650b895d89a7a4d5a",
+      "src/GameServer/Quest/quests/Q418_PathToArtisan.js": "13540985700599802018aa1f8092ea848f43cd1fd37f84147b9dbe6e8b0a6a73",
       "src/GameServer/Quest/quests/Q419_GetAPet.js": "af571bcd31cba012bed53c0851a2e5a5fad72845ad1a457237392fab3f32348c",
       "src/GameServer/Quest/quests/Q420_LittleWing.js": "64a85c60b6ecca4e2a791d08e43f3e793c841a55bf31300fd478e5a48998743b",
       "src/GameServer/Quest/quests/Q421_LittleWingsBigAdventure.js": "244c61e3a23236405989e25495e4de6aa3274ff792c03529a4534764711d3a41",
@@ -3034,7 +3002,7 @@
       "tests/fixtures/companion_path_worker.js": "f05a88b3afa43c6789b9590ab0a9e3f9a85386ba3bb64ade5363fe8aca15b913",
       "tests/helpers/assert_c4_monster_location.js": "cda8f67e97daac4ef6eb2ab5df4b11b799339a6ff2574b791845b3f49e8336d9",
       "tests/helpers/assert_monster_empty_before_slice.js": "16d92110624f64ceb4219af07cf86bd7c3d8a14defdcea93d50524b76202721a",
-      "tests/helpers/c4QuestHarness.js": "2f29cea7e120738d4b700c4af236da27ce02664224da58407373eb330ad00ada",
+      "tests/helpers/c4QuestHarness.js": "b5eaf2f36e0c24d8ec667a88308826e373c88380ef95754b1c2b12e81c59a7c6",
       "tests/helpers/legacyCharacterSchema.js": "457b9931fbebc1f87afbe2025b1aa44cb65228b0b91a87ce70d86c3f712ae6cc",
       "tests/helpers/verify_geodata_when_available.js": "84c75f6390b3482123b50d0e6fc406465bb8637e1cc7c3ab2d29c324841f9537",
       "tests/test_admin_saved_locations.js": "1baed3d5fbfa387d934d84ade82e50a71fa50beea5aef6b4d20765718cde8a13",
@@ -3246,6 +3214,7 @@
       "tests/test_c4_necropolis_of_saints.js": "3075aee2a87b189c556db54534bb72e1472addae7f4d0573a3637bd0f9002d65",
       "tests/test_c4_necropolis_of_the_disciples.js": "a9d098769c6bf03621a38757d4a9a5f72e7eeb50b209c46df91640a96ed7f74b",
       "tests/test_c4_necropolis_of_worshipers.js": "657a5b829c8e4a3c42ec32d25c45597c906234acd51b3943c9f28da6c12fbe4d",
+      "tests/test_c4_profession_routes.js": "fc33166cf33294673b55e3bcc69e6e2dccff0b804556fd0daf43e75faeef140f",
       "tests/test_c4_protocol_packets.js": "08a02359a80f70e48b9b89d1992612243cbb3059c05c0b23e8e67088a956e4e8",
       "tests/test_c4_raid_bosses.js": "c126798a64a802d566279ec0d12a473f6f8b17775d0491082e9880670b1b13b7",
       "tests/test_c4_seven_signs_dungeon_teleports.js": "6fa39e303eeaf12884e6ea933183b7ea84c8dc8145c7e725da800f1c37bf73fe",
@@ -3366,7 +3335,7 @@
       "tests/test_equipment_item_skills.js": "8eacd94ec8aef0c46fa4b1a4740ac5a48c4cded3309d06565faeb809fe038959",
       "tests/test_equipment_slots.js": "dec5e3f06c3532832093c066c985ed7ccdf7cee13199b9e5c4eb83ebe92786f7",
       "tests/test_fall_damage.js": "a5482775b4f495d01578ed0fb6247fa0266f578651f65ca4b510b747b8fa1e1c",
-      "tests/test_first_profession_proof.js": "256082ec0baaa4d095d8afe17811eaa056122b97f6b0aee4c930fbb312de8f14",
+      "tests/test_first_profession_proof.js": "e0d1a4e8bdfe11b0a8464e99062ae34056eb6c4ef5bf96b1dd1fb44cec7229d8",
       "tests/test_floor_aware_activation_policy.js": "bae117afa3afd62f9605dbbae635f97f23802aa84a8de5525025370dbd25f04d",
       "tests/test_friend_party_market_withdrawal.js": "55d3155e8255e82ccda0cb5859ab6663c81a9857c951bd44f2811365615464a0",
       "tests/test_gatekeeper_teleports.js": "5c53e845f56a14fae21a413340ca5d50e15465db265939cad6426347ed94e036",
@@ -3586,7 +3555,7 @@
       "tests/test_world_observer_world_state.js": "1694e9a8d888d7495da71f79d1ac6fc0f27b69a28b33e5f73753529cacce9c78",
       "tests/test_world_visible_users.js": "53949729f44132946b001ebe4ace8644ffac482aea9953a0ffa80829dac74aab",
       "tests/test_world_wipe.js": "d7f3aa5197dc8359c9542250394fc0ccd96010402be9c83b0576696ec47cf89c",
-      "docs/c4/quests/runtime-review.json": "7f05e7a09c62a83e2ad5cb91be974fdd95116c475780511b912c03722cb7853d",
+      "docs/c4/quests/runtime-review.json": "b05ee5462a808211536f4d7672040d9f66ba7ab50faa57ba01804ff733b8a05b",
       "docs/c4/quests/C4_QUEST_MASTER_INVENTORY.jsonl": "9f63e96d5fe25e0ce21f81027b805d8a4cc556e25e8f17b74a179ff316befc86"
     },
     "tests": [
@@ -3612,6 +3581,10 @@
       },
       {
         "path": "tests/test_c4_village_quests.js",
+        "exitCode": 0
+      },
+      {
+        "path": "tests/test_c4_profession_routes.js",
         "exitCode": 0
       },
       {

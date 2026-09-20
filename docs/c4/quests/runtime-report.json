@@ -2,8 +2,8 @@
   "errors": [],
   "confirmedInScope": 107,
   "counts": {
-    "VERIFIED": 71,
-    "IMPLEMENTED": 18,
+    "VERIFIED": 88,
+    "IMPLEMENTED": 1,
     "PARTIAL/BLOCKED": 14,
     "MISSING": 4
   },
@@ -6109,7 +6109,8 @@
       "registered": true,
       "tests": [
         "tests/test_first_profession_proof.js",
-        "tests/test_quest_runtime.js"
+        "tests/test_quest_runtime.js",
+        "tests/test_c4_profession_routes.js"
       ],
       "blocker": null,
       "certificationBlocker": null,
@@ -6117,10 +6118,8 @@
       "bridge": {
         "genericResolver": "PRESENT",
         "questAdapter": "AUTONOMOUS_COLD_AND_HOT_COLD_HANDOFF",
-        "reviewedRequirements": null,
-        "requirementsNeedingReview": [
-          "CLASS_TRANSFER_PROOF_PRIMITIVE"
-        ]
+        "reviewedRequirements": [],
+        "requirementsNeedingReview": []
       },
       "drift": [
         "status:PARTIAL->VERIFIED",
@@ -6132,30 +6131,26 @@
       "name": "Path to a Human Knight",
       "inScope": true,
       "quarantined": false,
-      "status": "IMPLEMENTED",
+      "status": "VERIFIED",
       "script": "Q402_PathToKnight.js",
       "definitionId": null,
       "registered": true,
       "tests": [
         "tests/test_quest_runtime.js",
-        "tests/test_first_profession_proof.js"
+        "tests/test_first_profession_proof.js",
+        "tests/test_c4_profession_routes.js"
       ],
       "blocker": null,
-      "certificationBlocker": {
-        "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
-        "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
-      },
+      "certificationBlocker": null,
       "professionProofContract": "PASS",
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "AUTONOMOUS_ROUTE_PENDING",
-        "reviewedRequirements": null,
-        "requirementsNeedingReview": [
-          "CLASS_TRANSFER_PROOF_PRIMITIVE"
-        ]
+        "questAdapter": "REVIEWED_PROFESSION_ROUTE",
+        "reviewedRequirements": [],
+        "requirementsNeedingReview": []
       },
       "drift": [
-        "status:PARTIAL->IMPLEMENTED",
+        "status:PARTIAL->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -6164,30 +6159,26 @@
       "name": "Path to a Rogue",
       "inScope": true,
       "quarantined": false,
-      "status": "IMPLEMENTED",
+      "status": "VERIFIED",
       "script": "Q403_PathToRogue.js",
       "definitionId": null,
       "registered": true,
       "tests": [
         "tests/test_quest_runtime.js",
-        "tests/test_first_profession_proof.js"
+        "tests/test_first_profession_proof.js",
+        "tests/test_c4_profession_routes.js"
       ],
       "blocker": null,
-      "certificationBlocker": {
-        "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
-        "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
-      },
+      "certificationBlocker": null,
       "professionProofContract": "PASS",
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "AUTONOMOUS_ROUTE_PENDING",
-        "reviewedRequirements": null,
-        "requirementsNeedingReview": [
-          "CLASS_TRANSFER_PROOF_PRIMITIVE"
-        ]
+        "questAdapter": "REVIEWED_PROFESSION_ROUTE",
+        "reviewedRequirements": [],
+        "requirementsNeedingReview": []
       },
       "drift": [
-        "status:PARTIAL->IMPLEMENTED",
+        "status:PARTIAL->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -6196,30 +6187,26 @@
       "name": "Path to a Human Wizard",
       "inScope": true,
       "quarantined": false,
-      "status": "IMPLEMENTED",
+      "status": "VERIFIED",
       "script": "Q404_PathToWizard.js",
       "definitionId": null,
       "registered": true,
       "tests": [
         "tests/test_quest_runtime.js",
-        "tests/test_first_profession_proof.js"
+        "tests/test_first_profession_proof.js",
+        "tests/test_c4_profession_routes.js"
       ],
       "blocker": null,
-      "certificationBlocker": {
-        "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
-        "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
-      },
+      "certificationBlocker": null,
       "professionProofContract": "PASS",
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "AUTONOMOUS_ROUTE_PENDING",
-        "reviewedRequirements": null,
-        "requirementsNeedingReview": [
-          "CLASS_TRANSFER_PROOF_PRIMITIVE"
-        ]
+        "questAdapter": "REVIEWED_PROFESSION_ROUTE",
+        "reviewedRequirements": [],
+        "requirementsNeedingReview": []
       },
       "drift": [
-        "status:PARTIAL->IMPLEMENTED",
+        "status:PARTIAL->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -6228,30 +6215,26 @@
       "name": "Path to a Cleric",
       "inScope": true,
       "quarantined": false,
-      "status": "IMPLEMENTED",
+      "status": "VERIFIED",
       "script": "Q405_PathToCleric.js",
       "definitionId": null,
       "registered": true,
       "tests": [
         "tests/test_quest_runtime.js",
-        "tests/test_first_profession_proof.js"
+        "tests/test_first_profession_proof.js",
+        "tests/test_c4_profession_routes.js"
       ],
       "blocker": null,
-      "certificationBlocker": {
-        "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
-        "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
-      },
+      "certificationBlocker": null,
       "professionProofContract": "PASS",
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "AUTONOMOUS_ROUTE_PENDING",
-        "reviewedRequirements": null,
-        "requirementsNeedingReview": [
-          "CLASS_TRANSFER_PROOF_PRIMITIVE"
-        ]
+        "questAdapter": "REVIEWED_PROFESSION_ROUTE",
+        "reviewedRequirements": [],
+        "requirementsNeedingReview": []
       },
       "drift": [
-        "status:PARTIAL->IMPLEMENTED",
+        "status:PARTIAL->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -6260,30 +6243,26 @@
       "name": "Path to an Elven Knight",
       "inScope": true,
       "quarantined": false,
-      "status": "IMPLEMENTED",
+      "status": "VERIFIED",
       "script": "Q406_PathToElvenKnight.js",
       "definitionId": null,
       "registered": true,
       "tests": [
         "tests/test_quest_runtime.js",
-        "tests/test_first_profession_proof.js"
+        "tests/test_first_profession_proof.js",
+        "tests/test_c4_profession_routes.js"
       ],
       "blocker": null,
-      "certificationBlocker": {
-        "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
-        "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
-      },
+      "certificationBlocker": null,
       "professionProofContract": "PASS",
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "AUTONOMOUS_ROUTE_PENDING",
-        "reviewedRequirements": null,
-        "requirementsNeedingReview": [
-          "CLASS_TRANSFER_PROOF_PRIMITIVE"
-        ]
+        "questAdapter": "REVIEWED_PROFESSION_ROUTE",
+        "reviewedRequirements": [],
+        "requirementsNeedingReview": []
       },
       "drift": [
-        "status:PARTIAL->IMPLEMENTED",
+        "status:PARTIAL->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -6292,30 +6271,26 @@
       "name": "Path to an Elven Scout",
       "inScope": true,
       "quarantined": false,
-      "status": "IMPLEMENTED",
+      "status": "VERIFIED",
       "script": "Q407_PathToElvenScout.js",
       "definitionId": null,
       "registered": true,
       "tests": [
         "tests/test_quest_runtime.js",
-        "tests/test_first_profession_proof.js"
+        "tests/test_first_profession_proof.js",
+        "tests/test_c4_profession_routes.js"
       ],
       "blocker": null,
-      "certificationBlocker": {
-        "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
-        "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
-      },
+      "certificationBlocker": null,
       "professionProofContract": "PASS",
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "AUTONOMOUS_ROUTE_PENDING",
-        "reviewedRequirements": null,
-        "requirementsNeedingReview": [
-          "CLASS_TRANSFER_PROOF_PRIMITIVE"
-        ]
+        "questAdapter": "REVIEWED_PROFESSION_ROUTE",
+        "reviewedRequirements": [],
+        "requirementsNeedingReview": []
       },
       "drift": [
-        "status:PARTIAL->IMPLEMENTED",
+        "status:PARTIAL->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -6324,30 +6299,26 @@
       "name": "Path to an Elven Wizard",
       "inScope": true,
       "quarantined": false,
-      "status": "IMPLEMENTED",
+      "status": "VERIFIED",
       "script": "Q408_PathToElvenWizard.js",
       "definitionId": null,
       "registered": true,
       "tests": [
         "tests/test_quest_runtime.js",
-        "tests/test_first_profession_proof.js"
+        "tests/test_first_profession_proof.js",
+        "tests/test_c4_profession_routes.js"
       ],
       "blocker": null,
-      "certificationBlocker": {
-        "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
-        "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
-      },
+      "certificationBlocker": null,
       "professionProofContract": "PASS",
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "AUTONOMOUS_ROUTE_PENDING",
-        "reviewedRequirements": null,
-        "requirementsNeedingReview": [
-          "CLASS_TRANSFER_PROOF_PRIMITIVE"
-        ]
+        "questAdapter": "REVIEWED_PROFESSION_ROUTE",
+        "reviewedRequirements": [],
+        "requirementsNeedingReview": []
       },
       "drift": [
-        "status:PARTIAL->IMPLEMENTED",
+        "status:PARTIAL->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -6356,33 +6327,26 @@
       "name": "Path to an Elven Oracle",
       "inScope": true,
       "quarantined": false,
-      "status": "IMPLEMENTED",
+      "status": "VERIFIED",
       "script": "Q409_PathToElvenOracle.js",
       "definitionId": null,
       "registered": true,
       "tests": [
         "tests/test_quest_runtime.js",
-        "tests/test_first_profession_proof.js"
+        "tests/test_first_profession_proof.js",
+        "tests/test_c4_profession_routes.js"
       ],
       "blocker": null,
-      "certificationBlocker": {
-        "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
-        "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
-      },
+      "certificationBlocker": null,
       "professionProofContract": "PASS",
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "AUTONOMOUS_ROUTE_PENDING",
-        "reviewedRequirements": null,
-        "requirementsNeedingReview": [
-          "SCRIPTED_SPAWN_PRIMITIVE",
-          "BOSS_ENCOUNTER_PRIMITIVE",
-          "DEFEND_PRIMITIVE",
-          "CLASS_TRANSFER_PROOF_PRIMITIVE"
-        ]
+        "questAdapter": "REVIEWED_PROFESSION_ROUTE",
+        "reviewedRequirements": [],
+        "requirementsNeedingReview": []
       },
       "drift": [
-        "status:PARTIAL->IMPLEMENTED",
+        "status:PARTIAL->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -6391,30 +6355,26 @@
       "name": "Path to a Palus Knight",
       "inScope": true,
       "quarantined": false,
-      "status": "IMPLEMENTED",
+      "status": "VERIFIED",
       "script": "Q410_PathToPalusKnight.js",
       "definitionId": null,
       "registered": true,
       "tests": [
         "tests/test_quest_runtime.js",
-        "tests/test_first_profession_proof.js"
+        "tests/test_first_profession_proof.js",
+        "tests/test_c4_profession_routes.js"
       ],
       "blocker": null,
-      "certificationBlocker": {
-        "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
-        "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
-      },
+      "certificationBlocker": null,
       "professionProofContract": "PASS",
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "AUTONOMOUS_ROUTE_PENDING",
-        "reviewedRequirements": null,
-        "requirementsNeedingReview": [
-          "CLASS_TRANSFER_PROOF_PRIMITIVE"
-        ]
+        "questAdapter": "REVIEWED_PROFESSION_ROUTE",
+        "reviewedRequirements": [],
+        "requirementsNeedingReview": []
       },
       "drift": [
-        "status:PARTIAL->IMPLEMENTED",
+        "status:PARTIAL->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -6423,30 +6383,26 @@
       "name": "Path to an Assassin",
       "inScope": true,
       "quarantined": false,
-      "status": "IMPLEMENTED",
+      "status": "VERIFIED",
       "script": "Q411_PathToAssassin.js",
       "definitionId": null,
       "registered": true,
       "tests": [
         "tests/test_quest_runtime.js",
-        "tests/test_first_profession_proof.js"
+        "tests/test_first_profession_proof.js",
+        "tests/test_c4_profession_routes.js"
       ],
       "blocker": null,
-      "certificationBlocker": {
-        "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
-        "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
-      },
+      "certificationBlocker": null,
       "professionProofContract": "PASS",
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "AUTONOMOUS_ROUTE_PENDING",
-        "reviewedRequirements": null,
-        "requirementsNeedingReview": [
-          "CLASS_TRANSFER_PROOF_PRIMITIVE"
-        ]
+        "questAdapter": "REVIEWED_PROFESSION_ROUTE",
+        "reviewedRequirements": [],
+        "requirementsNeedingReview": []
       },
       "drift": [
-        "status:PARTIAL->IMPLEMENTED",
+        "status:PARTIAL->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -6455,30 +6411,26 @@
       "name": "Path to a Dark Wizard",
       "inScope": true,
       "quarantined": false,
-      "status": "IMPLEMENTED",
+      "status": "VERIFIED",
       "script": "Q412_PathToDarkWizard.js",
       "definitionId": null,
       "registered": true,
       "tests": [
         "tests/test_quest_runtime.js",
-        "tests/test_first_profession_proof.js"
+        "tests/test_first_profession_proof.js",
+        "tests/test_c4_profession_routes.js"
       ],
       "blocker": null,
-      "certificationBlocker": {
-        "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
-        "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
-      },
+      "certificationBlocker": null,
       "professionProofContract": "PASS",
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "AUTONOMOUS_ROUTE_PENDING",
-        "reviewedRequirements": null,
-        "requirementsNeedingReview": [
-          "CLASS_TRANSFER_PROOF_PRIMITIVE"
-        ]
+        "questAdapter": "REVIEWED_PROFESSION_ROUTE",
+        "reviewedRequirements": [],
+        "requirementsNeedingReview": []
       },
       "drift": [
-        "status:PARTIAL->IMPLEMENTED",
+        "status:PARTIAL->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -6487,30 +6439,26 @@
       "name": "Path to a Shillien Oracle",
       "inScope": true,
       "quarantined": false,
-      "status": "IMPLEMENTED",
+      "status": "VERIFIED",
       "script": "Q413_PathToShillienOracle.js",
       "definitionId": null,
       "registered": true,
       "tests": [
         "tests/test_quest_runtime.js",
-        "tests/test_first_profession_proof.js"
+        "tests/test_first_profession_proof.js",
+        "tests/test_c4_profession_routes.js"
       ],
       "blocker": null,
-      "certificationBlocker": {
-        "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
-        "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
-      },
+      "certificationBlocker": null,
       "professionProofContract": "PASS",
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "AUTONOMOUS_ROUTE_PENDING",
-        "reviewedRequirements": null,
-        "requirementsNeedingReview": [
-          "CLASS_TRANSFER_PROOF_PRIMITIVE"
-        ]
+        "questAdapter": "REVIEWED_PROFESSION_ROUTE",
+        "reviewedRequirements": [],
+        "requirementsNeedingReview": []
       },
       "drift": [
-        "status:PARTIAL->IMPLEMENTED",
+        "status:PARTIAL->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -6519,32 +6467,26 @@
       "name": "Path to an Orc Raider",
       "inScope": true,
       "quarantined": false,
-      "status": "IMPLEMENTED",
+      "status": "VERIFIED",
       "script": "Q414_PathToOrcRaider.js",
       "definitionId": null,
       "registered": true,
       "tests": [
         "tests/test_quest_runtime.js",
-        "tests/test_first_profession_proof.js"
+        "tests/test_first_profession_proof.js",
+        "tests/test_c4_profession_routes.js"
       ],
       "blocker": null,
-      "certificationBlocker": {
-        "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
-        "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
-      },
+      "certificationBlocker": null,
       "professionProofContract": "PASS",
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "AUTONOMOUS_ROUTE_PENDING",
-        "reviewedRequirements": null,
-        "requirementsNeedingReview": [
-          "SCRIPTED_SPAWN_PRIMITIVE",
-          "BOSS_ENCOUNTER_PRIMITIVE",
-          "CLASS_TRANSFER_PROOF_PRIMITIVE"
-        ]
+        "questAdapter": "REVIEWED_PROFESSION_ROUTE",
+        "reviewedRequirements": [],
+        "requirementsNeedingReview": []
       },
       "drift": [
-        "status:PARTIAL->IMPLEMENTED",
+        "status:PARTIAL->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -6553,30 +6495,26 @@
       "name": "Path to a Monk",
       "inScope": true,
       "quarantined": false,
-      "status": "IMPLEMENTED",
+      "status": "VERIFIED",
       "script": "Q415_PathToOrcMonk.js",
       "definitionId": null,
       "registered": true,
       "tests": [
         "tests/test_quest_runtime.js",
-        "tests/test_first_profession_proof.js"
+        "tests/test_first_profession_proof.js",
+        "tests/test_c4_profession_routes.js"
       ],
       "blocker": null,
-      "certificationBlocker": {
-        "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
-        "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
-      },
+      "certificationBlocker": null,
       "professionProofContract": "PASS",
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "AUTONOMOUS_ROUTE_PENDING",
-        "reviewedRequirements": null,
-        "requirementsNeedingReview": [
-          "CLASS_TRANSFER_PROOF_PRIMITIVE"
-        ]
+        "questAdapter": "REVIEWED_PROFESSION_ROUTE",
+        "reviewedRequirements": [],
+        "requirementsNeedingReview": []
       },
       "drift": [
-        "status:PARTIAL->IMPLEMENTED",
+        "status:PARTIAL->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -6585,31 +6523,26 @@
       "name": "Path to an Orc Shaman",
       "inScope": true,
       "quarantined": false,
-      "status": "IMPLEMENTED",
+      "status": "VERIFIED",
       "script": "Q416_PathToOrcShaman.js",
       "definitionId": null,
       "registered": true,
       "tests": [
         "tests/test_quest_runtime.js",
-        "tests/test_first_profession_proof.js"
+        "tests/test_first_profession_proof.js",
+        "tests/test_c4_profession_routes.js"
       ],
       "blocker": null,
-      "certificationBlocker": {
-        "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
-        "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
-      },
+      "certificationBlocker": null,
       "professionProofContract": "PASS",
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "AUTONOMOUS_ROUTE_PENDING",
-        "reviewedRequirements": null,
-        "requirementsNeedingReview": [
-          "SCRIPTED_SPAWN_PRIMITIVE",
-          "CLASS_TRANSFER_PROOF_PRIMITIVE"
-        ]
+        "questAdapter": "REVIEWED_PROFESSION_ROUTE",
+        "reviewedRequirements": [],
+        "requirementsNeedingReview": []
       },
       "drift": [
-        "status:PARTIAL->IMPLEMENTED",
+        "status:PARTIAL->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -6618,31 +6551,26 @@
       "name": "Path to become a Scavenger",
       "inScope": true,
       "quarantined": false,
-      "status": "IMPLEMENTED",
+      "status": "VERIFIED",
       "script": "Q417_PathToScavenger.js",
       "definitionId": null,
       "registered": true,
       "tests": [
         "tests/test_quest_runtime.js",
-        "tests/test_first_profession_proof.js"
+        "tests/test_first_profession_proof.js",
+        "tests/test_c4_profession_routes.js"
       ],
       "blocker": null,
-      "certificationBlocker": {
-        "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
-        "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
-      },
+      "certificationBlocker": null,
       "professionProofContract": "PASS",
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "AUTONOMOUS_ROUTE_PENDING",
-        "reviewedRequirements": null,
-        "requirementsNeedingReview": [
-          "SCRIPTED_SPAWN_PRIMITIVE",
-          "CLASS_TRANSFER_PROOF_PRIMITIVE"
-        ]
+        "questAdapter": "REVIEWED_PROFESSION_ROUTE",
+        "reviewedRequirements": [],
+        "requirementsNeedingReview": []
       },
       "drift": [
-        "status:PARTIAL->IMPLEMENTED",
+        "status:PARTIAL->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -6651,30 +6579,26 @@
       "name": "Path to an Artisan",
       "inScope": true,
       "quarantined": false,
-      "status": "IMPLEMENTED",
+      "status": "VERIFIED",
       "script": "Q418_PathToArtisan.js",
       "definitionId": null,
       "registered": true,
       "tests": [
         "tests/test_quest_runtime.js",
-        "tests/test_first_profession_proof.js"
+        "tests/test_first_profession_proof.js",
+        "tests/test_c4_profession_routes.js"
       ],
       "blocker": null,
-      "certificationBlocker": {
-        "code": "INTERMEDIATE_STEPS_AND_ROUTE_PENDING",
-        "detail": "Real SQLite final hand-in, proof, transfer and replay pass. Full retail route and intermediate crash recovery remain uncertified."
-      },
+      "certificationBlocker": null,
       "professionProofContract": "PASS",
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "AUTONOMOUS_ROUTE_PENDING",
-        "reviewedRequirements": null,
-        "requirementsNeedingReview": [
-          "CLASS_TRANSFER_PROOF_PRIMITIVE"
-        ]
+        "questAdapter": "REVIEWED_PROFESSION_ROUTE",
+        "reviewedRequirements": [],
+        "requirementsNeedingReview": []
       },
       "drift": [
-        "status:PARTIAL->IMPLEMENTED",
+        "status:PARTIAL->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },

@@ -687,162 +687,198 @@
     "certified": true,
     "tests": [
       "tests/test_first_profession_proof.js",
+      "tests/test_quest_runtime.js",
       "tests/test_c4_profession_routes.js"
     ],
-    "bridge": "REVIEWED_PROFESSION_ROUTE",
+    "professionProofContract": "PASS",
+    "bridge": "AUTONOMOUS_COLD_AND_HOT_COLD_HANDOFF",
     "reviewedRequirements": []
   },
   "402": {
     "certified": true,
     "tests": [
       "tests/test_first_profession_proof.js",
+      "tests/test_quest_runtime.js",
       "tests/test_c4_profession_routes.js"
     ],
-    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "professionProofContract": "PASS",
+    "bridge": "REVIEWED_PROFESSION_ROUTE",
     "reviewedRequirements": []
   },
   "403": {
     "certified": true,
     "tests": [
       "tests/test_first_profession_proof.js",
+      "tests/test_quest_runtime.js",
       "tests/test_c4_profession_routes.js"
     ],
-    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "professionProofContract": "PASS",
+    "bridge": "REVIEWED_PROFESSION_ROUTE",
     "reviewedRequirements": []
   },
   "404": {
     "certified": true,
     "tests": [
       "tests/test_first_profession_proof.js",
+      "tests/test_quest_runtime.js",
       "tests/test_c4_profession_routes.js"
     ],
-    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "professionProofContract": "PASS",
+    "bridge": "REVIEWED_PROFESSION_ROUTE",
     "reviewedRequirements": []
   },
   "405": {
     "certified": true,
     "tests": [
       "tests/test_first_profession_proof.js",
+      "tests/test_quest_runtime.js",
       "tests/test_c4_profession_routes.js"
     ],
-    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "professionProofContract": "PASS",
+    "bridge": "REVIEWED_PROFESSION_ROUTE",
     "reviewedRequirements": []
   },
   "406": {
     "certified": true,
     "tests": [
       "tests/test_first_profession_proof.js",
+      "tests/test_quest_runtime.js",
       "tests/test_c4_profession_routes.js"
     ],
-    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "professionProofContract": "PASS",
+    "bridge": "REVIEWED_PROFESSION_ROUTE",
     "reviewedRequirements": []
   },
   "407": {
     "certified": true,
     "tests": [
       "tests/test_first_profession_proof.js",
+      "tests/test_quest_runtime.js",
       "tests/test_c4_profession_routes.js"
     ],
-    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "professionProofContract": "PASS",
+    "bridge": "REVIEWED_PROFESSION_ROUTE",
     "reviewedRequirements": []
   },
   "408": {
     "certified": true,
     "tests": [
       "tests/test_first_profession_proof.js",
+      "tests/test_quest_runtime.js",
       "tests/test_c4_profession_routes.js"
     ],
-    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "professionProofContract": "PASS",
+    "bridge": "REVIEWED_PROFESSION_ROUTE",
     "reviewedRequirements": []
   },
   "409": {
     "certified": true,
     "tests": [
       "tests/test_first_profession_proof.js",
+      "tests/test_quest_runtime.js",
       "tests/test_c4_profession_routes.js"
     ],
-    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "professionProofContract": "PASS",
+    "bridge": "REVIEWED_PROFESSION_ROUTE",
     "reviewedRequirements": []
   },
   "410": {
     "certified": true,
     "tests": [
       "tests/test_first_profession_proof.js",
+      "tests/test_quest_runtime.js",
       "tests/test_c4_profession_routes.js"
     ],
-    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "professionProofContract": "PASS",
+    "bridge": "REVIEWED_PROFESSION_ROUTE",
     "reviewedRequirements": []
   },
   "411": {
     "certified": true,
     "tests": [
       "tests/test_first_profession_proof.js",
+      "tests/test_quest_runtime.js",
       "tests/test_c4_profession_routes.js"
     ],
-    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "professionProofContract": "PASS",
+    "bridge": "REVIEWED_PROFESSION_ROUTE",
     "reviewedRequirements": []
   },
   "412": {
     "certified": true,
     "tests": [
       "tests/test_first_profession_proof.js",
+      "tests/test_quest_runtime.js",
       "tests/test_c4_profession_routes.js"
     ],
-    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "professionProofContract": "PASS",
+    "bridge": "REVIEWED_PROFESSION_ROUTE",
     "reviewedRequirements": []
   },
   "413": {
     "certified": true,
     "tests": [
       "tests/test_first_profession_proof.js",
+      "tests/test_quest_runtime.js",
       "tests/test_c4_profession_routes.js"
     ],
-    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "professionProofContract": "PASS",
+    "bridge": "REVIEWED_PROFESSION_ROUTE",
     "reviewedRequirements": []
   },
   "414": {
     "certified": true,
     "tests": [
       "tests/test_first_profession_proof.js",
+      "tests/test_quest_runtime.js",
       "tests/test_c4_profession_routes.js"
     ],
-    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "professionProofContract": "PASS",
+    "bridge": "REVIEWED_PROFESSION_ROUTE",
     "reviewedRequirements": []
   },
   "415": {
     "certified": true,
     "tests": [
       "tests/test_first_profession_proof.js",
+      "tests/test_quest_runtime.js",
       "tests/test_c4_profession_routes.js"
     ],
-    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "professionProofContract": "PASS",
+    "bridge": "REVIEWED_PROFESSION_ROUTE",
     "reviewedRequirements": []
   },
   "416": {
     "certified": true,
     "tests": [
       "tests/test_first_profession_proof.js",
+      "tests/test_quest_runtime.js",
       "tests/test_c4_profession_routes.js"
     ],
-    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "professionProofContract": "PASS",
+    "bridge": "REVIEWED_PROFESSION_ROUTE",
     "reviewedRequirements": []
   },
   "417": {
     "certified": true,
     "tests": [
       "tests/test_first_profession_proof.js",
+      "tests/test_quest_runtime.js",
       "tests/test_c4_profession_routes.js"
     ],
-    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "professionProofContract": "PASS",
+    "bridge": "REVIEWED_PROFESSION_ROUTE",
     "reviewedRequirements": []
   },
   "418": {
     "certified": true,
     "tests": [
       "tests/test_first_profession_proof.js",
+      "tests/test_quest_runtime.js",
       "tests/test_c4_profession_routes.js"
     ],
-    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "professionProofContract": "PASS",
+    "bridge": "REVIEWED_PROFESSION_ROUTE",
     "reviewedRequirements": []
   },
   "419": {
