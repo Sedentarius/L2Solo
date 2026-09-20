@@ -4,7 +4,7 @@ const Response = invoke('GameServer/Network/Response');
 
 // One compare-and-swap transaction for state, hand-in and reward. The caller
 // must be a server-authored handler that has validated its NPC and conditions.
-async function apply(state, { takes = [], gives = [], variables = state.variables, status = 'started', exp = 0, sp = 0 }) {
+async function apply(state, { takes = [], gives = [], variables = state.variables, status = 'started', exp = 0, sp = 0, beginner = null }) {
     const actor = state.session.actor;
     const next = { state: status, variables: { ...variables, revision: String(state.getInt('revision') + 1) } };
     const rewards = gives.flatMap(([selfId, amount]) => {
@@ -20,7 +20,7 @@ async function apply(state, { takes = [], gives = [], variables = state.variable
     } : null;
     const rows = await Database.applyQuestStep(actor.fetchId(), state.quest.id,
         { state: state.state, variables: state.variables }, next,
-        takes.map(([selfId, amount]) => ({ selfId, amount })), rewards, experience);
+        takes.map(([selfId, amount]) => ({ selfId, amount })), rewards, experience, beginner);
     let equipmentChanged=false;
     for (const row of rows) {
         const item = actor.backpack.fetchItemRaw(row.id);
@@ -51,6 +51,8 @@ async function apply(state, { takes = [], gives = [], variables = state.variable
         ]);
         if (actor.fetchMaxHp) state.session.dataSendToMe(Response.userInfo(actor));
     }
+    // Keep the in-memory actor's receipt aligned with the committed one.
+    if (rows.beginner) actor.newbieShotsReceived = rows.beginner.received;
     state.session.dataSendToMe(Response.itemsList(actor.backpack.fetchItems()));
     for (const [id, amount] of gives) invoke('GameServer/Quest/QuestService').transmitItemReceived(state.session, id, amount);
     return { ok: true };

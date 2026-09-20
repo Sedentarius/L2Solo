@@ -31,7 +31,8 @@ function create(definition) {
     const sources=d.stages.flatMap(s=>s.sources||[]);
     // A delivery stage may name the NPC who re-issues a lost carried document.
     const recoveries=d.stages.map(s=>s.recover).filter(Boolean);
-    const rewardReceipts=[...d.stages,...deliveries].filter(s=>s.onceReward).map(s=>`reward:${s.onceReward.key}`);
+    const rewardReceipts=[...[...d.stages,...deliveries].filter(s=>s.onceReward).map(s=>`reward:${s.onceReward.key}`),
+        ...(d.beginnerReward?.receiptKey?[`reward:${d.beginnerReward.receiptKey}`]:[])];
     const npcs = [...new Set([d.startNpc, ...exchanges.map(e=>e.npc), ...choices.map(c=>c.npc), ...deliveries.map(s=>s.npc), ...sources.map(s=>s.npc), ...recoveries.map(s=>s.npc), ...d.stages.map(s => s.npc).filter(Boolean)])];
     // Identity decides whether this NPC speaks about the quest at all; a missing
     // prerequisite item still lets the NPC explain what is needed.
@@ -73,6 +74,16 @@ function create(definition) {
             ...(s.transforms||[]).map(x=>x.to),...(s.sideDrops||[]).map(x=>x.item),
             ...(s.gives||[]).map(x=>x[0]),...(s.takes||[]).map(x=>x[0])]).filter(Boolean)])];
     const cleanup=state=>questItemIds.map(id=>[id,count(state,id)]).filter(([,n])=>n>0);
+    // The beginner-shot grant rides along with the reward it accompanies.
+    function beginnerGrant(state) {
+        if (!d.beginnerReward) return null;
+        const actor = state.session.actor;
+        const plan = require('./BeginnerReward').plan(actor, d.beginnerReward);
+        if (!plan) return null;
+        // A repeatable quest pays the beginner reward at most once.
+        if (d.beginnerReward.receiptKey && state.get(`reward:${d.beginnerReward.receiptKey}`)) return null;
+        return plan;
+    }
     async function cashout(state,stage,finish=false) {
         let takes=stage.prices.map(([id])=>[id,count(state,id)]).filter(([,n])=>n>0);
         const paid=takes.length>0;
@@ -82,6 +93,16 @@ function create(definition) {
             +(paid && total>=stage.bonusAt ? stage.bonusAdena : 0);
         let next=state.getInt('cond');
         if(paid) {
+            // Authored threshold bonuses. Each names the items it counts, the
+            // amount that unlocks it, and optionally a second stack that must
+            // also be present (Q273 pays more when a red soulstone accompanies
+            // ten black ones).
+            const sold=ids=>takes.filter(([id])=>ids.includes(id)).reduce((n,[,amount])=>n+amount,0);
+            for(const bonus of stage.bonuses||[]) {
+                if(sold(bonus.items)<bonus.at) continue;
+                if(bonus.and && sold(bonus.and.items)<bonus.and.at) continue;
+                adena+=bonus.adena;
+            }
             for(const bonus of stage.ownedBonuses||[]) if(count(state,bonus.item)>0) adena+=bonus.adena;
             for(const extra of stage.handInExtras||[]) {
                 const amount=count(state,extra.item);
@@ -89,7 +110,15 @@ function create(definition) {
             }
         }
         if(finish) takes=cleanup(state);
-        await step(state,{takes,...rewards(state,{adena}),status:finish?'created':'started',variables:{...state.variables,
+        const reward=rewards(state,{adena});
+        const variables={...state.variables};
+        const beginner=paid?beginnerGrant(state):null;
+        if(beginner) {
+            reward.gives=[...reward.gives,...beginner.items];
+            if(d.beginnerReward.receiptKey) variables[`reward:${d.beginnerReward.receiptKey}`]='1';
+        }
+        await step(state,{takes,...reward,...(beginner?{beginner:{received:beginner.received}}:{}),
+            status:finish?'created':'started',variables:{...variables,
             cond:String(finish?0:next),cashouts:String(state.getInt('cashouts')+(paid?1:0))}});
     }
     async function gather(state,stage,source) {
@@ -122,13 +151,18 @@ function create(definition) {
         const finishing=stage.type==='COMPLETE';
         const reward=finishing?rewards(state,d.reward):{gives:offer.gives||[]};
         const variables={...state.variables};
+        const beginner=finishing?beginnerGrant(state):null;
+        if(beginner) {
+            reward.gives=[...reward.gives,...beginner.items];
+            if(d.beginnerReward.receiptKey) variables[`reward:${d.beginnerReward.receiptKey}`]='1';
+        }
         if(offer.onceReward && !state.get(`reward:${offer.onceReward.key}`)) {
             reward.gives=[...reward.gives,...offer.onceReward.items];
             variables[`reward:${offer.onceReward.key}`]='1';
         }
         const delta=(rows,id)=>rows.filter(([item])=>item===id).reduce((sum,[,n])=>sum+n,0);
         const advance=!stage.deliveries || stage.objectives.every(([id,n])=>count(state,id)-delta(takes,id)+delta(reward.gives,id)>=n);
-        await step(state,{...reward,takes,variables:{...variables,
+        await step(state,{...reward,...(beginner?{beginner:{received:beginner.received}}:{}),takes,variables:{...variables,
             cond:String(finishing?0:state.getInt('cond')+(advance?1:0)),
             ...(finishing?{completions:String(state.getInt('completions')+1)}:{})},
             status:finishing?(d.repeatable?'created':'completed'):'started'});

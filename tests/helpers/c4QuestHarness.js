@@ -16,7 +16,7 @@ const DataCache = invoke('GameServer/DataCache');
 const Backpack = invoke('GameServer/Actor/Backpack');
 const Service = invoke('GameServer/Quest/QuestService');
 
-const CHARACTER_COLUMNS = `(id,username,name,classId,race,level,exp,sp,maxHp,maxMp,hp,mp,sex,face,hair,hairColor,locX,locY,locZ)`;
+const CHARACTER_COLUMNS = `(id,username,name,classId,race,level,exp,sp,maxHp,maxMp,hp,mp,sex,face,hair,hairColor,locX,locY,locZ,newbie,newbieShotsReceived)`;
 
 // Quest rates are pinned so reward assertions compare against authored values.
 function pinRates() {
@@ -33,11 +33,13 @@ async function createWorld(characters, label = 'c4-quest') {
     seed.exec(fs.readFileSync(path.resolve(__dirname, '../../database/sql/sqlite.sql'), 'utf8'));
     seed.exec("INSERT INTO accounts(username,password) VALUES ('quests','test')");
     const insert = seed.prepare(`INSERT INTO characters${CHARACTER_COLUMNS}
-        VALUES (?, 'quests', ?, ?, ?, ?, ?, 0, 187, 74, 187, 74, 0, 0, 0, 0, 0, 0, 0)`);
+        VALUES (?, 'quests', ?, ?, ?, ?, ?, 0, 187, 74, 187, 74, 0, 0, 0, 0, 0, 0, 0, ?, ?)`);
     for (const character of characters) {
         insert.run(character.id, character.name || `Quest${character.id}`,
             Number(character.classId || 0), Number(character.race || 0),
-            Number(character.level || 20), Number(character.exp || 0));
+            Number(character.level || 20), Number(character.exp || 0),
+            // -1 is the migration's "eligibility cannot be proven" default.
+            Number(character.newbie ?? -1), Number(character.newbieShotsReceived || 0));
     }
     seed.close();
     Database.init();

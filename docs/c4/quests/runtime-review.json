@@ -326,11 +326,12 @@
     }
   },
   "257": {
-    "certified": false,
-    "blocker": {
-      "code": "NEWBIE_REWARD_STATE_UNRESOLVED",
-      "detail": "Ordinary payouts are reviewed; shared once-per-character beginner-shot eligibility/receipt must be reconciled before complete implementation."
-    }
+    "certified": true,
+    "tests": [
+      "tests/test_c4_beginner_quests.js"
+    ],
+    "bridge": "REVIEWED_COLLECT_ROUTE",
+    "reviewedRequirements": []
   },
   "258": {
     "certified": true,
@@ -349,11 +350,12 @@
     "reviewedRequirements": []
   },
   "260": {
-    "certified": false,
-    "blocker": {
-      "code": "NEWBIE_REWARD_STATE_UNRESOLVED",
-      "detail": "Ordinary payouts are reviewed; shared once-per-character beginner-shot eligibility/receipt must be reconciled before complete implementation."
-    }
+    "certified": true,
+    "tests": [
+      "tests/test_c4_beginner_quests.js"
+    ],
+    "bridge": "REVIEWED_COLLECT_ROUTE",
+    "reviewedRequirements": []
   },
   "261": {
     "certified": true,
@@ -388,11 +390,12 @@
     "reviewedRequirements": []
   },
   "265": {
-    "certified": false,
-    "blocker": {
-      "code": "NEWBIE_REWARD_STATE_UNRESOLVED",
-      "detail": "Ordinary payouts are reviewed; shared once-per-character beginner-shot eligibility/receipt must be reconciled before complete implementation."
-    }
+    "certified": true,
+    "tests": [
+      "tests/test_c4_beginner_quests.js"
+    ],
+    "bridge": "REVIEWED_COLLECT_ROUTE",
+    "reviewedRequirements": []
   },
   "266": {
     "certified": false,
@@ -425,11 +428,12 @@
     "reviewedRequirements": []
   },
   "273": {
-    "certified": false,
-    "blocker": {
-      "code": "NEWBIE_REWARD_STATE_UNRESOLVED",
-      "detail": "Ordinary payouts are reviewed; shared once-per-character beginner-shot eligibility/receipt must be reconciled before complete implementation."
-    }
+    "certified": true,
+    "tests": [
+      "tests/test_c4_beginner_quests.js"
+    ],
+    "bridge": "REVIEWED_COLLECT_ROUTE",
+    "reviewedRequirements": []
   },
   "274": {
     "certified": true,
@@ -478,11 +482,12 @@
     "reviewedRequirements": []
   },
   "293": {
-    "certified": false,
-    "blocker": {
-      "code": "NEWBIE_REWARD_STATE_UNRESOLVED",
-      "detail": "Ordinary payouts are reviewed; shared once-per-character beginner-shot eligibility/receipt must be reconciled before complete implementation."
-    }
+    "certified": true,
+    "tests": [
+      "tests/test_c4_beginner_quests.js"
+    ],
+    "bridge": "REVIEWED_COLLECT_ROUTE",
+    "reviewedRequirements": []
   },
   "294": {
     "certified": true,

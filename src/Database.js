@@ -1220,7 +1220,21 @@ function applySchemaMigrations() {
                 fromClassId INTEGER NOT NULL,
                 toClassId INTEGER NOT NULL
             );
-        `)]
+        `)],
+        // C4 beginner-shot eligibility. The reference persists a 'newbie' flag at
+        // character creation (first character on the account, or a server
+        // override) and counts granted beginner-shot rewards per character.
+        // Characters created before this migration cannot have their original
+        // eligibility proven, so they are recorded as UNKNOWN (-1) rather than
+        // guessed from level or current inventory. General.newbieRewardPolicy
+        // decides how UNKNOWN is treated at runtime.
+        [45, () => {
+            const columns = connection.prepare('PRAGMA table_info(characters)').all().map(column => column.name);
+            if (!columns.includes('newbie'))
+                connection.exec('ALTER TABLE characters ADD COLUMN newbie INTEGER NOT NULL DEFAULT -1');
+            if (!columns.includes('newbieShotsReceived'))
+                connection.exec('ALTER TABLE characters ADD COLUMN newbieShotsReceived INTEGER NOT NULL DEFAULT 0');
+        }]
     ];
     const applied = new Set(connection.prepare('SELECT version FROM schema_migrations').all().map((row) => Number(row.version)));
     migrations.forEach(([version, apply]) => {
@@ -3869,11 +3883,16 @@ const Database = {
         return selectOne('accounts', ['username'], 'username = ? COLLATE NOCASE', [username], 'account:canonical-name')
             .then((accounts) => {
                 if (!accounts[0]) throw new Error('account does not exist');
-                return insert('characters', {
-                    username: accounts[0].username, name: data.name, race: data.race, classId: data.classId,
-                    maxHp: data.maxHp, maxMp: data.maxMp, sex: data.sex, face: data.face,
-                    hair: data.hair, hairColor: data.hairColor, locX: data.locX, locY: data.locY, locZ: data.locZ
-                }, 'character:create');
+                // C4 decides beginner-shot eligibility once, at creation, from
+                // whether this is the account's first character.
+                return select('characters', ['id'], 'username = ? COLLATE NOCASE',
+                    [accounts[0].username], 'character:account-count')
+                    .then((existing) => insert('characters', {
+                        username: accounts[0].username, name: data.name, race: data.race, classId: data.classId,
+                        maxHp: data.maxHp, maxMp: data.maxMp, sex: data.sex, face: data.face,
+                        hair: data.hair, hairColor: data.hairColor, locX: data.locX, locY: data.locY, locZ: data.locZ,
+                        newbie: require('./GameServer/Quest/BeginnerReward').flagForNewCharacter(existing.length)
+                    }, 'character:create'));
             });
     },
     deleteCharacter(username, name) {
@@ -4297,7 +4316,7 @@ const Database = {
         if (![420, 421].includes(questId)) return Promise.reject(new Error('Unsupported pet quest'));
         return this.applyQuestStep(characterId, questId, expected, next, takes, gives);
     },
-    applyQuestStep(characterId, questId, expected, next, takes, gives, experience = null) {
+    applyQuestStep(characterId, questId, expected, next, takes, gives, experience = null, beginner = null) {
         return withCharacterFlush(characterId, () => inTransaction(() => {
             if (!require('./GameServer/Quest/QuestRegistry').entries.some(e => e.id === questId && e.status === 'active')) throw new Error('Unsupported quest');
             const row = one('SELECT state, variables FROM character_quests WHERE characterId = ? AND questId = ?', [characterId, questId]);
@@ -4340,6 +4359,18 @@ const Database = {
                 const totalSp = actor.sp + experience.sp;
                 write('UPDATE characters SET exp = ?, sp = ?, level = ? WHERE id = ?', [award.totalExp, totalSp, level, characterId]);
                 rows.experience = { totalExp: award.totalExp, totalSp, level, grantedExp: award.accepted, grantedSp: experience.sp };
+            }
+            // A beginner-shot grant and its character-wide receipt commit with the
+            // rest of the hand-in, so shots can never be handed out unrecorded and
+            // the counter can never advance without the shots.
+            if (beginner) {
+                const character = one('SELECT newbieShotsReceived FROM characters WHERE id = ?', [characterId]);
+                if (Number(character.newbieShotsReceived) + 1 !== Number(beginner.received)) {
+                    throw new Error('beginner reward receipt changed');
+                }
+                write('UPDATE characters SET newbieShotsReceived = ? WHERE id = ?',
+                    [Number(beginner.received), characterId]);
+                rows.beginner = { received: Number(beginner.received) };
             }
             return rows;
         }, 'quest:step'));

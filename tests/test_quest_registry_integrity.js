@@ -4,7 +4,8 @@ const { auditQuestRegistry } = require("../scripts/check-quest-registry");
 
 const result = auditQuestRegistry();
 assert.deepStrictEqual(result.errors, []);
-assert.strictEqual(result.active, 70 + require('../src/GameServer/Quest/LowLevelDefinitions').filter(d=>!d.blocked).length);
+// 70 legacy script entries plus the five reviewed beginner bounties.
+assert.strictEqual(result.active, 75 + require('../src/GameServer/Quest/LowLevelDefinitions').filter(d=>!d.blocked).length);
 
 const QuestService = invoke("GameServer/Quest/QuestService");
 const Database = invoke("Database");
