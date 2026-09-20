@@ -159,13 +159,100 @@ function npc(selfId, id, coords = {}) {
     });
 }
 
-async function withFastTimers(callback) {
+async function withFastTimers(callback, maxAcceleratedDelay = Infinity) {
     const realSetTimeout = global.setTimeout;
-    global.setTimeout = (fn) => realSetTimeout(fn, 0);
+    global.setTimeout = (fn, delay) => realSetTimeout(fn, delay > maxAcceleratedDelay ? delay : 0);
     try {
         await callback(realSetTimeout);
     } finally {
         global.setTimeout = realSetTimeout;
+    }
+}
+
+async function checkPhantomActions(session, summon, summonSkillId) {
+    const loc = { locX: summon.fetchLocX() + 20, locY: summon.fetchLocY(), locZ: summon.fetchLocZ() };
+    const target = npc(1, 195000, loc);
+    const nearby = npc(1, 195001, { ...loc, locX: loc.locX + 20 });
+    const distant = npc(1, 195002, { ...loc, locX: loc.locX + 400 });
+    for (const enemy of [target, nearby, distant]) {
+        enemy.setMaxHp(100000);
+        enemy.setHp(100000);
+        enemy.setCollectiveMDef(100);
+    }
+    World.user = { sessions: [session] };
+    World.npc = { spawns: [summon, target, nearby, distant], grid: {}, nextId: 195003 };
+    World.indexSpawnsInGrid?.();
+    session.actor.setDestId(target.fetchId());
+    summon.setHp(100);
+    summon.setMp(1000);
+    const savedRandom = Math.random;
+    Math.random = () => 0;
+    const cast = actionId => withFastTimers(async realSetTimeout => {
+        BasicAction(session, session.actor, { actionId });
+        await new Promise(resolve => setImmediate(resolve));
+        await new Promise(resolve => realSetTimeout(resolve, 20));
+    }, 10000);
+    try {
+        assert.strictEqual(await World.fetchNpc(target.fetchId()), target);
+        assert.strictEqual(SummonControl.activeSummon(session.actor), summon);
+        if (summonSkillId === 1128) {
+            await cast(0x16);
+            assert.strictEqual(summon.controlMode, 'attack', 'Shadow must accept the attack command');
+            BasicAction(session, session.actor, { actionId: 0x17 });
+            assert(target.fetchHp() < target.fetchMaxHp(), 'Shadow must land a native melee attack');
+            assert(summon.fetchHp() > 100, 'Shadow Vampiric Attack must restore HP on melee damage');
+        } else if (summonSkillId === 1228) {
+            await cast(0x2f);
+            const damage = target.fetchMaxHp() - target.fetchHp();
+            assert(damage > 0, 'Silhouette Steal Blood must damage the selected enemy');
+            assert(Math.abs(summon.fetchHp() - 100 - damage * 0.2) < 0.001, 'Steal Blood must absorb the sourced 20%');
+            assert.strictEqual(summon.fetchMp(), 902, 'Steal Blood rank 7 must consume 98 MP');
+            const mp = summon.fetchMp();
+            await cast(0x2f);
+            assert.strictEqual(summon.fetchMp(), mp, 'Steal Blood must reject a cast during reuse');
+        } else {
+            await cast(0x24);
+            for (const enemy of [target, nearby]) {
+                assert(enemy.effects.toxic_smoke, 'Toxic Smoke must poison enemies in its area');
+                assert.deepStrictEqual(enemy.effects.toxic_smoke.dot, { count: 10, intervalMs: 3000, damage: 48 });
+                assert(enemy.effectTimers.toxic_smoke, 'Toxic Smoke must schedule damage ticks');
+            }
+            assert(!distant.effects?.toxic_smoke, 'Toxic Smoke must respect its 200-unit radius');
+            assert.strictEqual(summon.fetchMp(), 902, 'Toxic Smoke rank 7 must consume 98 MP');
+            await new Promise(resolve => setTimeout(resolve, 3100));
+            for (const enemy of [target, nearby]) {
+                assert.strictEqual(enemy.fetchMaxHp() - enemy.fetchHp(), 48, 'Toxic Smoke must deal its first real damage tick');
+                invoke('GameServer/Effects/EffectTicker').clearAll(enemy);
+                enemy.automation.stopReplenish();
+            }
+            const hpBeforeBurst = target.fetchHp();
+            const nearbyHpBeforeBurst = nearby.fetchHp();
+            const mpBeforeBurst = summon.fetchMp();
+            const corpse = npc(1, 195003, loc);
+            corpse.setHp(0);
+            corpse.state.setDead(true);
+            World.npc.spawns.push(corpse);
+            World.indexSpawnsInGrid?.();
+            session.actor.setDestId(corpse.fetchId());
+            try {
+                await cast(0x27);
+                assert(target.fetchHp() < hpBeforeBurst, 'Parasite Burst must damage living enemies around the corpse');
+                assert(nearby.fetchHp() < nearbyHpBeforeBurst, 'Parasite Burst must hit nearby enemies');
+                assert.strictEqual(distant.fetchHp(), distant.fetchMaxHp(), 'Parasite Burst must respect its radius');
+                assert.strictEqual(corpse.fetchHp(), 0, 'Parasite Burst must use the corpse as its center, not damage it');
+                assert(!World.npc.spawns.includes(corpse), 'Parasite Burst must consume its corpse');
+                assert.strictEqual(corpse.corpseDecayState, 'removed');
+                assert.strictEqual(summon.fetchMp(), mpBeforeBurst - 98, 'Parasite Burst rank 7 must consume 98 MP');
+            } finally {
+                corpse.destructor(session);
+            }
+        }
+    } finally {
+        Math.random = savedRandom;
+        for (const enemy of [target, nearby, distant]) {
+            invoke('GameServer/Effects/EffectTicker').clearAll(enemy);
+            enemy.destructor(session);
+        }
     }
 }
 
@@ -370,6 +457,60 @@ async function withFastTimers(callback) {
         const outcome = SkillEffects.execute(summonSession, summonSession.actor, corpseTarget, summonSkill, { attack });
         assert(outcome.summon, `${summonSkill.fetchName()} should spawn through the summon template fallback when needed`);
         outcome.summon.destructor(summonSession);
+    }
+
+    // Issue #113: a fallback keeps the requested NPC id but silently copies a
+    // weaker template's stats. Check both exact data coverage and real spawns.
+    // Anchors: Lisvus fdc7e33, datapack/sql/npc.sql (level, HP, MP, P.Atk, P.Def, M.Atk, M.Def).
+    const phantomStatAnchors = new Map([
+        [12447, [60, 4887, 1327, 860, 368, 478, 345]],
+        [12455, [76, 6876, 1972, 1614, 534, 994, 500]],
+        [12456, [60, 4887, 1327, 860, 368, 478, 345]],
+        [12464, [76, 6876, 1972, 1614, 534, 994, 500]],
+        [12503, [42, 1992, 679, 342, 215, 152, 202]],
+        [12538, [76, 5157, 1972, 1775, 534, 994, 500]]
+    ]);
+    for (const selfId of [1128, 1228, 1278]) {
+        const skillData = DataCache.skills.find((entry) => entry.selfId === selfId);
+        assert.strictEqual(skillData.levels.length, selfId === 1278 ? 14 : 18);
+        for (const levelData of skillData.levels) {
+            const label = `summon skill ${selfId} level ${levelData.level}`;
+            const templates = DataCache.npcs.filter((entry) => entry.selfId === levelData.npcId);
+            assert.strictEqual(templates.length, 1, `${label} must have exactly one matching NPC template`);
+            const template = templates[0];
+            const summonSkill = buildSkill(selfId, levelData.level);
+            const summonBackpack = new Backpack({ paperdoll: Array.from({ length: 16 }, () => ({})), items: [] });
+            summonBackpack.items = [item(20000 + selfId, summonSkill.fetchItemConsumeId(), summonSkill.fetchItemConsumeCount())];
+            // The owner's level is deliberately 40; summon stats come from the learned skill.
+            const summonSession = sessionFor(summonBackpack, summonSkill, { mp: 10000 });
+            World.npc = { spawns: [], grid: {}, nextId: 130000 + selfId };
+            const outcome = SkillEffects.execute(summonSession, summonSession.actor, summonSession.actor, summonSkill, { attack });
+            const summoned = outcome.summon;
+            assert(summoned, `${label} must spawn`);
+            try {
+                assert.strictEqual(summoned.fetchSelfId(), levelData.npcId, label);
+                assert.strictEqual(summoned.fetchName(), template.template.name, label);
+                const skills = NpcSkills.forNpc(summoned);
+                const expectedSkills = selfId === 1128 ? [4233] : selfId === 1228 ? [4260] : [4138, 4259];
+                for (const id of expectedSkills) {
+                    const ability = skills.find(entry => entry.fetchSelfId() === id);
+                    assert(ability, `${label} must have skill ${id}`);
+                    assert.strictEqual(ability.fetchLevel(), id === 4233 ? 1 : Math.floor(summoned.fetchLevel() / 10),
+                        `${label} must have the sourced rank of skill ${id}`);
+                }
+                if (selfId === 1128) assert.strictEqual(EffectStats.add(summoned, 'absorbDam'), 15, label);
+                const stats = [summoned.fetchLevel(), summoned.fetchMaxHp(), summoned.fetchMaxMp(),
+                    summoned.fetchPAtk(), summoned.fetchPDef(), summoned.fetchMAtk(), summoned.fetchMDef()];
+                assert.deepStrictEqual(stats, [template.template.level, Math.round(template.vitals.maxHp), template.vitals.maxMp,
+                    template.stats.pAtk, template.stats.pDef, template.stats.mAtk, template.stats.mDef], label);
+                if (phantomStatAnchors.has(levelData.npcId)) {
+                    assert.deepStrictEqual(stats, phantomStatAnchors.get(levelData.npcId), `${label} must retain sourced C4 stats`);
+                }
+                if (levelData.level === skillData.levels.length) await checkPhantomActions(summonSession, summoned, selfId);
+            } finally {
+                summoned.destructor(summonSession);
+            }
+        }
     }
 
     const upkeepBackpack = new Backpack({ paperdoll: Array.from({ length: 16 }, () => ({})), items: [] });

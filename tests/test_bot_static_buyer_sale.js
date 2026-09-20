@@ -10,11 +10,13 @@ const StaticBuyerService = invoke('GameServer/Bot/Economy/StaticBuyerService');
 DataCache.init();
 
 const originals = {
+    reconcileBotClanMembership: Database.reconcileBotClanMembership,
     execute: Database.execute,
     syncInventorySummary: Database.syncInventorySummary
 };
 
 async function run() {
+    Database.reconcileBotClanMembership = async () => ({ repairedMembers: 0, repairedParties: 0 });
     Database.execute = () => Promise.resolve([]);
     Database.syncInventorySummary = () => Promise.resolve();
 
@@ -53,6 +55,7 @@ run().catch((err) => {
     console.error(err);
     process.exitCode = 1;
 }).finally(() => {
+    Database.reconcileBotClanMembership = originals.reconcileBotClanMembership;
     Database.execute = originals.execute;
     Database.syncInventorySummary = originals.syncInventorySummary;
     LifeState.reset?.();

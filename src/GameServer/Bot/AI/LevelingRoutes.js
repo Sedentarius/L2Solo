@@ -205,9 +205,11 @@ function modeForState(state = {}, options = {}) {
     return 'solo';
 }
 
-function targetLevelForState(state = {}) {
+function targetLevelForState(state = {}, options = {}) {
     const actual = Number(state.fetchLevel?.() || state.level || state.stats?.level || 0);
-    if (actual > 0) return actual;
+    if (actual > 0 && ['party', 'duo'].includes(modeForState(state, options))) return actual;
+    if (actual > 0) return Math.max(1, actual - Number(
+        invoke('GameServer/Bot/Population/SpotRiskPolicy').recoveryFor(state)?.levelPenalty || 0));
 
     const parts = String(state.levelBand || '').split('-').map((part) => Number(part));
     if (parts.length >= 2 && Number.isFinite(parts[0]) && Number.isFinite(parts[1])) {
@@ -334,7 +336,7 @@ function scoreRoute(route, spot, context, tags) {
 
 function baseScore(spot, context) {
     const levelGap = Math.abs(Number(spot.avgLevel || spot.minLevel || 1) - context.level);
-    const density = Number(spot.density || 1);
+    const density = Math.min(12, Number(spot.density || 1));
     const peacePenalty = utils.isInPeaceZone?.(spot.center?.locX, spot.center?.locY) ? 40 : 0;
     return density * 3 - levelGap * 18 - peacePenalty;
 }
@@ -343,7 +345,7 @@ function scoreSpot(spot, state = {}, options = {}) {
     const tags = tagsForSpot(spot);
     const context = {
         state,
-        level: Number(options.level || targetLevelForState(state)),
+        level: Number(options.level || targetLevelForState(state, options)),
         role: options.role || roleForState(state),
         mode: modeForState(state, options)
     };
@@ -364,7 +366,8 @@ function scoreSpot(spot, state = {}, options = {}) {
     const huntingGroundPenalty = huntingGround.allowed ? 0 : 10000;
     const variation = stableVariation(spot, state);
     const efficiencyAdjustment = (options.efficiencyScores || HuntEfficiency.scores(state,options.timestamp,context.mode)).get(spot.id) || 0;
-    const targetMatchup = TargetMatchup.spotMatchup(spot, TargetMatchup.stateProfiles(state, { ...options, mode: context.mode }));
+    const targetMatchup = TargetMatchup.spotMatchup(spot, TargetMatchup.stateProfiles(state, { ...options, mode: context.mode }),
+        safetyOptions(state, { ...options, mode: context.mode }));
     const score = baseScore(spot, context) + (routeMatch ? routeMatch.score : 0)
         + variation + efficiencyAdjustment - crowdPenalty - localityPenalty - huntingGroundPenalty
         - targetMatchup.penalty - (targetMatchup.eligible ? 0 : 10000);
@@ -445,7 +448,14 @@ function bestSpot(spots, state = {}, options = {}) {
 function isSpotAllowedForState(spot, state = {}, options = {}) {
     const tags = tagsForSpot(spot);
     return BotHuntingGroundPolicy.evaluate(spot, state, { ...options, tags }).allowed
-        && TargetMatchup.spotMatchup(spot, TargetMatchup.stateProfiles(state, { ...options, mode: modeForState(state, options) })).eligible;
+        && TargetMatchup.spotMatchup(spot, TargetMatchup.stateProfiles(state, { ...options, mode: modeForState(state, options) }),
+            safetyOptions(state, options)).eligible;
+}
+
+function safetyOptions(state, options = {}) {
+    const soloSafety = !['party', 'duo'].includes(modeForState(state, options));
+    const recovery = soloSafety && invoke('GameServer/Bot/Population/SpotRiskPolicy').recoveryFor(state);
+    return { soloSafety, maxTargetLevel: recovery?.levelPenalty > 0 ? targetLevelForState(state) : null };
 }
 
 module.exports = {

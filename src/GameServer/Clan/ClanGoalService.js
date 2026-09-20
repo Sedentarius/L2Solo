@@ -65,6 +65,8 @@ async function clanProjection(clanId = null) {
                members.id AS characterId, members.name AS memberName,
                members.title AS memberTitle, members.classId, members.level AS memberLevel, members.clanId AS memberClanId,
                life.accountName, life.activity, life.phase, life.adena, life.currentRegion, life.spotId,
+               COALESCE(life.locX, members.locX) AS locX, COALESCE(life.locY, members.locY) AS locY,
+               COALESCE(life.locZ, members.locZ) AS locZ,
                life.partyId,
                life.simulationOwner, life.simulationRevision, life.inventorySummary, life.statsJson
         FROM clan_simulation_clans simulated
@@ -93,6 +95,7 @@ async function clanProjection(clanId = null) {
             name: String(row.memberName || ''),
             title: String(row.memberTitle || ''),
             classId: number(row.classId, -1),
+            loc: { locX: number(row.locX), locY: number(row.locY), locZ: number(row.locZ) },
             level: number(row.memberLevel),
             clanId: number(row.memberClanId),
             accountName: String(row.accountName || ''),
@@ -270,7 +273,7 @@ async function resolveClanInternal(clan, options = {}) {
         }
     }
     if (number(clan.level) >= 3) {
-        const previous = automaticPrevious;
+        const previous = automaticPrevious?.type === 'equipment' ? automaticPrevious : clan.state?.productionGoal || automaticPrevious;
         const candidateSnapshot = await ClanGoalCandidateService.snapshotFor(clan, previous, options);
         await ClanEquipmentService.validatePlanning(clan, candidateSnapshot.planning);
         const brain = candidateSnapshot.decisionNeeded

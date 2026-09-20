@@ -1,3 +1,4 @@
+const ClanCrafting = require('../../Clan/ClanCraftingPolicy');
 const ItemTemplateIndex = require('../../Item/ItemTemplateIndex');
 const DataCache = invoke('GameServer/DataCache');
 const C4RecipeItems = invoke('GameServer/Items/C4RecipeItems');
@@ -18,6 +19,7 @@ const NpcShopBuyLists = invoke('GameServer/World/Generics/NpcShopBuyLists');
 const BotRaidSafety = invoke('GameServer/Bot/AI/BotRaidSafety');
 const BotHuntingTargetPolicy = invoke('GameServer/Bot/AI/BotHuntingTargetPolicy');
 const InventorySummary = invoke('GameServer/Bot/Population/InventorySummary');
+const SpotRiskPolicy = invoke('GameServer/Bot/Population/SpotRiskPolicy');
 
 const RANKS = ['none', 'd', 'c', 'b', 'a', 's'];
 const WEAPON_SLOTS = new Set([7, 14]);
@@ -529,10 +531,11 @@ function preferredTarget(state = {}, options = {}) {
     const publishedRecipeIds = new Set(CraftShopService.CraftStations.flatMap((station) => (
         CraftShopService.stationRecipes(station, availableToStations).map((recipe) => Number(recipe.recipeId))
     )));
-    const craftRecipes = Object.values(C4RecipeItems.loadRecipeItems() || {}).filter((recipe) => (
-        recipe.type === 'dwarven' && publishedRecipeIds.has(Number(recipe.recipeId))
+    const craftRecipes = (options.craftRecipes || Object.values(C4RecipeItems.loadRecipeItems() || {})).filter((recipe) => (
+        recipe.type === 'dwarven' && (options.craftRecipes || publishedRecipeIds.has(Number(recipe.recipeId)))
     ));
-    const recipes = [...craftRecipes, ...C4DualSwordCombinations.loadRecipes()];
+    const recipes = ClanCrafting.clanIdFor(state) && !options.clanCrafting
+        ? [] : [...craftRecipes, ...C4DualSwordCombinations.loadRecipes()];
     const recipeRank = options.recipeId
         ? String((DataCache.items || []).find((item) => Number(item.selfId) === Number(recipes.find((recipe) => Number(recipe.recipeId) === Number(options.recipeId))?.productId))?.etc?.rank || '')
         : null;
@@ -969,6 +972,7 @@ function equipmentTargetFulfilled(state = {}, plan = {}) {
 function clanGoalPlanLocked(state = {}, plan = state?.stats?.equipmentPlan) {
     const npcId = Number(plan?.next?.npcId || 0);
     return isClanOwnedPlan(plan)
+        && !levelingRecoveryFor(state, plan)
         && !equipmentTargetFulfilled(state, plan)
         && !require('./EquipmentAcquisitionProgress').componentAcquired(state, plan)
         && (
@@ -1104,6 +1108,7 @@ function replanContextFor(state = {}, previousPlan = null, timestamp = Date.now(
     const currentGrade = gradeForLevel(state.level);
     const currentLevel = Number(state.level || 1);
     const sameGrade = previousPlan?.grade === currentGrade;
+    const levelingRecovery = levelingRecoveryFor(state, previousPlan, timestamp);
     const sourceNpcId = Number(previousPlan?.next?.npcId || 0);
     const sourceAllowed = !sourceNpcId || isBotEligibleSourceNpcId(sourceNpcId);
     const modelCurrent = Number(previousPlan?.rateModelVersion || 0) >= RATE_MODEL_VERSION
@@ -1133,10 +1138,11 @@ function replanContextFor(state = {}, previousPlan = null, timestamp = Date.now(
         ? recoveryTargets.find((entry) => Number(entry.targetId) === Number(previousPlan.target?.selfId || 0))
         : null;
     return {
-        planCurrent: Boolean(previousPlan)
+        levelingRecovery,
+        planCurrent: !levelingRecovery && !ClanCrafting.isPersonalCraft(state, previousPlan) && Boolean(previousPlan)
             && sameGrade
             && Number(previousPlan.plannedForLevel || 0) === currentLevel,
-        routeCurrent: Boolean(previousPlan)
+        routeCurrent: !levelingRecovery && !ClanCrafting.isPersonalCraft(state, previousPlan) && Boolean(previousPlan)
             && sameGrade
             && sourceAllowed
             && modelCurrent
@@ -1151,6 +1157,9 @@ function replanContextFor(state = {}, previousPlan = null, timestamp = Date.now(
 }
 
 function finalizePlan(state = {}, previousPlan = null, rawPlan = {}, context = {}, timestamp = Date.now()) {
+    const recovery = context.levelingRecovery || levelingRecoveryFor(state, previousPlan, timestamp);
+    if (recovery) return levelingRecoveryPlan(state, recovery, previousPlan);
+    if (ClanCrafting.isPersonalCraft(state, rawPlan)) return { status: 'deferred', strategy: 'none', reason: 'clan_managed_crafting', materials: [], next: null };
     if (clanGoalPlanLocked(state, previousPlan) && context?.allowClanGoalReplan !== true) {
         return previousPlan;
     }
@@ -1199,9 +1208,55 @@ function finalizePlan(state = {}, previousPlan = null, rawPlan = {}, context = {
         startedAt: samePlan ? Number(previousPlan?.startedAt || timestamp) : timestamp,
         plannedForLevel: Number(state.level || 1),
         plannedForGrade: gradeForLevel(state.level),
+        progressionBaseline: samePlan && previousPlan?.progressionBaseline
+            ? previousPlan.progressionBaseline
+            : { level: Number(state.level || 1), exp: Number(state.exp || 0) },
         recoveryTargets,
         ...(targetProgress ? { targetProgress } : {})
     };
+}
+
+function levelingRecoveryFor(state = {}, plan = state.stats?.equipmentPlan, timestamp = Date.now()) {
+    const stored = plan?.levelingRecovery;
+    if (stored) {
+        return timestamp < Number(stored.until || 0)
+            || Number(state.exp || 0) < Number(stored.resumeExp || 0)
+            || Number(state.level || 1) < Number(stored.resumeLevel || 1) ? stored : null;
+    }
+    if (plan?.status !== 'active' || !['direct_drop', 'craft'].includes(plan.strategy)) return null;
+    const level = Number(state.level || 1);
+    const baselineLevel = Math.max(Number(plan.progressionBaseline?.level || level),
+        Number(plan.plannedForLevel || level));
+    const death = state.stats?.deathExperience;
+    // Old plans may already have been restamped at the reduced level while
+    // retaining a target from the old grade. Recover those persisted routes too.
+    const gradeRegression = rankIndex(plan.grade) > rankIndex(gradeForLevel(level))
+        && Number(death?.expLost || 0) > 0
+        && Number(death?.penaltyAppliedAt || 0) >= Number(plan.startedAt || 0);
+    const pressure = SpotRiskPolicy.deathPressure(state, plan.next?.spotId);
+    const deleveled = level < baselineLevel || gradeRegression;
+    if (!deleveled && !pressure) return null;
+    return {
+        reason: deleveled ? 'level_regression' : pressure.reason || 'death_pressure',
+        startedAt: timestamp,
+        until: timestamp + SpotRiskPolicy.BACKOFF_MS,
+        resumeLevel: deleveled ? Math.max(level, baselineLevel) : level,
+        resumeExp: Math.max(Number(state.exp || 0), Number(plan.progressionBaseline?.exp || 0),
+            Number(death?.expBeforeDeath || 0)),
+        targetId: Number(plan.target?.selfId || 0),
+        npcId: Number(plan.next?.npcId || 0),
+        spotId: plan.next?.spotId || null
+    };
+}
+
+function levelingRecoveryPlan(state, recovery, previousPlan = state.stats?.equipmentPlan) {
+    return withRateProfile({
+        status: 'deferred', phase: 'leveling', strategy: 'none',
+        reason: recovery.reason, grade: gradeForLevel(state.level),
+        target: null, next: null, materials: [], recipeId: null,
+        levelingRecovery: recovery,
+        recoveryTargets: previousPlan?.recoveryTargets || []
+    });
 }
 
 function itemDropChance(reward, itemId, kind = 'drop') {
@@ -1353,6 +1408,8 @@ function plannedMaterialAcquired(state, plan) {
 }
 
 function bestSourceForPlan(state = {}, plan = {}, spots = [], options = {}) {
+    if (levelingRecoveryFor(state, plan, options.timestamp)) return null;
+    if (ClanCrafting.isPersonalCraft(state, plan) && !options.clanCrafting) return null;
     if (plan?.status !== 'active' || plannedMaterialAcquired(state, plan)) return null;
     const itemId = itemIdForPlan(plan);
     if (!itemId) return null;
@@ -1365,7 +1422,8 @@ function safeFallbackForPlan(state = {}, plan = {}, spots = [], options = {}) {
         ? Number(plan.target?.selfId || 0)
         : Number(plan.next?.itemId || 0);
     if (!itemId) return null;
-    return bestSourceForState(sourceForItem(itemId, spots, state, options), state, options);
+    return bestSourceForState(sourceForItem(itemId, spots, state, options)
+        .filter((source) => soloSafeForSource(state, source)), state, options);
 }
 
 function retargetPlanSource(state = {}, plan = {}, source = null) {
@@ -1398,7 +1456,8 @@ function retargetPlanSource(state = {}, plan = {}, source = null) {
         requiresParty: assessment.need === 'required',
         ...(plan.strategy === 'direct_drop' ? {
             expectedKills: Math.ceil(1 / Math.max(Number(source.expectedYield || 0), 0.000001)),
-            targetProgress: {
+            targetProgress: Number(plan.targetProgress?.npcId) === Number(source.npcId)
+                ? plan.targetProgress : {
                 npcId: Number(source.npcId || 0),
                 resolves: current.resolves,
                 targetKills: current.targetKills
@@ -1422,6 +1481,9 @@ function retargetPlanSource(state = {}, plan = {}, source = null) {
 }
 
 function replacementPlanFor(state = {}, previousPlan = {}, spots = [], options = {}) {
+    const recovery = options.levelingRecovery || levelingRecoveryFor(state, previousPlan, options.timestamp);
+    if (recovery) return levelingRecoveryPlan(state, recovery, previousPlan);
+    if (ClanCrafting.isPersonalCraft(state, previousPlan) && !options.clanCrafting) return planFor(state, { ...options, spots });
     const targetId = Number(previousPlan?.target?.selfId || 0);
     const excluded = new Set((options.excludedTargetIds || []).map(Number).filter(Boolean));
     if (!excluded.has(targetId)) {
@@ -1559,7 +1621,7 @@ function farmSourceForMaterial(itemId, state, spots, allowedRecipeIds, requiredA
     const directRoute = direct ? { ...direct, itemId: Number(itemId), requiredAmount,
         requiredTotal: requiredAmount + Number(state.inventory?.[itemId]?.amount || 0),
         effort: requiredAmount / Math.max(direct.expectedYield || 0, 0.000001) } : null;
-    const component = C4RecipeItems.resolveByProductId(itemId);
+    const component = options.recipeCatalog?.get(Number(itemId)) || C4RecipeItems.resolveByProductId(itemId);
     if (!component || !allowedRecipeIds.has(Number(component.recipeId))) return directRoute;
     const nextVisited = new Set(visited).add(Number(itemId));
     const crafts = Math.max(1, Math.ceil(requiredAmount / Math.max(1, Number(component.productCount || 1))));
@@ -1579,17 +1641,17 @@ function farmSourceForMaterial(itemId, state, spots, allowedRecipeIds, requiredA
     return { ...(next || { itemId: Number(itemId), requiredAmount }), effort };
 }
 
-function hasReadyCraftComponent(recipe, state, allowedRecipeIds, visited = new Set()) {
+function hasReadyCraftComponent(recipe, state, allowedRecipeIds, visited = new Set(), options = {}) {
     if (!recipe || visited.has(Number(recipe.recipeId))) return false;
     const nextVisited = new Set(visited).add(Number(recipe.recipeId));
     for (const material of recipe.materials || []) {
         const owned = Number(inventoryMap(state.inventory).get(Number(material.selfId)) || 0);
         if (owned >= Number(material.amount || 0)) continue;
-        const component = C4RecipeItems.resolveByProductId(material.selfId);
+        const component = options.recipeCatalog?.get(Number(material.selfId)) || C4RecipeItems.resolveByProductId(material.selfId);
         if (!component || !allowedRecipeIds.has(Number(component.recipeId))) continue;
         if ((component.materials || []).every((ingredient) => (
             Number(inventoryMap(state.inventory).get(Number(ingredient.selfId)) || 0) >= Number(ingredient.amount || 0)
-        )) || hasReadyCraftComponent(component, state, allowedRecipeIds, nextVisited)) return true;
+        )) || hasReadyCraftComponent(component, state, allowedRecipeIds, nextVisited, options)) return true;
     }
     return false;
 }
@@ -1659,6 +1721,7 @@ function rawPlanFor(state = {}, options = {}) {
     const planningOptions = {
         ...options,
         allowedRecipeIds: options.allowedRecipeIds || stationRecipeIds(),
+        recipeCatalog: options.craftRecipes ? new Map(options.craftRecipes.map(recipe => [Number(recipe.productId), recipe])) : null,
         sourceCache: options.sourceCache || new Map()
     };
     const preparedTarget = !options.recipeId && rankIndex(gradeForLevel(state.level)) > rankIndex('d')
@@ -1747,7 +1810,7 @@ function rawPlanFor(state = {}, options = {}) {
     const readyToCraft = strategy === 'craft' && missingMaterialPlans.length === 0;
     const componentReady = strategy === 'craft'
         && !readyToCraft
-        && hasReadyCraftComponent(target.recipe, state, allowedRecipeIds);
+        && hasReadyCraftComponent(target.recipe, state, allowedRecipeIds, new Set(), planningOptions);
     // A ready final recipe or component is a station action, not a request to
     // fight at the next (possibly unsafe) material source.  Let it leave the
     // party gate and finish the prepared manufacture first.
@@ -1781,6 +1844,11 @@ function rawPlanFor(state = {}, options = {}) {
 }
 
 function planFor(state = {}, options = {}) {
+    const recovery = options.levelingRecovery || levelingRecoveryFor(state, state.stats?.equipmentPlan, options.timestamp);
+    if (recovery) return levelingRecoveryPlan(state, recovery);
+    if (ClanCrafting.clanIdFor(state) && !options.clanCrafting && options.recipeId) {
+        options = { ...options, recipeId: null };
+    }
     const excluded = new Set((options.excludedTargetIds || []).map(Number).filter(Boolean));
     const maxExpectedKills = Number(options.maxExpectedKills);
     let plan;
@@ -1826,4 +1894,4 @@ function sameObjective(left, right) {
     );
 }
 
-module.exports = { RATE_MODEL_VERSION, DIRECT_FAILURE_RESOLVE_LIMIT, PARTY_ROUTE_FAILURE_ATTEMPT_LIMIT, gradeForLevel, isCraftService, roleFor, itemScore, isRealCatalogItem, suitable, isSlotUpgrade, combatReadiness, progressionPriceCap, operationalAdenaReserve, equippedSlotsFor, equipInventoryUpgrades, preferredTarget, preferredDropTarget, preferredNoGradeTarget, marketOfferForTarget, marketPlanForTarget, marketRecoveryPlanForTarget, staticNpcUpgradePlan, staticNpcKitAdequate, itemDropChance, itemDropYield, partyNeedForSource, partyNeedReasonForSource, soloSafeForSource, bestSourceForState, bestSourceForPlan, safeFallbackForPlan, retargetPlanSource, replacementPlanFor, sourceForItem, farmSourceForMaterial, missingMaterials, directPlanFailure, partyRouteFailure, abandonAcquisition, replanContextFor, rateProfileSignature, withinExpectedKillLimit, isBotEligibleSourceNpcId, isClanOwnedPlan, equipmentTargetFulfilled, clanGoalPlanLocked, finalizePlan, planFor, shouldFinishPreviousPlan, scoreSpot, sameObjective };
+module.exports = { RATE_MODEL_VERSION, DIRECT_FAILURE_RESOLVE_LIMIT, PARTY_ROUTE_FAILURE_ATTEMPT_LIMIT, gradeForLevel, isCraftService, roleFor, itemScore, isRealCatalogItem, suitable, isSlotUpgrade, combatReadiness, progressionPriceCap, operationalAdenaReserve, equippedSlotsFor, equipInventoryUpgrades, preferredTarget, preferredDropTarget, preferredNoGradeTarget, marketOfferForTarget, marketPlanForTarget, marketRecoveryPlanForTarget, staticNpcUpgradePlan, staticNpcKitAdequate, itemDropChance, itemDropYield, partyNeedForSource, partyNeedReasonForSource, soloSafeForSource, bestSourceForState, bestSourceForPlan, safeFallbackForPlan, retargetPlanSource, replacementPlanFor, sourceForItem, farmSourceForMaterial, missingMaterials, directPlanFailure, partyRouteFailure, abandonAcquisition, replanContextFor, levelingRecoveryFor, rateProfileSignature, withinExpectedKillLimit, isBotEligibleSourceNpcId, isClanOwnedPlan, equipmentTargetFulfilled, clanGoalPlanLocked, finalizePlan, planFor, shouldFinishPreviousPlan, scoreSpot, sameObjective };

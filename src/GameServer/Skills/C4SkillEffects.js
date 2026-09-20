@@ -547,13 +547,19 @@ function applyRecall(session, target, semantic) {
     const targetSession = target?.session || (session?.actor === target ? session : null);
     if (
         !targetSession ||
-        (semantic.teleportWhereType && semantic.teleportWhereType !== 'Town') ||
+        (semantic.teleportWhereType && !['Town', 'ClanHall'].includes(semantic.teleportWhereType)) ||
         target?.isDead?.() ||
         target?.state?.fetchDead?.() ||
         Number(target?.fetchPrivateStoreType?.() || 0) > 0 ||
         target?.isInOlympiadMode?.()
     ) return false;
 
+    if (semantic.teleportWhereType === 'ClanHall') {
+        const coords = require('../ClanHall/Runtime').destination(target);
+        if (!coords) return false;
+        invoke('GameServer/Actor/Generics/TeleportTo')(targetSession, target, coords);
+        return true;
+    }
     const TownRespawn = invoke('GameServer/World/TownRespawn');
     const coords = target.fetchKarma?.() > 0
         ? TownRespawn.getChaoticRespawnCoords(target.fetchLocX(), target.fetchLocY(), target.fetchLocZ())

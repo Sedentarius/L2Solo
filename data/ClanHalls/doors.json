@@ -1,0 +1,524 @@
+[
+  {
+    "id": 17220001,
+    "name": "gludin_clanhall_001",
+    "hallId": 28,
+    "locX": -84495,
+    "locY": 155209,
+    "locZ": -3150,
+    "maxHp": 158250
+  },
+  {
+    "id": 17220002,
+    "name": "gludin_clanhall_002",
+    "hallId": 28,
+    "locX": -84495,
+    "locY": 155286,
+    "locZ": -3150,
+    "maxHp": 158250
+  },
+  {
+    "id": 17220003,
+    "name": "gludin_clanhall_003",
+    "hallId": 28,
+    "locX": -83961,
+    "locY": 155258,
+    "locZ": -3150,
+    "maxHp": 158250
+  },
+  {
+    "id": 17220004,
+    "name": "gludin_clanhall_004",
+    "hallId": 28,
+    "locX": -83961,
+    "locY": 155180,
+    "locZ": -3150,
+    "maxHp": 158250
+  },
+  {
+    "id": 17220005,
+    "name": "gludin_clanhall_005",
+    "hallId": 27,
+    "locX": -83879,
+    "locY": 153064,
+    "locZ": -3149,
+    "maxHp": 158250
+  },
+  {
+    "id": 17220006,
+    "name": "gludin_clanhall_006",
+    "hallId": 27,
+    "locX": -83956,
+    "locY": 153064,
+    "locZ": -3149,
+    "maxHp": 158250
+  },
+  {
+    "id": 17220007,
+    "name": "gludin_clanhall_007",
+    "hallId": 27,
+    "locX": -83927,
+    "locY": 153598,
+    "locZ": -3149,
+    "maxHp": 158250
+  },
+  {
+    "id": 17220008,
+    "name": "gludin_clanhall_008",
+    "hallId": 27,
+    "locX": -83850,
+    "locY": 153598,
+    "locZ": -3149,
+    "maxHp": 158250
+  },
+  {
+    "id": 17220009,
+    "name": "gludin_clanhall_009",
+    "hallId": 26,
+    "locX": -83971,
+    "locY": 151880,
+    "locZ": -3112,
+    "maxHp": 158250
+  },
+  {
+    "id": 17220010,
+    "name": "gludin_clanhall_010",
+    "hallId": 26,
+    "locX": -84047,
+    "locY": 151880,
+    "locZ": -3112,
+    "maxHp": 158250
+  },
+  {
+    "id": 17220011,
+    "name": "gludin_einhasad_001",
+    "hallId": 29,
+    "locX": -79737,
+    "locY": 150063,
+    "locZ": -3027,
+    "maxHp": 158250
+  },
+  {
+    "id": 17220012,
+    "name": "gludin_einhasad_002",
+    "hallId": 29,
+    "locX": -79737,
+    "locY": 150138,
+    "locZ": -3027,
+    "maxHp": 158250
+  },
+  {
+    "id": 17220013,
+    "name": "gludin_einhasad_003",
+    "hallId": 30,
+    "locX": -79740,
+    "locY": 151522,
+    "locZ": -3027,
+    "maxHp": 158250
+  },
+  {
+    "id": 17220014,
+    "name": "gludin_einhasad_004",
+    "hallId": 30,
+    "locX": -79740,
+    "locY": 151598,
+    "locZ": -3027,
+    "maxHp": 158250
+  },
+  {
+    "id": 19210011,
+    "name": "gludio_clanhall_001",
+    "hallId": 23,
+    "locX": -14790,
+    "locY": 125633,
+    "locZ": -3123,
+    "maxHp": 158250
+  },
+  {
+    "id": 19210012,
+    "name": "gludio_clanhall_002",
+    "hallId": 23,
+    "locX": -14790,
+    "locY": 125557,
+    "locZ": -3123,
+    "maxHp": 158250
+  },
+  {
+    "id": 19210013,
+    "name": "gludio_clanhall_003",
+    "hallId": 24,
+    "locX": -14116,
+    "locY": 125602,
+    "locZ": -3122,
+    "maxHp": 158250
+  },
+  {
+    "id": 19210014,
+    "name": "gludio_clanhall_004",
+    "hallId": 24,
+    "locX": -14116,
+    "locY": 125677,
+    "locZ": -3122,
+    "maxHp": 158250
+  },
+  {
+    "id": 19210015,
+    "name": "gludio_clanhall_005",
+    "hallId": 25,
+    "locX": -12601,
+    "locY": 123885,
+    "locZ": -3096,
+    "maxHp": 158250
+  },
+  {
+    "id": 19210016,
+    "name": "gludio_clanhall_006",
+    "hallId": 25,
+    "locX": -12676,
+    "locY": 123885,
+    "locZ": -3096,
+    "maxHp": 158250
+  },
+  {
+    "id": 19210017,
+    "name": "gludio_clanhall_007",
+    "hallId": 22,
+    "locX": -15981,
+    "locY": 123747,
+    "locZ": -3096,
+    "maxHp": 158250
+  },
+  {
+    "id": 19210018,
+    "name": "gludio_clanhall_008",
+    "hallId": 22,
+    "locX": -15909,
+    "locY": 123725,
+    "locZ": -3096,
+    "maxHp": 158250
+  },
+  {
+    "id": 20220011,
+    "name": "H_Door_MV_01",
+    "hallId": 32,
+    "locX": 18879,
+    "locY": 143353,
+    "locZ": -2998,
+    "maxHp": 158250
+  },
+  {
+    "id": 20220012,
+    "name": "H_Door_MV_01",
+    "hallId": 32,
+    "locX": 18872,
+    "locY": 143278,
+    "locZ": -2998,
+    "maxHp": 158250
+  },
+  {
+    "id": 20220013,
+    "name": "H_Door_MV_01",
+    "hallId": 31,
+    "locX": 17616,
+    "locY": 145184,
+    "locZ": -3025,
+    "maxHp": 158250
+  },
+  {
+    "id": 20220014,
+    "name": "H_Door_MV_01",
+    "hallId": 31,
+    "locX": 17678,
+    "locY": 145226,
+    "locZ": -3025,
+    "maxHp": 158250
+  },
+  {
+    "id": 20220015,
+    "name": "H_Door_MV_01",
+    "hallId": 33,
+    "locX": 20118,
+    "locY": 145994,
+    "locZ": -3099,
+    "maxHp": 158250
+  },
+  {
+    "id": 20220016,
+    "name": "H_Door_MV_01",
+    "hallId": 33,
+    "locX": 20193,
+    "locY": 145994,
+    "locZ": -3099,
+    "maxHp": 158250
+  },
+  {
+    "id": 22220012,
+    "name": "giran_clanhall_001",
+    "hallId": 44,
+    "locX": 83618,
+    "locY": 145382,
+    "locZ": -3360,
+    "maxHp": 158250
+  },
+  {
+    "id": 22220011,
+    "name": "giran_clanhall_002",
+    "hallId": 44,
+    "locX": 83618,
+    "locY": 145382,
+    "locZ": -3360,
+    "maxHp": 158250
+  },
+  {
+    "id": 22220009,
+    "name": "giran_clanhall_003",
+    "hallId": 43,
+    "locX": 81831,
+    "locY": 145267,
+    "locZ": -3489,
+    "maxHp": 158250
+  },
+  {
+    "id": 22220010,
+    "name": "giran_clanhall_004",
+    "hallId": 43,
+    "locX": 81831,
+    "locY": 145267,
+    "locZ": -3489,
+    "maxHp": 158250
+  },
+  {
+    "id": 22220008,
+    "name": "giran_clanhall_005",
+    "hallId": 42,
+    "locX": 78521,
+    "locY": 148327,
+    "locZ": -3553,
+    "maxHp": 158250
+  },
+  {
+    "id": 22220007,
+    "name": "giran_clanhall_006",
+    "hallId": 42,
+    "locX": 78521,
+    "locY": 148327,
+    "locZ": -3553,
+    "maxHp": 158250
+  },
+  {
+    "id": 22220005,
+    "name": "giran_clanhall_007",
+    "hallId": 45,
+    "locX": 81196,
+    "locY": 151657,
+    "locZ": -3490,
+    "maxHp": 158250
+  },
+  {
+    "id": 22220006,
+    "name": "giran_clanhall_008",
+    "hallId": 45,
+    "locX": 81196,
+    "locY": 151657,
+    "locZ": -3490,
+    "maxHp": 158250
+  },
+  {
+    "id": 22220003,
+    "name": "giran_clanhall_009",
+    "hallId": 46,
+    "locX": 81873,
+    "locY": 151842,
+    "locZ": -3488,
+    "maxHp": 126600
+  },
+  {
+    "id": 22220004,
+    "name": "giran_clanhall_010",
+    "hallId": 46,
+    "locX": 81873,
+    "locY": 151842,
+    "locZ": -3488,
+    "maxHp": 126600
+  },
+  {
+    "id": 24160001,
+    "name": "goddard_clanhall_001",
+    "hallId": 47,
+    "locX": 146438,
+    "locY": -55458,
+    "locZ": -2792,
+    "maxHp": 158250
+  },
+  {
+    "id": 24160002,
+    "name": "goddard_clanhall_002",
+    "hallId": 47,
+    "locX": 146449,
+    "locY": -55547,
+    "locZ": -2792,
+    "maxHp": 158250
+  },
+  {
+    "id": 24160003,
+    "name": "goddard_clanhall_003",
+    "hallId": 48,
+    "locX": 147071,
+    "locY": -56472,
+    "locZ": -2792,
+    "maxHp": 158250
+  },
+  {
+    "id": 24160004,
+    "name": "goddard_clanhall_004",
+    "hallId": 48,
+    "locX": 147151,
+    "locY": -56514,
+    "locZ": -2792,
+    "maxHp": 158250
+  },
+  {
+    "id": 24160005,
+    "name": "goddard_clanhall_005",
+    "hallId": 49,
+    "locX": 148262,
+    "locY": -56520,
+    "locZ": -2792,
+    "maxHp": 158250
+  },
+  {
+    "id": 24160006,
+    "name": "goddard_clanhall_006",
+    "hallId": 49,
+    "locX": 148342,
+    "locY": -56478,
+    "locZ": -2792,
+    "maxHp": 158250
+  },
+  {
+    "id": 24160007,
+    "name": "goddard_clanhall_007",
+    "hallId": 50,
+    "locX": 148971,
+    "locY": -55557,
+    "locZ": -2792,
+    "maxHp": 158250
+  },
+  {
+    "id": 24160008,
+    "name": "goddard_clanhall_008",
+    "hallId": 50,
+    "locX": 148982,
+    "locY": -55468,
+    "locZ": -2792,
+    "maxHp": 158250
+  },
+  {
+    "id": 24180022,
+    "name": "aden_clanhall_001",
+    "hallId": 38,
+    "locX": 145358,
+    "locY": 25385,
+    "locZ": -2090,
+    "maxHp": 158250
+  },
+  {
+    "id": 24180023,
+    "name": "aden_clanhall_002",
+    "hallId": 38,
+    "locX": 145358,
+    "locY": 25304,
+    "locZ": -2090,
+    "maxHp": 158250
+  },
+  {
+    "id": 24180024,
+    "name": "aden_clanhall_003",
+    "hallId": 36,
+    "locX": 149438,
+    "locY": 23177,
+    "locZ": -2101,
+    "maxHp": 158250
+  },
+  {
+    "id": 24180025,
+    "name": "aden_clanhall_004",
+    "hallId": 36,
+    "locX": 149438,
+    "locY": 23095,
+    "locZ": -2101,
+    "maxHp": 158250
+  },
+  {
+    "id": 24180026,
+    "name": "aden_clanhall_005",
+    "hallId": 37,
+    "locX": 150299,
+    "locY": 23695,
+    "locZ": -2090,
+    "maxHp": 158250
+  },
+  {
+    "id": 24180027,
+    "name": "aden_clanhall_006",
+    "hallId": 37,
+    "locX": 150299,
+    "locY": 23614,
+    "locZ": -2090,
+    "maxHp": 158250
+  },
+  {
+    "id": 24180028,
+    "name": "aden_clanhall_007",
+    "hallId": 39,
+    "locX": 150444,
+    "locY": 26584,
+    "locZ": -2226,
+    "maxHp": 158250
+  },
+  {
+    "id": 24180029,
+    "name": "aden_clanhall_008",
+    "hallId": 39,
+    "locX": 150444,
+    "locY": 26502,
+    "locZ": -2226,
+    "maxHp": 158250
+  },
+  {
+    "id": 24180030,
+    "name": "aden_clanhall_009",
+    "hallId": 41,
+    "locX": 144359,
+    "locY": 28239,
+    "locZ": -2218,
+    "maxHp": 158250
+  },
+  {
+    "id": 24180031,
+    "name": "aden_clanhall_010",
+    "hallId": 41,
+    "locX": 144359,
+    "locY": 28158,
+    "locZ": -2218,
+    "maxHp": 158250
+  },
+  {
+    "id": 24180032,
+    "name": "aden_clanhall_011",
+    "hallId": 40,
+    "locX": 144294,
+    "locY": 27131,
+    "locZ": -2228,
+    "maxHp": 158250
+  },
+  {
+    "id": 24180033,
+    "name": "aden_clanhall_012",
+    "hallId": 40,
+    "locX": 144294,
+    "locY": 27049,
+    "locZ": -2228,
+    "maxHp": 158250
+  }
+]

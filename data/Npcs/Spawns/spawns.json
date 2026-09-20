@@ -401,7 +401,7 @@
 },{
     "selfId": "17_22_NPC_031130_01",
     "bounds": [{ "locX": -84388, "locY": 155484, "minZ": -3265, "maxZ": -3065 }, { "locX": -84188, "locY": 155484, "minZ": -3265, "maxZ": -3065 }, { "locX": -84188, "locY": 155684, "minZ": -3265, "maxZ": -3065 }, { "locX": -84388, "locY": 155684, "minZ": -3265, "maxZ": -3065 }],
-    "spawns": [{ "selfId": 7782, "name": "Winker", "coords": [{ "locX": -84282, "locY": 155597, "locZ": -3160, "head": 48512 }], "total": 1, "respawn": 60, "bias": 0 }]
+    "spawns": []
 },{
     "selfId": "17_22_NPC_031130_02",
     "bounds": [{ "locX": -83972, "locY": 155168, "minZ": -3223, "maxZ": -3023 }, { "locX": -83772, "locY": 155168, "minZ": -3223, "maxZ": -3023 }, { "locX": -83772, "locY": 155368, "minZ": -3223, "maxZ": -3023 }, { "locX": -83972, "locY": 155368, "minZ": -3223, "maxZ": -3023 }],
@@ -421,7 +421,7 @@
 },{
     "selfId": "17_22_NPC_031130_06",
     "bounds": [{ "locX": -84692, "locY": 152156, "minZ": -3224, "maxZ": -3024 }, { "locX": -84492, "locY": 152156, "minZ": -3224, "maxZ": -3024 }, { "locX": -84492, "locY": 152356, "minZ": -3224, "maxZ": -3024 }, { "locX": -84692, "locY": 152356, "minZ": -3224, "maxZ": -3024 }],
-    "spawns": [{ "selfId": 7778, "name": "Bremmer", "coords": [{ "locX": -84596, "locY": 152253, "locZ": -3125, "head": 53248 }], "total": 1, "respawn": 60, "bias": 0 }]
+    "spawns": []
 },{
     "selfId": "17_22_NPC_031130_07",
     "bounds": [{ "locX": -79908, "locY": 151500, "minZ": -3144, "maxZ": -2944 }, { "locX": -79708, "locY": 151500, "minZ": -3144, "maxZ": -2944 }, { "locX": -79708, "locY": 151700, "minZ": -3144, "maxZ": -2944 }, { "locX": -79908, "locY": 151700, "minZ": -3144, "maxZ": -2944 }],
@@ -429,7 +429,7 @@
 },{
     "selfId": "17_22_NPC_031130_08",
     "bounds": [{ "locX": -79684, "locY": 151340, "minZ": -3140, "maxZ": -2940 }, { "locX": -79484, "locY": 151340, "minZ": -3140, "maxZ": -2940 }, { "locX": -79484, "locY": 151540, "minZ": -3140, "maxZ": -2940 }, { "locX": -79684, "locY": 151540, "minZ": -3140, "maxZ": -2940 }],
-    "spawns": [{ "selfId": 7776, "name": "Horner", "coords": [{ "locX": -79587, "locY": 151436, "locZ": -3041, "head": 8192 }], "total": 1, "respawn": 60, "bias": 0 }]
+    "spawns": []
 },{
     "selfId": "17_22_NPC_031130_09",
     "bounds": [{ "locX": -79924, "locY": 149932, "minZ": -3144, "maxZ": -2944 }, { "locX": -79724, "locY": 149932, "minZ": -3144, "maxZ": -2944 }, { "locX": -79724, "locY": 150132, "minZ": -3144, "maxZ": -2944 }, { "locX": -79924, "locY": 150132, "minZ": -3144, "maxZ": -2944 }],
@@ -437,7 +437,7 @@
 },{
     "selfId": "17_22_NPC_031130_10",
     "bounds": [{ "locX": -79460, "locY": 150131, "minZ": -3126, "maxZ": -2926 }, { "locX": -79260, "locY": 150131, "minZ": -3126, "maxZ": -2926 }, { "locX": -79260, "locY": 150331, "minZ": -3126, "maxZ": -2926 }, { "locX": -79460, "locY": 150331, "minZ": -3126, "maxZ": -2926 }],
-    "spawns": [{ "selfId": 7774, "name": "Ruben", "coords": [{ "locX": -79357, "locY": 150232, "locZ": -3037, "head": 40000 }], "total": 1, "respawn": 60, "bias": 0 }]
+    "spawns": []
 },{
     "selfId": "17_22_NPC_031130_11",
     "bounds": [{ "locX": -81476, "locY": 151596, "minZ": -3216, "maxZ": -3016 }, { "locX": -81276, "locY": 151596, "minZ": -3216, "maxZ": -3016 }, { "locX": -81276, "locY": 151796, "minZ": -3216, "maxZ": -3016 }, { "locX": -81476, "locY": 151796, "minZ": -3216, "maxZ": -3016 }],
@@ -721,7 +721,7 @@
 },{
     "selfId": "19_21_NPC_031130_02",
     "bounds": [{ "locX": -16260, "locY": 123628, "minZ": -3197, "maxZ": -2997 }, { "locX": -16060, "locY": 123628, "minZ": -3197, "maxZ": -2997 }, { "locX": -16060, "locY": 123828, "minZ": -3197, "maxZ": -2997 }, { "locX": -16260, "locY": 123828, "minZ": -3197, "maxZ": -2997 }],
-    "spawns": [{ "selfId": 7784, "name": "Black", "coords": [{ "locX": -16159, "locY": 123728, "locZ": -3102, "head": 53248 }], "total": 1, "respawn": 60, "bias": 0 }]
+    "spawns": []
 },{
     "selfId": "19_21_NPC_031130_03",
     "bounds": [{ "locX": -12772, "locY": 123708, "minZ": -3193, "maxZ": -2993 }, { "locX": -12572, "locY": 123708, "minZ": -3193, "maxZ": -2993 }, { "locX": -12572, "locY": 123908, "minZ": -3193, "maxZ": -2993 }, { "locX": -12772, "locY": 123908, "minZ": -3193, "maxZ": -2993 }],
@@ -729,7 +729,7 @@
 },{
     "selfId": "19_21_NPC_031130_04",
     "bounds": [{ "locX": -12964, "locY": 124060, "minZ": -3179, "maxZ": -2979 }, { "locX": -12764, "locY": 124060, "minZ": -3179, "maxZ": -2979 }, { "locX": -12764, "locY": 124260, "minZ": -3179, "maxZ": -2979 }, { "locX": -12964, "locY": 124260, "minZ": -3179, "maxZ": -2979 }],
-    "spawns": [{ "selfId": 7786, "name": "Dillon", "coords": [{ "locX": -12866, "locY": 124166, "locZ": -3096, "head": 57344 }], "total": 1, "respawn": 60, "bias": 0 }]
+    "spawns": []
 },{
     "selfId": "19_21_NPC_031130_05",
     "bounds": [{ "locX": -14820, "locY": 125532, "minZ": -3218, "maxZ": -3018 }, { "locX": -14620, "locY": 125532, "minZ": -3218, "maxZ": -3018 }, { "locX": -14620, "locY": 125732, "minZ": -3218, "maxZ": -3018 }, { "locX": -14820, "locY": 125732, "minZ": -3218, "maxZ": -3018 }],
@@ -737,7 +737,7 @@
 },{
     "selfId": "19_21_NPC_031130_06",
     "bounds": [{ "locX": -14948, "locY": 125324, "minZ": -3231, "maxZ": -3031 }, { "locX": -14748, "locY": 125324, "minZ": -3231, "maxZ": -3031 }, { "locX": -14748, "locY": 125524, "minZ": -3231, "maxZ": -3031 }, { "locX": -14948, "locY": 125524, "minZ": -3231, "maxZ": -3031 }],
-    "spawns": [{ "selfId": 7788, "name": "Boyer", "coords": [{ "locX": -14852, "locY": 125413, "locZ": -3130, "head": 16384 }], "total": 1, "respawn": 60, "bias": 0 }]
+    "spawns": []
 },{
     "selfId": "19_21_NPC_031130_07",
     "bounds": [{ "locX": -14260, "locY": 125452, "minZ": -3228, "maxZ": -3028 }, { "locX": -14060, "locY": 125452, "minZ": -3228, "maxZ": -3028 }, { "locX": -14060, "locY": 125652, "minZ": -3228, "maxZ": -3028 }, { "locX": -14260, "locY": 125652, "minZ": -3228, "maxZ": -3028 }],
@@ -745,7 +745,7 @@
 },{
     "selfId": "19_21_NPC_031130_08",
     "bounds": [{ "locX": -13876, "locY": 125468, "minZ": -3229, "maxZ": -3029 }, { "locX": -13676, "locY": 125468, "minZ": -3229, "maxZ": -3029 }, { "locX": -13676, "locY": 125668, "minZ": -3229, "maxZ": -3029 }, { "locX": -13876, "locY": 125668, "minZ": -3229, "maxZ": -3029 }],
-    "spawns": [{ "selfId": 7790, "name": "Tim", "coords": [{ "locX": -13745, "locY": 125573, "locZ": -3129, "head": 32768 }], "total": 1, "respawn": 60, "bias": 0 }]
+    "spawns": []
 },{
     "selfId": "19_21_NPC_031130_09",
     "bounds": [{ "locX": -14852, "locY": 122860, "minZ": -3226, "maxZ": -3026 }, { "locX": -14652, "locY": 122860, "minZ": -3226, "maxZ": -3026 }, { "locX": -14652, "locY": 123060, "minZ": -3226, "maxZ": -3026 }, { "locX": -14852, "locY": 123060, "minZ": -3226, "maxZ": -3026 }],
@@ -1533,7 +1533,7 @@
 },{
     "selfId": "20_22_NPC_031130_01",
     "bounds": [{ "locX": 19900, "locY": 146109, "minZ": -3224, "maxZ": -3024 }, { "locX": 20100, "locY": 146109, "minZ": -3224, "maxZ": -3024 }, { "locX": 20100, "locY": 146309, "minZ": -3224, "maxZ": -3024 }, { "locX": 19900, "locY": 146309, "minZ": -3224, "maxZ": -3024 }],
-    "spawns": [{ "selfId": 7798, "name": "Seth", "coords": [{ "locX": 19996, "locY": 146216, "locZ": -3111, "head": 57344 }], "total": 1, "respawn": 60, "bias": 0 }]
+    "spawns": []
 },{
     "selfId": "20_22_NPC_031130_02",
     "bounds": [{ "locX": 20140, "locY": 145836, "minZ": -3226, "maxZ": -3026 }, { "locX": 20340, "locY": 145836, "minZ": -3226, "maxZ": -3026 }, { "locX": 20340, "locY": 146036, "minZ": -3226, "maxZ": -3026 }, { "locX": 20140, "locY": 146036, "minZ": -3226, "maxZ": -3026 }],
@@ -1541,7 +1541,7 @@
 },{
     "selfId": "20_22_NPC_031130_03",
     "bounds": [{ "locX": 17532, "locY": 144828, "minZ": -3121, "maxZ": -2921 }, { "locX": 17732, "locY": 144828, "minZ": -3121, "maxZ": -2921 }, { "locX": 17732, "locY": 145028, "minZ": -3121, "maxZ": -2921 }, { "locX": 17532, "locY": 145028, "minZ": -3121, "maxZ": -2921 }],
-    "spawns": [{ "selfId": 7800, "name": "Ron", "coords": [{ "locX": 17621, "locY": 144920, "locZ": -3037, "head": 12288 }], "total": 1, "respawn": 60, "bias": 0 }]
+    "spawns": []
 },{
     "selfId": "20_22_NPC_031130_04",
     "bounds": [{ "locX": 17564, "locY": 145196, "minZ": -3192, "maxZ": -2992 }, { "locX": 17764, "locY": 145196, "minZ": -3192, "maxZ": -2992 }, { "locX": 17764, "locY": 145396, "minZ": -3192, "maxZ": -2992 }, { "locX": 17564, "locY": 145396, "minZ": -3192, "maxZ": -2992 }],
@@ -1549,7 +1549,7 @@
 },{
     "selfId": "20_22_NPC_031130_05",
     "bounds": [{ "locX": 18540, "locY": 143244, "minZ": -3087, "maxZ": -2887 }, { "locX": 18740, "locY": 143244, "minZ": -3087, "maxZ": -2887 }, { "locX": 18740, "locY": 143444, "minZ": -3087, "maxZ": -2887 }, { "locX": 18540, "locY": 143444, "minZ": -3087, "maxZ": -2887 }],
-    "spawns": [{ "selfId": 7802, "name": "Flynn", "coords": [{ "locX": 18634, "locY": 143342, "locZ": -3010, "head": 64500 }], "total": 1, "respawn": 60, "bias": 0 }]
+    "spawns": []
 },{
     "selfId": "20_22_NPC_031130_06",
     "bounds": [{ "locX": 18844, "locY": 143292, "minZ": -3161, "maxZ": -2961 }, { "locX": 19044, "locY": 143292, "minZ": -3161, "maxZ": -2961 }, { "locX": 19044, "locY": 143492, "minZ": -3161, "maxZ": -2961 }, { "locX": 18844, "locY": 143492, "minZ": -3161, "maxZ": -2961 }],

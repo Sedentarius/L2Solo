@@ -2,6 +2,7 @@ const CP_CL_JOIN_CLAN = 1;
 const CP_CL_GIVE_TITLE = 2;
 const CP_CL_VIEW_WAREHOUSE = 4;
 const CP_CL_MANAGE_CREST = 8;
+const CP_CH_OPEN_DOOR = 16;
 const CP_CL_CLAN_WAR = 1024;
 const CP_ALL = 2047;
 
@@ -42,6 +43,7 @@ module.exports = {
     CP_CL_GIVE_TITLE,
     CP_CL_VIEW_WAREHOUSE,
     CP_CL_MANAGE_CREST,
+    CP_CH_OPEN_DOOR,
     CP_CL_CLAN_WAR,
     CP_ALL,
     LEVEL_REQUIREMENTS,

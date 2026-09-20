@@ -18,26 +18,34 @@ function consume(session, data) {
         return;
     }
 
+    const hallRuntime = require('../../ClanHall/Runtime');
+    const hallRestart = Number(data.location) === 1 ? hallRuntime.destination(actor) : null;
+    if (Number(data.location) === 1 && !hallRestart) {
+        session.dataSendToMe(ServerResponse.actionFailed());
+        return;
+    }
+
     const ArenaDuelService = invoke('GameServer/World/ArenaDuelService');
     const arenaDeath = session.arenaDeath === true && ArenaDuelService.duelForActor?.(actor);
     const TownRespawn = invoke('GameServer/World/TownRespawn');
-    const townRespawn = arenaDeath
+    const destination = arenaDeath
         ? invoke('GameServer/World/GiranArena').RESTART
-        : actor.fetchKarma?.() > 0
-        ? TownRespawn.getChaoticRespawnCoords(actor.fetchLocX(), actor.fetchLocY(), actor.fetchLocZ())
-        : TownRespawn.getRespawnCoords(actor.fetchLocX(), actor.fetchLocY(), actor.fetchLocZ());
+        : hallRestart || (actor.fetchKarma?.() > 0
+            ? TownRespawn.getChaoticRespawnCoords(actor.fetchLocX(), actor.fetchLocY(), actor.fetchLocZ())
+            : TownRespawn.getRespawnCoords(actor.fetchLocX(), actor.fetchLocY(), actor.fetchLocZ()));
     const Generics = invoke(path.actor);
 
-    // Town restart is a complete respawn, unlike a gradual resurrection skill.
+    // Restart is a complete respawn, unlike a gradual resurrection skill.
     // Make the actor alive before TeleportTo checks HP/dead state.
     Generics.revive(session, actor, {
         delayMs: 0,
         restoreFullVitals: true,
-        recoveryReason: 'restart_to_town'
+        restoreExpPercent: hallRestart && !arenaDeath ? hallRuntime.expRestore(actor) : null,
+        recoveryReason: hallRestart && !arenaDeath ? 'restart_to_clan_hall' : 'restart_to_town'
     });
     session.dataSendToMe(ServerResponse.userInfo(actor));
 
-    Generics.teleportTo(session, actor, townRespawn);
+    Generics.teleportTo(session, actor, destination);
     if (arenaDeath) ArenaDuelService.release(session, 'player_death');
 }
 

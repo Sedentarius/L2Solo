@@ -250,6 +250,7 @@ function lifecycleKind(state = {}, context = {}) {
     if ((state.activity === 'merchant' && state.stats?.marketStore)
         || (state.activity === 'crafting' && state.stats?.craftShop)) return 'event_driven';
     const stats = state.stats || {};
+    if (context.clanHallServices || stats.clanHallVisit) return 'command';
     // Finite travel/rest/death transitions are completely represented by the
     // pure resolver result and the owner CAS proposal. Economy follow-up, if
     // any, is selected on the next state after the transition is durable.
@@ -259,8 +260,10 @@ function lifecycleKind(state = {}, context = {}) {
     if (stats.partyMarketReturn && ['shopping', 'merchant'].includes(state.activity)) return 'command';
     if (require('./ClanPartyDuty').waiting(state)) return 'resolver';
     if (!SIMPLE_ACTIVITIES.has(String(state.activity || ''))) return 'command';
+    // craftReturn is a saved destination, not an outstanding crafting action.
+    // Actual crafting is routed by activity, shop/station and plan readiness.
     if (stats.warehouseWorkflow || stats.warehouseErrand || stats.marketStore || stats.marketReturn
-        || stats.craftShop || stats.craftStationId || stats.craftReturn || stats.supplyErrand) return 'command';
+        || stats.craftShop || stats.craftStationId || stats.supplyErrand) return 'command';
     if (stats.mammonReturn || (Number(stats.mammonRetryAt || 0) <= Date.now()
         && Object.values(state.inventory || {}).some(item => Number(item.amount)>0
             && invoke('GameServer/Items/C4Unseal').options(item.selfId).length))) return 'command';
@@ -495,7 +498,8 @@ class ColdSimulationKernel {
         this.partyCapacityBlocked = false;
         const limit = Math.max(0, Math.min(this.maxBatch, Number(capacity) || 0));
         const candidates = [];
-        while (candidates.length < limit && this.heap.size > 0) {
+        let commandsSelected = 0;
+        while (candidates.length + commandsSelected < limit && this.heap.size > 0) {
             const head = this.heap.peek();
             if (!this.validHeapEntry(head)) {
                 this.heap.pop();
@@ -595,7 +599,7 @@ class ColdSimulationKernel {
                     this.requeue(id, this.now() + 1000);
                     continue;
                 }
-                if (candidates.length + candidateMemberIds.length > limit && !atomicCapacityBurst) {
+                if (candidates.length + commandsSelected + candidateMemberIds.length > limit && !atomicCapacityBurst) {
                     this.partyCapacityBlocked = true;
                     // Keep the original overdue priority. Moving a party to
                     // now+100 on every partially free tick lets an endless
@@ -634,6 +638,7 @@ class ColdSimulationKernel {
                     });
                 });
             } else if (kind === 'command') {
+                commandsSelected += 1;
                 this.commanding.add(id);
                 this.commandStartedAt.set(id, this.now());
                 this.stats.commands += 1;
@@ -652,7 +657,7 @@ class ColdSimulationKernel {
             const elapsedMs = current.state.timing?.lastResolvedAt
                 ? Math.max(1000, timestamp - Number(current.state.timing.lastResolvedAt))
                 : 60000;
-            const lifecyclePlan = this.planLifecycle
+            const lifecyclePlan = !current.context.clanHallServices && !current.state.stats?.clanHallVisit && this.planLifecycle
                 ? await this.planLifecycle({
                     state: current.state,
                     context: current.context,
@@ -660,7 +665,9 @@ class ColdSimulationKernel {
                 })
                 : null;
             const resolveState = lifecyclePlan?.plannedState || current.state;
-            const result = await this.resolveSolo({
+            const result = current.context.clanHallServices || current.state.stats?.clanHallVisit
+                ? { patch: {}, events: [], materialize: { exp: 0, sp: 0, adena: 0, items: [] }, nextResolveAt: timestamp + 30000 }
+                : await this.resolveSolo({
                 assessRelationship: this.interactionMemory.assess.bind(this.interactionMemory),
                 state: resolveState,
                 spot: current.context.spot || null,
@@ -1297,8 +1304,15 @@ class ColdSimulationKernel {
         const id = Number(payload.characterId);
         this.commanding.delete(id);
         this.commandStartedAt.delete(id);
-        if (payload.state) this.upsert({ state: payload.state, context: payload.context || {} });
-        else this.requeue(id, this.now() + Math.max(1000, Number(payload.retryAfterMs) || 5000));
+        if (payload.state) {
+            this.upsert({ state: payload.state, context: payload.context || {} });
+            // Rejected commands often return the unchanged overdue state. Do
+            // not let that timestamp immediately re-enter the head of the queue.
+            if ((payload.ok === false || Number(payload.retryAfterMs) > 0) && this.scheduleTokens.has(id)) {
+                this.requeue(id, Math.max(this.scheduleTokens.get(id).dueAt,
+                    this.now() + Math.max(1000, Number(payload.retryAfterMs) || 5000)));
+            }
+        } else this.requeue(id, this.now() + Math.max(1000, Number(payload.retryAfterMs) || 5000));
     }
 
     requeue(characterId, dueAt) {

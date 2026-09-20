@@ -10,6 +10,7 @@ const SpotRiskPolicy = invoke('GameServer/Bot/Population/SpotRiskPolicy');
 DataCache.init();
 
 const originals = {
+    reconcileBotClanMembership: Database.reconcileBotClanMembership,
     execute: Database.execute,
     syncInventorySummary: Database.syncInventorySummary,
     updateCharacterLocation: Database.updateCharacterLocation,
@@ -18,6 +19,7 @@ const originals = {
 };
 
 async function run() {
+    Database.reconcileBotClanMembership = async () => ({ repairedMembers: 0, repairedParties: 0 });
     Database.execute = () => Promise.resolve([]);
     Database.syncInventorySummary = () => Promise.resolve();
     Database.updateCharacterLocation = () => Promise.resolve();

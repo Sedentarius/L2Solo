@@ -11,10 +11,13 @@ const Party = invoke('GameServer/Bot/AI/PartyCompanionService');
 
 (async () => {
     const saved = { now: Date.now, start: Timer.start, clear: Timer.clear, npc: World.fetchNpc,
+        timeout: global.setTimeout, clearTimeout: global.clearTimeout,
         environment: Generics.updateEnvironment, underwater: Generics.underwaterCheck, party: Party.updatePosition };
     let now = 10000;
     try {
         Date.now = () => now;
+        global.setTimeout = (callback, ms) => ({ callback, ms, cleared: false });
+        global.clearTimeout = timer => { if (timer) timer.cleared = true; };
         Timer.start = (handler, callback, ms) => { handler.timer = { callback, due: now + ms }; };
         Timer.clear = handler => { delete handler.timer; };
         Generics.updateEnvironment = Generics.underwaterCheck = Party.updatePosition = () => {};
@@ -86,7 +89,54 @@ const Party = invoke('GameServer/Bot/AI/PartyCompanionService');
         assert.equal(actor.x, 110053, 'early arrival preserves the accepted position');
         fallback.callback();
         assert.equal(hits.length, beforeArrival + 1);
+
+        // Live Kranrot encounter: the target reaches the player's latest
+        // accepted position before the original approach deadline. No new
+        // ValidatePosition arrives; the old destination is now behind it.
+        target.x = 175961;
+        target.y = 62886;
+        target.fetchLocX = () => target.x;
+        target.fetchLocY = () => target.y;
+        target.fetchLocZ = () => -4370;
+        actor.setLocXYZ({ locX: 176311, locY: 62692, locZ: -4370 });
+        request(); await drain();
+        const movingArrival = actor.automation.timer.action.timer;
+        const approach = actor.automation.playerAttackApproach;
+        const firstPoll = approach.rangeTimer;
+        firstPoll.callback();
+        assert.notEqual(approach.rangeTimer, firstPoll, 'out-of-range polling must continue');
+        const rangePoll = approach.rangeTimer;
+        actor.setLocXYZ({ locX: 176176, locY: 62766, locZ: -4370 });
+        target.x = 176141;
+        target.y = 62786;
+        const beforeMeeting = hits.length;
+        rangePoll.callback();
+        assert.equal(hits.length, beforeMeeting + 1, 'a target in range must trigger attack without a position packet');
+        assert.equal(actor.x, 176176, 'meeting must preserve the accepted player position');
+        assert.equal(rangePoll.cleared, true, 'arrival must clear the range watcher');
+        movingArrival.callback();
+        assert.equal(hits.length, beforeMeeting + 1, 'old arrival cannot repeat the attack');
+
+        actor.setLocXYZ({ locX: 176311, locY: 62692, locZ: -4370 });
+        request(); await drain();
+        const delayedPoll = actor.automation.playerAttackApproach.rangeTimer;
+        const deadline = actor.automation.timer.action.timer;
+        actor.setLocXYZ({ locX: 176176, locY: 62766, locZ: -4370 });
+        deadline.callback();
+        assert.equal(actor.x, 176176, 'deadline must also preserve an already reachable position');
+        assert.equal(delayedPoll.cleared, true);
+
+        actor.setLocXYZ({ locX: 176311, locY: 62692, locZ: -4370 });
+        request(); await drain();
+        const cancelledPoll = actor.automation.playerAttackApproach.rangeTimer;
+        actor.automation.abortAll(actor, { notifyClient: false });
+        const afterCancel = hits.length;
+        actor.setLocXYZ({ locX: 176176, locY: 62766, locZ: -4370 });
+        cancelledPoll.callback();
+        assert.equal(cancelledPoll.cleared, true, 'cancellation must clear the watcher');
+        assert.equal(hits.length, afterCancel, 'cancelled watcher cannot revive an attack');
     } finally {
+        global.setTimeout = saved.timeout; global.clearTimeout = saved.clearTimeout;
         Date.now = saved.now; Timer.start = saved.start; Timer.clear = saved.clear; World.fetchNpc = saved.npc;
         Generics.updateEnvironment = saved.environment; Generics.underwaterCheck = saved.underwater; Party.updatePosition = saved.party;
     }

@@ -1,3 +1,4 @@
+const Crafting = require('./ClanCraftingPolicy');
 const ItemTemplateIndex = require('../Item/ItemTemplateIndex');
 const DataCache = invoke('GameServer/DataCache');
 const ItemDisposition = invoke('GameServer/Bot/Economy/ItemDisposition');
@@ -24,13 +25,23 @@ function isClanWarehouseCandidate(item, config = {}) {
     const kind = kindFor(item);
     if (!selfId || selfId === 57 || amount <= 0 || item?.equipped || item?.equippedCount > 0) return false;
     if (ItemDisposition.isRecipeItem(item)) return true;
-    if (kind.startsWith('Other.Material')) return true;
+    if (Crafting.isResource(selfId)) return true;
+    if (kind.startsWith('Other.Material')) return Number(config.demand?.[selfId] || 0) > 0;
     return isBloodMark(item, config);
 }
 
-function itemRows(state = {}, items = []) {
-    return ItemDisposition.unreservedActorItems(state, items || [])
-        .filter((item) => isClanWarehouseCandidate(item))
+function itemRows(state = {}, items = [], config = {}) {
+    // Only a clan-authorized manufacture may retain its staged ingredients.
+    const plan = state.stats?.equipmentPlan;
+    const staged = plan?.clanGoal?.clanId && (!config.goalKey || config.goalKey === plan.clanGoal.goalKey)
+        && ['active', 'component_ready', 'ready_to_craft'].includes(plan.status);
+    const reserved = staged ? ItemDisposition.reservedEquipmentAmounts(state) : {};
+    const source = (items || []).map(item => {
+        const protectedAmount = Math.min(Number(item.amount || 0), Number(reserved[item.selfId] || 0));
+        reserved[item.selfId] = Math.max(0, Number(reserved[item.selfId] || 0) - protectedAmount);
+        return { ...item, amount: Number(item.amount || 0) - protectedAmount };
+    });
+    return source.filter((item) => isClanWarehouseCandidate(item, config))
         .map((item) => ({
             ...item,
             id: Number(item.id || 0),
@@ -46,20 +57,23 @@ function itemRows(state = {}, items = []) {
 }
 
 function depositCandidates(state = {}, items = [], warehouseItems = [], config = {}) {
-    const existingRecipes = new Set((warehouseItems || [])
-        .filter((item) => ItemDisposition.isRecipeItem(item) || String(item.kind || '').startsWith('Other.Recipe'))
-        .map((item) => Number(item.selfId)));
     const selected = new Set();
-    return itemRows(state, items).flatMap((item) => {
+    return itemRows(state, items, config).flatMap((item) => {
         const recipe = ItemDisposition.isRecipeItem(item);
-        if (recipe && (existingRecipes.has(item.selfId) || selected.has(item.selfId))) return [];
+        const recipeLimit = Math.max(1, Number(config.demand?.[item.selfId] || 0));
+        const stored = (warehouseItems || []).filter(row => Number(row.selfId) === item.selfId)
+            .reduce((sum, row) => sum + Number(row.amount || 0), 0);
+        if (recipe && (stored >= recipeLimit || selected.has(item.selfId))) return [];
         selected.add(item.selfId);
         return [{
             ...item,
-            amount: recipe ? 1 : item.amount,
+            recipeLimit,
+            amount: recipe ? Math.min(item.amount, recipeLimit - stored) : Crafting.isResource(item.selfId) || isBloodMark(item, config) ? item.amount
+                : Math.min(item.amount, Math.max(0, Number(config.demand?.[item.selfId] || 0)
+                    - (warehouseItems || []).filter(row => Number(row.selfId) === item.selfId).reduce((sum, row) => sum + Number(row.amount || 0), 0))),
             reason: recipe ? 'recipe' : (isBloodMark(item, config) ? 'progression_item' : 'material')
         }];
-    });
+    }).filter(item => item.amount > 0);
 }
 
 module.exports = {
