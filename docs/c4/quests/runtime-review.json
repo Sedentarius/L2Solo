@@ -461,18 +461,20 @@
     "reviewedRequirements": []
   },
   "275": {
-    "certified": false,
-    "blocker": {
-      "code": "ENCOUNTER_HANDOFF_UNCERTIFIED",
-      "detail": "Hot scripted spawning already exists. Owner-scoped encounter recovery and cold/hot parity need focused implementation; DEFEND requirement remains unproven."
-    }
+    "certified": true,
+    "tests": [
+      "tests/test_c4_orc_bounty_quests.js"
+    ],
+    "bridge": "REVIEWED_ENCOUNTER_ROUTE",
+    "reviewedRequirements": []
   },
   "276": {
-    "certified": false,
-    "blocker": {
-      "code": "ENCOUNTER_HANDOFF_UNCERTIFIED",
-      "detail": "Hot scripted spawning already exists. Owner-scoped encounter recovery and cold/hot parity need focused implementation; DEFEND requirement remains unproven."
-    }
+    "certified": true,
+    "tests": [
+      "tests/test_c4_orc_bounty_quests.js"
+    ],
+    "bridge": "REVIEWED_ENCOUNTER_ROUTE",
+    "reviewedRequirements": []
   },
   "277": {
     "certified": true,
@@ -882,11 +884,12 @@
     "reviewedRequirements": []
   },
   "419": {
-    "certified": false,
-    "certificationBlocker": {
-      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-    }
+    "certified": true,
+    "tests": [
+      "tests/test_c4_orc_bounty_quests.js"
+    ],
+    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "reviewedRequirements": []
   },
   "422": {
     "certified": false,

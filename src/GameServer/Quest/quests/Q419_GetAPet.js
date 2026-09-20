@@ -4,7 +4,20 @@ const MARTIN = 7731;
 const tutors = { 7256: ['Bella', 1, 'Wolves live in packs, led by the strongest pair. Learn how they communicate and hunt.'],
     7091: ['Ellie', 2, 'A pet needs food, equipment and care. Keep food in its inventory and resurrect it promptly if it dies.'],
     7072: ['Metty', 4, 'Wolves live in several regions of Aden. A pet earns combat experience through its contribution.'] };
-const mobs = [[103, 106, 108], [460, 308, 466], [25, 105, 34], [474, 476, 478], [403, 508]];
+// Source: MOBIUS_C4 6674a607 Q00419_GetAPet. Each race hunts its own targets,
+// and the proof drops at a per-target chance rather than on every kill. Local
+// mob ids are the reference 20xxx ids minus 20000, indexed by race.
+const drops = [
+    [[103, 0.6], [106, 0.75], [108, 1]],
+    [[460, 0.6], [308, 0.75], [466, 1]],
+    [[25, 0.6], [105, 0.75], [34, 1]],
+    [[474, 0.6], [476, 0.75], [478, 1]],
+    [[403, 0.75], [508, 1]]
+];
+const mobs = drops.map(table => table.map(([selfId]) => selfId));
+const PROOFS_REQUIRED = 50;
+const LIST = race => 3418 + race;
+const PROOF = race => 3423 + race;
 const Q = () => invoke('GameServer/Quest/QuestService');
 const count = (state, id) => state.session.actor.backpack.fetchItemFromSelfId(id)?.fetchAmount() || 0;
 const link = (event, text) => `<a action="bypass -h quest 419 ${event}">${text}</a>`;
@@ -34,15 +47,17 @@ module.exports = {
         if (!mobs[race]) return null;
         if (event === 'start' && !state.isStarted() && state.session.actor.fetchLevel() >= 15) {
             await state.setState('started'); await state.set('cond', 1);
-            await Q().giveItem(state.session, 3418 + race, 1);
+            await Q().giveItem(state.session, LIST(race), 1);
             return page('Collect 50 proofs from the creatures on your Animal Slayer List.');
         }
         if (!state.isStarted()) return null;
-        if (event === 'proof' && state.getInt('cond') === 1 && count(state, 3423 + race) >= 50) {
-            if (!(await Q().takeItem(state.session, 3423 + race, 50))) return null;
-            await Q().takeItem(state.session, 3418 + race, 1);
-            await Q().giveItem(state.session, 3417, 1);
-            await state.set('visits', 0); await state.set('cond', 2);
+        if (event === 'proof' && state.getInt('cond') === 1 && count(state, PROOF(race)) >= PROOFS_REQUIRED) {
+            // The proofs, the list and the collar move together with the cond.
+            await require('../QuestStep').apply(state, {
+                takes: [[PROOF(race), PROOFS_REQUIRED], [LIST(race), count(state, LIST(race))]].filter(([, n]) => n > 0),
+                gives: [[3417, 1]],
+                variables: { ...state.variables, visits: '0', cond: '2' }
+            });
             return page('Visit Bella in Gludio, Ellie in Giran and Metty in Dion.');
         }
         if (event.startsWith('learn_') && state.getInt('cond') === 2) {
@@ -79,9 +94,19 @@ module.exports = {
         return null;
     },
     async onKill(state, npc) {
-        const race = state.session.actor.fetchRace();
-        if (state.getInt('cond') !== 1 || !mobs[race]?.includes(npc.fetchSelfId())) return;
-        const amount = Q().questDropAmount(1, 50, count(state, 3423 + race));
-        if (amount > 0) await Q().giveItem(state.session, 3423 + race, amount);
+        const race = Number(state.session.actor.fetchRace());
+        if (state.getInt('cond') !== 1) return;
+        const entry = drops[race]?.find(([selfId]) => selfId === Number(npc.fetchSelfId()));
+        if (!entry) return;
+        // The reference only yields a proof while the race's Animal Slayer List
+        // is actually carried, and then only at that target's own chance.
+        if (!count(state, LIST(race))) return;
+        if (Math.random() >= entry[1]) return;
+        const amount = Q().questDropAmount(1, PROOFS_REQUIRED, count(state, PROOF(race)));
+        if (amount <= 0) return;
+        await require('../QuestStep').apply(state, {
+            gives: [[PROOF(race), amount]], variables: { ...state.variables }
+        });
+        state.playSound('ItemSound.quest_itemget');
     }
 };

@@ -461,18 +461,20 @@
     "reviewedRequirements": []
   },
   "275": {
-    "certified": false,
-    "blocker": {
-      "code": "ENCOUNTER_HANDOFF_UNCERTIFIED",
-      "detail": "Hot scripted spawning already exists. Owner-scoped encounter recovery and cold/hot parity need focused implementation; DEFEND requirement remains unproven."
-    }
+    "certified": true,
+    "tests": [
+      "tests/test_c4_orc_bounty_quests.js"
+    ],
+    "bridge": "REVIEWED_ENCOUNTER_ROUTE",
+    "reviewedRequirements": []
   },
   "276": {
-    "certified": false,
-    "blocker": {
-      "code": "ENCOUNTER_HANDOFF_UNCERTIFIED",
-      "detail": "Hot scripted spawning already exists. Owner-scoped encounter recovery and cold/hot parity need focused implementation; DEFEND requirement remains unproven."
-    }
+    "certified": true,
+    "tests": [
+      "tests/test_c4_orc_bounty_quests.js"
+    ],
+    "bridge": "REVIEWED_ENCOUNTER_ROUTE",
+    "reviewedRequirements": []
   },
   "277": {
     "certified": true,
@@ -882,11 +884,12 @@
     "reviewedRequirements": []
   },
   "419": {
-    "certified": false,
-    "certificationBlocker": {
-      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-    }
+    "certified": true,
+    "tests": [
+      "tests/test_c4_orc_bounty_quests.js"
+    ],
+    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "reviewedRequirements": []
   },
   "422": {
     "certified": false,
@@ -916,7 +919,7 @@
     }
   },
   "_certification": {
-    "generatedAt": "2026-09-20T01:32:30.033Z",
+    "generatedAt": "2026-09-20T01:49:50.147Z",
     "sourceHashes": {
       "config/default.ini": "14f3852373656b264d1e9f367252519f82072cb0dea69e465c968a775acb29c3",
       "config/local.example.ini": "cb13f57c7e72f2b6f55e342378bb9acc974e7f7c0ab6708a6ed8f5d0dc8f8fa0",
@@ -1181,7 +1184,7 @@
       "database/sql/sqlite.sql": "546a3888eb03901ccb1d4a52aa75349c3cebd96a201d2f0526d353f49f3f177b",
       "scripts/benchmark-interaction-memory.js": "d196e3f8dfb3fb49554d5081f339228a16a01c5ee606c2eca3f2987f45d3327b",
       "scripts/benchmark-town-navigation.js": "a03ca379db4ea4d1f55a50a4eea637962970f240c4557c7903ae925d5ea4d211",
-      "scripts/certify-c4-quests.js": "3f3712ec6bf19ca4fdf0deee114425baccb8e4130cbd1984b88581d4bc4d894a",
+      "scripts/certify-c4-quests.js": "81fbac284de2daed0c99a2395424bb8f75fbeb9e49cbe05a2829d5d76d24191d",
       "scripts/check-c4-quests.js": "094eec7789f23d33445e3d00452eb7d2640c7fdbc3d342d38997f25db218c0b2",
       "scripts/check-quest-registry.js": "a05ecd2fe1e6f62d6c7eed1629dad48be13a2023682a11201c2a89d07ed46da2",
       "scripts/check-syntax.js": "f18315645fba6bbdb1b80b103fc5006970e56f804f9c72759be6dea1f067b9b5",
@@ -1244,7 +1247,7 @@
       "scripts/run-tests-p0-b3.js": "07046504ac2f221826f1fdf599c30f0f53b61c44ec50f57371b3f1bc52982cc6",
       "scripts/run-tests-p0-b4.js": "309423b431c59b4f612c6041156952e5fe63cf65fff1256c5b10c3fb165a0af4",
       "scripts/run-tests-p0-b5.js": "a3f8e96312ed5ac1fe873005a8db1b7f008aa6db9df60f8d17780c509e94e71e",
-      "scripts/run-tests.js": "aaa2a72de000aad024dba945ea7fd5ee4b4da1521e691b4af365bded9d66a00e",
+      "scripts/run-tests.js": "6a8e2f50b6e2612331bcc1fb081ac7a6d785d0146624a8c5a2c5e2d8cf588971",
       "scripts/saved-games.js": "9d2f0c14084ad5403231e4e99e03388909c7fda432ff9c0ea7f44d829cf7b388",
       "scripts/simulate-bot-chat.js": "8b15f0e010fd24aca99c7cbc1e769cb40af0671afd45d9401a24b3b7e845bb01",
       "scripts/start.js": "4b47531f68f1733a1b4a9bb03626626cb83802594dd59a7aa20a2e61241a21b4",
@@ -1910,7 +1913,7 @@
       "src/GameServer/Quest/DeclarativeQuest.js": "f55d951d6a1a9ecde5b90a3a704305392d16e6d99c4d8597a8f29235941636f3",
       "src/GameServer/Quest/FirstProfessionProof.js": "836445225f11c0b25f3b30e1549adfdaecf1c3ee750a087b5442d786f4ecef2a",
       "src/GameServer/Quest/LowLevelDefinitions.js": "6fbb937001742755760ef38ed3faf61567a58595b3534bc194b2d4e41aec065f",
-      "src/GameServer/Quest/QuestRegistry.js": "f8afe4d2e5d1d3754f0db9054ee6f43f9532b72df7cc4836553beee065d84990",
+      "src/GameServer/Quest/QuestRegistry.js": "39f61fc81db421424621e5aaff91a4ebeaaaee1c18c983aee309b8b6fbd87fb6",
       "src/GameServer/Quest/QuestService.js": "9810b2461b6f94345c1038d3ecf6ca57204600b7df56e699970e642d18cf100f",
       "src/GameServer/Quest/QuestState.js": "d764e7fac7367002c151fd44e0006e6e8b27556d8586af4f40b73e4703d69e46",
       "src/GameServer/Quest/QuestStep.js": "8e23c3b873a54dc6cd083b3f3cae470ada26957cb8651a95372c19081572a1b3",
@@ -2006,7 +2009,7 @@
       "src/GameServer/Quest/quests/Q416_PathToOrcShaman.js": "f5302863ec2492fd818067684df19086bdaa31140e4865dab5bf380c630a5064",
       "src/GameServer/Quest/quests/Q417_PathToScavenger.js": "a8cb4242a3fd3076d0aae34f8e8e20de3570c0b3df63dcfb4530094623b5c3b9",
       "src/GameServer/Quest/quests/Q418_PathToArtisan.js": "13540985700599802018aa1f8092ea848f43cd1fd37f84147b9dbe6e8b0a6a73",
-      "src/GameServer/Quest/quests/Q419_GetAPet.js": "af571bcd31cba012bed53c0851a2e5a5fad72845ad1a457237392fab3f32348c",
+      "src/GameServer/Quest/quests/Q419_GetAPet.js": "c780cf1f76a500cc3386f23c0dd5e8dd36c3085d37dfafc29c614e6b6790f9ff",
       "src/GameServer/Quest/quests/Q420_LittleWing.js": "64a85c60b6ecca4e2a791d08e43f3e793c841a55bf31300fd478e5a48998743b",
       "src/GameServer/Quest/quests/Q421_LittleWingsBigAdventure.js": "244c61e3a23236405989e25495e4de6aa3274ff792c03529a4534764711d3a41",
       "src/GameServer/Quest/quests/Q501_ProofOfClanAlliance.js": "eaa99b8b4e23cb732d3659d5e8a951c4b6c65f3f07b0f53698e1883c4bdc5960",
@@ -3002,7 +3005,7 @@
       "tests/fixtures/companion_path_worker.js": "f05a88b3afa43c6789b9590ab0a9e3f9a85386ba3bb64ade5363fe8aca15b913",
       "tests/helpers/assert_c4_monster_location.js": "cda8f67e97daac4ef6eb2ab5df4b11b799339a6ff2574b791845b3f49e8336d9",
       "tests/helpers/assert_monster_empty_before_slice.js": "16d92110624f64ceb4219af07cf86bd7c3d8a14defdcea93d50524b76202721a",
-      "tests/helpers/c4QuestHarness.js": "b5eaf2f36e0c24d8ec667a88308826e373c88380ef95754b1c2b12e81c59a7c6",
+      "tests/helpers/c4QuestHarness.js": "ce254692afc5daf73fde860c1027f78131c545b419ea4a3d51f93c77811b5edb",
       "tests/helpers/legacyCharacterSchema.js": "457b9931fbebc1f87afbe2025b1aa44cb65228b0b91a87ce70d86c3f712ae6cc",
       "tests/helpers/verify_geodata_when_available.js": "84c75f6390b3482123b50d0e6fc406465bb8637e1cc7c3ab2d29c324841f9537",
       "tests/test_admin_saved_locations.js": "1baed3d5fbfa387d934d84ade82e50a71fa50beea5aef6b4d20765718cde8a13",
@@ -3475,8 +3478,8 @@
       "tests/test_quest_availability.js": "8c86c1106a7da942581d9f535a890c93227521e224f3a5fbfdcc9ad0fde25e7e",
       "tests/test_quest_character_switch.js": "450f74860657c7ced99c1638649996f6387bec56ba944e630a5eacde1e864bba",
       "tests/test_quest_handins.js": "966bd390f10cfaf96d672f0d24cf0e756338a08b091cb45ae5f615a1ef2bc251",
-      "tests/test_quest_packets.js": "4ae32e7bd97286c71c90f564058dbbee2e1bb1dc60815952717569d188fc25d1",
-      "tests/test_quest_registry_integrity.js": "ee55a533f66fde9c49daea175086b8b8d7cc1af2763d76b7c3049129dd522c5a",
+      "tests/test_quest_packets.js": "f2ed30db03bf4f2e1437f77920fe240d47c8f78db2f0ad99422e2f8949b0cb23",
+      "tests/test_quest_registry_integrity.js": "8e38449278d88f061b43730d05f8ff031371c3b51dad850c1fb788fa20a6e7e9",
       "tests/test_quest_runtime.js": "d0e4478d0801a858dbf8102cfe2c5cd029107e724b6afba02c8511f6149c6eb3",
       "tests/test_quest_spawn_radar.js": "91d3b95a956bd853ab25de1c3bfc67064bfc5c2807958109279fee74eefe3742",
       "tests/test_raid_boss_balance.js": "50d937f03684db2fbd7b66e3b207fa15725528140941b6d6bf792b711f0fdc5e",
@@ -3555,7 +3558,8 @@
       "tests/test_world_observer_world_state.js": "1694e9a8d888d7495da71f79d1ac6fc0f27b69a28b33e5f73753529cacce9c78",
       "tests/test_world_visible_users.js": "53949729f44132946b001ebe4ace8644ffac482aea9953a0ffa80829dac74aab",
       "tests/test_world_wipe.js": "d7f3aa5197dc8359c9542250394fc0ccd96010402be9c83b0576696ec47cf89c",
-      "docs/c4/quests/runtime-review.json": "b05ee5462a808211536f4d7672040d9f66ba7ab50faa57ba01804ff733b8a05b",
+      "tests/test_c4_orc_bounty_quests.js": "9d897f5a5faa20e63336f6d835bd7cab71ca3cd23f18261c6948b1212864bc05",
+      "docs/c4/quests/runtime-review.json": "bf4087d6b4b23f0454e6c8ee02d0391a9f0fbe57e108021eb4a4694d904c4fc8",
       "docs/c4/quests/C4_QUEST_MASTER_INVENTORY.jsonl": "9f63e96d5fe25e0ce21f81027b805d8a4cc556e25e8f17b74a179ff316befc86"
     },
     "tests": [
@@ -3585,6 +3589,10 @@
       },
       {
         "path": "tests/test_c4_profession_routes.js",
+        "exitCode": 0
+      },
+      {
+        "path": "tests/test_c4_orc_bounty_quests.js",
         "exitCode": 0
       },
       {

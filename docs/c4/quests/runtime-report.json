@@ -2,10 +2,10 @@
   "errors": [],
   "confirmedInScope": 107,
   "counts": {
-    "VERIFIED": 88,
-    "IMPLEMENTED": 1,
+    "VERIFIED": 91,
+    "IMPLEMENTED": 0,
     "PARTIAL/BLOCKED": 14,
-    "MISSING": 4
+    "MISSING": 2
   },
   "capabilities": {
     "genericGoalResolver": "PRESENT",
@@ -14,7 +14,7 @@
     "partyQuestSharing": "NOT_CERTIFIED",
     "note": "Existing NPC spawns and script events do not certify cold encounter ownership, timers or party credit."
   },
-  "registeredInScope": 91,
+  "registeredInScope": 93,
   "proofContracts": 18,
   "driftCount": 296,
   "scopeDriftCount": 107,
@@ -4120,27 +4120,26 @@
       "name": "Dark Winged Spies",
       "inScope": true,
       "quarantined": false,
-      "status": "MISSING",
-      "script": null,
+      "status": "VERIFIED",
+      "script": "Q275_DarkWingedSpies.js",
       "definitionId": null,
-      "registered": false,
-      "tests": [],
-      "blocker": {
-        "code": "ENCOUNTER_HANDOFF_UNCERTIFIED",
-        "detail": "Hot scripted spawning already exists. Owner-scoped encounter recovery and cold/hot parity need focused implementation; DEFEND requirement remains unproven."
-      },
+      "registered": true,
+      "tests": [
+        "tests/test_c4_orc_bounty_quests.js"
+      ],
+      "blocker": null,
       "certificationBlocker": null,
       "professionProofContract": null,
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "NOT_CERTIFIED",
-        "reviewedRequirements": null,
-        "requirementsNeedingReview": [
-          "SCRIPTED_SPAWN_PRIMITIVE",
-          "DEFEND_PRIMITIVE"
-        ]
+        "questAdapter": "REVIEWED_ENCOUNTER_ROUTE",
+        "reviewedRequirements": [],
+        "requirementsNeedingReview": []
       },
       "drift": [
+        "script_existence",
+        "registration",
+        "status:MISSING->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -4149,27 +4148,26 @@
       "name": "Totem of the Hestui",
       "inScope": true,
       "quarantined": false,
-      "status": "MISSING",
-      "script": null,
+      "status": "VERIFIED",
+      "script": "Q276_TotemOfTheHestui.js",
       "definitionId": null,
-      "registered": false,
-      "tests": [],
-      "blocker": {
-        "code": "ENCOUNTER_HANDOFF_UNCERTIFIED",
-        "detail": "Hot scripted spawning already exists. Owner-scoped encounter recovery and cold/hot parity need focused implementation; DEFEND requirement remains unproven."
-      },
+      "registered": true,
+      "tests": [
+        "tests/test_c4_orc_bounty_quests.js"
+      ],
+      "blocker": null,
       "certificationBlocker": null,
       "professionProofContract": null,
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "NOT_CERTIFIED",
-        "reviewedRequirements": null,
-        "requirementsNeedingReview": [
-          "SCRIPTED_SPAWN_PRIMITIVE",
-          "DEFEND_PRIMITIVE"
-        ]
+        "questAdapter": "REVIEWED_ENCOUNTER_ROUTE",
+        "reviewedRequirements": [],
+        "requirementsNeedingReview": []
       },
       "drift": [
+        "script_existence",
+        "registration",
+        "status:MISSING->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -6607,28 +6605,25 @@
       "name": "Get a Pet",
       "inScope": true,
       "quarantined": false,
-      "status": "IMPLEMENTED",
+      "status": "VERIFIED",
       "script": "Q419_GetAPet.js",
       "definitionId": null,
       "registered": true,
       "tests": [
         "tests/test_pet_quest.js",
-        "tests/test_pet_system.js"
+        "tests/test_pet_system.js",
+        "tests/test_c4_orc_bounty_quests.js"
       ],
       "blocker": null,
-      "certificationBlocker": {
-        "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-        "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-      },
+      "certificationBlocker": null,
       "professionProofContract": null,
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "NOT_CERTIFIED",
-        "reviewedRequirements": null,
+        "questAdapter": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+        "reviewedRequirements": [],
         "requirementsNeedingReview": []
       },
       "drift": [
-        "status:VERIFIED->IMPLEMENTED",
         "generic_bridge_already_exists"
       ]
     },

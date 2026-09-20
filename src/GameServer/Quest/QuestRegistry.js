@@ -88,6 +88,8 @@ const entries = [
     [260, "Q260_OrcHunting"],
     [265, "Q265_BondsOfSlavery"],
     [273, "Q273_InvadersOfTheHolyLand"],
+    [275, "Q275_DarkWingedSpies"],
+    [276, "Q276_TotemOfTheHestui"],
     [293, "Q293_TheHiddenVeins"],
     [401, "Q401_PathToWarrior"],
     [402, "Q402_PathToKnight"],

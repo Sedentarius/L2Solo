@@ -187,6 +187,18 @@ class World {
     }
 }
 
+// Quest spawns need somewhere to live. This is the minimum World state
+// SpawnNpcs.spawnQuestNpc touches, without loading geodata or the datapack's
+// world spawns, so a quest-monster test stays fast and isolated.
+function enableQuestSpawns() {
+    const World = invoke('GameServer/World/World');
+    World.npc = { spawns: [], nextId: 8000000, grid: {}, gridKeys: new Map(),
+        raidBossState: World.npc?.raidBossState || {} };
+    World.user = World.user || { sessions: [], revision: 0 };
+    World.items = World.items || { spawns: [], nextId: 5000000 };
+    return World;
+}
+
 // Deterministic RNG so drop-chance branches are exercised on purpose, never by luck.
 function withRandom(values, body) {
     const original = Math.random;
@@ -212,4 +224,4 @@ function withSeededRandom(seed, body) {
         .finally(() => { Math.random = original; });
 }
 
-module.exports = { createWorld, withRandom, withSeededRandom, Service, Database, DataCache };
+module.exports = { createWorld, withRandom, withSeededRandom, enableQuestSpawns, Service, Database, DataCache };

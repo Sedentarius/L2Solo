@@ -76,3 +76,31 @@ restarting after completion. Q153's two rings (875) and three intermediate shots
 Those local rewards remain; Q153 additionally retains a durable intermediate-reward
 receipt across cancellation so restarting cannot farm Sylvia's shots. No historical
 inventory field was changed to hide these differences.
+
+## Q275/Q276 quest spawns: the encounter blocker was over-broad
+
+The earlier `ENCOUNTER_HANDOFF_UNCERTIFIED` blocker assumed every scripted
+encounter needed a durable, restart-recoverable lifecycle. For Q275 and Q276
+that assumption does not match the pinned handlers. Both use a plain transient
+`addSpawn` at the killed mob's coordinates: Varangka's Tracker (local 5043) and
+the Kasha Bear Totem Spirit (local 5044) are ordinary quest monsters that exist
+only until they are killed or the server restarts. The reference neither
+persists them, nor enforces a singleton, nor restores them on login.
+
+They are therefore implemented on the existing `QuestService.spawnQuestNpc` /
+`World.spawnQuestNpc` path, which already supplies `questSpawn.ownerId` and
+`questSpawn.questId` and the ownership filtering in `QuestService.onKill`. No
+new encounter subsystem was added. Matching the source was preferred over
+satisfying the older speculative blocker text.
+
+Both spawn rules are certified at their exact authored boundaries rather than
+sampled. Q275 spawns its tracker on a roll below 10% while the fang count is
+strictly above 10 and strictly below 66, and the tracker pays five fangs
+outright without clamping the total back to seventy. Q276's tiers keep the
+reference's own comparisons, including the `<=` tiers at 69/59/49 and the `< 2`
+tier at 39, and 79 parasites always provoke the spirit.
+
+Q419's hunting phase previously dropped a proof on every eligible kill. The
+reference gives each target its own chance (60/75/100%, and 75/100% for the
+Dwarven pair) and only while the character carries its race's Animal Slayer
+List. Both are now enforced; the fifty-proof cap is unchanged.
