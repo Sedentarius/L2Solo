@@ -16,7 +16,9 @@ const ACTION_TYPES = Object.freeze({
     WAREHOUSE: 'warehouse',
     MARKET: 'market',
     PARTY: 'party',
-    TITLES: 'member_titles'
+    TITLES: 'member_titles',
+    SUPPLIES: 'supplies',
+    PRODUCTION: 'production'
 });
 // Bump when a deploy adds a recovery behavior that must revisit durable goals
 // whose previous bootstrap action already succeeded under older code.
@@ -57,6 +59,7 @@ const metrics = {
 };
 
 let bootstrapped = false;
+let nextSupplyScan = 0;
 
 function number(value, fallback = 0) {
     const parsed = Number(value);
@@ -149,7 +152,7 @@ function reviewDelayFor(actionType, goal, result = {}, ok = true, productive = w
 
 function deferredRetryDelay(actionType, result = {}) {
     const reason = String(result?.code || result?.reason || '');
-    if (actionType === ACTION_TYPES.PLAN && result?.retryable === true && reason === 'clan_planning_deferred') {
+    if ([ACTION_TYPES.PLAN, ACTION_TYPES.PRODUCTION].includes(actionType) && result?.retryable === true && reason === 'clan_planning_deferred') {
         return Math.min(5000, Config.actionRetryMs);
     }
     if (
@@ -173,6 +176,46 @@ function deferredRetryDelay(actionType, result = {}) {
         return Config.actionRetryMs;
     }
     return null;
+}
+
+async function scheduleProduction(clan) {
+    if (number(clan.level) >= 3) return;
+    const [active] = await Database.execute([`SELECT id FROM clan_actions WHERE clanId = ?
+        AND actionType = 'production' AND status IN ('pending', 'running') LIMIT 1`, [clan.id]]);
+    if (active) return;
+    await Database.enqueueClanAction({ clanId: clan.id,
+        actionType: ACTION_TYPES.PRODUCTION, priority: 30,
+        actionKey: `clan:${clan.id}:production:${Math.floor(Date.now() / Config.equipmentReviewMs)}` });
+}
+
+async function resolveProduction(clan) {
+    if (number(clan.level) >= 3) return { ok: true, skipped: true };
+    const service = invoke('GameServer/Clan/ClanEquipmentService');
+    let result;
+    try { result = await service.resolveClan(clan, clan.state?.productionGoal || null); }
+    catch (error) {
+        if (error.code !== 'clan_planning_deferred') throw error;
+        return { ok: true, retryable: true, reason: 'clan_planning_deferred' };
+    }
+    if (!result.ok || !result.goal) return result;
+    const update = await Database.execute([`UPDATE clan_simulation_clans SET
+        stateJson = json_set(stateJson, '$.productionGoal', json(?)), updatedAt = ?
+        WHERE clanId = ? AND json_extract(stateJson, '$.updatedAt') = ?`,
+    [JSON.stringify(result.goal), Date.now(), clan.id, result.expectedUpdatedAt]]);
+    if (Number(update.affectedRows) !== 1) return { ok: false, reason: 'production_snapshot_changed' };
+    return { ok: true, goal: result.goal };
+}
+
+async function scheduleSupplies() {
+    if (Date.now() < nextSupplyScan) return;
+    nextSupplyScan = Date.now() + Config.resolveIntervalMs;
+    const rows = await Database.execute([`SELECT simulated.clanId FROM clan_simulation_clans simulated
+        WHERE NOT EXISTS (SELECT 1 FROM clan_actions actions WHERE actions.clanId = simulated.clanId
+            AND actions.actionType = 'supplies' AND actions.status IN ('pending', 'running'))
+        ORDER BY simulated.clanId LIMIT 64`, []], 'clan-supplies:admission');
+    for (const row of rows) await Database.enqueueClanAction({ clanId: row.clanId,
+        actionKey: `clan:${row.clanId}:supplies:${Math.floor(Date.now() / Config.resolveIntervalMs)}`,
+        actionType: ACTION_TYPES.SUPPLIES, priority: 40 });
 }
 
 async function bootstrap() {
@@ -334,6 +377,14 @@ async function execute(action, options = {}) {
                     goalUpdatedAt: Number(payload.goalUpdatedAt) || null
                 });
                 break;
+            case ACTION_TYPES.PRODUCTION:
+                result = await resolveProduction(clan);
+                break;
+            case ACTION_TYPES.SUPPLIES:
+                result = await WarehouseService.resolveClan(clan, { deadlineAt,
+                    batchSize: Config.warehouseDepositBatchSize });
+                await scheduleProduction(clan);
+                break;
             case ACTION_TYPES.WAREHOUSE:
                 result = await WarehouseService.resolveClan(clan, {
                     batchSize: 1,
@@ -429,9 +480,8 @@ async function resolveAction(action, options = {}) {
             const playerMarketWait = marketMiss
                 && String(clan?.state?.mode || '') === 'player_managed'
                 && String(goal?.policy?.strategy || '') === 'market';
-            if (String(action.actionType) === ACTION_TYPES.TITLES) {
-                // Titles are an auxiliary durable clan action and do not alter
-                // the goal execution chain.
+            if ([ACTION_TYPES.TITLES, ACTION_TYPES.SUPPLIES, ACTION_TYPES.PRODUCTION].includes(String(action.actionType))) {
+                // Auxiliary actions do not alter the goal execution chain.
             } else if (clan && advanced) {
                 await schedulePlanAfterLevelUp(clan, action);
             } else if (clan && playerMarketWait) {
@@ -518,6 +568,7 @@ const ClanActionService = {
                 leftRunning: 0,
                 budgetStopped: false
             };
+            await scheduleSupplies();
             await refreshQueueStats();
             // Bootstrap and queue telemetry are admission overhead, not clan
             // work. Starting the execution budget before those reads caused a
@@ -619,6 +670,7 @@ const ClanActionService = {
 
     resetMetrics() {
         bootstrapped = false;
+        nextSupplyScan = 0;
         Object.keys(metrics).forEach((key) => {
             if (metrics[key] instanceof Map) metrics[key].clear();
             else metrics[key] = 0;

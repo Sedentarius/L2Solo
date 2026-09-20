@@ -67,9 +67,33 @@ an LLM. SA is intentionally deferred.
 - Hunt readiness checks the actual class-compatible weapon and armor.
   `BotHuntEfficiency` records cold simulated fight duration and estimated recovery
   cost for at most eight spots, with a six-hour lifetime and three-sample minimum.
-  The bounded route preference uses XP per modeled cycle and invalidates samples
+  The bounded route preference uses net XP after death penalties per modeled cycle and invalidates samples
   after class, level, equipped item/enchant, rate or solo/party context changes.
   Travel cost, material value and native empirical calibration are not modeled.
+- Solo routing and voluntary target selection estimate damage deliverable before
+  death using the learned attacks, cast/attack speed, MP budget, target defenses,
+  HP and physical attack. Require 1.5 times the target HP as reserve; this is a
+  conservative readiness estimate, not a full fight simulation. Mixed spots need
+  at least 60% eligible spawn weight, and density preference saturates at 12 mobs.
+  Each solo death lowers the desired hunting level by two (up to six); repeated
+  deaths remain visible across 12-fight windows until 12 death-free wins.
+  Recovery survives travel/restarts and eases by two levels after 12 wins and
+  restored XP. Failed ground is excluded before movement changes the origin.
+  Three abandoned solo fights also exclude the spot; a run of three clean wins
+  clears that failure count, while rest and unfinished encounter slices do not.
+  No additional recovery timer is used. Party risk remains roster-specific.
+  A rejected capacity reservation excludes only that destination for 60 seconds,
+  allowing the next decision to select another route without a death backoff.
+  The exclusion applies to worker planning and pending farm reservations.
+  A saved `craftReturn` destination alone does not route ordinary hunting to the
+  command executor; active crafting and ready-to-craft plans still do.
+  Lifecycle commands share the worker ownership limit with combat claims.
+  A rejected command respects its retry delay even when it returns the unchanged
+  overdue state, letting queued parties and solo hunters progress.
+- `BotEncounterReadiness` shares voluntary solo fight HP/MP reserves between
+  native hunting and cold simulation. A depleted cold hunter rests before a new
+  pull, using actual regeneration time. Pending fights and aggressive
+  interruptions still resolve combat instead of disappearing into recovery.
 - `ColdClassPolicy` shares offensive selection and charge planning with hot bots
   through cached profile adapters. `WeaponMask` has no network/World dependency,
   so the cold worker retains dependency isolation. Cold fights still abstract

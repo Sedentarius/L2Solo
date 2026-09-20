@@ -935,6 +935,7 @@ async function clanDetail(clanId) {
     return {
         generatedAt: Date.now(),
         clan: overview,
+        clanHall: await Database.fetchClanHallFinance(id),
         members: memberViews,
         bots: memberViews.filter((member) => member.isBot),
         warehouse: warehouse.map((item) => ({

@@ -11,7 +11,12 @@ const { PAGE_BYTES } = require('../src/GameServer/Bot/Population/ColdMessagePage
 // against an empty repository while keeping transport and cache code intact.
 const Memory = invoke('GameServer/Social/InteractionMemoryRuntime');
 const Policy = require('../src/GameServer/Social/InteractionMemoryPolicy');
+const ClanSocial = invoke('GameServer/Clan/ClanSocialRuntime');
+const originalRepository = Memory.repository;
+const originalClanRefresh = ClanSocial.refresh;
 Memory.repository = { loadMany: async ids => ids.map(Policy.empty) };
+// Clan social persistence has its own suite; this fixture has no clans or database.
+ClanSocial.refresh = async () => {};
 
 function setup() {
     const coordinator = new ColdSimulationCoordinator();
@@ -200,4 +205,7 @@ function setup() {
 })().catch((error) => {
     console.error(error);
     process.exitCode = 1;
+}).finally(() => {
+    Memory.repository = originalRepository;
+    ClanSocial.refresh = originalClanRefresh;
 });

@@ -145,6 +145,7 @@ function flush(now = Date.now(), immediate = false) {
                 }
             }
             if (entry.help && !helpStillGrouped(entry.help)) continue;
+            if (entry.task && !taskStillGrouped(entry.task)) continue;
             if (entry.goal && goalKey(invoke('GameServer/Bot/Goals/GoalState').snapshot(id(entry.source))?.current) !== entry.goal) continue;
             const players = audience(entry.source, clanId);
             if (!players.length) continue;
@@ -235,6 +236,37 @@ function onPartyHelp(helper, requester, party, clanId, now = Date.now()) {
     return enqueue(helper, 'party_help', { name: requester.name }, `party_help:${id(requester)}`, now, { clanId, help });
 }
 
+function taskStillGrouped(task) {
+    const party = invoke('GameServer/Bot/Population/BackgroundPartyState').find(task.partyId);
+    const clan = ClanService.findById(task.clanId);
+    return party?.status === 'active' && party.stats?.objective?.clanGoalKey === task.goalKey
+        && task.members.every(characterId => party.memberIds?.map(Number).includes(characterId)
+            && clan?.members?.some(member => Number(member.id) === characterId));
+}
+
+function onClanTask(party, members, now = Date.now()) {
+    const objective = party?.stats?.objective;
+    if (!objective?.clanGoalKey || !objective.clanId || !party.leaderId) return false;
+    const source = members.find(member => id(member) === Number(party.leaderId));
+    const companions = members.filter(member => id(member) !== Number(party.leaderId));
+    const item = itemName(objective.itemId);
+    if (!source || !companions.length || !item) return false;
+    const task = { partyId: party.partyId, clanId: Number(objective.clanId), goalKey: objective.clanGoalKey,
+        members: members.map(id).sort((a, b) => a - b) };
+    if (!taskStillGrouped(task)) return false;
+    const names = companions.map(member => member.name).filter(Boolean);
+    if (names.length !== companions.length) return false;
+    let shown = names.slice(0, 2);
+    const renderNames = () => shown.length < names.length
+        ? `${shown.join(', ')} and ${names.length - shown.length} others`
+        : shown.length === 1 ? shown[0] : `${shown[0]} and ${shown[1]}`;
+    if (renderNames().length + item.length > 75) shown = names.slice(0, 1);
+    const companionsText = renderNames();
+    const key = `clan_task:${task.goalKey}:${objective.itemId}:${task.members.join(',')}`;
+    return enqueue(source, objective.sourceKind === 'spoil' ? 'task_spoil' : 'task_hunt',
+        { name: companionsText, item }, key, now, { clanId: task.clanId, task });
+}
+
 function onWarehouse(source, result, clanId, now = Date.now()) {
     if (!result?.ok || !result.received) return false;
     const received = result.received;
@@ -261,7 +293,7 @@ function safe(callback) {
 
 module.exports = {
     onGoal: safe(onGoal), onDeath: safe(onDeath), onResolved: safe(onResolved), onWarehouse: safe(onWarehouse),
-    onPartyHelp: safe(onPartyHelp), onWithdrawal: safe(onWithdrawal), onJoined: safe(onJoined), flush: safe(flush), goalKey,
+    onClanTask: safe(onClanTask), onPartyHelp: safe(onPartyHelp), onWithdrawal: safe(onWithdrawal), onJoined: safe(onJoined), flush: safe(flush), goalKey,
     DEATH_WINDOW_MS, EVENT_COOLDOWN_MS, QUEUE_TTL_MS, MAX_PENDING, MAX_CLANS,
     snapshot() { return { clans: queues.size, pending: [...queues.values()].reduce((sum, queue) => sum + queue.pending.length, 0), history: history.size, deaths: deaths.size }; },
     reset() { queues.clear(); history.clear(); deaths.clear(); nextFlushAt = 0; }

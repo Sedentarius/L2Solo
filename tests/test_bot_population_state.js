@@ -28,6 +28,7 @@ const originalUpdateCharacterClassId = Database.updateCharacterClassId;
 const originalChoosePath = Database.chooseFirstProfessionPath;
 const originalTransferProfession = Database.transferFirstProfession;
 const originalRecoverStartupLeases = ColdSimulationOwner.recoverStartupLeases;
+const originalReconcileClanMembership = Database.reconcileBotClanMembership;
 const statements = [];
 const classUpdates = [];
 let stalePartyRows = [];
@@ -37,6 +38,7 @@ try {
     Database.chooseFirstProfessionPath = async (id, from, to) => ({ fromClassId: from, toClassId: to });
     Database.transferFirstProfession = async () => ({ ok: false, reason: 'proof' });
     ColdSimulationOwner.recoverStartupLeases = () => Promise.resolve({ affectedRows: 0 });
+    Database.reconcileBotClanMembership = () => Promise.resolve({ repairedMembers: 0, repairedParties: 0 });
     Database.execute = ([sql, params, queryOptions]) => {
         statements.push({ sql: String(sql), params, queryOptions });
         if (String(sql).startsWith('SELECT id, classId, level, exp, sp FROM characters')) {
@@ -98,7 +100,7 @@ try {
         assert(partyWaitMigration, 'startup must move legacy acquisition requests back to actionable hunting');
         assert(partyWaitMigration.sql.includes("'$.partyWaitUntil', NULL"), 'startup must clear the obsolete blocking wait deadline');
         const passivePartyRequestCleanup = statements.find((entry) => entry.sql.includes("json_remove(COALESCE(statsJson, '{}'), '$.partyRequest')")
-            && entry.sql.includes("activity IN ('traveling', 'shopping', 'merchant', 'crafting', 'dead')"));
+            && entry.sql.includes("activity IN ('traveling', 'shopping', 'merchant', 'crafting', 'dead', 'clan_hall')"));
         assert(passivePartyRequestCleanup, 'startup must clear party requests from passive activities that cannot join formation');
         assert(passivePartyRequestCleanup.sql.includes("partyRequestStatus = 'open'"), 'passive cleanup must use the generated request projection');
         const stalePartyRequestCleanup = statements.find((entry) => entry.sql.includes("'$.partyRequest.deferredUntil'")
@@ -280,13 +282,13 @@ try {
                     .then(() => BotLifeState.marketGoalCandidates(5, 123457));
             }))
         .then(() => {
-            const due = statements.find((entry) => entry.sql.includes("WHEN activity IN ('traveling', 'shopping', 'crafting') THEN 1"));
+            const due = statements.find((entry) => entry.sql.includes("WHEN activity IN ('traveling', 'shopping', 'crafting', 'clan_hall') THEN 1"));
             assert(due.sql.includes('rateModelVersion'), 'due cold states must prioritize persisted plans from an older drop-rate model');
             assert(due.sql.includes(`< ${GearPlanner.RATE_MODEL_VERSION}`), 'due cold states must prioritize plans from the current model rollout rather than a stale hard-coded version');
             assert(due.sql.includes("OR (activity = 'hunting' AND (json_extract(statsJson, '$.equipmentPlan.status') = 'active'"), 'only active stale combat plans must bypass their old next-resolve deadline for an immediate safety replan');
             const stalePlanOrder = due.sql.indexOf("WHEN json_extract(statsJson, '$.equipmentPlan.status') = 'active'");
-            assert(stalePlanOrder >= 0 && stalePlanOrder < due.sql.indexOf("WHEN activity IN ('traveling', 'shopping', 'crafting') THEN 1"), 'a stale active plan must outrank ordinary market, travel, and crafting transitions');
-            assert(due.sql.includes("WHEN activity IN ('traveling', 'shopping', 'crafting') THEN 1"), 'due cold states must promptly finish market, travel, and crafting transitions after an urgent combat-safety replan');
+            assert(stalePlanOrder >= 0 && stalePlanOrder < due.sql.indexOf("WHEN activity IN ('traveling', 'shopping', 'crafting', 'clan_hall') THEN 1"), 'a stale active plan must outrank ordinary market, travel, and crafting transitions');
+            assert(due.sql.includes("WHEN activity IN ('traveling', 'shopping', 'crafting', 'clan_hall') THEN 1"), 'due cold states must promptly finish market, travel, and crafting transitions after an urgent combat-safety replan');
             assert(due.sql.includes("json_extract(statsJson, '$.equipmentPlan.next.spotId')"), 'due cold states must prioritize active gear plans whose source spot differs from the saved spot');
             assert(due.sql.includes("startup_craft_wait_recovery"), 'startup craft recovery must immediately replan before the ordinary hunting backlog');
             assert(due.sql.includes('COALESCE(nextResolveAt, 0) ASC'), 'due cold states must remain fair by schedule within each lifecycle bucket');
@@ -541,6 +543,7 @@ try {
         Database.updateSkillLevel = originalUpdateSkillLevel;
         Database.updateCharacterClassId = originalUpdateCharacterClassId;
         ColdSimulationOwner.recoverStartupLeases = originalRecoverStartupLeases;
+        Database.reconcileBotClanMembership = originalReconcileClanMembership;
     });
 } catch (err) {
     Database.chooseFirstProfessionPath = originalChoosePath;
@@ -560,5 +563,6 @@ try {
     Database.updateSkillLevel = originalUpdateSkillLevel;
     Database.updateCharacterClassId = originalUpdateCharacterClassId;
     ColdSimulationOwner.recoverStartupLeases = originalRecoverStartupLeases;
+    Database.reconcileBotClanMembership = originalReconcileClanMembership;
     throw err;
 }

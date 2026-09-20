@@ -82,7 +82,7 @@ const BotDecisionService = {
                 };
             }
 
-            const candidate = SpotService.findBestSpot(status, { matchupProfiles:
+            const candidate = SpotService.findBestSpot(status, { spotRetryAfter: session.spotRetryAfter, matchupProfiles:
                 session.actor ? invoke('GameServer/Bot/AI/BotTargetMatchup').actorProfiles([session.actor]) : undefined });
             if (candidate) {
                 return {
@@ -97,7 +97,7 @@ const BotDecisionService = {
         }
 
         if (status.mode === 'hunting' && status.blockers.includes('no_targets_nearby')) {
-            const candidate = canMoveToSpot(session) ? SpotService.findBestSpot(status, { minDensity: 2,
+            const candidate = canMoveToSpot(session) ? SpotService.findBestSpot(status, { minDensity: 2, spotRetryAfter: session.spotRetryAfter,
                 matchupProfiles: session.actor ? invoke('GameServer/Bot/AI/BotTargetMatchup').actorProfiles([session.actor]) : undefined }) : null;
             if (candidate) {
                 return {

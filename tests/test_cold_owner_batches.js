@@ -64,6 +64,7 @@ async function createProbe(index) {
 
 (async () => {
     const states = await Promise.all([1, 2, 3].map(createProbe));
+    await Database.setSkill({ selfId: 239, name: 'Expertise', passive: true, level: 2 }, states[0].characterId);
     await Database.execute(['UPDATE characters SET karma = 45, pk = 1 WHERE id IN (?, ?)', [states[0].characterId, states[1].characterId]]);
     await Database.execute(['UPDATE characters SET karma = 1 WHERE id = ?', [states[2].characterId]]);
     const claimed = await Owner.claimBatch(states.map((state, index) => ({
@@ -118,7 +119,8 @@ async function createProbe(index) {
             baseState: states[index],
             durable: index < 2 ? {
                 classId: index + 1,
-                skills: [{ selfId: 1000 + index, name: `Batch Skill ${index}`, passive: index === 0, level: 2 }]
+                skills: [{ selfId: 1000 + index, name: `Batch Skill ${index}`, passive: index === 0, level: 2 },
+                    { selfId: 239, name: 'Expertise', passive: true, level: 1 }]
             } : null
         }
     }));
@@ -163,6 +165,8 @@ async function createProbe(index) {
     );
     assert.strictEqual(Number(physical[0].adenaItem), 550, 'accepted CAS must atomically persist materialized inventory');
     assert.strictEqual(Number(physical[0].skillLevel), 2, 'accepted CAS must atomically upsert the worker-planned skill tree');
+    assert.strictEqual(Number((await Database.fetchSkill(states[0].characterId, 239))[0].level), 2,
+        'a lower-level worker tree after delevel must not downgrade persisted Expertise');
     assert.deepStrictEqual(
         [Number(physical[1].classId), Number(physical[1].exp), physical[1].adenaItem],
         [0, 0, null],

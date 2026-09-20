@@ -11,6 +11,7 @@ const ChargeLifecycle = invoke('GameServer/Skills/ChargeLifecycle');
 const HealingPotionStock = invoke('GameServer/Bot/AI/HealingPotionStock');
 const BotHuntingGroundPolicy = invoke('GameServer/Bot/AI/BotHuntingGroundPolicy');
 const TargetMatchup = invoke('GameServer/Bot/AI/BotTargetMatchup');
+const EncounterReadiness = invoke('GameServer/Bot/AI/BotEncounterReadiness');
 
 function clamp(value, min, max) {
     return Math.max(min, Math.min(max, value));
@@ -128,7 +129,7 @@ function coldPassiveRegenAdd(state, skillId, stat) {
     return Number(C4SkillRules.resolve({ selfId: skillId, level: skillLevel }).stats?.[stat]) || 0;
 }
 
-function coldRestRegenPerTick(state) {
+function coldRestRegenPerTick(state, options = {}) {
     const level = Math.max(1, Number(state.level || midpointBand(state.levelBand)) || 1);
     const classId = Number(state.stats?.classId ?? state.classId);
     const template = (DataCache.classTemplates || []).find((entry) => Number(entry.classId) === classId) || {};
@@ -140,7 +141,7 @@ function coldRestRegenPerTick(state) {
     const mp = ((mpBase * Formulas.calcLevelMod(level) * Formulas.calcBaseMod.MEN(Number(baseStats.men) || 1))
         + coldPassiveRegenAdd(state, 229, 'regMpAdd')) * 1.5;
 
-    return { hp: Math.max(0, hp), mp: Math.max(0, mp) };
+    return { hp: Math.max(0, hp) * (options.hpMultiplier || 1), mp: Math.max(0, mp) * (options.mpMultiplier || 1) };
 }
 
 function requiresManaRecovery(state, options = {}) {
@@ -162,7 +163,7 @@ function estimateRestMs(state, vitals, options = {}) {
     const maxMp = Number(vitals.maxMp || vitals.mp || 1);
     const missingHp = Math.max(0, maxHp - Number(vitals.hp || 0));
     const missingMp = Math.max(0, maxMp - Number(vitals.mp || 0));
-    const regen = coldRestRegenPerTick(state);
+    const regen = coldRestRegenPerTick(state, options);
     const hpSeconds = missingHp / Math.max(0.01, regen.hp / 3);
     const mpSeconds = requiresManaRecovery(state, options)
         ? missingMp / Math.max(0.01, regen.mp / 3)
@@ -196,7 +197,7 @@ function resolveRest(state, elapsedMs, timestamp, options = {}) {
         mp: Math.max(0, Number(state.vitals?.mp || 0)),
         maxMp: combat.maxMp
     };
-    const regen = coldRestRegenPerTick(state);
+    const regen = coldRestRegenPerTick(state, options);
     const ticks = Math.max(0, Number(elapsedMs) || 0) / 3000;
     vitals.hp = Math.min(vitals.maxHp, vitals.hp + regen.hp * ticks);
     vitals.mp = Math.min(vitals.maxMp, vitals.mp + regen.mp * ticks);
@@ -623,12 +624,25 @@ function resolveFight({ state, spot, pressure, targetNpcId = 0, rng, timestamp =
     const encounterKey = PveEncounter.key([state], spot, targetNpcId);
     const pending = PveEncounter.read(state.stats?.pveEncounter, encounterKey, timestamp);
     const mob = pending?.mob || ColdCombatProfile.npcForSpot(spot, rng, { preferredNpcId: targetNpcId,
+        soloSafety: true,
+        maxTargetLevel: invoke('GameServer/Bot/Population/SpotRiskPolicy').recoveryFor(state)?.levelPenalty > 0
+            ? invoke('GameServer/Bot/AI/LevelingRoutes').targetLevelForState(state) : null,
         matchupProfiles: TargetMatchup.coldProfiles(bot, fightState, timestamp) }) || {
         level: Number(spot.avgLevel || bot.level), maxHp: Math.max(1, Number(spot.mob?.hp || 1)),
         pAtk: Math.max(1, Number(spot.mob?.damage || 1)), pAtkRnd: 0, pDef: 1, mDef: 1,
         accur: 1, evasion: 0, critical: 0, atkSpd: 253, mAtk: 1, castSpd: 333
     };
     if (mob.avoided) return { avoided: true, reason: mob.reason };
+    if (!pending && !mob.aggressiveInterruption) {
+        const readiness = EncounterReadiness.evaluate({
+            hp: state.vitals?.hp ?? bot.maxHp, maxHp: bot.maxHp,
+            mp: state.vitals?.mp ?? bot.maxMp, maxMp: bot.maxMp, level: bot.level,
+            manaDependent: BotRoles.shouldRestForMana(state)
+        }, mob);
+        if (!readiness.ready) {
+            return { avoided: true, needsRest: true, reason: 'solo_recovery_needed' };
+        }
+    }
     const vitals = {
         hp: Number(state.vitals?.hp ?? bot.maxHp),
         mp: Number(state.vitals?.mp ?? bot.maxMp),
@@ -1346,6 +1360,13 @@ const BackgroundResolver = {
                 maxActions: actionBudget - combatActions });
             if (result.avoided) {
                 patch.stats.lastReason = result.reason;
+                if (result.needsRest) {
+                    patch.activity = 'resting';
+                    patch.stats.restUntil = timestamp + estimateRestMs(fightState, patch.vitals);
+                    events.push({ type: 'rest', weight: 2,
+                        summary: `${state.name || 'Bot'} sat down before another fight near ${spot.name}`,
+                        meta: { spotId: spot.id, reason: result.reason } });
+                }
                 break;
             }
             attemptedFights += 1;
@@ -1446,6 +1467,7 @@ const BackgroundResolver = {
             nextResolveAt: patch.stats?.restUntil || timestamp + 30000 + Math.round(rng() * 90000),
             debug: {
                 elapsedMs,
+                combatMs,
                 fights: completedFights,
                 attemptedFights,
                 pendingFight: !!patch.stats.pveEncounter,

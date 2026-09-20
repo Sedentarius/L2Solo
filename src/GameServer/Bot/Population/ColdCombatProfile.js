@@ -396,6 +396,12 @@ function skillRecordsFromTree(classId, level) {
 function treeSnapshot(state = {}, timestamp = Date.now()) {
     const existing = state.stats?.coldCombat || {};
     const classId = number(state.stats?.classId, number(state.classId));
+    // Learning at a lower level after a death must not erase previously
+    // learned skills or lower their ranks (including Expertise).
+    const skills = new Map((existing.skills || []).map((skill) => [number(skill.selfId), skill]));
+    for (const skill of skillsFromTree(classId, Math.max(1, number(state.level, 1)))) {
+        if (number(skills.get(skill.selfId)?.level) < number(skill.level)) skills.set(skill.selfId, skill);
+    }
     return {
         ...existing,
         version: PROFILE_VERSION,
@@ -403,7 +409,7 @@ function treeSnapshot(state = {}, timestamp = Date.now()) {
         capturedAt: timestamp,
         classId,
         effects: existing.effects || [],
-        skills: skillsFromTree(classId, Math.max(1, number(state.level, 1)))
+        skills: [...skills.values()]
     };
 }
 
@@ -631,12 +637,20 @@ function npcForSpot(spot = {}, rng = Math.random, options = {}) {
     const encounterEntries = entries;
     const Matchup = invoke('GameServer/Bot/AI/BotTargetMatchup');
     if (options.matchupProfiles?.length) {
+        let resisted = 0;
         entries = entries.map(entry => {
             const npc = (DataCache.npcs || []).find(n => number(n.selfId) === number(entry.selfId));
-            const match = Matchup.evaluate(options.matchupProfiles, npcCombatStats(npc));
+            const target = npcCombatStats(npc);
+            const match = Matchup.evaluate(options.matchupProfiles, target);
+            if (!match.eligible) resisted += 1;
+            if (options.soloSafety) {
+                match.eligible &&= Matchup.soloSurvival(options.matchupProfiles, target).eligible
+                    && (!options.maxTargetLevel || Number(npc.template?.level || 0) <= options.maxTargetLevel);
+            }
             return { ...entry, match };
         }).filter(entry => entry.match.eligible);
-        if (!entries.length) return { avoided: true, reason: 'target_resistance' };
+        if (!entries.length) return { avoided: true,
+            reason: resisted === encounterEntries.length ? 'target_resistance' : 'no_safe_solo_target' };
     }
     const pickEntry = (candidates) => {
         const weight = entry => Math.max(1, number(entry.count, 1)) * Math.min(1, entry.match?.efficiency ?? 1) ** 2;
@@ -667,6 +681,7 @@ function npcForSpot(spot = {}, rng = Math.random, options = {}) {
     const combat = npcCombatStats(npc);
     return {
         selfId: number(npc.selfId),
+        aggressiveInterruption: !!preferred && selected !== preferred,
         ...combat
     };
 }

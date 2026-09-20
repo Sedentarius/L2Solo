@@ -1,3 +1,4 @@
+const ClanMembershipPolicy = require('../../Clan/ClanMembershipPolicy');
 const LifeStateCache = require('./LifeStateCache');
 const ItemTemplateIndex = require('../../Item/ItemTemplateIndex');
 const Database = invoke('Database');
@@ -458,7 +459,7 @@ function normalize(row) {
     const stats = parseJson(row.statsJson, {});
     const inventory = normalizeInventoryStackability(parseJson(row.inventorySummary, {}));
 
-    return {
+    return ClanMembershipPolicy.reconcileState({
         characterId: Number(row.characterId),
         accountName: row.accountName || '',
         name: row.characterName || '',
@@ -503,7 +504,7 @@ function normalize(row) {
             leaseUntil: Math.max(0, Number(row.simulationLeaseUntil || 0))
         },
         updatedAt: Number(row.updatedAt || 0)
-    };
+    });
 }
 
 function recordFromSession(session, phase, reason = '') {
@@ -527,13 +528,19 @@ function recordFromSession(session, phase, reason = '') {
         pvpIncidents: invoke('GameServer/Social/PvpResponsibility').snapshot(actor, timestamp),
         revengeUntil: Math.max(Number(session.nextRevengeAt || 0), Number(cache.get(characterId)?.stats?.revengeUntil || 0)),
         clanGearExchangeRevision: Number(cache.get(characterId)?.stats?.clanGearExchangeRevision || 0),
+        clanInventoryRevision: Number(cache.get(characterId)?.stats?.clanInventoryRevision || 0),
+        clanMembershipVersion: Number(cache.get(characterId)?.stats?.clanMembershipVersion || 0),
         classId: actor.fetchClassId ? Number(actor.fetchClassId()) : null,
         // A freshly spawned bot may cool before it has gone through a cold
         // resolve. Persist the completed profile here so it is never picked
         // up by the one-off legacy migration on a later restart.
         classProgressionLevel: actor.fetchLevel(),
         classProgressionClassId: actor.fetchClassId ? Number(actor.fetchClassId()) : null,
-        clanId: actor.fetchClanId ? Number(actor.fetchClanId()) || 0 : 0,
+        clanId: cache.get(characterId)?.stats?.clanMembershipVersion
+            ? Number(cache.get(characterId).stats.clanId || 0)
+            : actor.fetchClanId ? Number(actor.fetchClanId()) || 0 : 0,
+        clanHallVisit: session.clanHallVisit === undefined ? session.coldLifeState?.stats?.clanHallVisit || null : session.clanHallVisit,
+        clanHallRetryAt: session.clanHallRetryAt ?? session.coldLifeState?.stats?.clanHallRetryAt ?? 0,
         route: currentSpot?.route || null,
         build: GearSkillHints.forCharacter(actor, { role: session.botStatus?.role || null }),
         equipment: equipmentSummaryFromInventory(inventory),
@@ -591,6 +598,7 @@ function recordFromSession(session, phase, reason = '') {
 }
 
 function rowFromState(state) {
+    state = ClanMembershipPolicy.reconcileState(state);
     const inventory = InventorySummary.canonicalize(state?.inventory);
     const equipmentAdvance = equipmentCompletionSignal({ ...state, inventory });
     const persistedState = reconcileFulfilledEquipmentPlan({
@@ -658,10 +666,16 @@ function preserveVersionedAppearanceForSave(row) {
 }
 
 function save(row) {
+    const proposed = { activity: row.activity, stats: parseJson(row.statsJson, {}) };
+    const reconciled = ClanMembershipPolicy.reconcileState(proposed);
+    if (reconciled !== proposed) {
+        row.activity = reconciled.activity;
+        row.statsJson = safeJson(reconciled.stats);
+    }
     // An async lifecycle step may still hold the inventory from before an
     // exchange. Reject it before its subsequent inventory sync restores gear.
     const exchangeRevision = Number(cache.get(Number(row.characterId))?.stats?.clanGearExchangeRevision || 0);
-    if (exchangeRevision > Number(parseJson(row.statsJson, {}).clanGearExchangeRevision || 0)) {
+    if (exchangeRevision > Number(reconciled.stats.clanGearExchangeRevision || 0)) {
         const error = new Error(`stale inventory before clan equipment exchange for ${row.characterId}`);
         error.code = 'BOT_LIFE_STATE_OWNERSHIP_CONFLICT';
         return Promise.reject(error);
@@ -703,7 +717,11 @@ function save(row) {
             inventorySummary = excluded.inventorySummary,
             statsJson = excluded.statsJson,
             updatedAt = excluded.updatedAt
-        WHERE ${TABLE}.simulationOwner = 'legacy_main'`,
+        WHERE ${TABLE}.simulationOwner = 'legacy_main'
+          AND COALESCE(json_extract(${TABLE}.statsJson, '$.clanInventoryRevision'), 0)
+              <= COALESCE(json_extract(excluded.statsJson, '$.clanInventoryRevision'), 0)
+          AND COALESCE(json_extract(${TABLE}.statsJson, '$.clanMembershipVersion'), 0)
+              <= COALESCE(json_extract(excluded.statsJson, '$.clanMembershipVersion'), 0)`,
         [
             row.characterId,
             row.accountName,
@@ -1124,7 +1142,7 @@ function clearPassivePartyRequests() {
             updatedAt = ?
         WHERE phase = 'cold'
         AND (partyId IS NULL OR partyId = '')
-        AND activity IN ('traveling', 'shopping', 'merchant', 'crafting', 'dead')
+        AND activity IN ('traveling', 'shopping', 'merchant', 'crafting', 'dead', 'clan_hall')
         AND partyRequestStatus = 'open'`,
         [timestamp]
     ]).then((result) => {
@@ -1412,6 +1430,11 @@ const BotLifeState = {
             // even when its wall-clock lease had time remaining. Reclaim the
             // rows before any legacy startup repair can touch them.
             .then(() => invoke('GameServer/Bot/Population/ColdSimulationOwner').recoverStartupLeases())
+            .then(() => Database.reconcileBotClanMembership()).then(({ repairedMembers, repairedParties }) => {
+                if (repairedMembers || repairedParties) {
+                    utils.infoWarn('BotLife', 'reconciled clan membership and crafting goals: bots=%d parties=%d', repairedMembers, repairedParties);
+                }
+            })
             .then(() => Database.execute([`UPDATE ${TABLE}
                 SET statsJson = json_set(COALESCE(statsJson, '{}'), '$.karma',
                     (SELECT karma FROM characters WHERE id = characterId))
@@ -1526,6 +1549,12 @@ const BotLifeState = {
     markCold(session, reason = 'cooldown') {
         if (!session || !session.actor) return Promise.resolve(null);
 
+        const membership = cache.get(Number(session.actor.fetchId()))?.stats;
+        const membershipStats = membership?.clanMembershipVersion ? {
+            clanId: membership.clanId,
+            clanMembershipVersion: membership.clanMembershipVersion,
+            clanDiscipline: membership.clanDiscipline
+        } : {};
         const marketState = session.coldMarketState;
         const craftState = refreshCraftShop(session.coldCraftState);
         if (marketState?.stats?.marketStore) {
@@ -1546,6 +1575,7 @@ const BotLifeState = {
                 },
                 stats: {
                     ...(marketState.stats || {}),
+                    ...membershipStats,
                     pvpEnemies: invoke('GameServer/Bot/AI/BotEnemyMemory').snapshot(session),
                     marketStore: {
                         ...(marketState.stats.marketStore || {}),
@@ -1580,7 +1610,7 @@ const BotLifeState = {
                     activityStartedAt: now(),
                     nextResolveAt: null
                 },
-                stats: { ...(craftState.stats || {}), pvpEnemies: invoke('GameServer/Bot/AI/BotEnemyMemory').snapshot(session), lastReason: reason },
+                stats: { ...(craftState.stats || {}), ...membershipStats, pvpEnemies: invoke('GameServer/Bot/AI/BotEnemyMemory').snapshot(session), lastReason: reason },
                 inventory: parseJson(row.inventorySummary, {})
             };
             return this.upsertState(nextState, reason);
@@ -1719,7 +1749,7 @@ const BotLifeState = {
                 -- Replan active combat before it can continue using a stale
                 -- target level or drop-rate estimate.
                 WHEN ${staleRateModelPlan} THEN 0
-                WHEN activity IN ('traveling', 'shopping', 'crafting') THEN 1
+                WHEN activity IN ('traveling', 'shopping', 'crafting', 'clan_hall') THEN 1
                 -- An active equipment plan whose next source is elsewhere
                 -- must get a chance to start gatekeeper travel before the
                 -- ordinary hunting backlog keeps resolving the old spot.
@@ -2286,8 +2316,18 @@ const BotLifeState = {
             totalWins: Number(state.stats?.fightsWon || 0),
             deaths: Math.max(0, nextDeaths - previousDeaths),
             fights: Number(result.debug?.fights || 0),
-            wins: Number(result.debug?.wins || 0)
+            wins: Number(result.debug?.wins || 0),
+            // Only completed, abandoned hunts count. Pending encounter slices
+            // and pre-fight recovery have zero completed fights.
+            failedHunts: Math.max(0, Number(result.debug?.fights || 0)
+                - Number(result.debug?.wins || 0) - Math.max(0, nextDeaths - previousDeaths))
         });
+        const soloRiskState = { ...state, spotId: nextSpotId, stats: { ...state.stats, spotRisk } };
+        const soloPressure = !(state.party?.partyId || state.partyId) && SpotRiskPolicy.deathPressure(soloRiskState);
+        const newlyFailedSpot = soloPressure && !SpotRiskPolicy.activeBackoffs(state, timestamp)
+            .some(entry => entry.spotId === nextSpotId);
+        const failedSpotState = newlyFailedSpot ? SpotRiskPolicy.withBackoff(soloRiskState,
+            SpotRiskPolicy.backoffForStates([soloRiskState], nextSpotId, timestamp), timestamp) : null;
         // Resolver patches often carry a projected copy of the previous
         // stats so they can add lifecycle-specific fields such as cooldowns,
         // rest deadlines, travel state, or party affinity.  Merge that copy
@@ -2389,6 +2429,26 @@ const BotLifeState = {
                 // Resolver patches commonly start from the prior state. Keep
                 // the baseline stamped for this resolve's actual destination.
                 spotRisk,
+                // Save the failed ground before revival/physical movement can
+                // change the routing origin and lose its exclusion.
+                ...(failedSpotState ? { spotBackoffs: failedSpotState.stats.spotBackoffs } : {}),
+                ...(!(state.party?.partyId || state.partyId) ? {
+                    huntingRecovery: SpotRiskPolicy.recordRecovery(state, {
+                        deaths: Math.max(0, nextDeaths - previousDeaths),
+                        wins: Number(result.debug?.wins || 0), exp,
+                        expBeforeDeath: experienceAward.totalExp,
+                        pressure: soloPressure
+                    }),
+                    ...(Number(result.debug?.combatMs) > 0 ? {
+                        // The lifecycle owns actual death penalties and capped XP.
+                        // Replace the resolver's provisional gross reward sample.
+                        huntEfficiency: invoke('GameServer/Bot/AI/BotHuntEfficiency').record(state, {
+                            spotId: nextSpotId, timestamp, exp: exp - Number(state.exp || 0),
+                            combatMs: result.debug.combatMs,
+                            recoveryMs: Math.max(0, Number(result.patch?.stats?.restUntil || timestamp) - timestamp)
+                        })
+                    } : {})
+                } : {}),
                 // Party combat carries a projected combat snapshot in patch.stats.
                 // Keep lifecycle telemetry from this resolve authoritative over
                 // that snapshot, which still contains the previous tick's data.
@@ -2537,6 +2597,7 @@ const BotLifeState = {
                 WHERE states.phase = 'cold'
                 AND (states.partyId IS NULL OR states.partyId = '')
                 AND states.activity NOT IN ('traveling', 'shopping', 'merchant', 'crafting', 'dead', 'pk_hunting')
+                AND states.activity <> 'clan_hall'
                 AND COALESCE(CAST(json_extract(states.statsJson, '$.marketSellRetryAfter') AS INTEGER), 0) <= ?
                 AND (states.updatedAt > ?
                     OR (states.updatedAt = ? AND states.characterId > ?))
@@ -2761,6 +2822,7 @@ const BotLifeState = {
                 WHERE states.phase = 'cold'
                 AND (states.partyId IS NULL OR states.partyId = '')
                 AND states.activity NOT IN ('traveling', 'shopping', 'merchant', 'crafting')
+                AND states.activity <> 'clan_hall'
                 AND COALESCE(CAST(json_extract(goals.goalJson, '$.nextReviewAt') AS INTEGER), 0) <= ?
                 ORDER BY goals.updatedAt ASC, states.updatedAt ASC
                 LIMIT ${safeLimit}
@@ -3247,6 +3309,40 @@ const BotLifeState = {
         });
         pendingWrites.set(id, tracked);
         return tracked;
+    },
+
+    acceptClanMembershipState(row) {
+        const snapshot = normalize(row);
+        cache.set(snapshot.characterId, snapshot);
+        notifyColdSnapshot(snapshot, 'clan_membership', { critical: true });
+        return snapshot;
+    },
+
+    acceptClanCraftState(row) {
+        const snapshot = normalize(row);
+        cache.set(snapshot.characterId, snapshot);
+        notifyColdSnapshot(snapshot, 'clan_craft', { critical: true });
+        return snapshot;
+    },
+
+    applyClanMaterialTransfer(request, withdraw = false) {
+        const id = Number(request.characterId);
+        const previous = pendingWrites.get(id) || Promise.resolve();
+        const next = previous.then(() => withdraw
+            ? Database.transferClanWarehouseToMember({ ...request, allowParty: true })
+            : Database.transferInventoryToClanWarehouse({ ...request, allowParty: true }))
+            .then(result => {
+                if (!result?.ok || !result.state) return result;
+                const snapshot = normalize(result.state);
+                cache.set(id, snapshot);
+                notifyColdSnapshot(snapshot, 'clan_material_transfer', { critical: true });
+                return { ...result, state: snapshot };
+            });
+        const tracked = next.catch(() => {}).finally(() => {
+            if (pendingWrites.get(id) === tracked) pendingWrites.delete(id);
+        });
+        pendingWrites.set(id, tracked);
+        return next;
     },
 
     applyWarehouseGearCleanup(characterId, selections = [], options = {}) {

@@ -418,6 +418,9 @@ const BotAI = {
         // Actual player aggression owns the action window before travel,
         // conversation, recovery or ordinary party/PvE state routing.
         const defendingPvp = !botDead && invoke('GameServer/Bot/AI/BotPvpDefense').tick(session, bot, invoke(path.actor), this);
+        if ((botDead || defendingPvp) && session.clanHallVisit) {
+            invoke('GameServer/ClanHall/BotVisit').finish(session, bot, Date.now() + 300000);
+        }
 
         if (!botDead && !defendingPvp
             && invoke('GameServer/Bot/AI/ClanAllianceSupportAI').tick(session, bot, invoke(path.actor))) return;
@@ -531,7 +534,15 @@ const BotAI = {
                 const deathStartedAt = session.deathTimerStart;
                 // TeleportTo rejects actors that are still marked dead, so bot
                 // respawns must complete before applying the new town location.
-                Generics.revive(session, bot, { delayMs: 0, restoreFullVitals: true });
+                const hallRuntime = invoke('GameServer/ClanHall/Runtime');
+                const recoveryHall = !wasCompanion && !session.clanAllianceQuest && !session.clanAllianceSupportLeaderId
+                    && Number(bot.fetchKarma?.() || 0) === 0 && session.plan !== 'merchant'
+                    ? hallRuntime.forActor(bot) : null;
+                Generics.revive(session, bot, { delayMs: 0, restoreFullVitals: true,
+                    restoreExpPercent: recoveryHall ? hallRuntime.expRestore(bot) : null,
+                    recoveryReason: recoveryHall ? 'restart_to_clan_hall' : 'restart_to_town' });
+                session.clanHallVisit = null;
+                session.clanHallRetryAt = 0;
                 session.deathTimerStart = undefined;
                 session.currentTargetId = undefined;
                 session.incomingThreatId = undefined;
@@ -571,7 +582,7 @@ const BotAI = {
                     session.plan = 'hunting'; // Reset plan
                     session.currentSpot = null;
                     session.noTargetTicks = 0;
-                    spawnTarget = this.getDeathRespawnTarget(session, bot, false);
+                    spawnTarget = recoveryHall?.spawn || this.getDeathRespawnTarget(session, bot, false);
                 }
                 
                 Generics.teleportTo(session, bot, spawnTarget);
@@ -612,6 +623,7 @@ const BotAI = {
         if (visibleRealPlayers.length) invoke('GameServer/Bot/AI/BotChatReactions').offerLocal(session, tickStartedAt);
 
         // 3. Dynamic State Machine Routing
+        if (!defendingPvp && invoke('GameServer/ClanHall/BotVisit').tick(session, bot)) return;
         if (invoke('GameServer/Bot/AI/HotResourceCompetition').tick(session)) return;
         if (session.hotBackgroundPartyId && invoke('GameServer/Bot/AI/HotBackgroundParty').tick(session, bot, Generics, this)) return;
         const state = States[session.plan];

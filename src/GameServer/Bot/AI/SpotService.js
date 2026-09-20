@@ -289,6 +289,7 @@ const SpotService = {
         routeOptions.matchupProfiles = invoke('GameServer/Bot/AI/BotTargetMatchup').stateProfiles(routeState, routeOptions);
 
         const candidates = this.ensureIndexed()
+            .filter((spot) => !(Number(options.spotRetryAfter?.[spot.id]) > Date.now()))
             .filter((spot) => spot.density >= (options.minDensity || 4))
             .filter((spot) => spot.minLevel <= targetLevel + levelRange && spot.maxLevel >= targetLevel - levelRange)
             .filter((spot) => isSuitable(spot, targetLevel, options))

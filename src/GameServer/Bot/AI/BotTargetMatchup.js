@@ -33,13 +33,15 @@ function actorProfile(actor) {
         atkSpd: actor.fetchCollectiveAtkSpd?.() ?? actor.fetchAtkSpd?.() ?? 300,
         castSpd: actor.fetchCollectiveCastSpd?.() ?? actor.fetchCastSpd?.() ?? 333,
         maxMp: actor.fetchMaxMp?.(), weaponMask: WeaponMask.weaponMaskFor(actor),
+        maxHp: actor.fetchMaxHp?.(),
+        pDef: actor.fetchCollectivePDef?.() ?? actor.fetchPDef?.(),
         equipment: { weaponKind: actor.backpack?.fetchTotalWeaponKind?.() },
         skills: (actor.skillset?.skills || actor.skillset?.fetchSkills?.() || []).map(skill => ({
             selfId: skill.fetchSelfId?.(), level: skill.fetchLevel?.(),
             reuseReady: actor.canUseSkill?.(skill) !== false,
             semantic: skill.fetchSemantic?.() || {}, passive: skill.fetchPassive?.(),
             spell: skill.fetchSpell?.(), power: skill.fetchPower?.(), mp: skill.fetchConsumedMp?.(),
-            hitTime: skill.fetchHitTime?.(), distance: skill.fetchDistance?.()
+            hitTime: skill.fetchHitTime?.(), reuse: skill.fetchReuseTime?.(), distance: skill.fetchDistance?.()
         }))
     };
 }
@@ -101,6 +103,9 @@ function targetView(target, stats = ['bowWpnVuln', 'bluntWpnVuln', 'daggerWpnVul
     const pDef = target.fetchCollectivePDef?.() ?? target.fetchPDef?.();
     const mDef = target.fetchCollectiveMDef?.() ?? target.fetchMDef?.();
     return { vulnerabilities, pDef, mDef, undead: target.fetchUndead?.() === true,
+        maxHp: target.fetchMaxHp?.(),
+        pAtk: target.fetchCollectivePAtk?.() ?? target.fetchPAtk?.(),
+        atkSpd: target.fetchCollectiveAtkSpd?.() ?? target.fetchAtkSpd?.(),
         basePDef: target.fetchPDef?.() ?? pDef, baseMDef: target.fetchMDef?.() ?? mDef };
 }
 
@@ -143,7 +148,13 @@ function channels(profile, target) {
                 / Math.max(0.5, number(skill.hitTime, 3000) / 1000 * 333 / positive(profile.castSpd || 333))
             : 70 * (positive(profile.pAtk) + power) / positive(target.basePDef || target.pDef)
                 / Math.max(1, number(skill.hitTime, 1500) / 1000);
-        result.push({ weight, modifier: modifier(target, semantic, magic, kind) });
+        const hitDamage = magic
+            ? 91 * Math.sqrt(positive(profile.mAtk)) * power / positive(target.baseMDef || target.mDef)
+            : 70 * (positive(profile.pAtk) + power) / positive(target.basePDef || target.pDef);
+        result.push({ weight, modifier: modifier(target, semantic, magic, kind),
+            survivalWeight: Math.min(weight, hitDamage / Math.max(0.25, number(skill.reuse, 0) / 1000)),
+            damageBudget: number(skill.mp, 0) > 0
+                ? Math.floor(number(profile.maxMp, 0) / skill.mp) * hitDamage : Infinity });
     }
     return result;
 }
@@ -162,6 +173,24 @@ function evaluate(profiles, target) {
         reason: efficiency <= MIN_EFFICIENCY ? 'target_resistance' : 'target_efficiency' };
 }
 
+// Full-health readiness, not an estimate of the current injured fight. Keep
+// headroom for misses, interrupted casts and the retreat before zero HP.
+// Missing legacy projections remain neutral until real stats are available.
+function soloSurvival(profiles, target, minimum = 1.5) {
+    if (!profiles?.length || !(target.maxHp > 0) || !(target.pAtk > 0)
+        || profiles.some(profile => profile.survivalKnown === false || !(profile.maxHp > 0) || !(profile.pDef > 0))) {
+        return { eligible: true, survivalRatio: null };
+    }
+    const lifetime = Math.max(...profiles.map(profile => profile.maxHp
+        / (70 * target.pAtk / profile.pDef * positive(target.atkSpd || 253) / 500)));
+    const damage = profiles.reduce((sum, profile) => sum + Math.max(0, ...channels(profile, target)
+        .map(attack => Math.min((attack.survivalWeight ?? attack.weight) * lifetime,
+            attack.damageBudget ?? Infinity) * attack.modifier)), 0);
+    const survivalRatio = damage / target.maxHp;
+    return { eligible: survivalRatio >= minimum, survivalRatio,
+        reason: survivalRatio >= minimum ? 'solo_survival_ready' : 'insufficient_survival_margin' };
+}
+
 function stateProfiles(state, options = {}) {
     if (options.matchupProfiles) return options.matchupProfiles;
     const states = (options.capacityStates?.length ? options.capacityStates : [state])
@@ -171,26 +200,39 @@ function stateProfiles(state, options = {}) {
     const Cold = invoke('GameServer/Bot/Population/ColdCombatProfile');
     return states.flatMap(member => typeof member.fetchHp === 'function'
         ? actorProfiles([member])
-        : coldProfiles(Cold.profileFor(member, options.timestamp), member, options.timestamp));
+        : coldProfiles({ ...Cold.profileFor(member, options.timestamp),
+            // Partial route projections must not turn an invented default
+            // class/build into evidence that the real character is too weak.
+            survivalKnown: !!member.stats?.coldCombat
+                || Number.isFinite(Number(member.stats?.classId ?? member.classId))
+        }, member, options.timestamp));
 }
 
-function spotMatchup(spot, profiles) {
+function spotMatchup(spot, profiles, options = {}) {
     if (!profiles?.length) return evaluate([], {});
     const Cold = invoke('GameServer/Bot/Population/ColdCombatProfile');
     const HuntingPolicy = invoke('GameServer/Bot/AI/BotHuntingTargetPolicy');
-    let total = 0, effective = 0, eligible = false;
+    let total = 0, effective = 0, eligible = false, safe = 0;
     for (const entry of spot.npcEntries || []) {
         const npc = npcTemplate(entry.selfId);
         if (!npc || !HuntingPolicy.canHunt(npc)) continue;
         const weight = Math.max(1, number(entry.count));
-        const match = evaluate(profiles, Cold.npcCombatStats(npc));
+        const target = Cold.npcCombatStats(npc);
+        const match = evaluate(profiles, target);
+        const survival = options.soloSafety ? soloSurvival(profiles, target) : { eligible: true };
+        const withinRecoveryLevel = !options.maxTargetLevel || Number(npc.template?.level || 0) <= options.maxTargetLevel;
         total += weight;
         effective += weight * Math.min(1, match.efficiency);
-        eligible ||= match.eligible;
+        const canHunt = match.eligible && survival.eligible && withinRecoveryLevel;
+        eligible ||= canHunt;
+        if (canHunt) safe += weight;
     }
     const efficiency = total ? effective / total : 1;
-    return { efficiency, eligible: !total || eligible, penalty: Math.round((1 - efficiency) * 250) };
+    const safeFraction = total ? safe / total : 1;
+    return { efficiency, safeFraction,
+        eligible: !total || (eligible && (!options.soloSafety || safeFraction >= 0.6)),
+        penalty: Math.round((1 - efficiency) * 250 + (options.soloSafety ? (1 - safeFraction) * 250 : 0)) };
 }
 
 module.exports = { MIN_EFFICIENCY, actorProfiles, coldProfiles, targetView, skillModifier, profileStats, skillStats,
-    evaluate, stateProfiles, spotMatchup };
+    evaluate, soloSurvival, stateProfiles, spotMatchup };

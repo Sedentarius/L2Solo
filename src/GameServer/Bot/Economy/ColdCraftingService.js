@@ -1,3 +1,4 @@
+const ClanCrafting = require('../../Clan/ClanCraftingPolicy');
 const ItemTemplateIndex = require('../../Item/ItemTemplateIndex');
 const Database = invoke('Database');
 const DataCache = invoke('GameServer/DataCache');
@@ -16,7 +17,12 @@ function isStationService(state = {}) {
         || Number(state.stats?.generatedIndex || 0) >= 10000;
 }
 
-function stationForRecipe(recipeId) {
+function stationForRecipe(recipeId, state = null) {
+    const provider = state?.stats?.equipmentPlan?.craftProviders?.[recipeId];
+    if (provider && state.stats.equipmentPlan.clanGoal?.clanId) return {
+        id: `clan_crafter_${provider.characterId}`, characterId: provider.characterId,
+        loc: provider.loc, clan: true
+    };
     const combination = C4DualSwordCombinations.resolveByRecipeId(recipeId);
     if (combination) return combination.station;
     const service = { level: STATION_CRAFTER_LEVEL, stats: { classId: 57 } };
@@ -31,7 +37,23 @@ function crafterAccount(station) {
     return index < 0 ? null : `bot_craft_${String(index + 1).padStart(2, '0')}`;
 }
 
+function componentFor(state, selfId) {
+    return C4RecipeItems.resolveByRecipeId(state?.stats?.equipmentPlan?.componentRecipes?.[selfId])
+        || C4RecipeItems.resolveByProductId(selfId);
+}
+
+function recipeForState(state, recipe) {
+    const provider = state?.stats?.equipmentPlan?.craftProviders?.[recipe?.recipeId];
+    if (!recipe || !provider || provider.known) return recipe;
+    const materials = recipe.materials.map(row => ({ ...row }));
+    const scroll = materials.find(row => Number(row.selfId) === Number(recipe.recipeItemId));
+    if (scroll) scroll.amount += 1;
+    else materials.push({ selfId: Number(recipe.recipeItemId), amount: 1 });
+    return { ...recipe, materials };
+}
+
 function hasMaterials(state, recipe) {
+    recipe = recipeForState(state, recipe);
     return (recipe?.materials || []).every((material) => (
         CraftSupplementMaterials.isSupplementalMaterial(material.selfId)
             || Number(state?.inventory?.[String(material.selfId)]?.amount || 0) >= Number(material.amount || 0)
@@ -49,8 +71,8 @@ function readyRecipeFor(state, recipe, visited = new Set()) {
     for (const material of recipe.materials || []) {
         const owned = Number(state?.inventory?.[String(material.selfId)]?.amount || 0);
         if (owned >= Number(material.amount || 0) || CraftSupplementMaterials.isSupplementalMaterial(material.selfId)) continue;
-        const component = C4RecipeItems.resolveByProductId(material.selfId);
-        if (!component || !stationForRecipe(component.recipeId)) continue;
+        const component = componentFor(state, material.selfId);
+        if (!component || !stationForRecipe(component.recipeId, state)) continue;
         const ready = readyRecipeFor(state, component, nextVisited);
         if (ready) return ready;
     }
@@ -58,13 +80,13 @@ function readyRecipeFor(state, recipe, visited = new Set()) {
 }
 
 function beginTravel(state, timestamp = Date.now()) {
-    if (Number(state?.stats?.karma || 0) > 0) return null;
+    if (Number(state?.stats?.karma || 0) > 0 || ClanCrafting.isPersonalCraft(state)) return null;
     const plan = state?.stats?.equipmentPlan;
     if (!state || state.activity === 'traveling' || !['active', 'component_ready', 'ready_to_craft'].includes(plan?.status) || plan.strategy !== 'craft') return null;
     const finalRecipe = C4RecipeItems.resolveByRecipeId(plan.recipeId)
         || C4DualSwordCombinations.resolveByRecipeId(plan.recipeId);
-    const recipe = readyRecipeFor(state, finalRecipe);
-    const station = stationForRecipe(recipe?.recipeId);
+    let recipe = readyRecipeFor(state, finalRecipe);
+    const station = stationForRecipe(recipe?.recipeId, state);
     if (!recipe || !station) return null;
     const nearestTown = TownRespawn.getClosestTown(state.loc?.locX, state.loc?.locY, state.loc?.locZ);
     return {
@@ -154,7 +176,7 @@ function requiredCraftCount(finalRecipe, recipe, state, requestedOutput = null, 
     if (Number(finalRecipe.recipeId) === Number(recipe.recipeId)) return Math.max(1, crafts);
     const nextVisited = new Set(visited).add(Number(finalRecipe.recipeId));
     for (const material of finalRecipe.materials || []) {
-        const component = C4RecipeItems.resolveByProductId(material.selfId);
+        const component = componentFor(state, material.selfId);
         if (!component) continue;
         const owned = Number(state?.inventory?.[String(material.selfId)]?.amount || 0);
         const needed = Math.max(0, Number(material.amount || 0) * crafts - owned);
@@ -247,9 +269,9 @@ async function craft(state, random = Math.random) {
     const plan = state?.stats?.equipmentPlan;
     const finalRecipe = C4RecipeItems.resolveByRecipeId(plan?.recipeId)
         || C4DualSwordCombinations.resolveByRecipeId(plan?.recipeId);
-    const recipe = readyRecipeFor(state, finalRecipe);
-    const station = stationForRecipe(recipe?.recipeId);
-    if (!state || state.activity !== 'crafting' || !recipe || !station) {
+    let recipe = readyRecipeFor(state, finalRecipe);
+    const station = stationForRecipe(recipe?.recipeId, state);
+    if (!state || ClanCrafting.isPersonalCraft(state) || state.activity !== 'crafting' || !recipe || !station) {
         return { state, crafted: false, reason: 'not_ready' };
     }
     if (C4DualSwordCombinations.isCombination(recipe)) {
@@ -257,16 +279,43 @@ async function craft(state, random = Math.random) {
     }
 
     const account = crafterAccount(station);
-    const [characters] = await Promise.all([Database.fetchCharacters(account)]);
+    const characters = station.clan ? [{ id: station.characterId }] : await Database.fetchCharacters(account);
     const crafter = characters[0];
     if (!crafter) return { state, crafted: false, reason: 'missing_station' };
-    const crafterState = await LifeState.findByCharacterId(crafter.id);
+    let crafterState = await LifeState.findByCharacterId(crafter.id);
     if (!crafterState || crafterState.phase !== 'cold') return { state, crafted: false, reason: 'station_busy' };
 
-    const profile = CraftShopService.profileFor(crafterState);
-    const entry = profile.entries.find((candidate) => Number(candidate.recipeId) === Number(recipe.recipeId));
+    let learning = false;
+    if (station.clan) {
+        if (crafterState.simulation?.ownerId === 'cold_simulation_owner') {
+            const handedOff = await invoke('GameServer/Bot/Population/ColdSimulationOwner').handoffToMain(crafterState);
+            if (!handedOff.ok) return { state, crafted: false, reason: 'clan_crafter_busy' };
+            crafterState = await LifeState.findByCharacterId(crafter.id);
+        }
+        const clanId = Number(plan.clanGoal?.clanId);
+        const [membership] = await Database.execute(['SELECT clanId FROM characters WHERE id = ?', [crafter.id]]);
+        if (Number(membership?.clanId) !== clanId || (crafterState.partyId || crafterState.party?.partyId)
+            || Number(crafterState.vitals?.hp) <= 0 || ['dead', 'respawning'].includes(crafterState.activity)
+            || String(crafterState.simulation?.ownerId || crafterState.simulationOwner || 'legacy_main') !== 'legacy_main'
+            || CraftShopService.craftLevelFor(crafterState) < Number(recipe.level)) {
+            return { state, crafted: false, reason: 'clan_crafter_unavailable' };
+        }
+        if (Math.hypot(Number(state.loc?.locX) - Number(crafterState.loc?.locX),
+            Number(state.loc?.locY) - Number(crafterState.loc?.locY)) > 1200) {
+            const moved = { ...state, stats: { ...state.stats, equipmentPlan: { ...plan,
+                craftProviders: { ...plan.craftProviders, [recipe.recipeId]: { ...plan.craftProviders[recipe.recipeId], loc: crafterState.loc } } } } };
+            return { state: beginTravel(moved) || state, crafted: false, reason: 'clan_crafter_moved' };
+        }
+        const known = await Database.fetchCharacterRecipes(crafter.id);
+        learning = !known.some(row => Number(row.recipeId) === Number(recipe.recipeId));
+        const providers = { ...plan.craftProviders, [recipe.recipeId]: { ...plan.craftProviders[recipe.recipeId], known: !learning } };
+        state = { ...state, stats: { ...state.stats, equipmentPlan: { ...plan, craftProviders: providers } } };
+        recipe = recipeForState(state, recipe);
+    }
+    const profile = station.clan ? null : CraftShopService.profileFor(crafterState);
+    const entry = station.clan ? { price: 0 } : profile.entries.find((candidate) => Number(candidate.recipeId) === Number(recipe.recipeId));
     const template = ItemTemplateIndex.find(DataCache.items, recipe.productId);
-    const stationService = isStationService(crafterState);
+    const stationService = !station.clan && isStationService(crafterState);
     const crafterMp = Number(crafterState.vitals?.mp || 0);
     if (!entry || !template || (!stationService && crafterMp < Number(recipe.mpCost || 0))) {
         return { state, crafted: false, reason: 'station_unavailable' };
@@ -274,8 +323,9 @@ async function craft(state, random = Math.random) {
 
     const componentCraft = Number(recipe.recipeId) !== Number(finalRecipe?.recipeId);
     const customerItems = await Database.fetchItems(state.characterId);
-    const requestedBatch = componentCraft ? requiredCraftCount(finalRecipe, recipe, state) : 1;
-    const batchCount = componentCraft ? craftableBatchCount(customerItems, recipe, requestedBatch) : 1;
+    const requestedBatch = componentCraft && !learning ? requiredCraftCount(finalRecipe, recipe, state) : 1;
+    const materialBatch = componentCraft ? craftableBatchCount(customerItems, recipe, requestedBatch) : 1;
+    const batchCount = station.clan ? Math.min(materialBatch, Math.floor(crafterMp / Math.max(1, Number(recipe.mpCost)))) : materialBatch;
     if (!batchCount || !hasNonSupplementalMaterials(customerItems, recipe, batchCount)) {
         const reconciled = await refreshPhysicalInventory(state);
         return { state: reconciled, crafted: false, reason: 'materials_changed' };
@@ -310,7 +360,11 @@ async function craft(state, random = Math.random) {
             // They must remain available to the whole cold population indefinitely.
             crafterMp: stationService ? crafterMp : crafterMp - Number(recipe.mpCost || 0),
             price,
-            adena: { name: 'Adena' }
+            adena: { name: 'Adena' },
+            ...(station.clan ? { clanCraft: { clanId: Number(plan.clanGoal.clanId), recipeId: recipe.recipeId,
+                learning, crafterRevision: crafterState.simulation?.revision ?? crafterState.simulationRevision ?? 0,
+                customerRevision: state.simulation?.revision ?? state.simulationRevision ?? 0,
+                mpCost: Number(recipe.mpCost) * batchCount } } : {})
         });
     } catch (error) {
         // A concurrent market/craft transaction may invalidate a material or
@@ -322,7 +376,13 @@ async function craft(state, random = Math.random) {
             error: String(error?.message || error)
         };
     }
-    await LifeState.upsertState({
+    if (station.clan) {
+        LifeState.acceptClanCraftState(result.crafterState);
+        const committed = LifeState.acceptClanCraftState(result.customerState);
+        state = { ...committed, stats: { ...state.stats, clanInventoryRevision: committed.stats.clanInventoryRevision } };
+        state.stats.equipmentPlan.craftProviders[recipe.recipeId].known = true;
+    }
+    if (!station.clan) await LifeState.upsertState({
         ...crafterState,
         vitals: { ...(crafterState.vitals || {}), mp: stationService ? crafterMp : crafterMp - Number(recipe.mpCost || 0) }
     }, 'cold_manufacture');

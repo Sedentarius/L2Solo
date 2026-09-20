@@ -1,0 +1,1940 @@
+[
+  {
+    "selfId": 8151,
+    "template": {
+      "kind": "Doormen",
+      "name": "Daniel",
+      "title": "Clan Hall Gatekeeper",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 132
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 22
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 8153,
+    "template": {
+      "kind": "Doormen",
+      "name": "Jacques",
+      "title": "Clan Hall Gatekeeper",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 132
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 23
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 8155,
+    "template": {
+      "kind": "Doormen",
+      "name": "Joff",
+      "title": "Clan Hall Gatekeeper",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 132
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 22
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 8157,
+    "template": {
+      "kind": "Doormen",
+      "name": "Niels",
+      "title": "Clan Hall Gatekeeper",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 132
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 22
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 8159,
+    "template": {
+      "kind": "Doormen",
+      "name": "Rudy",
+      "title": "Clan Hall Gatekeeper",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 132
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 22
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 8161,
+    "template": {
+      "kind": "Doormen",
+      "name": "Gellar",
+      "title": "Clan Hall Gatekeeper",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 132
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 23
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 8447,
+    "template": {
+      "kind": "Doormen",
+      "name": "Rosconne",
+      "title": "Clan Hall Gatekeeper",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 132
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 22
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 8448,
+    "template": {
+      "kind": "Doormen",
+      "name": "Stewart",
+      "title": "Clan Hall Gatekeeper",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 132
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 23
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 8449,
+    "template": {
+      "kind": "Doormen",
+      "name": "Theobolt",
+      "title": "Clan Hall Gatekeeper",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 132
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 22
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 8450,
+    "template": {
+      "kind": "Doormen",
+      "name": "Theron",
+      "title": "Clan Hall Gatekeeper",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 132
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 23
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 8451,
+    "template": {
+      "kind": "Doormen",
+      "name": "Trey",
+      "title": "Clan Hall Gatekeeper",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 132
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 22
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 12833,
+    "template": {
+      "kind": "ClanHallManager",
+      "name": "Adrienne",
+      "title": "Clan Hall Manager",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 132
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 20.5
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 12834,
+    "template": {
+      "kind": "ClanHallManager",
+      "name": "Bianca",
+      "title": "Clan Hall Manager",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 132
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 22
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 12835,
+    "template": {
+      "kind": "ClanHallManager",
+      "name": "Emma",
+      "title": "Clan Hall Manager",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 132
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 20.5
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 12836,
+    "template": {
+      "kind": "ClanHallManager",
+      "name": "Gladys",
+      "title": "Clan Hall Manager",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 132
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 20.5
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 12837,
+    "template": {
+      "kind": "ClanHallManager",
+      "name": "Regina",
+      "title": "Clan Hall Manager",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 132
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 22
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 12846,
+    "template": {
+      "kind": "ClanHallManager",
+      "name": "Ruben",
+      "title": "Clan Hall Manager",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 88,
+      "run": 171
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 5.53,
+      "revMp": 1.53,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 23
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 12847,
+    "template": {
+      "kind": "ClanHallManager",
+      "name": "Horner",
+      "title": "Clan Hall Manager",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 88,
+      "run": 171
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 7.11,
+      "revMp": 1.84,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 23
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 12848,
+    "template": {
+      "kind": "ClanHallManager",
+      "name": "Bremmer",
+      "title": "Clan Hall Manager",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 88,
+      "run": 171
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 8.69,
+      "revMp": 2.14,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 23
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 12849,
+    "template": {
+      "kind": "ClanHallManager",
+      "name": "Kalis",
+      "title": "Clan Hall Manager",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 88,
+      "run": 171
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 5.53,
+      "revMp": 1.53,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 23
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 12850,
+    "template": {
+      "kind": "ClanHallManager",
+      "name": "Winker",
+      "title": "Clan Hall Manager",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 88,
+      "run": 171
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 5.53,
+      "revMp": 1.53,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 23
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 12851,
+    "template": {
+      "kind": "ClanHallManager",
+      "name": "Black",
+      "title": "Clan Hall Manager",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 88,
+      "run": 171
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 7.11,
+      "revMp": 1.84,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 23
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 12852,
+    "template": {
+      "kind": "ClanHallManager",
+      "name": "Dillon",
+      "title": "Clan Hall Manager",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 88,
+      "run": 171
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 8.69,
+      "revMp": 2.14,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 23
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 12853,
+    "template": {
+      "kind": "ClanHallManager",
+      "name": "Boyer",
+      "title": "Clan Hall Manager",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 88,
+      "run": 171
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 7.11,
+      "revMp": 1.84,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 23
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 12854,
+    "template": {
+      "kind": "ClanHallManager",
+      "name": "Tim",
+      "title": "Clan Hall Manager",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 88,
+      "run": 171
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 8.69,
+      "revMp": 2.14,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 23
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 12861,
+    "template": {
+      "kind": "ClanHallManager",
+      "name": "Seth",
+      "title": "Clan Hall Manager",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 88,
+      "run": 171
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 8.69,
+      "revMp": 2.14,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 23
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 12862,
+    "template": {
+      "kind": "ClanHallManager",
+      "name": "Ron",
+      "title": "Clan Hall Manager",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 88,
+      "run": 171
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 7.11,
+      "revMp": 1.84,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 23
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 12863,
+    "template": {
+      "kind": "ClanHallManager",
+      "name": "Flynn",
+      "title": "Clan Hall Manager",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 88,
+      "run": 171
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 8.69,
+      "revMp": 2.14,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 23
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 12889,
+    "template": {
+      "kind": "ClanHallManager",
+      "name": "Carey",
+      "title": "Clan Hall Manager",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 0
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 22
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 12890,
+    "template": {
+      "kind": "ClanHallManager",
+      "name": "Dianne",
+      "title": "Clan Hall Manager",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 0
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 20.5
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 12891,
+    "template": {
+      "kind": "ClanHallManager",
+      "name": "Crissy",
+      "title": "Clan Hall Manager",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 0
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 20.5
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 12892,
+    "template": {
+      "kind": "ClanHallManager",
+      "name": "Albert",
+      "title": "Clan Hall Manager",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 0
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 23
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 12893,
+    "template": {
+      "kind": "ClanHallManager",
+      "name": "Korgen",
+      "title": "Clan Hall Manager",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 0
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 23
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  },
+  {
+    "selfId": 12894,
+    "template": {
+      "kind": "ClanHallManager",
+      "name": "DiMaggio",
+      "title": "Clan Hall Manager",
+      "level": 70,
+      "hostile": false
+    },
+    "base": {
+      "str": 40,
+      "con": 43,
+      "dex": 30,
+      "int": 21,
+      "wit": 20,
+      "men": 10
+    },
+    "stats": {
+      "pAtk": 1314,
+      "pAtkRnd": 30,
+      "pDef": 470,
+      "mAtk": 780,
+      "mDef": 382,
+      "atkSpd": 278,
+      "castSpd": 253,
+      "atkRadius": 40,
+      "accur": 4.75
+    },
+    "speed": {
+      "walk": 55,
+      "run": 0
+    },
+    "vitals": {
+      "maxHp": 3862,
+      "maxMp": 1493,
+      "revHp": 11.85,
+      "revMp": 2.78,
+      "corpseTime": 7000
+    },
+    "collision": {
+      "radius": 8,
+      "size": 23
+    },
+    "equipment": {
+      "weapon": 0,
+      "shield": 0,
+      "reuseTime": 0
+    },
+    "clan": {
+      "clanName": "",
+      "helpRadius": 0
+    },
+    "rewards": {
+      "exp": 0,
+      "sp": 0
+    }
+  }
+]
