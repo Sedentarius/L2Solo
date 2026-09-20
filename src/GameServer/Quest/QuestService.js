@@ -167,7 +167,13 @@ async function onEvent(session, event) {
     const eventName = String(event.name);
     if (!quest || !npc || !quest.npcs.includes(Number(npc.selfId)))
       return false;
-    if (quest.eventNpc?.(eventName) !== Number(npc.selfId)) return false;
+    // A quest whose errand is offered by many interchangeable NPCs (every
+    // Gatekeeper Ziggurat, every Dimension Keeper) answers with the whole set
+    // rather than one id.
+    const eventNpcs = quest.eventNpc?.(eventName);
+    const permitted = Array.isArray(eventNpcs)
+        ? eventNpcs.includes(Number(npc.selfId)) : eventNpcs === Number(npc.selfId);
+    if (!permitted) return false;
     const state = stateFor(session, quest);
     const before = activeQuestSnapshot(session);
     if (state.isCompleted()) return false;

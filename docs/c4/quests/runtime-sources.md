@@ -357,3 +357,49 @@ thousand more from ten, the prerequisite ring and the quit path - were already
 faithful and are now certified end to end.
 
 No coordinate was invented for either quest.
+
+## Q385 and Q634: the Seven Signs blocker was over-broad too
+
+Both were blocked as `PARTY_SEVEN_SIGNS_INTEGRATION`. The pinned C4 handlers
+contain **no Seven Signs condition of any kind** — no seal, no side, no
+participation check, no catacomb admission. Reading them settles what they
+actually are:
+
+* **Q385 Yoke of the Past.** Every Gatekeeper Ziggurat outside a catacomb or
+  necropolis offers the same standing errand from level 20. Forty-one catacomb
+  dwellers each drop a Scroll of Ancient Magic at their own authored chance
+  (7% to 91%, written out of a million in the reference), and the gatekeeper
+  exchanges every scroll for a Blank Scroll, one for one. Repeatable, no cap.
+* **Q634 In Search of Fragments of the Dimension.** Every Dimension Keeper
+  offers the same errand from level 20. The same forty-one targets drop a
+  Fragment of Dimension on 8% of kills, `floor(level * 0.15 + 2.6)` at a time.
+  The fragments are ordinary goods, so ending the errand leaves them in the pack.
+
+**Party credit.** The only party-shaped thing in either handler is
+`getRandomPartyMemberState(player, -1, 3, npc)`, which picks a random eligible
+party member to credit. This server already has an explicit, documented policy
+for that, stated in `NpcDied.js`: "C4's ordinary quest callback is attributed to
+the actual killer, not to every party member that receives shared EXP." Both
+quests are implemented on that existing attribution. Changing it would alter
+every quest in the catalogue, and neither of these two needs it.
+
+**One reusable primitive was added**, and only because three confirmed quests
+require it: `QuestService.onEvent` now accepts an array from `eventNpc`, so a
+quest whose errand is offered by many interchangeable NPCs can name the whole
+set instead of a single id. Q385 has twenty-nine gatekeepers, Q634 fourteen
+keepers and Q635 twenty rift NPCs; a single-id contract cannot express any of
+them. Existing single-id quests are unaffected.
+
+**Restored content.** Items 5902 Scroll of Ancient Magic, 5965 Blank Scroll and
+7079 Fragment of Dimension were absent. So were all twenty rift NPCs — the six
+Rift Post ranks 8488-8493 and the fourteen Dimension Keepers 8494-8507 — which
+are now authored from the reference's own stats and spawned at its own
+coordinates. The twenty-nine Gatekeepers Ziggurat already existed and were
+already spawned; the test asserts that rather than assuming it.
+
+**Seven ids are deliberately not targets.** The reference registers the whole
+21208-21255 range for Q634 with a bare loop, but 21212, 21216, 21220 and
+21232-21235 are unspawned content in C4: they have reference templates and no
+spawn anywhere in the pinned datapack, and no local template at all. Q385's own
+chance table omits exactly the same seven. Both quests therefore hunt the same
+forty-one targets a player can actually meet.

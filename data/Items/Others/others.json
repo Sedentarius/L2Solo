@@ -14091,6 +14091,18 @@
     "template": { "kind": "Other.None", "name": "Ritron's Dessert Recipe", "class1": 4, "class2": 5, "mass": 10, "price": 40000 },
     "etc": { "stackable": false, "consumable": false }
 },{
+    "selfId": 5902,
+    "template": { "kind": "Other.Quest", "name": "Scroll of Ancient Magic", "class1": 4, "class2": 3, "mass": 0, "price": 0 },
+    "etc": { "stackable": true, "consumable": false }
+},{
+    "selfId": 5965,
+    "template": { "kind": "Other.None", "name": "Blank Scroll", "class1": 4, "class2": 5, "mass": 0, "price": 500 },
+    "etc": { "stackable": true, "consumable": false }
+},{
+    "selfId": 7079,
+    "template": { "kind": "Other.None", "name": "Fragment of Dimension", "class1": 4, "class2": 5, "mass": 0, "price": 0 },
+    "etc": { "stackable": true, "consumable": false }
+},{
     "selfId": 6521,
     "template": { "kind": "Other.None", "name": "Green Colored Lure - High Grade", "class1": 4, "class2": 5, "mass": 3, "price": 150 },
     "etc": { "stackable": true, "consumable": false }

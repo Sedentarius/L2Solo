@@ -683,11 +683,12 @@
     "reviewedRequirements": []
   },
   "385": {
-    "certified": false,
-    "runtimeBlocker": {
-      "code": "PARTY_SEVEN_SIGNS_INTEGRATION",
-      "detail": "Needs shared party credit and Seven Signs participation/reward integration; generic resolver already exists."
-    }
+    "certified": true,
+    "tests": [
+      "tests/test_c4_catacomb_quests.js"
+    ],
+    "bridge": "REVIEWED_DELIVERY_ROUTE",
+    "reviewedRequirements": []
   },
   "401": {
     "certified": true,
@@ -903,11 +904,12 @@
     }
   },
   "634": {
-    "certified": false,
-    "runtimeBlocker": {
-      "code": "PARTY_SEVEN_SIGNS_INTEGRATION",
-      "detail": "Needs shared party credit and Seven Signs participation/reward integration; generic resolver already exists."
-    }
+    "certified": true,
+    "tests": [
+      "tests/test_c4_catacomb_quests.js"
+    ],
+    "bridge": "REVIEWED_DELIVERY_ROUTE",
+    "reviewedRequirements": []
   },
   "635": {
     "certified": false,
@@ -923,7 +925,7 @@
     }
   },
   "_certification": {
-    "generatedAt": "2026-09-20T05:02:41.269Z",
+    "generatedAt": "2026-09-20T05:09:45.228Z",
     "sourceHashes": {
       "config/default.ini": "14f3852373656b264d1e9f367252519f82072cb0dea69e465c968a775acb29c3",
       "config/local.example.ini": "cb13f57c7e72f2b6f55e342378bb9acc974e7f7c0ab6708a6ed8f5d0dc8f8fa0",
@@ -972,7 +974,7 @@
       "data/Items/Others/c4_valley_of_saints.json": "04f32940f8994116d0cc8730a5b0c1f6123975852e0d1f911f81e962b61bac71",
       "data/Items/Others/c4_varka_silenos_stronghold.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
       "data/Items/Others/c4_wall_of_argos.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
-      "data/Items/Others/others.json": "dae5caf8a75482b7c771a7459c5481a8f7af45d6a8aa9249d948c1399e22e650",
+      "data/Items/Others/others.json": "841a77e9e9bf5174b901967f18d494cd2810030946e9f4331a96ae16ee805f2a",
       "data/Items/Weapons/.schema.json": "03fc149c9107d3ce4b3d5f1e36cbfe8f255205d5f9b95cb3e67418414cf9cbea",
       "data/Items/Weapons/c4_necropolis_of_sacrifice.json": "dc8ed6d6ad90dbcfad3f2d18ed254389ae12f1477702bdea58566496b8534656",
       "data/Items/Weapons/c4_raid_bosses.json": "d5ac7a78f17bcf720c34b59c773eb5207b17a3ff2493a5933babdf55ea584c02",
@@ -1107,7 +1109,7 @@
       "data/Npcs/Spawns/c4_necropolis_of_saints.json": "8bdb32a87d9bf216ad74ca3b0a1dc5691af1654e39e247c6ba2d639bb6d39a62",
       "data/Npcs/Spawns/c4_necropolis_of_the_disciples.json": "dff621e8bed4bce8e43d1aa03a131eac0770ceb580c0419e69ffb2cba85a3b6c",
       "data/Npcs/Spawns/c4_necropolis_of_worshipers.json": "ef35b7a3bd0ec08c7151f8850fb21f7591de986aab08396c63f0e13cdc3179d7",
-      "data/Npcs/Spawns/c4_quest_content.json": "cd061419cb375bc560587f2f5ae182a47cbc59c160df7d9f097c5d2de1d9a8b5",
+      "data/Npcs/Spawns/c4_quest_content.json": "3f1297eba8414a32032e96f1d9a0188a69981ef054b55e4c0462f0255e8abf76",
       "data/Npcs/Spawns/c4_raid_bosses.json": "3c0ca2a453e3e6cf2cf3541c3e195bd2769bbbc84b3230bf7605f2443764be25",
       "data/Npcs/Spawns/c4_shrine_of_loyalty.json": "aa7137ce91859297888475b262b489d8d691cdf427c318aadf7311dfc9fd3544",
       "data/Npcs/Spawns/c4_swamp_of_screams.json": "3a29f0d5e92ed7f0dd98eec5459c058240ef6a71f7c38535b585ff3f7260949e",
@@ -1150,7 +1152,7 @@
       "data/Npcs/c4_necropolis_of_saints.json": "e2f8707e139cc70f7b328c6cf3c3fe81f8d14d03477f758366e9a869d1326f4b",
       "data/Npcs/c4_necropolis_of_the_disciples.json": "65e30c1aa65ed33ac109935b4d7a3a0c03574996e8ca0fde107cb730c27d905c",
       "data/Npcs/c4_necropolis_of_worshipers.json": "fd9c36224065b259d50dd17c4513c85a01330c53c73fbb6e5d9baed58cd6cb84",
-      "data/Npcs/c4_quest_content.json": "6550ed686a725138862af27bb6b57bfe4a1d966f0d83223e9a578810bb9fab88",
+      "data/Npcs/c4_quest_content.json": "018c450fffaa4cd5377f16fd3894ad0ae6120ef5d78c4f71f70c848539bb0136",
       "data/Npcs/c4_raid_boss_minions.json": "516b959332985c4b098ebdc763a4079187a3feeda2f3215326177cfc00e40566",
       "data/Npcs/c4_raid_bosses.json": "aefc7ae40168901eb99d5633341fc600f90db89e5203da03bb9d49d31d85e8f7",
       "data/Npcs/c4_shrine_of_loyalty.json": "44e9f46a8036ad2b7df135aa7e7e1291071dc13d4b320af6a8099f2e5e4f378f",
@@ -1191,7 +1193,7 @@
       "database/sql/sqlite.sql": "546a3888eb03901ccb1d4a52aa75349c3cebd96a201d2f0526d353f49f3f177b",
       "scripts/benchmark-interaction-memory.js": "d196e3f8dfb3fb49554d5081f339228a16a01c5ee606c2eca3f2987f45d3327b",
       "scripts/benchmark-town-navigation.js": "a03ca379db4ea4d1f55a50a4eea637962970f240c4557c7903ae925d5ea4d211",
-      "scripts/certify-c4-quests.js": "cf21180ff4109f53628e6cde798669986a9c09ff21e1e8bebaf8f1ac58e1763c",
+      "scripts/certify-c4-quests.js": "196ca930f05f1aa5d1f08e8e5c046071d3c231c6e33024542536d600e9724d27",
       "scripts/check-c4-quests.js": "094eec7789f23d33445e3d00452eb7d2640c7fdbc3d342d38997f25db218c0b2",
       "scripts/check-quest-registry.js": "a05ecd2fe1e6f62d6c7eed1629dad48be13a2023682a11201c2a89d07ed46da2",
       "scripts/check-syntax.js": "f18315645fba6bbdb1b80b103fc5006970e56f804f9c72759be6dea1f067b9b5",
@@ -1254,7 +1256,7 @@
       "scripts/run-tests-p0-b3.js": "07046504ac2f221826f1fdf599c30f0f53b61c44ec50f57371b3f1bc52982cc6",
       "scripts/run-tests-p0-b4.js": "309423b431c59b4f612c6041156952e5fe63cf65fff1256c5b10c3fb165a0af4",
       "scripts/run-tests-p0-b5.js": "a3f8e96312ed5ac1fe873005a8db1b7f008aa6db9df60f8d17780c509e94e71e",
-      "scripts/run-tests.js": "090bb83eb1a040eab5e18be83be731af4e326f59f5ff607b8853f7bec58144b1",
+      "scripts/run-tests.js": "4e23c45c99adfec29e2db9f2f98999b501a792ebbb2970e41626e7ba8f49bd07",
       "scripts/saved-games.js": "9d2f0c14084ad5403231e4e99e03388909c7fda432ff9c0ea7f44d829cf7b388",
       "scripts/simulate-bot-chat.js": "8b15f0e010fd24aca99c7cbc1e769cb40af0671afd45d9401a24b3b7e845bb01",
       "scripts/start.js": "4b47531f68f1733a1b4a9bb03626626cb83802594dd59a7aa20a2e61241a21b4",
@@ -1920,8 +1922,8 @@
       "src/GameServer/Quest/DeclarativeQuest.js": "f55d951d6a1a9ecde5b90a3a704305392d16e6d99c4d8597a8f29235941636f3",
       "src/GameServer/Quest/FirstProfessionProof.js": "836445225f11c0b25f3b30e1549adfdaecf1c3ee750a087b5442d786f4ecef2a",
       "src/GameServer/Quest/LowLevelDefinitions.js": "f30832d4dd03a5d8d0025927142c6ff8a2acc658904fbd6ecab689b9743aa432",
-      "src/GameServer/Quest/QuestRegistry.js": "b257b0966235332168b1a286e81f9e50f008cb4f0ab0dae02708f701d7dd4541",
-      "src/GameServer/Quest/QuestService.js": "9810b2461b6f94345c1038d3ecf6ca57204600b7df56e699970e642d18cf100f",
+      "src/GameServer/Quest/QuestRegistry.js": "4a9066cbc667a3e2faf640b8d21809b6299b2455d5b3580ec4f6378209bd70e0",
+      "src/GameServer/Quest/QuestService.js": "a401f95f5e9d5f5fdd04d13a372071950d00ad7872e01255b9442cab8acd635d",
       "src/GameServer/Quest/QuestState.js": "d764e7fac7367002c151fd44e0006e6e8b27556d8586af4f40b73e4703d69e46",
       "src/GameServer/Quest/QuestStep.js": "8e23c3b873a54dc6cd083b3f3cae470ada26957cb8651a95372c19081572a1b3",
       "src/GameServer/Quest/RecoveredLowLevelDefinitions.js": "82b2fe72bed05e35b4806e4bf8a8a4864f5a62e7e73e4a145eb6e6114b0073f5",
@@ -3199,6 +3201,7 @@
       "tests/test_buffer_healer_skills.js": "5430abf8b38a4d586bda6cf32de74062508a977917e8da461b3e3534197f03ec",
       "tests/test_c4_alligator_island.js": "a5c610eecf59de50a95fe07502927b1349dc9a795ad0bb2e8c4adfda10ef5d8d",
       "tests/test_c4_beginner_quests.js": "56a8ca8ffba30b6d747a094321eeecc003cfb1abde4a0eeca700be996774246b",
+      "tests/test_c4_bounty_target_quests.js": "ed25ffebe95ae9ebc9306d5cea58a9f8acb47d1ffeafe026014a2eb5b7d497ca",
       "tests/test_c4_buff_modifiers.js": "141b6f85ba9266b1c607ea5b673a6454439295dd8dccb5749352c81a9f0f63d8",
       "tests/test_c4_catacomb_of_dark_omen.js": "89046e30bf1bde89610191d3ef370760e7f9483b0470c0fce6b1521c5b39fb2c",
       "tests/test_c4_catacomb_of_the_apostate.js": "e10dd4a22b015f7bf62af4d7f974351b46facb515dec3cd76e6b4d98097c1d89",
@@ -3497,8 +3500,8 @@
       "tests/test_quest_availability.js": "8ec12ac73aad560e6da81a5cab4910e744bfaa75ec6ce6b87563a28873d358ae",
       "tests/test_quest_character_switch.js": "450f74860657c7ced99c1638649996f6387bec56ba944e630a5eacde1e864bba",
       "tests/test_quest_handins.js": "966bd390f10cfaf96d672f0d24cf0e756338a08b091cb45ae5f615a1ef2bc251",
-      "tests/test_quest_packets.js": "b6b0421babb65423e9d74a7321d392ce2b28c6e0b96aafcfe5aac71204cbcea4",
-      "tests/test_quest_registry_integrity.js": "77f83950510804eb6d49b85b6b938acda490e34bd953949fa501b8614919f505",
+      "tests/test_quest_packets.js": "1ab0135fc2eecf05ce71e567d77e72fa759f18208620bc00f351cbb9d2b8d538",
+      "tests/test_quest_registry_integrity.js": "7287a01e3b0f1e74ab986deefe8b52199752ccd92415b419e43367fac3abe2ed",
       "tests/test_quest_runtime.js": "d0e4478d0801a858dbf8102cfe2c5cd029107e724b6afba02c8511f6149c6eb3",
       "tests/test_quest_spawn_radar.js": "91d3b95a956bd853ab25de1c3bfc67064bfc5c2807958109279fee74eefe3742",
       "tests/test_raid_boss_balance.js": "50d937f03684db2fbd7b66e3b207fa15725528140941b6d6bf792b711f0fdc5e",
@@ -3577,8 +3580,8 @@
       "tests/test_world_observer_world_state.js": "1694e9a8d888d7495da71f79d1ac6fc0f27b69a28b33e5f73753529cacce9c78",
       "tests/test_world_visible_users.js": "53949729f44132946b001ebe4ace8644ffac482aea9953a0ffa80829dac74aab",
       "tests/test_world_wipe.js": "d7f3aa5197dc8359c9542250394fc0ccd96010402be9c83b0576696ec47cf89c",
-      "tests/test_c4_bounty_target_quests.js": "ed25ffebe95ae9ebc9306d5cea58a9f8acb47d1ffeafe026014a2eb5b7d497ca",
-      "docs/c4/quests/runtime-review.json": "b2a2f0c4e0d5f071494395397fbd767df0cb724d582b8ca38e970a2c15071964",
+      "tests/test_c4_catacomb_quests.js": "7a1b08b535de23bcdfa4e998259d4fb658d1dc141b4611d9ca0aaef88a9aa56a",
+      "docs/c4/quests/runtime-review.json": "d65d121b73ba0dd63b32c29cfe2afc9d4a75393c24f930a9991aeedee0801ff1",
       "docs/c4/quests/C4_QUEST_MASTER_INVENTORY.jsonl": "9f63e96d5fe25e0ce21f81027b805d8a4cc556e25e8f17b74a179ff316befc86"
     },
     "tests": [
@@ -3632,6 +3635,10 @@
       },
       {
         "path": "tests/test_c4_bounty_target_quests.js",
+        "exitCode": 0
+      },
+      {
+        "path": "tests/test_c4_catacomb_quests.js",
         "exitCode": 0
       },
       {

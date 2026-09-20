@@ -536123,6 +536123,31 @@
   },
   {
     "grade": "none",
+    "id": 5902,
+    "kind": "Other.Quest",
+    "name": "Scroll of Ancient Magic",
+    "sources": {
+      "drops": [],
+      "spoils": []
+    },
+    "template": {
+      "etc": {
+        "consumable": false,
+        "stackable": true
+      },
+      "selfId": 5902,
+      "template": {
+        "class1": 4,
+        "class2": 3,
+        "kind": "Other.Quest",
+        "mass": 0,
+        "name": "Scroll of Ancient Magic",
+        "price": 0
+      }
+    }
+  },
+  {
+    "grade": "none",
     "id": 5956,
     "kind": "Other.None",
     "name": "15 Year Old Wine",
@@ -536218,6 +536243,31 @@
         "mass": 10,
         "name": "Ritron's Dessert Recipe",
         "price": 40000
+      }
+    }
+  },
+  {
+    "grade": "none",
+    "id": 5965,
+    "kind": "Other.None",
+    "name": "Blank Scroll",
+    "sources": {
+      "drops": [],
+      "spoils": []
+    },
+    "template": {
+      "etc": {
+        "consumable": false,
+        "stackable": true
+      },
+      "selfId": 5965,
+      "template": {
+        "class1": 4,
+        "class2": 5,
+        "kind": "Other.None",
+        "mass": 0,
+        "name": "Blank Scroll",
+        "price": 500
       }
     }
   },
@@ -561287,6 +561337,31 @@
         "mass": 30,
         "name": "Recipe: Shining Arrow (100%)",
         "price": 200000
+      }
+    }
+  },
+  {
+    "grade": "none",
+    "id": 7079,
+    "kind": "Other.None",
+    "name": "Fragment of Dimension",
+    "sources": {
+      "drops": [],
+      "spoils": []
+    },
+    "template": {
+      "etc": {
+        "consumable": false,
+        "stackable": true
+      },
+      "selfId": 7079,
+      "template": {
+        "class1": 4,
+        "class2": 5,
+        "kind": "Other.None",
+        "mass": 0,
+        "name": "Fragment of Dimension",
+        "price": 0
       }
     }
   },

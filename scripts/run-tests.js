@@ -18,6 +18,7 @@ const tests = [
     'tests/test_c4_lizardman_invader_quests.js',
     'tests/test_c4_elven_forest_quests.js',
     'tests/test_c4_bounty_target_quests.js',
+    'tests/test_c4_catacomb_quests.js',
     'tests/test_bot_quest_bridge_foundation.js',
     'tests/test_bot_quest_bridge_kill_collect.js',
     'tests/test_bot_quest_bridge_deliver_complete.js',

@@ -2,9 +2,9 @@
   "errors": [],
   "confirmedInScope": 107,
   "counts": {
-    "VERIFIED": 103,
+    "VERIFIED": 105,
     "IMPLEMENTED": 0,
-    "PARTIAL/BLOCKED": 4,
+    "PARTIAL/BLOCKED": 2,
     "MISSING": 0
   },
   "capabilities": {
@@ -14,7 +14,7 @@
     "partyQuestSharing": "NOT_CERTIFIED",
     "note": "Existing NPC spawns and script events do not certify cold encounter ownership, timers or party credit."
   },
-  "registeredInScope": 103,
+  "registeredInScope": 105,
   "proofContracts": 18,
   "driftCount": 296,
   "scopeDriftCount": 107,
@@ -6043,27 +6043,26 @@
       "name": "Yoke of the Past",
       "inScope": true,
       "quarantined": false,
-      "status": "PARTIAL/BLOCKED",
-      "script": null,
+      "status": "VERIFIED",
+      "script": "Q385_YokeOfThePast.js",
       "definitionId": null,
-      "registered": false,
-      "tests": [],
-      "blocker": {
-        "code": "PARTY_SEVEN_SIGNS_INTEGRATION",
-        "detail": "Needs shared party credit and Seven Signs participation/reward integration; generic resolver already exists."
-      },
+      "registered": true,
+      "tests": [
+        "tests/test_c4_catacomb_quests.js"
+      ],
+      "blocker": null,
       "certificationBlocker": null,
       "professionProofContract": null,
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "NOT_CERTIFIED",
-        "reviewedRequirements": null,
-        "requirementsNeedingReview": [
-          "PARTY_QUEST_PRIMITIVE"
-        ]
+        "questAdapter": "REVIEWED_DELIVERY_ROUTE",
+        "reviewedRequirements": [],
+        "requirementsNeedingReview": []
       },
       "drift": [
-        "status:MISSING->PARTIAL/BLOCKED",
+        "script_existence",
+        "registration",
+        "status:MISSING->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -7699,27 +7698,26 @@
       "name": "In Search of Fragments of the Dimension",
       "inScope": true,
       "quarantined": false,
-      "status": "PARTIAL/BLOCKED",
-      "script": null,
+      "status": "VERIFIED",
+      "script": "Q634_InSearchOfFragmentsOfDimension.js",
       "definitionId": null,
-      "registered": false,
-      "tests": [],
-      "blocker": {
-        "code": "PARTY_SEVEN_SIGNS_INTEGRATION",
-        "detail": "Needs shared party credit and Seven Signs participation/reward integration; generic resolver already exists."
-      },
+      "registered": true,
+      "tests": [
+        "tests/test_c4_catacomb_quests.js"
+      ],
+      "blocker": null,
       "certificationBlocker": null,
       "professionProofContract": null,
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "NOT_CERTIFIED",
-        "reviewedRequirements": null,
-        "requirementsNeedingReview": [
-          "PARTY_QUEST_PRIMITIVE"
-        ]
+        "questAdapter": "REVIEWED_DELIVERY_ROUTE",
+        "reviewedRequirements": [],
+        "requirementsNeedingReview": []
       },
       "drift": [
-        "status:MISSING->PARTIAL/BLOCKED",
+        "script_existence",
+        "registration",
+        "status:MISSING->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },

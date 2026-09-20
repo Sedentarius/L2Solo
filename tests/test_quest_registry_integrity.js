@@ -7,8 +7,9 @@ assert.deepStrictEqual(result.errors, []);
 // 70 legacy script entries, the five reviewed beginner bounties, the two
 // reviewed Orc bounties Q275/Q276, Q340 Subjugation of Lizardmen, the three
 // scripted music/feast quests Q363/Q364/Q378, the two restored lizardman
-// quests Q38/Q39 and Q267 Wrath of Verdure.
-assert.strictEqual(result.active, 84 + require('../src/GameServer/Quest/LowLevelDefinitions').filter(d=>!d.blocked).length);
+// quests Q38/Q39, Q267 Wrath of Verdure and the two catacomb errands
+// Q385/Q634.
+assert.strictEqual(result.active, 86 + require('../src/GameServer/Quest/LowLevelDefinitions').filter(d=>!d.blocked).length);
 
 const QuestService = invoke("GameServer/Quest/QuestService");
 const Database = invoke("Database");

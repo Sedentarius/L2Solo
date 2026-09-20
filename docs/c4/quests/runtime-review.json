@@ -683,11 +683,12 @@
     "reviewedRequirements": []
   },
   "385": {
-    "certified": false,
-    "runtimeBlocker": {
-      "code": "PARTY_SEVEN_SIGNS_INTEGRATION",
-      "detail": "Needs shared party credit and Seven Signs participation/reward integration; generic resolver already exists."
-    }
+    "certified": true,
+    "tests": [
+      "tests/test_c4_catacomb_quests.js"
+    ],
+    "bridge": "REVIEWED_DELIVERY_ROUTE",
+    "reviewedRequirements": []
   },
   "401": {
     "certified": true,
@@ -903,11 +904,12 @@
     }
   },
   "634": {
-    "certified": false,
-    "runtimeBlocker": {
-      "code": "PARTY_SEVEN_SIGNS_INTEGRATION",
-      "detail": "Needs shared party credit and Seven Signs participation/reward integration; generic resolver already exists."
-    }
+    "certified": true,
+    "tests": [
+      "tests/test_c4_catacomb_quests.js"
+    ],
+    "bridge": "REVIEWED_DELIVERY_ROUTE",
+    "reviewedRequirements": []
   },
   "635": {
     "certified": false,

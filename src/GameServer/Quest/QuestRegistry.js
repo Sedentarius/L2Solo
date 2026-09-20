@@ -94,6 +94,7 @@ const entries = [
     [363, "Q363_SorrowfulSoundOfFlute"],
     [364, "Q364_JovialAccordion"],
     [378, "Q378_GrandFeast"],
+    [385, "Q385_YokeOfThePast"],
     [401, "Q401_PathToWarrior"],
     [402, "Q402_PathToKnight"],
     [403, "Q403_PathToRogue"],
@@ -116,6 +117,7 @@ const entries = [
     [420, "Q420_LittleWing"],
     [421, "Q421_LittleWingsBigAdventure"],
     [501, "Q501_ProofOfClanAlliance"],
+    [634, "Q634_InSearchOfFragmentsOfDimension"],
   ].map(([id, name]) => ({
     id,
     modulePath: `./quests/${name}`,

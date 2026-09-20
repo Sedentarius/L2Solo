@@ -833,6 +833,306 @@
                 "total": 1,
                 "respawn": 100,
                 "bias": 0
+            },
+            {
+                "selfId": 8488,
+                "name": "Rift Post Recruit",
+                "coords": [
+                    {
+                        "locX": -114224,
+                        "locY": -181504,
+                        "locZ": -6752,
+                        "head": 32768
+                    }
+                ],
+                "total": 1,
+                "respawn": 60,
+                "bias": 0
+            },
+            {
+                "selfId": 8489,
+                "name": "Rift Post Soldier",
+                "coords": [
+                    {
+                        "locX": -114216,
+                        "locY": -178698,
+                        "locZ": -6752,
+                        "head": 32768
+                    }
+                ],
+                "total": 1,
+                "respawn": 60,
+                "bias": 0
+            },
+            {
+                "selfId": 8490,
+                "name": "Rift Post Officer",
+                "coords": [
+                    {
+                        "locX": -114798,
+                        "locY": -178084,
+                        "locZ": -6752,
+                        "head": 49152
+                    }
+                ],
+                "total": 1,
+                "respawn": 60,
+                "bias": 0
+            },
+            {
+                "selfId": 8491,
+                "name": "Rift Post Captain",
+                "coords": [
+                    {
+                        "locX": -115362,
+                        "locY": -178692,
+                        "locZ": -6752,
+                        "head": 0
+                    }
+                ],
+                "total": 1,
+                "respawn": 60,
+                "bias": 0
+            },
+            {
+                "selfId": 8492,
+                "name": "Rift Post Commander",
+                "coords": [
+                    {
+                        "locX": -115364,
+                        "locY": -181517,
+                        "locZ": -6752,
+                        "head": 0
+                    }
+                ],
+                "total": 1,
+                "respawn": 60,
+                "bias": 0
+            },
+            {
+                "selfId": 8493,
+                "name": "Rift Post Hero",
+                "coords": [
+                    {
+                        "locX": -114793,
+                        "locY": -182125,
+                        "locZ": -6752,
+                        "head": 16384
+                    }
+                ],
+                "total": 1,
+                "respawn": 60,
+                "bias": 0
+            },
+            {
+                "selfId": 8494,
+                "name": "Dimension Keeper",
+                "coords": [
+                    {
+                        "locX": -41251,
+                        "locY": 209886,
+                        "locZ": -5085,
+                        "head": 32000
+                    }
+                ],
+                "total": 1,
+                "respawn": 60,
+                "bias": 0
+            },
+            {
+                "selfId": 8495,
+                "name": "Dimension Keeper",
+                "coords": [
+                    {
+                        "locX": -53067,
+                        "locY": -250565,
+                        "locZ": -7907,
+                        "head": 16000
+                    }
+                ],
+                "total": 1,
+                "respawn": 60,
+                "bias": 0
+            },
+            {
+                "selfId": 8496,
+                "name": "Dimension Keeper",
+                "coords": [
+                    {
+                        "locX": 44953,
+                        "locY": 123778,
+                        "locZ": -5408,
+                        "head": 0
+                    }
+                ],
+                "total": 1,
+                "respawn": 60,
+                "bias": 0
+            },
+            {
+                "selfId": 8497,
+                "name": "Dimension Keeper",
+                "coords": [
+                    {
+                        "locX": 46327,
+                        "locY": 170013,
+                        "locZ": -4979,
+                        "head": 16000
+                    }
+                ],
+                "total": 1,
+                "respawn": 60,
+                "bias": 0
+            },
+            {
+                "selfId": 8498,
+                "name": "Dimension Keeper",
+                "coords": [
+                    {
+                        "locX": 111379,
+                        "locY": 173725,
+                        "locZ": -5432,
+                        "head": 16000
+                    }
+                ],
+                "total": 1,
+                "respawn": 60,
+                "bias": 0
+            },
+            {
+                "selfId": 8499,
+                "name": "Dimension Keeper",
+                "coords": [
+                    {
+                        "locX": -20429,
+                        "locY": -251079,
+                        "locZ": -8160,
+                        "head": 16000
+                    }
+                ],
+                "total": 1,
+                "respawn": 60,
+                "bias": 0
+            },
+            {
+                "selfId": 8500,
+                "name": "Dimension Keeper",
+                "coords": [
+                    {
+                        "locX": -21635,
+                        "locY": 77075,
+                        "locZ": -5168,
+                        "head": 16000
+                    }
+                ],
+                "total": 1,
+                "respawn": 60,
+                "bias": 0
+            },
+            {
+                "selfId": 8501,
+                "name": "Dimension Keeper",
+                "coords": [
+                    {
+                        "locX": 140532,
+                        "locY": 79384,
+                        "locZ": -5424,
+                        "head": 16000
+                    }
+                ],
+                "total": 1,
+                "respawn": 60,
+                "bias": 0
+            },
+            {
+                "selfId": 8502,
+                "name": "Dimension Keeper",
+                "coords": [
+                    {
+                        "locX": -52142,
+                        "locY": 78814,
+                        "locZ": -4736,
+                        "head": 16000
+                    }
+                ],
+                "total": 1,
+                "respawn": 60,
+                "bias": 0
+            },
+            {
+                "selfId": 8503,
+                "name": "Dimension Keeper",
+                "coords": [
+                    {
+                        "locX": 118387,
+                        "locY": 132477,
+                        "locZ": -4824,
+                        "head": 16000
+                    }
+                ],
+                "total": 1,
+                "respawn": 60,
+                "bias": 0
+            },
+            {
+                "selfId": 8504,
+                "name": "Dimension Keeper",
+                "coords": [
+                    {
+                        "locX": 172427,
+                        "locY": -17871,
+                        "locZ": -4927,
+                        "head": 16000
+                    }
+                ],
+                "total": 1,
+                "respawn": 60,
+                "bias": 0
+            },
+            {
+                "selfId": 8505,
+                "name": "Dimension Keeper",
+                "coords": [
+                    {
+                        "locX": 83187,
+                        "locY": 208917,
+                        "locZ": -5465,
+                        "head": 16000
+                    }
+                ],
+                "total": 1,
+                "respawn": 60,
+                "bias": 0
+            },
+            {
+                "selfId": 8506,
+                "name": "Dimension Keeper",
+                "coords": [
+                    {
+                        "locX": -19309,
+                        "locY": 13210,
+                        "locZ": -4927,
+                        "head": 16000
+                    }
+                ],
+                "total": 1,
+                "respawn": 60,
+                "bias": 0
+            },
+            {
+                "selfId": 8507,
+                "name": "Dimension Keeper",
+                "coords": [
+                    {
+                        "locX": 12715,
+                        "locY": -248777,
+                        "locZ": -9607,
+                        "head": 16000
+                    }
+                ],
+                "total": 1,
+                "respawn": 60,
+                "bias": 0
             }
         ]
     }
