@@ -399,6 +399,8 @@ const World = {
                     BotSocialMemory.recordEvent(session, state, 'invite_attempt', source);
                     BotSocialMemory.recordEvent(session, state, 'party_refused', result.reason || 'activation_failed');
                     session.dataSendToMe(ServerResponse.actionFailed());
+                    utils.infoWarn('BotParty', 'remote activation failed for %s: reason=%s activity=%s clanmate=%s',
+                        state.name || lookup, result.reason || 'activation_failed', state.activity || 'unknown', availability.clanmate);
                     coldBotTell(session, state, `I can't get to you right now.`);
                     return false;
                 }
