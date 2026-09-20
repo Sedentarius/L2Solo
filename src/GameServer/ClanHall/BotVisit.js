@@ -12,7 +12,12 @@ function duty(session) {
         session.clanAllianceSupportLeaderId ||
         stats.clanPartyObjective ||
         stats.equipmentPlan?.clanGoal ||
-        stats.supplyErrand
+        stats.supplyErrand ||
+        stats.marketReturn ||
+        stats.craftReturn ||
+        stats.warehouseWorkflow ||
+        stats.mammonReturn ||
+        stats.partyMarketReturn
     );
 }
 function safe(session, actor) {
@@ -25,6 +30,9 @@ function safe(session, actor) {
         !session.pvpDefense &&
         !session.currentTargetId &&
         !session.incomingThreatId &&
+        !session.spotRelocation &&
+        !session.townEscape &&
+        !session.pendingTownTrip &&
         !duty(session) &&
         Number(actor.fetchKarma?.() || 0) === 0
     );
@@ -72,14 +80,27 @@ function tick(session, actor, timestamp = Date.now()) {
     if (!visit) {
         if (
             !['hunting', 'resting', 'following'].includes(session.plan) ||
-            timestamp < Number(session.clanHallRetryAt ?? session.coldLifeState?.stats?.clanHallRetryAt ?? 0) ||
-            !local(actor, hall)
+            timestamp < Number(session.clanHallRetryAt ?? session.coldLifeState?.stats?.clanHallRetryAt ?? 0)
         )
             return false;
-        if (!Services.missing(actor, hall, timestamp).length && !Services.recovery(actor, hall)) return false;
+        const needsBuffs = Services.missing(actor, hall, timestamp).length > 0;
+        const nearby = local(actor, hall);
+        if (!needsBuffs && (!nearby || !Services.recovery(actor, hall))) return false;
         session.clanHallVisit = { hallId: hall.id, startedAt: timestamp, expiresAt: timestamp + VISIT_MS };
         actor.automation?.abortAll?.(actor);
         actor.unselect?.();
+        if (!nearby) {
+            Approach.reset(session);
+            Navigation.clear(session);
+            const teleported = invoke('GameServer/Actor/Generics/TeleportTo')(session, actor, { ...hall.spawn });
+            if (!teleported) {
+                finish(session, actor, timestamp + RETRY_MS);
+                return false;
+            }
+            // TeleportTo updates the actor location after one second. Do not
+            // start walking or grant support using its old field coordinates.
+            session.clanHallVisit.arrivalAt = timestamp + 1200;
+        }
     }
     session.roleDecision = {
         ...(session.roleDecision || {}),
@@ -87,6 +108,11 @@ function tick(session, actor, timestamp = Date.now()) {
         reason: 'clan_hall_services',
         at: timestamp
     };
+    if (timestamp < Number(session.clanHallVisit.arrivalAt || 0)) return true;
+    if (session.clanHallVisit.arrivalAt && !local(actor, hall)) {
+        finish(session, actor, timestamp + RETRY_MS);
+        return false;
+    }
     if (!Services.near(actor, npc)) {
         const target = {
             ...Services.point(npc),

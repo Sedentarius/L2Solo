@@ -204,15 +204,17 @@ async function main() {
         const remote = hotActor({ ...state, loc: { locX: 0, locY: 0, locZ: 0 } });
         actors.push(remote);
         assert.equal(
-            Hot.tick({ ...session, actor: remote, clanHallVisit: null, clanHallRetryAt: 0 }, remote, at),
-            false,
-            'no cross-map detours'
-        );
-        assert.equal(
             Hot.tick({ ...session, actor: remote, clanHallVisit: null, clanHallRetryAt: 0, followPlayerSession: {} }, remote, at),
             false,
             'do not abandon a party'
         );
+        for (const guard of [
+            { currentTargetId: 55 }, { incomingThreatId: 55 }, { pvpDefense: {} },
+            { spotRelocation: {} }, { townEscape: {} }, { pendingTownTrip: {} },
+            { clanAllianceQuest: {} }, { coldLifeState: { stats: { equipmentPlan: { clanGoal: {} } } } },
+            { coldLifeState: { stats: { marketReturn: {} } } }
+        ]) assert.equal(Hot.tick({ ...session, actor: remote, clanHallVisit: null, clanHallRetryAt: 0, ...guard }, remote, at),
+            false, 'return for buffs must wait for combat, transport and existing duties');
         const nearby = hotActor({ ...state, loc: { ...def.spawn, locX: def.spawn.locX + 900 } });
         actors.push(nearby);
         assert(Hot.tick({ ...session, actor: nearby, clanHallVisit: null, clanHallRetryAt: 0 }, nearby, at));
@@ -234,6 +236,10 @@ async function main() {
             false
         );
         assert.equal(Cold.needed({ ...state, party: { partyId: 'party' } }, at), false);
+        const distantState = { ...state, loc: { locX: 0, locY: 0, locZ: 0 } };
+        assert(Cold.needed(distantState, at), 'missing useful buffs trigger a cold visit from anywhere');
+        assert.equal(Cold.needed({ ...distantState, stats: { ...state.stats, marketReturn: {} } }, at), false);
+        assert.equal(Cold.needed({ ...distantState, stats: { ...state.stats, clanHallRetryAt: at + 10000 } }, at), false);
         await Life.init();
         state = await Life.upsertState(state, 'hall_test_seed');
         assert(state);
@@ -270,6 +276,40 @@ async function main() {
         global.invoke = (name) => name === 'GameServer/Actor/Generics/TeleportTo'
             ? (_session, _actor, destination) => { hotDestination = destination; return true; }
             : originalInvoke(name);
+        const remoteSession = { ...session, actor: remote, clanHallVisit: null, clanHallRetryAt: 0 };
+        remote.session = remoteSession;
+        assert(Hot.tick(remoteSession, remote, at));
+        assert.deepEqual(hotDestination, def.spawn, 'a distant hot bot teleports to its owned hall');
+        assert.equal(Effects.list(remote).length, 0, 'no buffs before the real teleport arrives');
+        hotDestination = null;
+        const movesBeforeArrival = moved;
+        assert(Hot.tick(remoteSession, remote, at + 500));
+        assert.equal(hotDestination, null, 'do not send duplicate teleports while arriving');
+        assert.equal(moved, movesBeforeArrival, 'do not walk from the old coordinates during a teleport');
+        remote.fetchLocX = () => def.spawn.locX;
+        remote.fetchLocY = () => def.spawn.locY;
+        remote.fetchLocZ = () => def.spawn.locZ;
+        assert(Hot.tick(remoteSession, remote, at + 1200));
+        assert.equal(Services.missing(remote, Runtime.owned(1), at + 1200).length, 0);
+        assert.deepEqual(hotDestination, returnSpot.center, 'hot round trip ends at the selected farm');
+        assert.equal(remoteSession.clanHallVisit, null);
+        remote.fetchLocX = () => 0;
+        remote.fetchLocY = () => 0;
+        remote.fetchLocZ = () => 0;
+        assert.equal(Hot.tick({ ...remoteSession, spotRelocation: null, clanHallRetryAt: 0 }, remote, at + 60000), false,
+            'fresh buffs do not cause another remote visit');
+        const refreshingSession = { ...remoteSession, spotRelocation: null, clanHallRetryAt: 0 };
+        assert(Hot.tick(refreshingSession, remote, at + 1200000), 'ending hot buffs trigger the next return');
+        assert.deepEqual(hotDestination, def.spawn);
+        global.invoke = (name) => name === 'GameServer/Actor/Generics/TeleportTo'
+            ? () => false : originalInvoke(name);
+        const failedSession = { ...remoteSession, spotRelocation: null, clanHallVisit: null, clanHallRetryAt: 0 };
+        assert.equal(Hot.tick(failedSession, remote, at + 1200000), false);
+        assert.equal(failedSession.clanHallVisit, null);
+        assert(failedSession.clanHallRetryAt > at + 1200000, 'failed teleports back off instead of looping');
+        global.invoke = (name) => name === 'GameServer/Actor/Generics/TeleportTo'
+            ? (_session, _actor, destination) => { hotDestination = destination; return true; }
+            : originalInvoke(name);
         const departingActor = hotActor(state);
         actors.push(departingActor);
         const departing = { ...session, actor: departingActor, clanHallVisit: { hallId: def.id, expiresAt: at + 180000 } };
@@ -288,7 +328,13 @@ async function main() {
         assert.equal(Hot.tick(grouped, full, at + 1000), false);
         assert.equal(hotDestination, null, 'party members stay with their party after support');
         global.invoke = originalInvoke;
-        const outcome = await Cold.resolve(state, at);
+        const recalled = await Cold.resolve({ ...state, loc: distantState.loc }, at);
+        assert(recalled.ok && recalled.state.activity === 'clan_hall');
+        assert.deepEqual(recalled.state.loc, def.spawn, 'cold return persists the owned hall destination');
+        assert.equal(recalled.state.stats.coldCombat.effects.length, 0, 'cold bots also receive buffs only after arrival');
+        assert(recalled.state.stats.clanHallVisit);
+        assert.equal(recalled.state.stats.travel, null, 'remote return does not walk across the map');
+        const outcome = await Cold.resolve(recalled.state, at + 1200);
         assert(outcome?.ok, 'cold service snapshot persists');
         state = outcome.state;
         assert.equal(mp, 0, 'cold batch also works without manager MP');
@@ -300,6 +346,10 @@ async function main() {
         assert.deepEqual(state.loc, returnSpot.center, 'cold departure persists an immediate teleport');
         assert.equal(state.spotId, returnSpot.id);
         assert.equal(state.stats.travel, null, 'no gatekeeper or walking leg after hall support');
+        assert.equal(Cold.needed({ ...state, stats: { ...state.stats, clanHallRetryAt: 0 } }, at + 60000), false,
+            'fresh buffs prevent another cold round trip even without the retry cooldown');
+        assert(Cold.needed({ ...state, stats: { ...state.stats, clanHallRetryAt: 0 } }, at + 1200000),
+            'ending buffs trigger another remote visit');
         const haste = state.stats.coldCombat.effects.find((e) => e.id === 1086);
         assert.equal(haste.level, 1, 'cold service preserves the C4 hall skill rank');
         assert(haste.expiresAt > at && haste.expiresAt < at + 1300000);
@@ -334,6 +384,9 @@ async function main() {
         assert.equal(recovering.state.activity, 'clan_hall', 'cold bots also stay to recover after receiving all buffs');
         assert.equal(Services.missing(Cold.actorFor(recovering.state, Runtime.owned(1)), Runtime.owned(1), at + 30000).length, 0);
         assert.deepEqual(recovering.state.loc, def.spawn);
+        Runtime.applyRows([{ ...hallRow, functionsJson: '{"hp":100}' }]);
+        assert.equal(Cold.needed({ ...wounded, loc: distantState.loc }, at + 30000), false,
+            'recovery alone does not enable remote recall when the hall has no useful buffs');
         Runtime.applyRows([hallRow]);
         const travelStart = {
             ...state,
@@ -380,6 +433,8 @@ async function main() {
         assert.equal(Services.missing(magic, Runtime.owned(1), at).length, 0);
         assert.equal(Services.cast(null, magic, npc, 1059, at, true).code, 'not_authorized');
         assert.equal(Services.buffBot(null, magic, npc, at, true).code, 'not_authorized');
+        assert.equal(Cold.needed(distantState, at), false, 'unpaid support cannot trigger a remote visit');
+        assert.equal(Hot.tick({ ...session, actor: remote, clanHallVisit: null, clanHallRetryAt: 0 }, remote, at), false);
         const Resolver = invoke('GameServer/Bot/Population/BackgroundResolver');
         const weak = {
             ...state,

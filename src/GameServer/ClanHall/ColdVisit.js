@@ -86,9 +86,9 @@ function needed(state, timestamp = Date.now()) {
     const actor = actorFor(state, hall);
     return (
         Services.available(hall, timestamp) &&
-        require('./BotVisit').local(actor, hall) &&
         !!Services.manager(hall) &&
-        (Services.missing(actor, hall, timestamp).length > 0 || Services.recovery(actor, hall))
+        (Services.missing(actor, hall, timestamp).length > 0 ||
+            (require('./BotVisit').local(actor, hall) && Services.recovery(actor, hall)))
     );
 }
 function result(state, patch, timestamp, nextAt, reason) {
@@ -100,6 +100,7 @@ function result(state, patch, timestamp, nextAt, reason) {
                 summary: `${state.name || 'Bot'} ${
                     {
                         walking_to_clan_hall: 'is walking to the clan hall manager',
+                        teleported_to_clan_hall: 'teleported to the clan hall for support magic',
                         clan_hall_buff_received: 'received support magic in the clan hall',
                         clan_hall_recovery: 'is recovering at the clan hall manager',
                         clan_hall_services_complete: 'finished the clan hall visit and is returning to hunting',
@@ -169,7 +170,17 @@ async function resolve(state, timestamp = Date.now()) {
     } else {
         const actor = actorFor(state, hall);
         const currentVisit = visit || { hallId: hall.id, startedAt: timestamp, expiresAt: timestamp + VISIT_MS };
-        if (!Services.near(actor, npc)) {
+        if (!require('./BotVisit').local(actor, hall)) {
+            next = Services.missing(actor, hall, timestamp).length
+                ? result(state, {
+                    activity: 'clan_hall',
+                    loc: { ...hall.spawn },
+                    currentRegion: hall.town,
+                    spotId: null,
+                    stats: { ...state.stats, clanHallVisit: currentVisit, travel: null, restUntil: null }
+                }, timestamp, timestamp + 1200, 'teleported_to_clan_hall')
+                : finish(state, timestamp, 'clan_hall_visit_cancelled');
+        } else if (!Services.near(actor, npc)) {
             const to =
                 invoke('GameServer/Bot/AI/TownNpcApproach').pointsFor({
                     ...Services.point(npc),
