@@ -1,0 +1,59 @@
+[
+    {
+        "selfId": 7989,
+        "template": {
+            "kind": "Thing",
+            "name": "Chest of Bifrons",
+            "title": "",
+            "level": 70,
+            "hostile": false
+        },
+        "base": {
+            "str": 40,
+            "dex": 30,
+            "con": 43,
+            "int": 21,
+            "wit": 20,
+            "men": 10
+        },
+        "stats": {
+            "pAtk": 688.86373,
+            "pAtkRnd": 30,
+            "pDef": 295.91597,
+            "mAtk": 470.40463,
+            "mDef": 216.53847,
+            "accur": 5,
+            "atkSpd": 253,
+            "castSpd": 333,
+            "atkRadius": 40
+        },
+        "speed": {
+            "walk": 50,
+            "run": 120
+        },
+        "vitals": {
+            "maxHp": 2444.46819,
+            "maxMp": 1345.8,
+            "revHp": 7.5,
+            "revMp": 2.7,
+            "corpseTime": 7000
+        },
+        "collision": {
+            "radius": 12,
+            "size": 9
+        },
+        "equipment": {
+            "weapon": 0,
+            "shield": 0,
+            "reuseTime": 500
+        },
+        "clan": {
+            "clanName": "",
+            "helpRadius": 300
+        },
+        "rewards": {
+            "exp": 0.1,
+            "sp": 10
+        }
+    }
+]

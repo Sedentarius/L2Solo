@@ -621,11 +621,12 @@
     "reviewedRequirements": []
   },
   "340": {
-    "certified": false,
-    "blocker": {
-      "code": "ENCOUNTER_HANDOFF_UNCERTIFIED",
-      "detail": "Hot scripted spawning already exists. Owner-scoped encounter recovery and cold/hot parity need focused implementation; DEFEND requirement remains unproven."
-    }
+    "certified": true,
+    "tests": [
+      "tests/test_c4_lizardmen_quest.js"
+    ],
+    "bridge": "REVIEWED_ENCOUNTER_ROUTE",
+    "reviewedRequirements": []
   },
   "341": {
     "certified": true,

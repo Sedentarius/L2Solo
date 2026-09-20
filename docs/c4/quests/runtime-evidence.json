@@ -621,11 +621,12 @@
     "reviewedRequirements": []
   },
   "340": {
-    "certified": false,
-    "blocker": {
-      "code": "ENCOUNTER_HANDOFF_UNCERTIFIED",
-      "detail": "Hot scripted spawning already exists. Owner-scoped encounter recovery and cold/hot parity need focused implementation; DEFEND requirement remains unproven."
-    }
+    "certified": true,
+    "tests": [
+      "tests/test_c4_lizardmen_quest.js"
+    ],
+    "bridge": "REVIEWED_ENCOUNTER_ROUTE",
+    "reviewedRequirements": []
   },
   "341": {
     "certified": true,
@@ -919,7 +920,7 @@
     }
   },
   "_certification": {
-    "generatedAt": "2026-09-20T01:49:50.147Z",
+    "generatedAt": "2026-09-20T04:28:38.775Z",
     "sourceHashes": {
       "config/default.ini": "14f3852373656b264d1e9f367252519f82072cb0dea69e465c968a775acb29c3",
       "config/local.example.ini": "cb13f57c7e72f2b6f55e342378bb9acc974e7f7c0ab6708a6ed8f5d0dc8f8fa0",
@@ -968,7 +969,7 @@
       "data/Items/Others/c4_valley_of_saints.json": "04f32940f8994116d0cc8730a5b0c1f6123975852e0d1f911f81e962b61bac71",
       "data/Items/Others/c4_varka_silenos_stronghold.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
       "data/Items/Others/c4_wall_of_argos.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
-      "data/Items/Others/others.json": "b4ad89e152f03d0e087d41d557f7f0b576d139284c26d02b3f3ffad3522d5940",
+      "data/Items/Others/others.json": "b394dece9b23f5966ab26063b63a9c2469170aa39ad1dd9f803e7d0e10e5e442",
       "data/Items/Weapons/.schema.json": "03fc149c9107d3ce4b3d5f1e36cbfe8f255205d5f9b95cb3e67418414cf9cbea",
       "data/Items/Weapons/c4_necropolis_of_sacrifice.json": "dc8ed6d6ad90dbcfad3f2d18ed254389ae12f1477702bdea58566496b8534656",
       "data/Items/Weapons/c4_raid_bosses.json": "d5ac7a78f17bcf720c34b59c773eb5207b17a3ff2493a5933babdf55ea584c02",
@@ -1184,7 +1185,7 @@
       "database/sql/sqlite.sql": "546a3888eb03901ccb1d4a52aa75349c3cebd96a201d2f0526d353f49f3f177b",
       "scripts/benchmark-interaction-memory.js": "d196e3f8dfb3fb49554d5081f339228a16a01c5ee606c2eca3f2987f45d3327b",
       "scripts/benchmark-town-navigation.js": "a03ca379db4ea4d1f55a50a4eea637962970f240c4557c7903ae925d5ea4d211",
-      "scripts/certify-c4-quests.js": "81fbac284de2daed0c99a2395424bb8f75fbeb9e49cbe05a2829d5d76d24191d",
+      "scripts/certify-c4-quests.js": "412f82abd6f5819c27f4fea521e3c84536d3c92b3c5da791ac25b87572f7d890",
       "scripts/check-c4-quests.js": "094eec7789f23d33445e3d00452eb7d2640c7fdbc3d342d38997f25db218c0b2",
       "scripts/check-quest-registry.js": "a05ecd2fe1e6f62d6c7eed1629dad48be13a2023682a11201c2a89d07ed46da2",
       "scripts/check-syntax.js": "f18315645fba6bbdb1b80b103fc5006970e56f804f9c72759be6dea1f067b9b5",
@@ -1247,7 +1248,7 @@
       "scripts/run-tests-p0-b3.js": "07046504ac2f221826f1fdf599c30f0f53b61c44ec50f57371b3f1bc52982cc6",
       "scripts/run-tests-p0-b4.js": "309423b431c59b4f612c6041156952e5fe63cf65fff1256c5b10c3fb165a0af4",
       "scripts/run-tests-p0-b5.js": "a3f8e96312ed5ac1fe873005a8db1b7f008aa6db9df60f8d17780c509e94e71e",
-      "scripts/run-tests.js": "6a8e2f50b6e2612331bcc1fb081ac7a6d785d0146624a8c5a2c5e2d8cf588971",
+      "scripts/run-tests.js": "8c84d5aab34b3afc3fbbf07729ee6aed5c2ce8db5c908c9241d5d58a0017a7ef",
       "scripts/saved-games.js": "9d2f0c14084ad5403231e4e99e03388909c7fda432ff9c0ea7f44d829cf7b388",
       "scripts/simulate-bot-chat.js": "8b15f0e010fd24aca99c7cbc1e769cb40af0671afd45d9401a24b3b7e845bb01",
       "scripts/start.js": "4b47531f68f1733a1b4a9bb03626626cb83802594dd59a7aa20a2e61241a21b4",
@@ -1629,7 +1630,7 @@
       "src/GameServer/Crafting/ManufactureShop.js": "1de7ff64fe9a96539f0c402b4d26ba8e47a656e6c9bb747db683327dedc166e6",
       "src/GameServer/Crafting/RecipeCrafting.js": "e655483df8a7f1ca864c6ae772db42b0696718517ed7970d9f808b63f42195bd",
       "src/GameServer/Crystallize.js": "fbdcd57dc351062ae1e9c67aaea197cd319c84ccb04e735f01763e43c591f85e",
-      "src/GameServer/DataCache.js": "45ce4bce5bd5cc0605cdd4b86e16477c1052baa6eb945e2f5461dd8e8ea7fffe",
+      "src/GameServer/DataCache.js": "c9c3b36fe9e69a3df932a948ec774fa0b4c4862e2c026a74b61796493301e7ab",
       "src/GameServer/DevConsole.js": "fd3f3d0f26dc9e5dd7e0145163441efc7a884d3216a425fdf660cf0d5424da8e",
       "src/GameServer/Effects/BuffCatalog.js": "1c768070f718c5102c8e7efc78d5fe566c1e328d6881ac0a180feb0c32d411cf",
       "src/GameServer/Effects/EffectRestrictions.js": "23e1919987be8c42f9ff636b0c6c73e7b70d17ddb8f4fa0aac007578e59e5716",
@@ -1913,7 +1914,7 @@
       "src/GameServer/Quest/DeclarativeQuest.js": "f55d951d6a1a9ecde5b90a3a704305392d16e6d99c4d8597a8f29235941636f3",
       "src/GameServer/Quest/FirstProfessionProof.js": "836445225f11c0b25f3b30e1549adfdaecf1c3ee750a087b5442d786f4ecef2a",
       "src/GameServer/Quest/LowLevelDefinitions.js": "6fbb937001742755760ef38ed3faf61567a58595b3534bc194b2d4e41aec065f",
-      "src/GameServer/Quest/QuestRegistry.js": "39f61fc81db421424621e5aaff91a4ebeaaaee1c18c983aee309b8b6fbd87fb6",
+      "src/GameServer/Quest/QuestRegistry.js": "0926c6a7195ddfa2d6c3628f146e79d939ce1a0f536a8d4adc6d1ca132c1531f",
       "src/GameServer/Quest/QuestService.js": "9810b2461b6f94345c1038d3ecf6ca57204600b7df56e699970e642d18cf100f",
       "src/GameServer/Quest/QuestState.js": "d764e7fac7367002c151fd44e0006e6e8b27556d8586af4f40b73e4703d69e46",
       "src/GameServer/Quest/QuestStep.js": "8e23c3b873a54dc6cd083b3f3cae470ada26957cb8651a95372c19081572a1b3",
@@ -1990,6 +1991,8 @@
       "src/GameServer/Quest/quests/Q260_OrcHunting.js": "c4c30fd066a5a2922887ed23d3d1b33586f6837870832f72006e29e702286c2d",
       "src/GameServer/Quest/quests/Q265_BondsOfSlavery.js": "00a074ed743ecc46396d00810fe86678e7e3139ec01bdc8975c6ff0c21594dfd",
       "src/GameServer/Quest/quests/Q273_InvadersOfTheHolyLand.js": "a7cec38cc11041f635885d7b29528773fc0d603c908fb0f4234a1d62710b94af",
+      "src/GameServer/Quest/quests/Q275_DarkWingedSpies.js": "7ec6699c4db6e3ff71f5ed5f5a10cc997fe8d48ec63a9e6fbe0525813a6320aa",
+      "src/GameServer/Quest/quests/Q276_TotemOfTheHestui.js": "5b0a8fa876546a216bd5e0c78e5c51a828409bdfdb59b71a5664cfc53808161d",
       "src/GameServer/Quest/quests/Q293_TheHiddenVeins.js": "851f75d8b9f9bd7fd60e4b53f68c611608bc456828ab18ebaac8afaf3252701e",
       "src/GameServer/Quest/quests/Q401_PathToWarrior.js": "ecce5421f89c063a41bcaa8840a664820b36c1d9b479cce38ffc2f41c9b9a912",
       "src/GameServer/Quest/quests/Q402_PathToKnight.js": "43d562b15dc44a74b6ad80dd85c6c2d3bdb4f24395abd806e142a0155a3093b4",
@@ -3217,6 +3220,7 @@
       "tests/test_c4_necropolis_of_saints.js": "3075aee2a87b189c556db54534bb72e1472addae7f4d0573a3637bd0f9002d65",
       "tests/test_c4_necropolis_of_the_disciples.js": "a9d098769c6bf03621a38757d4a9a5f72e7eeb50b209c46df91640a96ed7f74b",
       "tests/test_c4_necropolis_of_worshipers.js": "657a5b829c8e4a3c42ec32d25c45597c906234acd51b3943c9f28da6c12fbe4d",
+      "tests/test_c4_orc_bounty_quests.js": "9d897f5a5faa20e63336f6d835bd7cab71ca3cd23f18261c6948b1212864bc05",
       "tests/test_c4_profession_routes.js": "fc33166cf33294673b55e3bcc69e6e2dccff0b804556fd0daf43e75faeef140f",
       "tests/test_c4_protocol_packets.js": "08a02359a80f70e48b9b89d1992612243cbb3059c05c0b23e8e67088a956e4e8",
       "tests/test_c4_raid_bosses.js": "c126798a64a802d566279ec0d12a473f6f8b17775d0491082e9880670b1b13b7",
@@ -3475,11 +3479,11 @@
       "tests/test_pvp_encounter_extension.js": "14e1d3450534c317f873c062282407d80a4980ffff9cfdd63d655dc8233e60b8",
       "tests/test_pvp_encounter_handoff.js": "029c4dc5fc56a9b5e73c3625f588c9f64f052bd9367304ec49f3f6d2bbdd69ad",
       "tests/test_pvp_interaction_memory.js": "ab68bddab41dcdc707a0504357b52ab3735ecfcab309ff8a9fcbafc855f4f88b",
-      "tests/test_quest_availability.js": "8c86c1106a7da942581d9f535a890c93227521e224f3a5fbfdcc9ad0fde25e7e",
+      "tests/test_quest_availability.js": "8ec12ac73aad560e6da81a5cab4910e744bfaa75ec6ce6b87563a28873d358ae",
       "tests/test_quest_character_switch.js": "450f74860657c7ced99c1638649996f6387bec56ba944e630a5eacde1e864bba",
       "tests/test_quest_handins.js": "966bd390f10cfaf96d672f0d24cf0e756338a08b091cb45ae5f615a1ef2bc251",
-      "tests/test_quest_packets.js": "f2ed30db03bf4f2e1437f77920fe240d47c8f78db2f0ad99422e2f8949b0cb23",
-      "tests/test_quest_registry_integrity.js": "8e38449278d88f061b43730d05f8ff031371c3b51dad850c1fb788fa20a6e7e9",
+      "tests/test_quest_packets.js": "8fccf6ad4343fc96ee1592c0d471104e1cf7675a4970c8816bb27e49dc20aeb1",
+      "tests/test_quest_registry_integrity.js": "5584881ee96e5c6a27f9a9b340213d67a4e9f8c5cd42e18eac098aa963acd231",
       "tests/test_quest_runtime.js": "d0e4478d0801a858dbf8102cfe2c5cd029107e724b6afba02c8511f6149c6eb3",
       "tests/test_quest_spawn_radar.js": "91d3b95a956bd853ab25de1c3bfc67064bfc5c2807958109279fee74eefe3742",
       "tests/test_raid_boss_balance.js": "50d937f03684db2fbd7b66e3b207fa15725528140941b6d6bf792b711f0fdc5e",
@@ -3558,8 +3562,8 @@
       "tests/test_world_observer_world_state.js": "1694e9a8d888d7495da71f79d1ac6fc0f27b69a28b33e5f73753529cacce9c78",
       "tests/test_world_visible_users.js": "53949729f44132946b001ebe4ace8644ffac482aea9953a0ffa80829dac74aab",
       "tests/test_world_wipe.js": "d7f3aa5197dc8359c9542250394fc0ccd96010402be9c83b0576696ec47cf89c",
-      "tests/test_c4_orc_bounty_quests.js": "9d897f5a5faa20e63336f6d835bd7cab71ca3cd23f18261c6948b1212864bc05",
-      "docs/c4/quests/runtime-review.json": "bf4087d6b4b23f0454e6c8ee02d0391a9f0fbe57e108021eb4a4694d904c4fc8",
+      "tests/test_c4_lizardmen_quest.js": "1022ce62fcf3597c17d8877ae770749e11b58fc6c995579033a0847dcc9bdaad",
+      "docs/c4/quests/runtime-review.json": "4233283249f3b34fd773467adc64aa6936a7d8c893cd831b60b37ee9a98bfe9c",
       "docs/c4/quests/C4_QUEST_MASTER_INVENTORY.jsonl": "9f63e96d5fe25e0ce21f81027b805d8a4cc556e25e8f17b74a179ff316befc86"
     },
     "tests": [
@@ -3593,6 +3597,10 @@
       },
       {
         "path": "tests/test_c4_orc_bounty_quests.js",
+        "exitCode": 0
+      },
+      {
+        "path": "tests/test_c4_lizardmen_quest.js",
         "exitCode": 0
       },
       {

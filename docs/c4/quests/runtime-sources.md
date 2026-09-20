@@ -104,3 +104,51 @@ Q419's hunting phase previously dropped a proof on every eligible kill. The
 reference gives each target its own chance (60/75/100%, and 75/100% for the
 Dwarven pair) and only while the character carries its race's Animal Slayer
 List. Both are now enforced; the fifty-proof cap is unchanged.
+
+## Q340: the raid boss ID mapping, the transient chest and the relic dead end
+
+Three facts about Q340 had to be settled against the local runtime rather than
+assumed from the usual ID arithmetic.
+
+**The raid boss is 10146, not 5146.** Q340's final target is reference 25146,
+Serpent Demon Bifrons. The catalogue's ordinary rules (NPC = reference − 23000,
+mob = reference − 20000, quest monster = reference − 22000) would give 5146, but
+local 5146 is Tarlk Raider Triska, which is reference 27146 — an unrelated quest
+monster at level 48. Serpent Demon Bifrons is native **10146** (raid bosses carry
+a −15000 offset), it is authored in `data/Npcs/c4_raid_bosses.json`, and it is
+spawned at (−13698, 213796, −3300). No coordinate was invented.
+
+**The chest is a transient quest spawn, not an encounter subsystem.** The
+reference is `addSpawn(CHEST, npc, false, 30000)`: spawn NPC 30989 at the fallen
+boss for thirty seconds. That is exactly `QuestService.spawnQuestNpc` with
+`despawnDelay: 30000`, which already carries `questSpawn.ownerId` and
+`questSpawn.questId`. The quest additionally refuses the chest to anyone but its
+owner, which the reference does not do but the local quest-spawn convention
+does; the chest is not restored across a restart, and the quest state is. The
+older `ENCOUNTER_HANDOFF_UNCERTIFIED` blocker was over-broad here for the same
+reason it was for Q275/Q276.
+
+Native **7989** (Chest of Bifrons) had no local template and is added in
+`data/Npcs/c4_quest_content.json` from the pinned reference's own stats. Item
+4255 (Trade Cargo) was authored non-stackable locally while the pinned source
+sets `is_stackable="true"`; the quest requires thirty of them and the backpack
+lookup reads a single stack, so the local entry is corrected to match the
+source. That divergence is systemic in the local item datapack — roughly two
+thousand items differ from the pinned source on stackability — but only the
+entries a quest in this catalogue actually needs are being corrected here.
+
+**The relic drop has one deliberate, minimal deviation.** The reference rolls
+the pair inside `getQuestItemsCount(player, HOLY) < 1`: a 10% chance of Agnes's
+Holy Symbol and, only in that same instant, a nested 10% chance of Agnes's
+Rosary. Adonius demands both, and nothing else in the quest can ever yield
+either, so nine players in ten who obtain the symbol are permanently stranded at
+condition 3. The rolls and their rates are kept exactly as authored; only the
+outer guard is widened from "does not hold the symbol" to "does not hold both",
+so the missing relic stays reachable at the same 1%-per-kill rate. This is
+recorded as an implementation choice, not a source fact.
+
+The refusal branch is preserved as authored. Thirty cargo boxes open a real
+choice: the temple mission (consume the cargo, advance to condition 2) or a flat
+4090 adena, which itself splits into continuing the cargo hunt at condition 1 and
+`exitQuest(true)` — a repeatable release, not a completion. Only the temple route
+reaches Weisz's single 14700 adena completion.

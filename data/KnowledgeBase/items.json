@@ -466887,7 +466887,7 @@
     "template": {
       "etc": {
         "consumable": false,
-        "stackable": false
+        "stackable": true
       },
       "selfId": 4255,
       "template": {

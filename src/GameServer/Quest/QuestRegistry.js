@@ -91,6 +91,7 @@ const entries = [
     [275, "Q275_DarkWingedSpies"],
     [276, "Q276_TotemOfTheHestui"],
     [293, "Q293_TheHiddenVeins"],
+    [340, "Q340_SubjugationOfLizardmen"],
     [401, "Q401_PathToWarrior"],
     [402, "Q402_PathToKnight"],
     [403, "Q403_PathToRogue"],

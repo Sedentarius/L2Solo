@@ -4,9 +4,9 @@ const { auditQuestRegistry } = require("../scripts/check-quest-registry");
 
 const result = auditQuestRegistry();
 assert.deepStrictEqual(result.errors, []);
-// 70 legacy script entries, the five reviewed beginner bounties and the two
-// reviewed Orc bounties Q275/Q276.
-assert.strictEqual(result.active, 77 + require('../src/GameServer/Quest/LowLevelDefinitions').filter(d=>!d.blocked).length);
+// 70 legacy script entries, the five reviewed beginner bounties, the two
+// reviewed Orc bounties Q275/Q276 and Q340 Subjugation of Lizardmen.
+assert.strictEqual(result.active, 78 + require('../src/GameServer/Quest/LowLevelDefinitions').filter(d=>!d.blocked).length);
 
 const QuestService = invoke("GameServer/Quest/QuestService");
 const Database = invoke("Database");

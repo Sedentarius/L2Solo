@@ -12265,7 +12265,7 @@
 },{
     "selfId": 4255,
     "template": { "kind": "Other.Quest", "name": "Trade Cargo", "class1": 4, "class2": 3, "mass": 0, "price": 0 },
-    "etc": { "stackable": false, "consumable": false }
+    "etc": { "stackable": true, "consumable": false }
 },{
     "selfId": 4256,
     "template": { "kind": "Other.Quest", "name": "Agnes's Holy Symbol", "class1": 4, "class2": 3, "mass": 0, "price": 0 },

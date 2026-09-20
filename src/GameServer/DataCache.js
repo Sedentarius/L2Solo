@@ -64,6 +64,9 @@ const DataCache = {
             ...validateModel(path + 'Npcs/c4_low_level_raid_bosses'),
             ...validateModel(path + 'Npcs/c4_raid_bosses'),
             ...validateModel(path + 'Npcs/c4_raid_boss_minions'),
+            // Source-backed templates restored for the C4 level 1-20 quest
+            // catalogue. See docs/c4/quests/runtime-sources.md.
+            ...validateModel(path + 'Npcs/c4_quest_content'),
             ...C4LateTownGatekeepers.npcs,
             ...require('./World/GiranMammon').npcs,
             ...C4SevenSignsDungeonTeleports.npcs
