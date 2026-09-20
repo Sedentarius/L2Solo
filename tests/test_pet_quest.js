@@ -12,6 +12,22 @@ const service = {
     questDropAmount: (amount, needed, current) => Math.min(amount, needed - current)
 };
 global.invoke = name => name === 'GameServer/Quest/QuestService' ? service : originalInvoke(name);
+
+// Q419's proof drop commits through the shared atomic quest step, which needs a
+// real datapack and a real database. This file is the unit test for the wolf
+// quest's route logic - race gates, the tutor visits, the exam and the replay -
+// and it drives a hand-rolled state that has neither. The step is therefore
+// stubbed onto the same fake inventory the rest of this file uses; the atomic
+// path itself is certified for real in tests/test_c4_orc_bounty_quests.js.
+const questStep = require('../src/GameServer/Quest/QuestStep');
+questStep.apply = async (state, { takes = [], gives = [], variables, status } = {}) => {
+    for (const [id, amount] of takes) inventory.set(id, Math.max(0, (inventory.get(id) || 0) - amount));
+    for (const [id, amount] of gives) inventory.set(id, (inventory.get(id) || 0) + amount);
+    if (variables) state.variables = { ...variables };
+    if (status) state.state = status;
+    return { ok: true };
+};
+
 const quest = require('../src/GameServer/Quest/quests/Q419_GetAPet');
 const { questions } = require('../data/Pets/c4-wolf-quiz.json');
 let level = 14, race = 0;
@@ -33,7 +49,13 @@ async function main() {
     assert.strictEqual(inventory.get(3418), 1);
     await quest.onKill(state, { fetchSelfId: () => 460 });
     assert.strictEqual(inventory.get(3423), undefined, 'wrong race target gives no progress');
-    for (let i = 0; i < 55; i++) await quest.onKill(state, { fetchSelfId: () => 103 });
+    // Each target now drops at its own authored chance, so the collection is
+    // driven with a roll that always succeeds rather than left to luck.
+    const luck = Math.random;
+    Math.random = () => 0;
+    try {
+        for (let i = 0; i < 55; i++) await quest.onKill(state, { fetchSelfId: () => 103 });
+    } finally { Math.random = luck; }
     assert.strictEqual(inventory.get(3423), 50);
     await quest.onEvent(state, 'proof');
     assert.strictEqual(state.getInt('cond'), 2);

@@ -26,7 +26,8 @@ try {
     ]);
     assert.deepStrictEqual(meta.npcFilters.hpMultipliers.map(({ value }) => value), [0.5, 2, 3, 4, 5, 6, 9]);
     const weaponDirectory = meta.itemDirectory.find((entry) => entry.key === 'weapons');
-    assert.strictEqual(weaponDirectory.total, 516);
+    // 516 plus the Baby Duck Rod, restored as Q39's reward.
+    assert.strictEqual(weaponDirectory.total, 517);
     assert.strictEqual(weaponDirectory.grades.find((grade) => grade.key === 'd').count, 121);
     assert.deepStrictEqual(meta.itemDirectory.find((entry) => entry.key === 'materials').grades, [
         { key: 'no-grade', count: 606 }

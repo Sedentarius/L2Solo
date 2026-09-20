@@ -52,12 +52,19 @@ for (const npcId of dualRoleNpcIds) {
 }
 
 (async () => {
+    // Unoren's quest is a reviewed definition with a level requirement, so the
+    // character used here has to meet it; an ineligible one would correctly be
+    // shown the no-quest page and would prove nothing about the dual role.
+    const unorenQuest = QuestService.quests().find((quest) => (quest.startNpcs || []).includes(7147));
+    assert.ok(unorenQuest, 'Unoren must start a quest');
+    const eligibleLevel = Number(unorenQuest.definition?.minLevel) || 1;
+
     const packets = [];
     const session = {
         actor: {
             fetchId: () => 42,
-            fetchLevel: () => 1,
-            fetchRace: () => 0
+            fetchLevel: () => eligibleLevel,
+            fetchRace: () => Number(unorenQuest.definition?.race ?? 0)
         },
         questStatesLoaded: true,
         questStates: new Map(),
@@ -77,7 +84,10 @@ for (const npcId of dualRoleNpcIds) {
     await new Promise((resolve) => setImmediate(resolve));
 
     assert.strictEqual(packets[2][0], 0x0f, 'Unoren quest link must open a quest HTML page');
-    assert.ok(packetIncludes(packets[2], 'Unoren'), 'Unoren quest link must render QuestService output');
+    // A reviewed definition heads its pages with the quest's own name rather
+    // than the NPC's, so that is what the rendered page must carry.
+    assert.ok(packetIncludes(packets[2], unorenQuest.name),
+        'Unoren quest link must render QuestService output for his own quest');
     assert.strictEqual(packets[3][0], 0x25, 'Unoren quest link must terminate the quest interaction');
     console.log(`dual-role NPC checks passed (${dualRoleNpcIds.length} NPCs)`);
 })().catch((error) => {
