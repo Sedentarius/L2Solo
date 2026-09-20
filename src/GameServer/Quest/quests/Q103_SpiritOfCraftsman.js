@@ -1,3 +1,4 @@
+const ClassQuestReward = require('../ClassQuestReward');
 const K = 7307,
   C = 7132,
   H = 7144,
@@ -83,16 +84,7 @@ module.exports = {
       return p("Cekton", "Return to Karrod.");
     }
     if (id === K && c === 8) {
-      await q.takeItem(s.session, ST);
-      for (const [z, c] of [
-        [W, 1],
-        [HP, 100],
-        [a.isSpellcaster?.() ? 2509 : 1835, a.isSpellcaster?.() ? 500 : 1000],
-        ...E.map((z) => [z, 10]),
-      ])
-        await q.giveItem(s.session, z, c);
-      s.playSound("ItemSound.quest_finish");
-      await s.exit(false);
+      await ClassQuestReward.complete(s, { takes: [[ST, 1]], weapon: W });
       return p("Karrod", "The spirit is at peace.");
     }
     return p(

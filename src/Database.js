@@ -1129,6 +1129,18 @@ function applySchemaMigrations() {
                 resolutionReason TEXT NOT NULL DEFAULT ''
             );
         `);
+        }],
+        [42, () => {
+            const columns = connection.prepare('PRAGMA table_info(characters)')
+                .all().map(column => column.name);
+            if (!columns.includes('newbie'))
+                connection.exec(
+                    'ALTER TABLE characters ADD COLUMN newbie INTEGER NOT NULL DEFAULT -1'
+                );
+            if (!columns.includes('newbieShotsReceived'))
+                connection.exec(
+                    'ALTER TABLE characters ADD COLUMN newbieShotsReceived INTEGER NOT NULL DEFAULT 0'
+                );
         }]
     ];
     const applied = new Set(connection.prepare('SELECT version FROM schema_migrations').all().map((row) => Number(row.version)));
@@ -3704,11 +3716,16 @@ const Database = {
         return selectOne('accounts', ['username'], 'username = ? COLLATE NOCASE', [username], 'account:canonical-name')
             .then((accounts) => {
                 if (!accounts[0]) throw new Error('account does not exist');
-                return insert('characters', {
-                    username: accounts[0].username, name: data.name, race: data.race, classId: data.classId,
-                    maxHp: data.maxHp, maxMp: data.maxMp, sex: data.sex, face: data.face,
-                    hair: data.hair, hairColor: data.hairColor, locX: data.locX, locY: data.locY, locZ: data.locZ
-                }, 'character:create');
+                // C4 decides beginner-shot eligibility once, at creation, from
+                // whether this is the account's first character.
+                return select('characters', ['id'], 'username = ? COLLATE NOCASE',
+                    [accounts[0].username], 'character:account-count')
+                    .then((existing) => insert('characters', {
+                        username: accounts[0].username, name: data.name, race: data.race, classId: data.classId,
+                        maxHp: data.maxHp, maxMp: data.maxMp, sex: data.sex, face: data.face,
+                        hair: data.hair, hairColor: data.hairColor, locX: data.locX, locY: data.locY, locZ: data.locZ,
+                        newbie: require('./GameServer/Quest/BeginnerReward').flagForNewCharacter(existing.length)
+                    }, 'character:create'));
             });
     },
     deleteCharacter(username, name) {
@@ -4129,14 +4146,24 @@ const Database = {
         }, 'pet:mount-food'));
     },
     applyPetQuestStep(characterId, questId, expected, next, takes, gives) {
+        if (![420, 421].includes(questId)) return Promise.reject(new Error('Unsupported pet quest'));
+        return this.applyQuestStep(characterId, questId, expected, next, takes, gives);
+    },
+    applyQuestStep(characterId, questId, expected, next, takes, gives, experience = null, beginner = null) {
         return withCharacterFlush(characterId, () => inTransaction(() => {
-            if (![420, 421].includes(questId)) throw new Error('Unsupported pet quest');
+            if (!require('./GameServer/Quest/QuestRegistry').entries.some(e => e.id === questId && e.status === 'active')) throw new Error('Unsupported quest');
             const row = one('SELECT state, variables FROM character_quests WHERE characterId = ? AND questId = ?', [characterId, questId]);
             const current = row ? JSON.parse(row.variables || '{}') : {};
             if ((row?.state || 'created') !== expected.state || JSON.stringify(current) !== JSON.stringify(expected.variables)) throw new Error('Pet quest step changed');
+            const profession = require('./GameServer/Quest/FirstProfessionProof').forQuest(questId);
+            if (profession && next.state === 'completed') {
+                const character = one('SELECT classId, level FROM characters WHERE id = ?', [characterId]);
+                if (character?.classId !== profession.fromClassId || character.level < 19) throw new Error('Profession eligibility changed');
+            }
             const changed = new Set();
             for (const take of takes) {
-                const items = all('SELECT id, amount FROM items WHERE characterId = ? AND selfId = ? AND equipped = 0 ORDER BY id', [characterId, take.selfId]);
+                const unequipped = [420,421].includes(questId) ? ' AND equipped = 0' : '';
+                const items = all(`SELECT id, amount FROM items WHERE characterId = ? AND selfId = ?${unequipped} ORDER BY id`, [characterId, take.selfId]);
                 if (!Number.isSafeInteger(take.amount) || take.amount < 1 || items.reduce((sum, item) => sum + item.amount, 0) < take.amount) throw new Error('Required quest items missing');
                 let remaining = take.amount;
                 for (const item of items) {
@@ -4155,8 +4182,52 @@ const Database = {
                 else changed.add(Number(write('INSERT INTO items(selfId, name, amount, characterId) VALUES (?, ?, ?, ?)', [give.selfId, give.name, give.amount, characterId]).insertId));
             }
             write(UPSERT_CHARACTER_QUEST, [characterId, questId, next.state, JSON.stringify(next.variables)]);
-            return [...changed].map(id => one('SELECT * FROM items WHERE id = ? AND characterId = ?', [id, characterId]) || { id, amount: 0 });
-        }, 'pet:quest-step'));
+            const rows = [...changed].map(id => one('SELECT * FROM items WHERE id = ? AND characterId = ?', [id, characterId]) || { id, amount: 0 });
+            if (experience) {
+                if (![experience.exp, experience.sp].every(n => Number.isSafeInteger(n) && n >= 0)) throw new Error('Invalid quest experience');
+                const actor = one('SELECT exp, sp, level FROM characters WHERE id = ?', [characterId]);
+                const cap = require('./GameServer/Progression/ProgressionCap');
+                const award = cap.applyAward(actor.exp, experience.exp);
+                const level = Math.max(actor.level, cap.levelForExperience(award.totalExp, actor.level));
+                const totalSp = actor.sp + experience.sp;
+                write('UPDATE characters SET exp = ?, sp = ?, level = ? WHERE id = ?', [award.totalExp, totalSp, level, characterId]);
+                rows.experience = { totalExp: award.totalExp, totalSp, level, grantedExp: award.accepted, grantedSp: experience.sp };
+            }
+            // A beginner-shot grant and its character-wide receipt commit with the
+            // rest of the hand-in, so shots can never be handed out unrecorded and
+            // the counter can never advance without the shots.
+            if (beginner) {
+                const character = one('SELECT newbieShotsReceived FROM characters WHERE id = ?', [characterId]);
+                if (Number(character.newbieShotsReceived) + 1 !== Number(beginner.received)) {
+                    throw new Error('beginner reward receipt changed');
+                }
+                write('UPDATE characters SET newbieShotsReceived = ? WHERE id = ?',
+                    [Number(beginner.received), characterId]);
+                rows.beginner = { received: Number(beginner.received) };
+            }
+            return rows;
+        }, 'quest:step'));
+    },
+    transferFirstProfession(characterId, targetClassId) {
+        return withCharacterFlush(characterId, () => inTransaction(() => {
+            const spec = require('./GameServer/Quest/FirstProfessionProof').forTarget(targetClassId);
+            if (!spec) return { ok: false, reason: 'wrong_profession' };
+            const actor = one('SELECT classId, level FROM characters WHERE id = ?', [characterId]);
+            const quest = one('SELECT state, variables FROM character_quests WHERE characterId = ? AND questId = ?', [characterId, spec.questId]);
+            const variables = JSON.parse(quest?.variables || '{}');
+            if (actor?.classId === spec.toClassId && Number(variables.professionConsumed) === spec.toClassId) return { ok: true, alreadyTransferred: true, targetClassId: spec.toClassId };
+            if (actor?.classId !== spec.fromClassId) return { ok: false, reason: 'wrong_profession' };
+            if (actor.level < 20) return { ok: false, reason: 'level', requiredLevel: 20 };
+            if (quest?.state !== 'completed' || Number(variables.professionProof) !== spec.itemId || variables.professionConsumed) return { ok: false, reason: 'proof' };
+            const item = one('SELECT id, amount FROM items WHERE characterId = ? AND selfId = ? AND amount >= 1 ORDER BY id LIMIT 1', [characterId, spec.itemId]);
+            if (!item) return { ok: false, reason: 'proof' };
+            if (item.amount === 1) write('DELETE FROM items WHERE id = ?', [item.id]);
+            else write('UPDATE items SET amount = amount - 1 WHERE id = ?', [item.id]);
+            variables.professionConsumed = String(spec.toClassId);
+            write(UPSERT_CHARACTER_QUEST, [characterId, spec.questId, 'completed', JSON.stringify(variables)]);
+            write('UPDATE characters SET classId = ? WHERE id = ?', [spec.toClassId, characterId]);
+            return { ok: true, targetClassId: spec.toClassId, requiredLevel: 20, consumedItemId: item.id, remaining: item.amount - 1 };
+        }, 'quest:first-profession-transfer'));
     },
     evolveHatchling(characterId, controlId) {
         return withCharacterFlush(characterId, () => inTransaction(() => {

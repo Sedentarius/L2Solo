@@ -1,6 +1,2 @@
-module.exports = require("./TravelerRoute")({
-  id: 48,
-  name: "To the Immortal Plateau",
-  race: 3,
-  reward: 7557,
-});
+// Compatibility entry point; gameplay uses shared atomic quest steps.
+module.exports = require('../DeclarativeQuest').create(require('../StarterQuestDefinitions').find(d => d.id === 48));

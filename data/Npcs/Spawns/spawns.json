@@ -1009,7 +1009,7 @@
 },{
     "selfId": "t21_19_NPC_030709",
     "bounds": [{ "locX": 35592, "locY": 46830, "minZ": -3728, "maxZ": -3528 }, { "locX": 35822, "locY": 46841, "minZ": -3728, "maxZ": -3528 }, { "locX": 35819, "locY": 47171, "minZ": -3728, "maxZ": -3528 }, { "locX": 35532, "locY": 47165, "minZ": -3728, "maxZ": -3528 }],
-    "spawns": [{ "selfId": 12092, "name": "Treant Bremec", "coords": [{ "locX": 35689, "locY": 47039, "locZ": -3609, "head": 0 }], "total": 1, "respawn": 60, "bias": 0 }]
+    "spawns": [{ "selfId": 12092, "name": "Treant Bremec", "coords": [{ "locX": 50592, "locY": 54896, "locZ": -3352, "head": 40960 }], "total": 1, "respawn": 60, "bias": 0 }]
 },{
     "selfId": "21_19_030704",
     "bounds": [{ "locX": 45356, "locY": 48268, "minZ": -3109, "maxZ": -2909 }, { "locX": 45556, "locY": 48268, "minZ": -3109, "maxZ": -2909 }, { "locX": 45556, "locY": 48468, "minZ": -3109, "maxZ": -2909 }, { "locX": 45356, "locY": 48468, "minZ": -3109, "maxZ": -2909 }],

@@ -37,7 +37,7 @@ module.exports = {
     if (!state.isStarted()) { const actor = state.session.actor; if (npcId !== VIRGIL || Number(actor.fetchClassId()) !== 31) return page("Quest", "This path is not for your current class."); return Number(actor.fetchLevel()) < 19 ? page("Virgil", "Come back after reaching level 19.") : page("Virgil", "Do you seek the path of a Palus Knight?", '<a action="bypass -h quest 410 start">Accept the trial.</a>'); }
     if (npcId === VIRGIL) {
       if (count(state, PALUS_TALISMAN)) return count(state, LYCANTHROPE_SKULL) >= 13 ? page("Virgil", "You have all the skulls.", '<a action="bypass -h quest 410 skulls">Present the skulls.</a>') : page("Virgil", `Lycanthrope Skulls: ${count(state, LYCANTHROPE_SKULL)}/13.`);
-      if (count(state, COFFIN_ETERNAL_REST)) { const result = await quest.awardFirstProfession(state, 32); if (!result.ok) return page("Virgil", "Your profession could not be granted. Keep the coffin and try again."); await quest.takeItem(state.session, COFFIN_ETERNAL_REST); await quest.giveItem(state.session, GAZE_OF_ABYSS, 1); state.playSound(FINISH); await state.exit(false); return page("Virgil", "You have completed the Path to Palus Knight and become a Palus Knight."); }
+      if (count(state, COFFIN_ETERNAL_REST)) { const result = await quest.awardFirstProfession(state, 32, [[COFFIN_ETERNAL_REST, 1]]); if (!result.ok) return page("Virgil", "Your profession could not be granted. Keep the coffin and try again."); state.playSound(FINISH); return page("Virgil", "You have completed the Path to Palus Knight. Present your proof for class transfer at level 20."); }
       return page("Virgil", "Complete Kalinta's request.");
     }
     if (npcId === KALINTA) {

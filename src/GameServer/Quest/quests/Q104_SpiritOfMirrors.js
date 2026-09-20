@@ -1,3 +1,4 @@
+const ClassQuestReward = require('../ClassQuestReward');
 const G = 7017,
   A = 7041,
   J = 7043,
@@ -58,18 +59,9 @@ module.exports = {
       return p("Quest", "Seek the spirits.");
     }
     if (id === G && W.every((z) => n(s, z))) {
-      for (const z of W) await q.takeItem(s.session, z);
-      const mage = Boolean(a.isSpellcaster?.());
-      const rewards = [
-        [R, 1],
-        [HP, 100],
-        [mage ? SP : SS, mage ? 500 : 1000],
-        ...E.map((z) => [z, 10]),
-      ];
-      if (a.isNewbie?.()) rewards.push([mage ? BSP : BSS, mage ? 3000 : 7000]);
-      for (const [z, c] of rewards) await q.giveItem(s.session, z, c);
-      s.playSound("ItemSound.quest_finish");
-      await s.exit(false);
+      await ClassQuestReward.complete(s, {
+        takes: W.map((z) => [z, 1]), weapon: R,
+      });
       return p("Gallint", "The Wand of Adept is yours.");
     }
     return p("Gallint", "Equip an Oak Wand and defeat each spirit.");

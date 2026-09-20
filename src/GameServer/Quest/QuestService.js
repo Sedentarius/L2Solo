@@ -6,7 +6,6 @@ const ProgressionRates = invoke("GameServer/ProgressionRates");
 const ExperienceReward = invoke("GameServer/Actor/Generics/ExperienceReward");
 const ConsoleText = invoke("GameServer/ConsoleText");
 const World = invoke("GameServer/World/World");
-const ClassTransfer = invoke("GameServer/ClassTransfer");
 const QuestRegistry = require("./QuestRegistry");
 
 const quests = QuestRegistry.activeQuests();
@@ -168,9 +167,16 @@ async function onEvent(session, event) {
     const eventName = String(event.name);
     if (!quest || !npc || !quest.npcs.includes(Number(npc.selfId)))
       return false;
-    if (quest.eventNpc?.(eventName) !== Number(npc.selfId)) return false;
+    // A quest whose errand is offered by many interchangeable NPCs (every
+    // Gatekeeper Ziggurat, every Dimension Keeper) answers with the whole set
+    // rather than one id.
+    const eventNpcs = quest.eventNpc?.(eventName);
+    const permitted = Array.isArray(eventNpcs)
+        ? eventNpcs.includes(Number(npc.selfId)) : eventNpcs === Number(npc.selfId);
+    if (!permitted) return false;
     const state = stateFor(session, quest);
     const before = activeQuestSnapshot(session);
+    if (state.isCompleted()) return false;
     const html = await quest.onEvent(state, eventName);
     if (!html) return false;
     if (before !== activeQuestSnapshot(session)) syncActiveQuests(session);
@@ -319,13 +325,22 @@ function spawnQuestNpc(state, selfId, options = {}) {
   });
 }
 
-// Profession quests call this only from their verified final hand-in. The
-// shared transfer commits classId and target skills before the quest can mark
-// itself completed, so a database failure cannot consume the final objective.
-function awardFirstProfession(state, targetClassId) {
-  return ClassTransfer.transfer(state?.session, targetClassId, {
-    firstProfessionOnly: true,
-  });
+// Completion grants a durable proof, never a class mutation. ClassTransfer
+// consumes the proof independently once the character reaches level 20.
+async function awardFirstProfession(state, targetClassId, takes = [], cleanup = []) {
+  const spec = require('./FirstProfessionProof').forQuest(state.quest?.id);
+  const actor = state.session.actor;
+  if (!spec || spec.toClassId !== targetClassId || Number(actor.fetchClassId()) !== spec.fromClassId) return { ok: false, reason: 'wrong_profession' };
+  if (Number(actor.fetchLevel()) < 19) return { ok: false, reason: 'level', requiredLevel: 19 };
+  if (!state.isStarted()) return { ok: false, reason: 'state' };
+  const required = new Map(takes);
+  for (const id of cleanup) {
+    const amount = actor.backpack.fetchItemFromSelfId(id)?.fetchAmount() || 0;
+    if (amount) required.set(id, Math.max(amount, required.get(id) || 0));
+  }
+  return require('./QuestStep').apply(state, { takes: [...required], gives: [[spec.itemId, 1]],
+    ...require('./FirstProfessionProof').rewardFor(spec.questId),
+    variables: { ...state.variables, professionProof: String(spec.itemId) }, status: 'completed' });
 }
 
 function rewardExpSp(session, exp, sp) {

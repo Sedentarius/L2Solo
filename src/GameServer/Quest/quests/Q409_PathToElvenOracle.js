@@ -55,12 +55,14 @@ module.exports = {
     // reaches it.  Keep the encounter retryable until the captain's order is
     // actually obtained (as in the source quest), rather than stranding the
     // owner at condition 2.
-    if (event === "lizardmen" && state.isStarted() && count(state, CRYSTAL_MEDALLION) && !count(state, LIZARD_CAPTAIN_ORDER)) {
+    if (event === "lizardmen" && [1, 2].includes(state.getInt("cond")) && count(state, CRYSTAL_MEDALLION)) {
       for (const selfId of [LIZARDMAN_WARRIOR, LIZARDMAN_SCOUT, LIZARDMAN]) state.addSpawn(selfId);
-      await state.set("cond", 2);
+      if (state.getInt("cond") === 1) await state.set("cond", 2);
       return page("Allana", "The lizardmen have appeared. Defend Allana.");
     }
-    if (event === "tamato" && state.getInt("cond") >= 4 && count(state, LIZARD_CAPTAIN_ORDER) && !count(state, TAMATOS_NECKLACE)) {
+    // Tamato can be re-challenged while Perrin still owes Allana, but never
+    // once Perrin has paid: the necklace is not a renewable source of money.
+    if (event === "tamato" && [4, 5].includes(state.getInt("cond")) && !count(state, TAMATOS_NECKLACE)) {
       state.addSpawn(TAMATO);
       return page("Perrin", "Tamato is coming to defend Perrin.");
     }
@@ -83,50 +85,56 @@ module.exports = {
     }
 
     if (npcId === MANUEL) {
-      if (count(state, MONEY_OF_SWINDLER) && count(state, DIARY_OF_ALLANA) && count(state, LIZARD_CAPTAIN_ORDER) && !count(state, HALF_OF_DIARY)) {
-        const profession = await quest.awardFirstProfession(state, 29);
-        if (!profession.ok) return page("Manuel", profession.reason === "level" ? `Reach level ${profession.requiredLevel} to become an Elven Oracle.` : "Your profession could not be granted. Keep the evidence and try again.");
-        for (const item of [MONEY_OF_SWINDLER, DIARY_OF_ALLANA, LIZARD_CAPTAIN_ORDER, CRYSTAL_MEDALLION]) await quest.takeItem(state.session, item);
-        await quest.giveItem(state.session, LEAF_OF_ORACLE, 1);
-        state.playSound(FINISH);
-        await state.exit(false);
-        return page("Manuel", "You have completed the Path to Elven Oracle and become an Elven Oracle.");
+      if (count(state, LEAF_OF_ORACLE)) return page("Manuel", "You have already earned the Leaf of Oracle.");
+      if (cond < 7) return page("Manuel", "Investigate the false prophet Allana.");
+      const profession = await quest.awardFirstProfession(state, 29,
+        [MONEY_OF_SWINDLER, DIARY_OF_ALLANA, LIZARD_CAPTAIN_ORDER, CRYSTAL_MEDALLION].map((id) => [id, 1]));
+      if (!profession.ok) {
+        return page("Manuel", profession.reason === "level"
+          ? `Reach level ${profession.requiredLevel} to become an Elven Oracle.`
+          : "Your profession could not be granted. Keep your quest items and try again.");
       }
-      return page("Manuel", "Bring me Allana's diary, Perrin's money, and the Lizard Captain's Order.");
+      state.playSound(FINISH);
+      return page("Manuel", "You have completed the Path to Elven Oracle. Present your proof for class transfer at level 20.");
     }
 
-    if (npcId === ALLANA && count(state, CRYSTAL_MEDALLION)) {
-      if (!count(state, LIZARD_CAPTAIN_ORDER) && !count(state, HALF_OF_DIARY)) {
-        if (cond > 2) return page("Allana", "You have driven the lizardmen away.");
-        return page("Allana", "The lizardmen are threatening me.", '<a action="bypass -h quest 409 lizardmen">Defend Allana.</a>');
-      }
-      if (count(state, LIZARD_CAPTAIN_ORDER) && !count(state, HALF_OF_DIARY)) {
-        await quest.giveItem(state.session, HALF_OF_DIARY, 1);
-        await state.set("cond", 4);
+    if (npcId === ALLANA) {
+      if (cond === 1) return page("Allana", "The lizardmen are coming.", '<a action="bypass -h quest 409 lizardmen">Stand guard.</a>');
+      if (cond === 2) return page("Allana", "Defeat the lizardman captain.");
+      if (cond === 3) {
+        await require("../QuestStep").apply(state, {
+          gives: [[HALF_OF_DIARY, 1]],
+          variables: { ...state.variables, cond: "4" },
+        });
         state.playSound(MIDDLE);
-        return page("Allana", "Take this half of my diary and confront Perrin.");
+        return page("Allana", "Half my diary is missing. Perrin owes me money; find him.");
       }
-      if (count(state, MONEY_OF_SWINDLER) && count(state, LIZARD_CAPTAIN_ORDER) && count(state, HALF_OF_DIARY) && !count(state, DIARY_OF_ALLANA)) {
-        await quest.takeItem(state.session, HALF_OF_DIARY);
-        await quest.giveItem(state.session, DIARY_OF_ALLANA, 1);
-        await state.set("cond", 7);
+      if (cond === 4 || cond === 5) return page("Allana", "Perrin owes me money. Please find him.");
+      if (cond === 6) {
+        await require("../QuestStep").apply(state, {
+          takes: [[HALF_OF_DIARY, count(state, HALF_OF_DIARY)]],
+          gives: [[DIARY_OF_ALLANA, 1]],
+          variables: { ...state.variables, cond: "7" },
+        });
         state.playSound(MIDDLE);
-        return page("Allana", "Take my complete diary to Manuel.");
+        return page("Allana", "Take my diary to Manuel.");
       }
-      if (count(state, LIZARD_CAPTAIN_ORDER) && count(state, HALF_OF_DIARY) && !count(state, TAMATOS_NECKLACE)) return page("Allana", "Perrin owes me money. Please find him.");
-      return page("Allana", "Continue your investigation.");
+      return page("Allana", "Return to Manuel.");
     }
 
-    if (npcId === PERRIN && count(state, CRYSTAL_MEDALLION) && count(state, LIZARD_CAPTAIN_ORDER)) {
-      if (count(state, TAMATOS_NECKLACE)) {
-        await quest.giveItem(state.session, MONEY_OF_SWINDLER, 1);
-        await quest.takeItem(state.session, TAMATOS_NECKLACE);
-        await state.set("cond", 6);
+    if (npcId === PERRIN) {
+      if (cond === 4) return page("Perrin", "You will not get Allana's money.", '<a action="bypass -h quest 409 tamato">Challenge Tamato.</a>');
+      if (cond === 5) {
+        await require("../QuestStep").apply(state, {
+          takes: [[TAMATOS_NECKLACE, count(state, TAMATOS_NECKLACE)]],
+          gives: [[MONEY_OF_SWINDLER, 1]],
+          variables: { ...state.variables, cond: "6" },
+        });
         state.playSound(MIDDLE);
         return page("Perrin", "Take the money to Allana.");
       }
-      if (count(state, MONEY_OF_SWINDLER)) return page("Perrin", "I have already paid Allana.");
-      return page("Perrin", "You will not get Allana's money.", '<a action="bypass -h quest 409 tamato">Challenge Tamato.</a>');
+      if (cond > 5) return page("Perrin", "I have already paid Allana.");
+      return page("Perrin", "I have nothing to say to you.");
     }
 
     return page("Quest", "Continue your trial.");
@@ -135,14 +143,18 @@ module.exports = {
   async onKill(state, npc) {
     if (!state.isStarted()) return;
     const npcId = Number(npc.fetchSelfId());
-    const quest = service();
-    if (npcId === LIZARDMAN_WARRIOR && !count(state, LIZARD_CAPTAIN_ORDER)) {
-      await quest.giveItem(state.session, LIZARD_CAPTAIN_ORDER, 1);
-      await state.set("cond", 3);
+    const cond = state.getInt("cond");
+    if (npcId === LIZARDMAN_WARRIOR && cond === 2) {
+      await require("../QuestStep").apply(state, {
+        gives: [[LIZARD_CAPTAIN_ORDER, 1]],
+        variables: { ...state.variables, cond: "3" },
+      });
       state.playSound(MIDDLE);
-    } else if (npcId === TAMATO && !count(state, TAMATOS_NECKLACE)) {
-      await quest.giveItem(state.session, TAMATOS_NECKLACE, 1);
-      await state.set("cond", 5);
+    } else if (npcId === TAMATO && cond === 4) {
+      await require("../QuestStep").apply(state, {
+        gives: [[TAMATOS_NECKLACE, 1]],
+        variables: { ...state.variables, cond: "5" },
+      });
       state.playSound(MIDDLE);
     }
   },

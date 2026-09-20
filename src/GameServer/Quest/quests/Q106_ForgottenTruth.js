@@ -1,3 +1,4 @@
+const ClassQuestReward = require('../ClassQuestReward');
 const T = 7358,
   K = 7133,
   X = 984,
@@ -67,22 +68,7 @@ module.exports = {
       return p("Kartia", "Return to Thifiell.");
     }
     if (id === T && c === 4) {
-      await q.takeItem(s.session, TR);
-      for (const [z, c] of [
-        [D, 1],
-        [HP, 100],
-        [a.isSpellcaster?.() ? 2509 : 1835, a.isSpellcaster?.() ? 500 : 1000],
-        ...E.map((z) => [z, 10]),
-      ])
-        await q.giveItem(s.session, z, c);
-      if (a.isNewbie?.())
-        await q.giveItem(
-          s.session,
-          a.isSpellcaster?.() ? 5790 : 5789,
-          a.isSpellcaster?.() ? 3000 : 6000,
-        );
-      s.playSound("ItemSound.quest_finish");
-      await s.exit(false);
+      await ClassQuestReward.complete(s, { takes: [[TR, 1]], weapon: D });
       return p("Thifiell", "The forgotten truth is restored.");
     }
     return p(id === K ? "Kartia" : "Thifiell", "Continue your task.");

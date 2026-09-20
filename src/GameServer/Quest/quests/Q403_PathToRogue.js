@@ -112,15 +112,10 @@ module.exports = {
     }
 
     if (hasAllStolenItems(state) && !count(state, HORSESHOE_OF_LIGHT)) {
-      const profession = await quest.awardFirstProfession(state, 7);
+      const profession = await quest.awardFirstProfession(state, 7, STOLEN_ITEMS.map(id => [id, 1]), [NETIS_BOW, NETIS_DAGGER, WANTED_BILL]);
       if (!profession.ok) {
         return page('Bezique', profession.reason === 'level' ? `Reach level ${profession.requiredLevel} to become a Rogue.` : 'Your profession could not be granted. Keep your quest items and try again.');
-      }
-      for (const item of [NETIS_BOW, NETIS_DAGGER, WANTED_BILL, ...STOLEN_ITEMS]) await quest.takeItem(state.session, item, -1);
-      await quest.giveItem(state.session, BEZIQUES_RECOMMENDATION, 1);
-      state.playSound(FINISH);
-      await state.exit(false);
-      return page('Bezique', 'You have completed the Path to Rogue and become a Rogue.');
+      } state.playSound(FINISH); return page('Bezique', 'You have completed the Path to Rogue. Present your proof for class transfer at level 20.');
     }
     if (count(state, BEZIQUES_LETTER)) return page('Bezique', 'Take my letter to Neti.');
     if (count(state, HORSESHOE_OF_LIGHT)) {
@@ -138,14 +133,17 @@ module.exports = {
     if (!state.isStarted() || !hasNetiWeapon(state)) return;
     const npcId = Number(npc.fetchSelfId());
     const chance = BONE_CHANCE.get(npcId);
-    if (chance !== undefined && state.getInt('cond') > 0) {
+    // The reference collects bones only while the trial is at that stage. A
+    // looser guard keeps dropping them for the rest of the quest, leaving ten
+    // unconsumed bones behind at completion.
+    if (chance !== undefined && state.getInt('cond') === 2) {
       if (await collectBones(state, chance)) {
         await state.set('cond', 3);
         state.playSound(MIDDLE);
       } else if (count(state, SPARTOI_BONES)) state.playSound(ITEM);
       return;
     }
-    if (npcId !== CATS_EYE_BANDIT || !count(state, WANTED_BILL)) return;
+    if (npcId !== CATS_EYE_BANDIT || state.getInt('cond') !== 5 || !count(state, WANTED_BILL)) return;
     const item = STOLEN_ITEMS[Math.floor(Math.random() * STOLEN_ITEMS.length)];
     if (count(state, item)) return;
     await service().giveItem(state.session, item, 1);

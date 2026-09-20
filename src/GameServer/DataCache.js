@@ -64,6 +64,7 @@ const DataCache = {
             ...validateModel(path + 'Npcs/c4_low_level_raid_bosses'),
             ...validateModel(path + 'Npcs/c4_raid_bosses'),
             ...validateModel(path + 'Npcs/c4_raid_boss_minions'),
+            ...validateModel(path + 'Npcs/c4_quest_content'),
             ...C4LateTownGatekeepers.npcs,
             ...require('./World/GiranMammon').npcs,
             ...validateModel(path + 'Npcs/clan_halls'),
@@ -106,6 +107,7 @@ const DataCache = {
             ...validateModel(path + 'Npcs/Spawns/c4_catacomb_of_the_forbidden_path'),
             ...validateModel(path + 'Npcs/Spawns/c4_low_level_raid_bosses'),
             ...validateModel(path + 'Npcs/Spawns/c4_raid_bosses'),
+            ...validateModel(path + 'Npcs/Spawns/c4_quest_content'),
             ...C4LateTownGatekeepers.spawns,
             ...require('./World/GiranMammon').spawns,
             ...validateModel(path + 'Npcs/Spawns/clan_halls'),
@@ -117,6 +119,7 @@ const DataCache = {
         DataCache.npcRewards      = [
             ...require('../../data/Pets/c4-quest-npcs.json').rewards,
             ...validateModel(path + 'Npcs/Rewards/rewards').filter((reward) => reward.selfId !== 135),
+            ...validateModel(path + 'Npcs/Rewards/c4_quest_content'),
             ...validateModel(path + 'Npcs/Rewards/c4_swamp_of_screams'),
             ...validateModel(path + 'Npcs/Rewards/c4_garden_of_beasts'),
             ...validateModel(path + 'Npcs/Rewards/c4_valley_of_saints'),

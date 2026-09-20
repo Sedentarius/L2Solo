@@ -2,6 +2,7 @@ const Database = invoke('Database');
 const CalculateStats = invoke('GameServer/Actor/Generics/CalculateStats');
 const ServerResponse = invoke('GameServer/Network/Response');
 const ClassProgression = invoke('GameServer/ClassProgression');
+const Proof = require('./Quest/FirstProfessionProof');
 
 function statusParams(actor) {
     const d = (value) => Math.round(Number(value) || 0);
@@ -48,8 +49,36 @@ function eligibility(actor, targetClassId, { firstProfessionOnly = false } = {})
 // view; callers therefore never leave a completed quest with a stale class.
 async function transfer(session, targetClassId, options = {}) {
     const actor = session?.actor;
+    const spec = Proof.forTarget(targetClassId);
+    if (spec && actor && !actor.isDead?.() && [spec.fromClassId, spec.toClassId].includes(Number(actor.fetchClassId()))) {
+        const result = await transferPersisted(actor.fetchId(), targetClassId);
+        if (!result.ok) return result;
+        actor.setClassId(result.targetClassId);
+        if (result.consumedItemId && actor.backpack) {
+            const item = actor.backpack.fetchItemRaw(result.consumedItemId);
+            if (result.remaining) item?.setAmount(result.remaining);
+            else actor.backpack.items = actor.backpack.items.filter(i => i.fetchId() !== result.consumedItemId);
+            session.dataSendToMe?.(ServerResponse.itemsList(actor.backpack.fetchItems()));
+        }
+        // The proof/class transaction is committed. A failed UI refresh must
+        // never roll the class back or make the spent proof reusable.
+        try {
+            await actor.skillset.awardSkills(actor.fetchId(), result.targetClassId, actor.fetchLevel());
+            CalculateStats(session, actor);
+            actor.fillupVitals();
+            session.dataSendToMe?.(ServerResponse.skillsList(actor.skillset.fetchSkills()));
+            await invoke('GameServer/Shortcuts').refreshSkills(session, actor);
+            session.dataSendToMe?.(ServerResponse.userInfo(actor));
+            session.dataSendToMe?.(ServerResponse.statusUpdate(actor.fetchId(), statusParams(actor)));
+            session.dataSendToOthers?.(ServerResponse.charInfo(actor), actor);
+        } catch (error) {
+            utils.infoWarn('Character', 'class committed; refresh deferred for %s: %s', actor.fetchId(), error.message);
+        }
+        return result;
+    }
     const check = eligibility(actor, targetClassId, options);
     if (!check.ok) return check;
+    if (ClassProgression.firstProfMap[check.currentClassId]) return { ok: false, reason: 'proof' };
     const currentLevel = Number(actor.fetchLevel());
     if (currentLevel < check.requiredLevel) {
         return { ok: false, reason: 'level', requiredLevel: check.requiredLevel };
@@ -78,4 +107,9 @@ async function transfer(session, targetClassId, options = {}) {
     }
 }
 
-module.exports = { eligibility, transfer, statusParams };
+// Cold actors use the same authority and database checks without requiring a
+// materialized client session. Skill reconciliation follows durable transfer.
+function transferPersisted(characterId, targetClassId) {
+    return Database.transferFirstProfession(Number(characterId), Number(targetClassId));
+}
+module.exports = { eligibility, transfer, transferPersisted, statusParams };

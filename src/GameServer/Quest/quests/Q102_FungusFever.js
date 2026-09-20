@@ -1,3 +1,4 @@
+const ClassQuestReward = require('../ClassQuestReward');
 const A = 7284,
   C = 7156,
   N = [7217, 7219, 7221, 7285],
@@ -88,17 +89,9 @@ module.exports = {
       return p("Elf", "Thank you for the medicine.");
     }
     if (id === A && c === 6) {
-      await q.takeItem(s.session, LI);
-      await q.giveItem(s.session, a.isSpellcaster?.() ? 744 : 743, 1);
-      await q.giveItem(
-        s.session,
-        a.isSpellcaster?.() ? 2509 : 1835,
-        a.isSpellcaster?.() ? 500 : 1000,
-      );
-      for (const z of [1060, ...E])
-        await q.giveItem(s.session, z, z === 1060 ? 100 : 10);
-      s.playSound("ItemSound.quest_finish");
-      await s.exit(false);
+      await ClassQuestReward.complete(s, {
+        takes: [[LI, 1]], weapon: 743, mageWeapon: 744,
+      });
       return p("Alberius", "The fever has passed.");
     }
     return p("Quest", "Continue your task.");

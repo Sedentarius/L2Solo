@@ -1,3 +1,4 @@
+const ClassQuestReward = require('../ClassQuestReward');
 const K = 7218,
   O1 = [1836, 1837, 1838, 1839],
   O2 = [1840, 1841, 1842, 1843],
@@ -55,17 +56,11 @@ module.exports = {
       return p("Kendell", "Now defeat another chief.");
     }
     if (c === 4) {
-      for (const z of [...O2, T2]) await q.takeItem(s.session, z, -1);
-      await q.giveItem(s.session, a.isSpellcaster?.() ? 754 : 981, 1);
-      for (const z of E) await q.giveItem(s.session, z, 10);
-      if (a.isNewbie?.())
-        await q.giveItem(
-          s.session,
-          a.isSpellcaster?.() ? 5790 : 5789,
-          a.isSpellcaster?.() ? 3000 : 7000,
-        );
-      s.playSound("ItemSound.quest_finish");
-      await s.exit(false);
+      // Only the one order Kendell actually issued is carried, plus the torc.
+      await ClassQuestReward.complete(s, {
+        takes: [...O2, T2].filter((z) => n(s, z)).map((z) => [z, n(s, z)]),
+        weapon: 981, mageWeapon: 754, noGradeShots: false,
+      });
       return p("Kendell", "The forest is safer now.");
     }
     return p("Kendell", "Continue your task.");

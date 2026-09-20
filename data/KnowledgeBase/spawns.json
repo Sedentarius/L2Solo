@@ -103920,6 +103920,166 @@
     }
   },
   {
+    "id": "spawn-112-5589a904d658",
+    "mobId": 112,
+    "period": "always",
+    "possibleLocations": [
+      {
+        "head": 0,
+        "locX": 46398,
+        "locY": 243131,
+        "locZ": -6604
+      },
+      {
+        "head": 0,
+        "locX": 46802,
+        "locY": 243487,
+        "locZ": -6604
+      },
+      {
+        "head": 0,
+        "locX": 47103,
+        "locY": 243309,
+        "locZ": -6604
+      }
+    ],
+    "randomBiasSeconds": 0,
+    "respawnSeconds": 100,
+    "sourceIndex": 9,
+    "total": 1,
+    "zone": {
+      "bounds": [],
+      "id": "c4_quest_content",
+      "sourceIndex": 3970
+    }
+  },
+  {
+    "id": "spawn-113-ef87d563aa00",
+    "mobId": 113,
+    "period": "always",
+    "possibleLocations": [
+      {
+        "head": 0,
+        "locX": 45174,
+        "locY": 242779,
+        "locZ": -6502
+      },
+      {
+        "head": 0,
+        "locX": 45577,
+        "locY": 242779,
+        "locZ": -6502
+      },
+      {
+        "head": 0,
+        "locX": 45932,
+        "locY": 242794,
+        "locZ": -6464
+      }
+    ],
+    "randomBiasSeconds": 0,
+    "respawnSeconds": 100,
+    "sourceIndex": 10,
+    "total": 1,
+    "zone": {
+      "bounds": [],
+      "id": "c4_quest_content",
+      "sourceIndex": 3970
+    }
+  },
+  {
+    "id": "spawn-114-0842c1ea5fe4",
+    "mobId": 114,
+    "period": "always",
+    "possibleLocations": [
+      {
+        "head": 0,
+        "locX": 45046,
+        "locY": 245580,
+        "locZ": -6663
+      },
+      {
+        "head": 0,
+        "locX": 45247,
+        "locY": 245580,
+        "locZ": -6663
+      },
+      {
+        "head": 0,
+        "locX": 45649,
+        "locY": 245580,
+        "locZ": -6663
+      },
+      {
+        "head": 0,
+        "locX": 46724,
+        "locY": 245079,
+        "locZ": -6656
+      },
+      {
+        "head": 0,
+        "locX": 46724,
+        "locY": 245435,
+        "locZ": -6656
+      }
+    ],
+    "randomBiasSeconds": 0,
+    "respawnSeconds": 100,
+    "sourceIndex": 11,
+    "total": 1,
+    "zone": {
+      "bounds": [],
+      "id": "c4_quest_content",
+      "sourceIndex": 3970
+    }
+  },
+  {
+    "id": "spawn-115-8c5f7dee18a8",
+    "mobId": 115,
+    "period": "always",
+    "possibleLocations": [
+      {
+        "head": 0,
+        "locX": 45046,
+        "locY": 245936,
+        "locZ": -6663
+      },
+      {
+        "head": 49873,
+        "locX": 45157,
+        "locY": 246173,
+        "locZ": -6608
+      },
+      {
+        "head": 0,
+        "locX": 45550,
+        "locY": 246114,
+        "locZ": -6663
+      },
+      {
+        "head": 0,
+        "locX": 46786,
+        "locY": 246075,
+        "locZ": -6662
+      },
+      {
+        "head": 0,
+        "locX": 46988,
+        "locY": 246431,
+        "locZ": -6662
+      }
+    ],
+    "randomBiasSeconds": 0,
+    "respawnSeconds": 100,
+    "sourceIndex": 12,
+    "total": 1,
+    "zone": {
+      "bounds": [],
+      "id": "c4_quest_content",
+      "sourceIndex": 3970
+    }
+  },
+  {
     "id": "spawn-117-7515c374233f",
     "mobId": 117,
     "period": "always",
@@ -525673,7 +525833,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -525695,7 +525855,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -525717,7 +525877,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -525739,7 +525899,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -525761,7 +525921,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -525783,7 +525943,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -525805,7 +525965,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -525827,7 +525987,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -525849,7 +526009,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -525871,7 +526031,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -525893,7 +526053,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -525915,7 +526075,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -525937,7 +526097,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -525959,7 +526119,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -525981,7 +526141,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -526003,7 +526163,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -526025,7 +526185,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -526047,7 +526207,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -526069,7 +526229,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -526091,7 +526251,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -526113,7 +526273,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -526135,7 +526295,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -526157,7 +526317,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -526179,7 +526339,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -526201,7 +526361,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -526223,7 +526383,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -526245,7 +526405,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -526267,7 +526427,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -526289,7 +526449,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -526311,7 +526471,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -526333,7 +526493,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -526355,7 +526515,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -526377,7 +526537,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -526399,7 +526559,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -526421,7 +526581,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -526443,7 +526603,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -526465,7 +526625,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -526487,7 +526647,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -526509,7 +526669,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -526531,7 +526691,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -526553,7 +526713,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -526575,7 +526735,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -526597,7 +526757,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -526619,7 +526779,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -526641,7 +526801,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -526663,7 +526823,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -526685,7 +526845,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -526707,7 +526867,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -526729,7 +526889,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -526751,7 +526911,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -526773,7 +526933,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -526795,7 +526955,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -526817,7 +526977,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -526839,7 +526999,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -526861,7 +527021,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -526883,7 +527043,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -526905,7 +527065,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -526927,7 +527087,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -526949,7 +527109,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -526971,7 +527131,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -526993,7 +527153,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -527015,7 +527175,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -527037,7 +527197,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -527059,7 +527219,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -527081,7 +527241,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -527103,7 +527263,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -527125,7 +527285,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -527147,7 +527307,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -527169,7 +527329,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -527191,7 +527351,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -527213,7 +527373,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -527235,7 +527395,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -527257,7 +527417,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -527279,7 +527439,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -527301,7 +527461,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -527323,7 +527483,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -527345,7 +527505,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -527367,7 +527527,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -527389,7 +527549,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -527411,7 +527571,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -527433,7 +527593,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -527455,7 +527615,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -527477,7 +527637,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -527499,7 +527659,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -527521,7 +527681,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -527543,7 +527703,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -527565,7 +527725,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -527587,7 +527747,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -527609,7 +527769,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -527631,7 +527791,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -527653,7 +527813,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -527675,7 +527835,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -527697,7 +527857,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -527719,7 +527879,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -527741,7 +527901,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -527763,7 +527923,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -527785,7 +527945,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -527807,7 +527967,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -527829,7 +527989,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -527851,7 +528011,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -527873,7 +528033,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -527895,7 +528055,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -527917,7 +528077,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -527939,7 +528099,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -527961,7 +528121,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -527983,7 +528143,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -528005,7 +528165,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -528027,7 +528187,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -528049,7 +528209,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -528071,7 +528231,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -528093,7 +528253,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -528115,7 +528275,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -528137,7 +528297,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -528159,7 +528319,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -528181,7 +528341,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -528203,7 +528363,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -528225,7 +528385,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -528247,7 +528407,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -528269,7 +528429,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -528291,7 +528451,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -528313,7 +528473,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -528335,7 +528495,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -528357,7 +528517,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -528379,7 +528539,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -528401,7 +528561,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -528423,7 +528583,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -528445,7 +528605,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -528467,7 +528627,299 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
+    }
+  },
+  {
+    "id": "spawn-925-004a3d14df23",
+    "mobId": 925,
+    "period": "always",
+    "possibleLocations": [
+      {
+        "head": 41268,
+        "locX": -33286,
+        "locY": 116530,
+        "locZ": -2509
+      },
+      {
+        "head": 49441,
+        "locX": -33096,
+        "locY": 105962,
+        "locZ": -2591
+      },
+      {
+        "head": 23451,
+        "locX": -32919,
+        "locY": 119353,
+        "locZ": -2575
+      },
+      {
+        "head": 52543,
+        "locX": -32879,
+        "locY": 106280,
+        "locZ": -2635
+      },
+      {
+        "head": 13796,
+        "locX": -32745,
+        "locY": 107879,
+        "locZ": -2628
+      },
+      {
+        "head": 0,
+        "locX": -32744,
+        "locY": 113678,
+        "locZ": -2272
+      },
+      {
+        "head": 0,
+        "locX": -32240,
+        "locY": 113144,
+        "locZ": -2416
+      },
+      {
+        "head": 23584,
+        "locX": -32172,
+        "locY": 106412,
+        "locZ": -2914
+      },
+      {
+        "head": 0,
+        "locX": -31838,
+        "locY": 112076,
+        "locZ": -2688
+      },
+      {
+        "head": 0,
+        "locX": -31736,
+        "locY": 112610,
+        "locZ": -2640
+      },
+      {
+        "head": 0,
+        "locX": -31222,
+        "locY": 117672,
+        "locZ": -3702
+      },
+      {
+        "head": 0,
+        "locX": -31033,
+        "locY": 111720,
+        "locZ": -3055
+      },
+      {
+        "head": 0,
+        "locX": -31033,
+        "locY": 112432,
+        "locZ": -2896
+      },
+      {
+        "head": 0,
+        "locX": -30832,
+        "locY": 112432,
+        "locZ": -2952
+      },
+      {
+        "head": 0,
+        "locX": -30820,
+        "locY": 116960,
+        "locZ": -3702
+      },
+      {
+        "head": 0,
+        "locX": -30618,
+        "locY": 116604,
+        "locZ": -3702
+      },
+      {
+        "head": 0,
+        "locX": -30306,
+        "locY": 108728,
+        "locZ": -3613
+      },
+      {
+        "head": 2437,
+        "locX": -29981,
+        "locY": 118408,
+        "locZ": -3589
+      },
+      {
+        "head": 0,
+        "locX": -29913,
+        "locY": 116070,
+        "locZ": -3702
+      },
+      {
+        "head": 0,
+        "locX": -29864,
+        "locY": 107948,
+        "locZ": -3618
+      },
+      {
+        "head": 0,
+        "locX": -29813,
+        "locY": 117672,
+        "locZ": -3702
+      },
+      {
+        "head": 0,
+        "locX": -29712,
+        "locY": 117138,
+        "locZ": -3702
+      },
+      {
+        "head": 0,
+        "locX": -29638,
+        "locY": 109059,
+        "locZ": -3665
+      },
+      {
+        "head": 0,
+        "locX": -29501,
+        "locY": 107304,
+        "locZ": -3536
+      },
+      {
+        "head": 11162,
+        "locX": -29438,
+        "locY": 119529,
+        "locZ": -3701
+      },
+      {
+        "head": 0,
+        "locX": -29029,
+        "locY": 120470,
+        "locZ": -3725
+      },
+      {
+        "head": 0,
+        "locX": -28986,
+        "locY": 116648,
+        "locZ": -3671
+      },
+      {
+        "head": 0,
+        "locX": -28886,
+        "locY": 117182,
+        "locZ": -3699
+      },
+      {
+        "head": 0,
+        "locX": -28483,
+        "locY": 116470,
+        "locZ": -3711
+      },
+      {
+        "head": 40200,
+        "locX": -28313,
+        "locY": 105007,
+        "locZ": -3683
+      },
+      {
+        "head": 0,
+        "locX": -28255,
+        "locY": 114288,
+        "locZ": -3536
+      },
+      {
+        "head": 0,
+        "locX": -28200,
+        "locY": 118028,
+        "locZ": -3702
+      },
+      {
+        "head": 49258,
+        "locX": -27983,
+        "locY": 121368,
+        "locZ": -3712
+      },
+      {
+        "head": 42312,
+        "locX": -27679,
+        "locY": 115756,
+        "locZ": -3721
+      },
+      {
+        "head": 0,
+        "locX": -27550,
+        "locY": 114110,
+        "locZ": -3536
+      },
+      {
+        "head": 38193,
+        "locX": -27542,
+        "locY": 111796,
+        "locZ": -3654
+      },
+      {
+        "head": 54888,
+        "locX": -27422,
+        "locY": 120585,
+        "locZ": -3723
+      },
+      {
+        "head": 6483,
+        "locX": -27305,
+        "locY": 114910,
+        "locZ": -3646
+      },
+      {
+        "head": 20245,
+        "locX": -27257,
+        "locY": 121968,
+        "locZ": -3692
+      },
+      {
+        "head": 19283,
+        "locX": -26844,
+        "locY": 109821,
+        "locZ": -3694
+      },
+      {
+        "head": 40705,
+        "locX": -26790,
+        "locY": 120764,
+        "locZ": -3723
+      },
+      {
+        "head": 24495,
+        "locX": -26638,
+        "locY": 120003,
+        "locZ": -3723
+      },
+      {
+        "head": 0,
+        "locX": -26342,
+        "locY": 113042,
+        "locZ": -3536
+      },
+      {
+        "head": 29502,
+        "locX": -25784,
+        "locY": 118489,
+        "locZ": -3704
+      },
+      {
+        "head": 4276,
+        "locX": -23999,
+        "locY": 119919,
+        "locZ": -3621
+      },
+      {
+        "head": 63278,
+        "locX": -23943,
+        "locY": 118352,
+        "locZ": -3671
+      }
+    ],
+    "randomBiasSeconds": 0,
+    "respawnSeconds": 32,
+    "sourceIndex": 8,
+    "total": 1,
+    "zone": {
+      "bounds": [],
+      "id": "c4_quest_content",
+      "sourceIndex": 3970
     }
   },
   {
@@ -531304,6 +531756,344 @@
       "bounds": [],
       "id": "c4-tower-of-insolence",
       "sourceIndex": 3953
+    }
+  },
+  {
+    "id": "spawn-1100-86e1d436adb9",
+    "mobId": 1100,
+    "period": "always",
+    "possibleLocations": [
+      {
+        "head": 27775,
+        "locX": -52961,
+        "locY": 202061,
+        "locZ": -3566
+      },
+      {
+        "head": 37726,
+        "locX": -51812,
+        "locY": 196817,
+        "locZ": -3725
+      },
+      {
+        "head": 8403,
+        "locX": -51745,
+        "locY": 198237,
+        "locZ": -3637
+      },
+      {
+        "head": 11684,
+        "locX": -51408,
+        "locY": 199660,
+        "locZ": -3529
+      },
+      {
+        "head": 12228,
+        "locX": -51184,
+        "locY": 200145,
+        "locZ": -3426
+      },
+      {
+        "head": 0,
+        "locX": -50350,
+        "locY": 199303,
+        "locZ": -3792
+      },
+      {
+        "head": 11539,
+        "locX": -49990,
+        "locY": 200154,
+        "locZ": -3423
+      },
+      {
+        "head": 21585,
+        "locX": -48637,
+        "locY": 207016,
+        "locZ": -3702
+      },
+      {
+        "head": 63889,
+        "locX": -48558,
+        "locY": 199837,
+        "locZ": -3632
+      },
+      {
+        "head": 14076,
+        "locX": -47868,
+        "locY": 203324,
+        "locZ": -3587
+      },
+      {
+        "head": 0,
+        "locX": -47537,
+        "locY": 200557,
+        "locZ": -3808
+      },
+      {
+        "head": 0,
+        "locX": -46934,
+        "locY": 200913,
+        "locZ": -3808
+      },
+      {
+        "head": 6420,
+        "locX": -46087,
+        "locY": 199767,
+        "locZ": -3499
+      },
+      {
+        "head": 0,
+        "locX": -44918,
+        "locY": 204979,
+        "locZ": -3801
+      },
+      {
+        "head": 0,
+        "locX": -44606,
+        "locY": 207634,
+        "locZ": -3413
+      },
+      {
+        "head": 0,
+        "locX": -44203,
+        "locY": 207990,
+        "locZ": -3413
+      },
+      {
+        "head": 4068,
+        "locX": -43781,
+        "locY": 204010,
+        "locZ": -3593
+      },
+      {
+        "head": 0,
+        "locX": -40085,
+        "locY": 203015,
+        "locZ": -2939
+      },
+      {
+        "head": 0,
+        "locX": -39784,
+        "locY": 203193,
+        "locZ": -2939
+      },
+      {
+        "head": 0,
+        "locX": -37146,
+        "locY": 205491,
+        "locZ": -3495
+      },
+      {
+        "head": 0,
+        "locX": -36844,
+        "locY": 206025,
+        "locZ": -3495
+      },
+      {
+        "head": 0,
+        "locX": -20539,
+        "locY": 213291,
+        "locZ": -3704
+      },
+      {
+        "head": 830,
+        "locX": -18218,
+        "locY": 213876,
+        "locZ": -3704
+      }
+    ],
+    "randomBiasSeconds": 0,
+    "respawnSeconds": 20,
+    "sourceIndex": 6,
+    "total": 1,
+    "zone": {
+      "bounds": [],
+      "id": "c4_quest_content",
+      "sourceIndex": 3970
+    }
+  },
+  {
+    "id": "spawn-1101-66c4e7eb4a5f",
+    "mobId": 1101,
+    "period": "always",
+    "possibleLocations": [
+      {
+        "head": 31413,
+        "locX": -54102,
+        "locY": 211622,
+        "locZ": -2663
+      },
+      {
+        "head": 40537,
+        "locX": -53952,
+        "locY": 210939,
+        "locZ": -2598
+      },
+      {
+        "head": 0,
+        "locX": -51611,
+        "locY": 210744,
+        "locZ": -3600
+      },
+      {
+        "head": 65247,
+        "locX": -51479,
+        "locY": 211761,
+        "locZ": -2991
+      },
+      {
+        "head": 0,
+        "locX": -50705,
+        "locY": 209854,
+        "locZ": -3600
+      },
+      {
+        "head": 18635,
+        "locX": -49282,
+        "locY": 204885,
+        "locZ": -3732
+      },
+      {
+        "head": 62103,
+        "locX": -49275,
+        "locY": 211251,
+        "locZ": -3108
+      },
+      {
+        "head": 60243,
+        "locX": -47763,
+        "locY": 210332,
+        "locZ": -3321
+      },
+      {
+        "head": 39510,
+        "locX": -47642,
+        "locY": 204991,
+        "locZ": -3646
+      },
+      {
+        "head": 35415,
+        "locX": -47633,
+        "locY": 211662,
+        "locZ": -3330
+      },
+      {
+        "head": 0,
+        "locX": -46674,
+        "locY": 211628,
+        "locZ": -3376
+      },
+      {
+        "head": 0,
+        "locX": -46609,
+        "locY": 205483,
+        "locZ": -3670
+      },
+      {
+        "head": 0,
+        "locX": -46574,
+        "locY": 211094,
+        "locZ": -3376
+      },
+      {
+        "head": 23678,
+        "locX": -46191,
+        "locY": 210097,
+        "locZ": -3389
+      },
+      {
+        "head": 12559,
+        "locX": -45832,
+        "locY": 211180,
+        "locZ": -3372
+      },
+      {
+        "head": 14071,
+        "locX": -44924,
+        "locY": 213852,
+        "locZ": -3324
+      },
+      {
+        "head": 0,
+        "locX": -42854,
+        "locY": 211530,
+        "locZ": -3533
+      },
+      {
+        "head": 0,
+        "locX": -42350,
+        "locY": 211708,
+        "locZ": -3608
+      },
+      {
+        "head": 0,
+        "locX": -42148,
+        "locY": 210640,
+        "locZ": -3344
+      },
+      {
+        "head": 0,
+        "locX": -42047,
+        "locY": 210818,
+        "locZ": -3344
+      },
+      {
+        "head": 0,
+        "locX": -41177,
+        "locY": 211429,
+        "locZ": -3560
+      },
+      {
+        "head": 0,
+        "locX": -41076,
+        "locY": 211607,
+        "locZ": -3560
+      },
+      {
+        "head": 27132,
+        "locX": -39144,
+        "locY": 213652,
+        "locZ": -3707
+      },
+      {
+        "head": 0,
+        "locX": -39020,
+        "locY": 208901,
+        "locZ": -3676
+      },
+      {
+        "head": 0,
+        "locX": -38517,
+        "locY": 208723,
+        "locZ": -3696
+      },
+      {
+        "head": 61678,
+        "locX": -35585,
+        "locY": 213715,
+        "locZ": -3720
+      },
+      {
+        "head": 2457,
+        "locX": -34456,
+        "locY": 211577,
+        "locZ": -3704
+      },
+      {
+        "head": 63255,
+        "locX": -32063,
+        "locY": 212116,
+        "locZ": -3700
+      }
+    ],
+    "randomBiasSeconds": 0,
+    "respawnSeconds": 20,
+    "sourceIndex": 7,
+    "total": 1,
+    "zone": {
+      "bounds": [],
+      "id": "c4_quest_content",
+      "sourceIndex": 3970
     }
   },
   {
@@ -589152,7 +589942,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -589174,7 +589964,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -589196,7 +589986,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {
@@ -589218,7 +590008,7 @@
     "zone": {
       "bounds": [],
       "id": "c4_pet_quest_npcs",
-      "sourceIndex": 3974
+      "sourceIndex": 3975
     }
   },
   {

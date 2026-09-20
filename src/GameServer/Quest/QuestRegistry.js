@@ -13,11 +13,10 @@ const disabledReasons = new Map([
   [33, "Required NPC template 8520 is absent"],
   [35, "Required kill target 135 has no world spawn"],
   [37, "Required NPC templates are absent: 8520, 8521, 8627"],
-  [38, "Required NPC templates are absent: 1100, 1101"],
-  [39, "Required NPC template 925 is absent"],
 ]);
 
 const entries = [
+  ...require('./LowLevelDefinitions').map(d => ({ id: d.id, definitionId: d.id, status: d.blocked ? 'disabled' : 'active', ...(d.blocked ? {reason:d.blocked} : {}) })),
   ...[
     [1, "Q001_LettersOfLove"],
     [2, "Q002_WhatWomenWant"],
@@ -83,6 +82,19 @@ const entries = [
     [168, "Q168_DeliverSupplies"],
     [169, "Q169_OffspringOfNightmares"],
     [170, "Q170_DangerousSeduction"],
+    [257, "Q257_TheGuardIsBusy"],
+    [260, "Q260_OrcHunting"],
+    [265, "Q265_BondsOfSlavery"],
+    [267, "Q267_WrathOfVerdure"],
+    [273, "Q273_InvadersOfTheHolyLand"],
+    [275, "Q275_DarkWingedSpies"],
+    [276, "Q276_TotemOfTheHestui"],
+    [293, "Q293_TheHiddenVeins"],
+    [340, "Q340_SubjugationOfLizardmen"],
+    [363, "Q363_SorrowfulSoundOfFlute"],
+    [364, "Q364_JovialAccordion"],
+    [378, "Q378_GrandFeast"],
+    [385, "Q385_YokeOfThePast"],
     [401, "Q401_PathToWarrior"],
     [402, "Q402_PathToKnight"],
     [403, "Q403_PathToRogue"],
@@ -104,7 +116,10 @@ const entries = [
     [419, "Q419_GetAPet"],
     [420, "Q420_LittleWing"],
     [421, "Q421_LittleWingsBigAdventure"],
+    [422, "Q422_RepentYourSins"],
     [501, "Q501_ProofOfClanAlliance"],
+    [634, "Q634_InSearchOfFragmentsOfDimension"],
+    [635, "Q635_IntoTheDimensionalRift"],
   ].map(([id, name]) => ({
     id,
     modulePath: `./quests/${name}`,
@@ -119,7 +134,9 @@ const entries = [
 function activeQuests() {
   return entries
     .filter((entry) => entry.status === "active")
-    .map((entry) => require(entry.modulePath));
+    .map((entry) => entry.definitionId
+      ? require('./DeclarativeQuest').create(require('./LowLevelDefinitions').find(d => d.id === entry.definitionId))
+      : require(entry.modulePath));
 }
 
 module.exports = { entries, activeQuests };

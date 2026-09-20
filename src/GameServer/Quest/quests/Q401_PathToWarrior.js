@@ -41,7 +41,8 @@ async function collect(state, selfId, needed, chance = 1) {
   if (current >= needed || Math.random() >= chance) return false;
   const amount = service().questDropAmount(1, needed, current);
   if (!amount) return false;
-  await service().giveItem(state.session, selfId, amount);
+  await require('../QuestStep').apply(state, { gives: [[selfId, amount]],
+    variables: { ...state.variables, cond: String(state.getInt('cond') + (current + amount >= needed ? 1 : 0)) } });
   return current + amount >= needed;
 }
 
@@ -58,24 +59,19 @@ module.exports = {
     const actor = state.session.actor;
     if (event === 'start' && !state.isStarted() && !state.isCompleted()) {
       if (Number(actor.fetchClassId()) !== 0 || Number(actor.fetchLevel()) < 19) return null;
-      await state.setState('started');
-      await state.set('cond', 1);
-      await quest.giveItem(state.session, AURONS_LETTER, 1);
+      await require('../QuestStep').apply(state, { gives: [[AURONS_LETTER, 1]], variables: { ...state.variables, cond: '1' } });
       state.playSound(ACCEPT);
       return page('Auron', 'Take my letter to Simplon in the Warrior Guild.');
     }
     if (event === 'guild' && state.getInt('cond') === 1) {
-      if (!(await quest.takeItem(state.session, AURONS_LETTER))) return null;
-      await quest.giveItem(state.session, WARRIOR_GUILD_MARK, 1);
-      await state.set('cond', 2);
+      if (!count(state, AURONS_LETTER)) return null;
+      await require('../QuestStep').apply(state, { takes: [[AURONS_LETTER, 1]], gives: [[WARRIOR_GUILD_MARK, 1]], variables: { ...state.variables, cond: '2' } });
       state.playSound(MIDDLE);
       return page('Simplon', 'Bring me ten pieces of rusted bronze sword.');
     }
     if (event === 'forge' && state.getInt('cond') === 4) {
-      if (!(await quest.takeItem(state.session, SIMPLONS_LETTER))) return null;
-      if (!(await quest.takeItem(state.session, RUSTED_SWORD_2))) return null;
-      await quest.giveItem(state.session, RUSTED_SWORD_3, 1);
-      await state.set('cond', 5);
+      if (!count(state, SIMPLONS_LETTER) || !count(state, RUSTED_SWORD_2)) return null;
+      await require('../QuestStep').apply(state, { takes: [[SIMPLONS_LETTER,1],[RUSTED_SWORD_2,1]], gives: [[RUSTED_SWORD_3,1]], variables: { ...state.variables, cond:'5' } });
       state.playSound(MIDDLE);
       return page('Auron', 'Equip the Rusted Bronze Sword and hunt Poison Spiders.');
     }
@@ -102,11 +98,7 @@ module.exports = {
       }
       if (cond === 2 && count(state, WARRIOR_GUILD_MARK)) return page('Simplon', `Rusted bronze swords: ${count(state, RUSTED_SWORD_1)}/10.`);
       if (cond === 3 && count(state, WARRIOR_GUILD_MARK) && count(state, RUSTED_SWORD_1) >= 10) {
-        await quest.takeItem(state.session, WARRIOR_GUILD_MARK);
-        await quest.takeItem(state.session, RUSTED_SWORD_1, -1);
-        await quest.giveItem(state.session, RUSTED_SWORD_2, 1);
-        await quest.giveItem(state.session, SIMPLONS_LETTER, 1);
-        await state.set('cond', 4);
+        await require('../QuestStep').apply(state, { takes: [[WARRIOR_GUILD_MARK,1],[RUSTED_SWORD_1,10]], gives: [[RUSTED_SWORD_2,1],[SIMPLONS_LETTER,1]], variables: { ...state.variables, cond:'4' } });
         state.playSound(MIDDLE);
         return page('Simplon', 'Take this sword and my letter back to Auron.');
       }
@@ -121,16 +113,12 @@ module.exports = {
       if (count(state, POISON_SPIDER_LEG) < 20) {
         return page('Auron', `Poison Spider’s Legs: ${count(state, POISON_SPIDER_LEG)}/20. Equip the Rusted Bronze Sword first.`);
       }
-      const profession = await quest.awardFirstProfession(state, 1);
+      const profession = await quest.awardFirstProfession(state, 1, [[POISON_SPIDER_LEG, 20], [RUSTED_SWORD_3, 1]]);
       if (!profession.ok) {
         return page('Auron', profession.reason === 'level' ? `Reach level ${profession.requiredLevel} to become a Warrior.` : 'Your profession could not be granted. Keep your quest items and try again.');
       }
-      await quest.takeItem(state.session, POISON_SPIDER_LEG, -1);
-      await quest.takeItem(state.session, RUSTED_SWORD_3);
-      await quest.giveItem(state.session, MEDALLION_OF_WARRIOR, 1);
       state.playSound(FINISH);
-      await state.exit(false);
-      return page('Auron', 'You have completed the Path to Warrior and become a Warrior.');
+      return page('Auron', 'You have earned the Medallion of Warrior. Present it for class transfer at level 20.');
     }
     return page('Auron', 'Continue your trial.');
   },
@@ -139,7 +127,6 @@ module.exports = {
     const npcId = Number(npc.fetchSelfId());
     if ([TRACKER_SKELETON, TRACKER_SKELETON_LEADER].includes(npcId) && state.getInt('cond') === 2) {
       if (await collect(state, RUSTED_SWORD_1, 10, 0.7)) {
-        await state.set('cond', 3);
         state.playSound(MIDDLE);
       } else if (count(state, RUSTED_SWORD_1)) state.playSound(ITEM);
       return;
@@ -147,7 +134,6 @@ module.exports = {
     if (![POISON_SPIDER, ARACHNID_SPIDER].includes(npcId) || state.getInt('cond') !== 5) return;
     if (equippedWeapon(state) !== RUSTED_SWORD_3) return;
     if (await collect(state, POISON_SPIDER_LEG, 20)) {
-      await state.set('cond', 6);
       state.playSound(MIDDLE);
     } else if (count(state, POISON_SPIDER_LEG)) state.playSound(ITEM);
   },
