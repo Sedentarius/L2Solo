@@ -388,6 +388,60 @@ try {
     assert(emergencyRoute, 'a detached solo bot must receive a route out of party-only content');
     assert.strictEqual(emergencyRoute.spotId, targetSpot.id);
     assert.strictEqual(emergencyRoute.reason, 'unsafe_ground_evacuation');
+
+    // A large world catalog must not rebuild a bot's skills and combat stats
+    // for every possible evacuation destination on the server thread.
+    const ColdCombatProfile = invoke('GameServer/Bot/Population/ColdCombatProfile');
+    const LevelingRoutes = invoke('GameServer/Bot/AI/LevelingRoutes');
+    const originalProfileFor = ColdCombatProfile.profileFor;
+    const originalAllowed = LevelingRoutes.isSpotAllowedForState;
+    let profileBuilds = 0;
+    const checkedSpots = [];
+    ColdCombatProfile.profileFor = (...args) => {
+        profileBuilds += 1;
+        return originalProfileFor.apply(ColdCombatProfile, args);
+    };
+    LevelingRoutes.isSpotAllowedForState = (spot, ...args) => {
+        checkedSpots.push(spot.id);
+        return originalAllowed(spot, ...args);
+    };
+    try {
+        const alternatives = Array.from({ length: 8 }, (_, i) => ({
+            ...targetSpot, id: `evacuation-${i}`
+        }));
+        const outOfRange = Array.from({ length: 100 }, (_, i) => ({
+            ...targetSpot, id: `out-of-range-${i}`, minLevel: 70, maxLevel: 80
+        }));
+        const fullSpot = { ...targetSpot, id: 'evacuation-full' };
+        const catalog = [...outOfRange, fullSpot, ...alternatives];
+        const evacuationState = {
+            characterId: 26, phase: 'cold', activity: 'hunting', level: 22,
+            spotId: dangerousSpot.id, currentRegion: dangerousSpot.name,
+            loc: { locX: 1, locY: 2, locZ: 3 }, stats: { routeMode: 'party' }
+        };
+        const routeAgain = () => coordinator.routeFor(evacuationState,
+            unqualifiedCurrentSpot, null, [], {
+                profiles: catalog, spots: new Map(catalog.map(spot => [spot.id, spot])),
+                occupancy: { [fullSpot.id]: {
+                    reservedCount: 3, capacity: 2, reservedKeys: new Set(['20', '21', '22'])
+                } }
+            });
+        const first = routeAgain();
+        assert(first && alternatives.some(spot => spot.id === first.spotId),
+            'evacuation must still choose a safe destination with room');
+        assert(profileBuilds <= 3,
+            `evacuation must reuse combat profiles across candidates; built ${profileBuilds}`);
+        assert(!checkedSpots.some(id => id.startsWith('out-of-range-') || id === fullSpot.id),
+            'level and capacity exclusions must run before expensive combat checks');
+        const firstBuilds = profileBuilds;
+        const second = routeAgain();
+        assert.strictEqual(second.spotId, first.spotId);
+        assert(profileBuilds > firstBuilds && profileBuilds <= firstBuilds + 3,
+            'each new route decision must use fresh combat state without a catalog-sized rebuild');
+    } finally {
+        ColdCombatProfile.profileFor = originalProfileFor;
+        LevelingRoutes.isSpotAllowedForState = originalAllowed;
+    }
     SpotService.findCurrentSpot = () => currentSpot;
     SpotProfiles.findForState = routeTargetForState;
 
