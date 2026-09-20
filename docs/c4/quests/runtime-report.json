@@ -2,8 +2,8 @@
   "errors": [],
   "confirmedInScope": 107,
   "counts": {
-    "VERIFIED": 62,
-    "IMPLEMENTED": 27,
+    "VERIFIED": 71,
+    "IMPLEMENTED": 18,
     "PARTIAL/BLOCKED": 14,
     "MISSING": 4
   },
@@ -2382,26 +2382,25 @@
       "name": "Shards of Golem",
       "inScope": true,
       "quarantined": false,
-      "status": "IMPLEMENTED",
+      "status": "VERIFIED",
       "script": "Q152_ShardsOfGolem.js",
       "definitionId": null,
       "registered": true,
       "tests": [
-        "tests/test_quest_runtime.js"
+        "tests/test_quest_runtime.js",
+        "tests/test_c4_village_quests.js"
       ],
       "blocker": null,
-      "certificationBlocker": {
-        "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-        "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-      },
+      "certificationBlocker": null,
       "professionProofContract": null,
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "NOT_CERTIFIED",
-        "reviewedRequirements": null,
+        "questAdapter": "REVIEWED_DELIVERY_ROUTE",
+        "reviewedRequirements": [],
         "requirementsNeedingReview": []
       },
       "drift": [
+        "status:IMPLEMENTED->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -2436,27 +2435,24 @@
       "name": "Sacrifice to the Sea",
       "inScope": true,
       "quarantined": false,
-      "status": "IMPLEMENTED",
+      "status": "VERIFIED",
       "script": "Q154_SacrificeToTheSea.js",
       "definitionId": null,
       "registered": true,
-      "tests": [],
+      "tests": [
+        "tests/test_c4_village_quests.js"
+      ],
       "blocker": null,
-      "certificationBlocker": {
-        "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-        "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-      },
+      "certificationBlocker": null,
       "professionProofContract": null,
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "NOT_CERTIFIED",
-        "reviewedRequirements": null,
-        "requirementsNeedingReview": [
-          "PARTY_QUEST_PRIMITIVE"
-        ]
+        "questAdapter": "REVIEWED_DELIVERY_ROUTE",
+        "reviewedRequirements": [],
+        "requirementsNeedingReview": []
       },
       "drift": [
-        "status:REGISTERED_UNTESTED->IMPLEMENTED",
+        "status:REGISTERED_UNTESTED->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -2517,26 +2513,25 @@
       "name": "Recover Smuggled Goods",
       "inScope": true,
       "quarantined": false,
-      "status": "IMPLEMENTED",
+      "status": "VERIFIED",
       "script": "Q157_RecoverSmuggledGoods.js",
       "definitionId": null,
       "registered": true,
       "tests": [
-        "tests/test_quest_runtime.js"
+        "tests/test_quest_runtime.js",
+        "tests/test_c4_village_quests.js"
       ],
       "blocker": null,
-      "certificationBlocker": {
-        "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-        "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-      },
+      "certificationBlocker": null,
       "professionProofContract": null,
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "NOT_CERTIFIED",
-        "reviewedRequirements": null,
+        "questAdapter": "REVIEWED_DELIVERY_ROUTE",
+        "reviewedRequirements": [],
         "requirementsNeedingReview": []
       },
       "drift": [
+        "status:IMPLEMENTED->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -2571,26 +2566,25 @@
       "name": "Protect the Water Source",
       "inScope": true,
       "quarantined": false,
-      "status": "IMPLEMENTED",
+      "status": "VERIFIED",
       "script": "Q159_ProtectTheWaterSource.js",
       "definitionId": null,
       "registered": true,
       "tests": [
-        "tests/test_quest_runtime.js"
+        "tests/test_quest_runtime.js",
+        "tests/test_c4_village_quests.js"
       ],
       "blocker": null,
-      "certificationBlocker": {
-        "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-        "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-      },
+      "certificationBlocker": null,
       "professionProofContract": null,
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "NOT_CERTIFIED",
-        "reviewedRequirements": null,
+        "questAdapter": "REVIEWED_DELIVERY_ROUTE",
+        "reviewedRequirements": [],
         "requirementsNeedingReview": []
       },
       "drift": [
+        "status:IMPLEMENTED->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -2652,26 +2646,25 @@
       "name": "Curse of the Underground Fortress",
       "inScope": true,
       "quarantined": false,
-      "status": "IMPLEMENTED",
+      "status": "VERIFIED",
       "script": "Q162_CurseOfTheUndergroundFortress.js",
       "definitionId": null,
       "registered": true,
       "tests": [
-        "tests/test_quest_runtime.js"
+        "tests/test_quest_runtime.js",
+        "tests/test_c4_village_quests.js"
       ],
       "blocker": null,
-      "certificationBlocker": {
-        "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-        "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-      },
+      "certificationBlocker": null,
       "professionProofContract": null,
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "NOT_CERTIFIED",
-        "reviewedRequirements": null,
+        "questAdapter": "REVIEWED_DELIVERY_ROUTE",
+        "reviewedRequirements": [],
         "requirementsNeedingReview": []
       },
       "drift": [
+        "status:IMPLEMENTED->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -2680,26 +2673,25 @@
       "name": "Legacy of the Poet",
       "inScope": true,
       "quarantined": false,
-      "status": "IMPLEMENTED",
+      "status": "VERIFIED",
       "script": "Q163_LegacyOfThePoet.js",
       "definitionId": null,
       "registered": true,
       "tests": [
-        "tests/test_quest_runtime.js"
+        "tests/test_quest_runtime.js",
+        "tests/test_c4_village_quests.js"
       ],
       "blocker": null,
-      "certificationBlocker": {
-        "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-        "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-      },
+      "certificationBlocker": null,
       "professionProofContract": null,
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "NOT_CERTIFIED",
-        "reviewedRequirements": null,
+        "questAdapter": "REVIEWED_DELIVERY_ROUTE",
+        "reviewedRequirements": [],
         "requirementsNeedingReview": []
       },
       "drift": [
+        "status:IMPLEMENTED->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -2763,25 +2755,24 @@
       "name": "Mass of Darkness",
       "inScope": true,
       "quarantined": false,
-      "status": "IMPLEMENTED",
+      "status": "VERIFIED",
       "script": "Q166_MassOfDarkness.js",
       "definitionId": null,
       "registered": true,
-      "tests": [],
+      "tests": [
+        "tests/test_c4_village_quests.js"
+      ],
       "blocker": null,
-      "certificationBlocker": {
-        "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-        "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-      },
+      "certificationBlocker": null,
       "professionProofContract": null,
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "NOT_CERTIFIED",
-        "reviewedRequirements": null,
+        "questAdapter": "REVIEWED_DELIVERY_ROUTE",
+        "reviewedRequirements": [],
         "requirementsNeedingReview": []
       },
       "drift": [
-        "status:REGISTERED_UNTESTED->IMPLEMENTED",
+        "status:REGISTERED_UNTESTED->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -2790,25 +2781,24 @@
       "name": "Dwarven Kinship",
       "inScope": true,
       "quarantined": false,
-      "status": "IMPLEMENTED",
+      "status": "VERIFIED",
       "script": "Q167_DwarvenKinship.js",
       "definitionId": null,
       "registered": true,
-      "tests": [],
+      "tests": [
+        "tests/test_c4_village_quests.js"
+      ],
       "blocker": null,
-      "certificationBlocker": {
-        "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-        "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-      },
+      "certificationBlocker": null,
       "professionProofContract": null,
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "NOT_CERTIFIED",
-        "reviewedRequirements": null,
+        "questAdapter": "REVIEWED_DELIVERY_ROUTE",
+        "reviewedRequirements": [],
         "requirementsNeedingReview": []
       },
       "drift": [
-        "status:REGISTERED_UNTESTED->IMPLEMENTED",
+        "status:REGISTERED_UNTESTED->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -2843,25 +2833,24 @@
       "name": "Offspring of Nightmares",
       "inScope": true,
       "quarantined": false,
-      "status": "IMPLEMENTED",
+      "status": "VERIFIED",
       "script": "Q169_OffspringOfNightmares.js",
       "definitionId": null,
       "registered": true,
-      "tests": [],
+      "tests": [
+        "tests/test_c4_village_quests.js"
+      ],
       "blocker": null,
-      "certificationBlocker": {
-        "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-        "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-      },
+      "certificationBlocker": null,
       "professionProofContract": null,
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "NOT_CERTIFIED",
-        "reviewedRequirements": null,
+        "questAdapter": "REVIEWED_DELIVERY_ROUTE",
+        "reviewedRequirements": [],
         "requirementsNeedingReview": []
       },
       "drift": [
-        "status:REGISTERED_UNTESTED->IMPLEMENTED",
+        "status:REGISTERED_UNTESTED->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },

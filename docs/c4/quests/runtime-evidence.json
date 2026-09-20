@@ -206,11 +206,12 @@
     "reviewedRequirements": []
   },
   "152": {
-    "certified": false,
-    "certificationBlocker": {
-      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-    }
+    "certified": true,
+    "tests": [
+      "tests/test_c4_village_quests.js"
+    ],
+    "bridge": "REVIEWED_DELIVERY_ROUTE",
+    "reviewedRequirements": []
   },
   "153": {
     "certified": true,
@@ -221,11 +222,12 @@
     "reviewedRequirements": []
   },
   "154": {
-    "certified": false,
-    "certificationBlocker": {
-      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-    }
+    "certified": true,
+    "tests": [
+      "tests/test_c4_village_quests.js"
+    ],
+    "bridge": "REVIEWED_DELIVERY_ROUTE",
+    "reviewedRequirements": []
   },
   "155": {
     "certified": true,
@@ -244,18 +246,20 @@
     "reviewedRequirements": []
   },
   "157": {
-    "certified": false,
-    "certificationBlocker": {
-      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-    }
+    "certified": true,
+    "tests": [
+      "tests/test_c4_village_quests.js"
+    ],
+    "bridge": "REVIEWED_DELIVERY_ROUTE",
+    "reviewedRequirements": []
   },
   "159": {
-    "certified": false,
-    "certificationBlocker": {
-      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-    }
+    "certified": true,
+    "tests": [
+      "tests/test_c4_village_quests.js"
+    ],
+    "bridge": "REVIEWED_DELIVERY_ROUTE",
+    "reviewedRequirements": []
   },
   "160": {
     "certified": true,
@@ -274,18 +278,20 @@
     "reviewedRequirements": []
   },
   "162": {
-    "certified": false,
-    "certificationBlocker": {
-      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-    }
+    "certified": true,
+    "tests": [
+      "tests/test_c4_village_quests.js"
+    ],
+    "bridge": "REVIEWED_DELIVERY_ROUTE",
+    "reviewedRequirements": []
   },
   "163": {
-    "certified": false,
-    "certificationBlocker": {
-      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-    }
+    "certified": true,
+    "tests": [
+      "tests/test_c4_village_quests.js"
+    ],
+    "bridge": "REVIEWED_DELIVERY_ROUTE",
+    "reviewedRequirements": []
   },
   "165": {
     "certified": true,
@@ -299,18 +305,20 @@
     "reviewedRequirements": []
   },
   "166": {
-    "certified": false,
-    "certificationBlocker": {
-      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-    }
+    "certified": true,
+    "tests": [
+      "tests/test_c4_village_quests.js"
+    ],
+    "bridge": "REVIEWED_DELIVERY_ROUTE",
+    "reviewedRequirements": []
   },
   "167": {
-    "certified": false,
-    "certificationBlocker": {
-      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-    }
+    "certified": true,
+    "tests": [
+      "tests/test_c4_village_quests.js"
+    ],
+    "bridge": "REVIEWED_DELIVERY_ROUTE",
+    "reviewedRequirements": []
   },
   "168": {
     "certified": true,
@@ -321,11 +329,12 @@
     "reviewedRequirements": []
   },
   "169": {
-    "certified": false,
-    "certificationBlocker": {
-      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-    }
+    "certified": true,
+    "tests": [
+      "tests/test_c4_village_quests.js"
+    ],
+    "bridge": "REVIEWED_DELIVERY_ROUTE",
+    "reviewedRequirements": []
   },
   "255": {
     "certified": false,
@@ -939,7 +948,7 @@
     }
   },
   "_certification": {
-    "generatedAt": "2026-09-20T01:09:10.392Z",
+    "generatedAt": "2026-09-20T01:19:31.039Z",
     "sourceHashes": {
       "config/default.ini": "14f3852373656b264d1e9f367252519f82072cb0dea69e465c968a775acb29c3",
       "config/local.example.ini": "cb13f57c7e72f2b6f55e342378bb9acc974e7f7c0ab6708a6ed8f5d0dc8f8fa0",
@@ -1204,7 +1213,7 @@
       "database/sql/sqlite.sql": "546a3888eb03901ccb1d4a52aa75349c3cebd96a201d2f0526d353f49f3f177b",
       "scripts/benchmark-interaction-memory.js": "d196e3f8dfb3fb49554d5081f339228a16a01c5ee606c2eca3f2987f45d3327b",
       "scripts/benchmark-town-navigation.js": "a03ca379db4ea4d1f55a50a4eea637962970f240c4557c7903ae925d5ea4d211",
-      "scripts/certify-c4-quests.js": "24def260982b773add4718c91c488b1c63da008e9967e6a0395381b22a98fabf",
+      "scripts/certify-c4-quests.js": "37c168acb314089ac33cc2b7a34fa6d5cd6b154414d1909fba4c8b8824fa5c52",
       "scripts/check-c4-quests.js": "094eec7789f23d33445e3d00452eb7d2640c7fdbc3d342d38997f25db218c0b2",
       "scripts/check-quest-registry.js": "a05ecd2fe1e6f62d6c7eed1629dad48be13a2023682a11201c2a89d07ed46da2",
       "scripts/check-syntax.js": "f18315645fba6bbdb1b80b103fc5006970e56f804f9c72759be6dea1f067b9b5",
@@ -1267,7 +1276,7 @@
       "scripts/run-tests-p0-b3.js": "07046504ac2f221826f1fdf599c30f0f53b61c44ec50f57371b3f1bc52982cc6",
       "scripts/run-tests-p0-b4.js": "309423b431c59b4f612c6041156952e5fe63cf65fff1256c5b10c3fb165a0af4",
       "scripts/run-tests-p0-b5.js": "a3f8e96312ed5ac1fe873005a8db1b7f008aa6db9df60f8d17780c509e94e71e",
-      "scripts/run-tests.js": "c2b497544284c5051acbafab2972e486f287fff26b26c9c3c2ff1d2167a60c24",
+      "scripts/run-tests.js": "26075a30b88f93c0ed9cf251444ba7aab8c2079b1791e9b063e7077dcaa7085e",
       "scripts/saved-games.js": "9d2f0c14084ad5403231e4e99e03388909c7fda432ff9c0ea7f44d829cf7b388",
       "scripts/simulate-bot-chat.js": "8b15f0e010fd24aca99c7cbc1e769cb40af0671afd45d9401a24b3b7e845bb01",
       "scripts/start.js": "4b47531f68f1733a1b4a9bb03626626cb83802594dd59a7aa20a2e61241a21b4",
@@ -1930,7 +1939,7 @@
       "src/GameServer/Quest/BeginnerQuestDefinitions.js": "dd507787a04ccb99d792539f11b193baad04ce3bf3b15710374c530d52d49c8a",
       "src/GameServer/Quest/BeginnerReward.js": "282f4d6b53a65aecdc7a3c2c93298dfef6f14777ca48d20c88e1dae4c3e84e5a",
       "src/GameServer/Quest/ClassQuestReward.js": "245d4bca4f9a73983deb9cb0e19821810bee0e5bc831842ec96e6377916f6ea3",
-      "src/GameServer/Quest/DeclarativeQuest.js": "0c9c4092c8d33ae4e489b6522e1fb1b7070544df3d01728c14ff5888468e3c34",
+      "src/GameServer/Quest/DeclarativeQuest.js": "f55d951d6a1a9ecde5b90a3a704305392d16e6d99c4d8597a8f29235941636f3",
       "src/GameServer/Quest/FirstProfessionProof.js": "836445225f11c0b25f3b30e1549adfdaecf1c3ee750a087b5442d786f4ecef2a",
       "src/GameServer/Quest/LowLevelDefinitions.js": "6fbb937001742755760ef38ed3faf61567a58595b3534bc194b2d4e41aec065f",
       "src/GameServer/Quest/QuestRegistry.js": "f8afe4d2e5d1d3754f0db9054ee6f43f9532b72df7cc4836553beee065d84990",
@@ -1939,6 +1948,7 @@
       "src/GameServer/Quest/QuestStep.js": "8e23c3b873a54dc6cd083b3f3cae470ada26957cb8651a95372c19081572a1b3",
       "src/GameServer/Quest/RecoveredLowLevelDefinitions.js": "82b2fe72bed05e35b4806e4bf8a8a4864f5a62e7e73e4a145eb6e6114b0073f5",
       "src/GameServer/Quest/StarterQuestDefinitions.js": "dfee921b7cc816002b790c88602bf381487b284f0f4c47ac0bae077a02890cce",
+      "src/GameServer/Quest/VillageQuestDefinitions.js": "6328d880a45a43bff207460cc0394950fd7dd69fbd51a187a6e758420de06d04",
       "src/GameServer/Quest/quests/FormalWear.js": "3a28863c3a0c18e03eae081fdf967dcefa99a8aa0875510a8a4ab2749d2493c1",
       "src/GameServer/Quest/quests/PetTicketQuest.js": "864ffb702c0985556a5f996cb88d63c637ce4b37ae1e36146f9bf6dc4cbc62de",
       "src/GameServer/Quest/quests/Q001_LettersOfLove.js": "9b7390a003e272cd39d8975eeab945ea95d22d767974e782c0f9a571d96703fd",
@@ -1986,24 +1996,24 @@
       "src/GameServer/Quest/quests/Q107_MercilessPunishment.js": "6f140d620bfb771f09cb463ab0b7c5a81f9b2416d8b2b55aec2a25311178c785",
       "src/GameServer/Quest/quests/Q108_JumbleTumbleDiamondFuss.js": "e58cc6ce30ae64e3d5e7d8e219b456e4907d22b6a9aca0e3143c6b6a147d56f9",
       "src/GameServer/Quest/quests/Q151_CureForFeverDisease.js": "a8ad0c58fc32e1df51b42499c5bb353ffd5c1630ac93d9ea35fd8afcfb78616b",
-      "src/GameServer/Quest/quests/Q152_ShardsOfGolem.js": "6f6fbf7efd4104494c4846ff229406d48f521f20822e35617de4e1b5677b0ae1",
+      "src/GameServer/Quest/quests/Q152_ShardsOfGolem.js": "2489730b12e0481d4f16cc2e41457cd6bfec1e6006c661120439f66f6bc36cbf",
       "src/GameServer/Quest/quests/Q153_DeliverGoods.js": "6d7aa04d935a8eec8323b5beb10af3185c912b7f7b091a79997cd509837989b6",
-      "src/GameServer/Quest/quests/Q154_SacrificeToTheSea.js": "54b6e238ab619cb99c43004a5d7ddfcd44ad8a6a12d22bc4b89f0be4f86681a9",
+      "src/GameServer/Quest/quests/Q154_SacrificeToTheSea.js": "f1dc72bbb4e7b9c30098f828d828946828ae4c4091b7fed5517b5faa5941ac01",
       "src/GameServer/Quest/quests/Q155_FindSirWindawood.js": "f85a2ea9deb2429b306260d0faf586282a1e98af73736f72f45e25f8ba36bc8a",
       "src/GameServer/Quest/quests/Q156_MillenniumLove.js": "e3330faac21a98659967577433dcd5a24202c37730edbc2176fef896e474f0cd",
-      "src/GameServer/Quest/quests/Q157_RecoverSmuggledGoods.js": "051d3ab7c6aa5b57a931a6d3114d948fd7a47e42d12078412e51094f196b8d9a",
+      "src/GameServer/Quest/quests/Q157_RecoverSmuggledGoods.js": "9f285920c426c9c42d90335b41912a9665fdaaca8826f0b51ad109bb6333e828",
       "src/GameServer/Quest/quests/Q158_SeedOfEvil.js": "5773cfe69579245e0c81ac4a3cdd51d90de9a774d1485f1147a80fd02f0402cb",
-      "src/GameServer/Quest/quests/Q159_ProtectTheWaterSource.js": "f41ae630db3bd4ea24071afd839456dcf9df9eada58dff7e2a7e7cd0f7f08a19",
+      "src/GameServer/Quest/quests/Q159_ProtectTheWaterSource.js": "806618017a106189e314e147092140d74ea4739b7e9d8df51d1b6d4a0972f75c",
       "src/GameServer/Quest/quests/Q160_NerupasRequest.js": "a22af7f801d078bd2a75a5b3ee02313ba86b49cc43e4bd18ea8e72ac0f459adc",
       "src/GameServer/Quest/quests/Q161_FruitOfTheMotherTree.js": "fffc75e63bbeb19aaa48247b0fced397192fbf38f43d5f8e07b9aaca0275e7fb",
-      "src/GameServer/Quest/quests/Q162_CurseOfTheUndergroundFortress.js": "e815cc1384423aa3ae4f01fc85a3ad05fff16e9f295a02041bb41c689692b051",
-      "src/GameServer/Quest/quests/Q163_LegacyOfThePoet.js": "1584d43ddb333981a17ea1b0c64b67021b52644fb7853a622ee2432c82e1092f",
+      "src/GameServer/Quest/quests/Q162_CurseOfTheUndergroundFortress.js": "619ca6d46eb86c303d6f927f460a4f8450e38b1a11540534df67f11d1ee9605e",
+      "src/GameServer/Quest/quests/Q163_LegacyOfThePoet.js": "5c1edbcb03694e49a7736f39135d3352c9effc86dc94cc2d7f44d6b74f0fa6ac",
       "src/GameServer/Quest/quests/Q164_BloodFiend.js": "cff64e492ff45367675f752db7f566265d704e63bea49017e1a190d6110331ed",
       "src/GameServer/Quest/quests/Q165_ShilensHunt.js": "87a2bd495faa8c40633cacbff44bbf02db38538f282e0b14a4a4f2eede8e13d9",
-      "src/GameServer/Quest/quests/Q166_MassOfDarkness.js": "68f88625a6b51686261633c899658be0a7d923ea994a2cc05bddba8eede02569",
-      "src/GameServer/Quest/quests/Q167_DwarvenKinship.js": "982e5783f32227190c53ec5d7bba3abeaf8ecc173b4a26ca107d62f49f271121",
+      "src/GameServer/Quest/quests/Q166_MassOfDarkness.js": "810beeb1bdd4b5f213044650ea8e9f1efab2ce7efb6c0764c3af9e1fc76d97bd",
+      "src/GameServer/Quest/quests/Q167_DwarvenKinship.js": "2335303c33f7a5358534dcd9e2eb8e97cdf093cf3cb3a22ced380e6e6c686ccd",
       "src/GameServer/Quest/quests/Q168_DeliverSupplies.js": "b69e7c4b57eec0ba25cee9762787428c88260dedac8355f2a07d9be3810f7e2d",
-      "src/GameServer/Quest/quests/Q169_OffspringOfNightmares.js": "360dbe73f073c204a28146df4188b802c87284f25198de593fe1daa98e7d6a6e",
+      "src/GameServer/Quest/quests/Q169_OffspringOfNightmares.js": "63bd9d1c6ab4403b89ae78aad4c27b6c4ddc07e6e87070e5f37da8c602a5802d",
       "src/GameServer/Quest/quests/Q170_DangerousSeduction.js": "bfb26303001e6229d8ce1c87a3f7f76c74f95b4389a8e8bcba3e9dad908781b9",
       "src/GameServer/Quest/quests/Q257_TheGuardIsBusy.js": "cc140813b138bcc5bcccb74c5a1d8411f249340288e080fab112c45e71964153",
       "src/GameServer/Quest/quests/Q260_OrcHunting.js": "c4c30fd066a5a2922887ed23d3d1b33586f6837870832f72006e29e702286c2d",
@@ -3245,6 +3255,7 @@
       "tests/test_c4_tower_of_insolence.js": "4041b68ac10655ef60a9ff58a5afec00dc5a6d404e7c3e89dc26930b49107f82",
       "tests/test_c4_valley_of_saints.js": "c50d0e1eeecdc74a5002ab6e94ce778940fcc8eb6e51a231b1065aaae31bae36",
       "tests/test_c4_varka_silenos_stronghold.js": "b9e2f00487c90aa8569dffb25b9480195b0517c604d89a47f3816218db0744b6",
+      "tests/test_c4_village_quests.js": "9aae910194cd619c642b95a6a2e0a28ba711fb92bb0c153102666d4d94605b6c",
       "tests/test_c4_wall_of_argos.js": "5e3c1d031f84c9bfc48d41f20b27bbb485a2c40f3c9d3debe18ac282121676a7",
       "tests/test_cast_interrupt.js": "484de0782f3a27fa68e605a9e6e9beb21c07a2b9c053abfab73733a95c5210db",
       "tests/test_change_class.js": "64c465941d6ffe1cbb54fdc7b013fbc27e12ae71262c0bf0a8fbbe83263dfc08",
@@ -3494,7 +3505,7 @@
       "tests/test_pvp_interaction_memory.js": "ab68bddab41dcdc707a0504357b52ab3735ecfcab309ff8a9fcbafc855f4f88b",
       "tests/test_quest_availability.js": "8c86c1106a7da942581d9f535a890c93227521e224f3a5fbfdcc9ad0fde25e7e",
       "tests/test_quest_character_switch.js": "450f74860657c7ced99c1638649996f6387bec56ba944e630a5eacde1e864bba",
-      "tests/test_quest_handins.js": "0ff9a5ecab99781773b4b7c821d455d6728cb3517f6b8be2ac3e358a9f133c74",
+      "tests/test_quest_handins.js": "966bd390f10cfaf96d672f0d24cf0e756338a08b091cb45ae5f615a1ef2bc251",
       "tests/test_quest_packets.js": "4ae32e7bd97286c71c90f564058dbbee2e1bb1dc60815952717569d188fc25d1",
       "tests/test_quest_registry_integrity.js": "ee55a533f66fde9c49daea175086b8b8d7cc1af2763d76b7c3049129dd522c5a",
       "tests/test_quest_runtime.js": "d0e4478d0801a858dbf8102cfe2c5cd029107e724b6afba02c8511f6149c6eb3",
@@ -3575,7 +3586,7 @@
       "tests/test_world_observer_world_state.js": "1694e9a8d888d7495da71f79d1ac6fc0f27b69a28b33e5f73753529cacce9c78",
       "tests/test_world_visible_users.js": "53949729f44132946b001ebe4ace8644ffac482aea9953a0ffa80829dac74aab",
       "tests/test_world_wipe.js": "d7f3aa5197dc8359c9542250394fc0ccd96010402be9c83b0576696ec47cf89c",
-      "docs/c4/quests/runtime-review.json": "c5e157b3f0a51e05c81552cbd24118ca55e3f045894396615cb014eafc279de0",
+      "docs/c4/quests/runtime-review.json": "7f05e7a09c62a83e2ad5cb91be974fdd95116c475780511b912c03722cb7853d",
       "docs/c4/quests/C4_QUEST_MASTER_INVENTORY.jsonl": "9f63e96d5fe25e0ce21f81027b805d8a4cc556e25e8f17b74a179ff316befc86"
     },
     "tests": [
@@ -3597,6 +3608,10 @@
       },
       {
         "path": "tests/test_c4_class_quests.js",
+        "exitCode": 0
+      },
+      {
+        "path": "tests/test_c4_village_quests.js",
         "exitCode": 0
       },
       {
