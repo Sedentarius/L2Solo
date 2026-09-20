@@ -43,6 +43,7 @@ function clanPartyObjectiveForState(state) {
 }
 
 function partyRequestForPlan(state, plan, timestamp = Date.now()) {
+    if (plan?.levelingRecovery) return null;
     if (!partyRequestEligible(state)) return null;
     const previous = state.stats?.partyRequest;
     const sharedTarget = previous?.reason === 'shared_target' && ['open', 'deferred'].includes(previous.status)
@@ -97,6 +98,7 @@ function partyRequestForPlan(state, plan, timestamp = Date.now()) {
 }
 
 function partyObjectiveForState(state) {
+    if (state?.stats?.equipmentPlan?.levelingRecovery) return null;
     const request = state?.stats?.partyRequest;
     const clanObjective = clanPartyObjectiveForState(state);
     if (clanObjective?.status === 'open') {

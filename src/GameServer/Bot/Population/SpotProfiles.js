@@ -100,19 +100,22 @@ function occupiedSpotId(state = {}) {
     return state.spotId || null;
 }
 
-function farmIntentSpotId(state = {}) {
+function farmIntentSpotId(state = {}, timestamp = Date.now()) {
     if (['merchant', 'shopping', 'crafting', 'dead'].includes(state.activity)) return null;
     const clanObjective = state.stats?.clanPartyObjective;
-    if (clanObjective?.spotId && ['open', 'deferred'].includes(String(clanObjective.status || ''))) {
-        return clanObjective.spotId;
-    }
     const request = state.stats?.partyRequest;
-    if (request?.spotId && ['open', 'deferred'].includes(String(request.status || ''))) return request.spotId;
     const plan = state.stats?.equipmentPlan;
-    if (plan?.status === 'active' && ['direct_drop', 'craft'].includes(plan.strategy) && plan.next?.spotId) {
-        return plan.next.spotId;
+    let spotId = null;
+    if (clanObjective?.spotId && ['open', 'deferred'].includes(String(clanObjective.status || ''))) {
+        spotId = clanObjective.spotId;
+    } else if (request?.spotId && ['open', 'deferred'].includes(String(request.status || ''))) {
+        spotId = request.spotId;
+    } else if (plan?.status === 'active' && ['direct_drop', 'craft'].includes(plan.strategy) && plan.next?.spotId) {
+        spotId = plan.next.spotId;
     }
-    return null;
+    if ((state.stats?.capacityBackoffs || []).some(entry => String(entry.spotId) === String(spotId)
+        && Number(entry.until) > timestamp)) return null;
+    return spotId;
 }
 
 function allocationGroups(states = [], physicalKeys = new Set()) {
@@ -340,14 +343,17 @@ const SpotProfiles = {
     },
 
     findForState(state, options = {}) {
+        const timestamp = Number(options.timestamp || Date.now());
+        if (GearAcquisitionPlanner.levelingRecoveryFor(state, state?.stats?.equipmentPlan, timestamp)) {
+            state = { ...state, stats: { ...(state.stats || {}), equipmentPlan: null } };
+        }
         const acquisitionPlan = state?.stats?.equipmentPlan;
         const protectedStarterCohort = isProtectedStarterCohort(state);
         const profiles = this.ensure();
         const physicalSpot = physicalSpotForState(state, profiles);
         const savedSpot = state?.spotId ? this.findById(state.spotId) : null;
         const currentSpot = physicalSpot || savedSpot;
-        const targetLevel = LevelingRoutes.targetLevelForState(state);
-        const timestamp = Number(options.timestamp || Date.now());
+        const targetLevel = LevelingRoutes.targetLevelForState(state, options);
         const excludedSpotIds = new Set([
             ...(options.mode === 'party' ? [] : SpotRiskPolicy.excludedSpotIdsForStates([state], timestamp)),
             ...((options.excludedSpotIds instanceof Set || Array.isArray(options.excludedSpotIds))

@@ -1,3 +1,4 @@
+const ClanCrafting = require('../../Clan/ClanCraftingPolicy');
 const DataCache = invoke('GameServer/DataCache');
 const BotEconomyPricing = invoke('GameServer/Bot/Economy/BotEconomyPricing');
 const C4RecipeItems = invoke('GameServer/Items/C4RecipeItems');
@@ -175,6 +176,8 @@ function inventoryCleanupNeed(state = {}, options = {}) {
 function reservedCraftAmounts(state) {
     const plan = state?.stats?.equipmentPlan;
     if (!['active', 'component_ready', 'ready_to_craft'].includes(plan?.status) || plan.strategy !== 'craft') return {};
+    if (plan.clanGoal?.clanId && plan.recipeId) return Object.fromEntries(ClanCrafting.requirements(
+        C4RecipeItems.resolveByRecipeId(plan.recipeId), state.inventory, null, 1, plan.craftProviders, plan.componentRecipes));
     const reserved = {};
     const reserve = (materials, multiplier = 1, visited = new Set()) => {
         for (const material of materials || []) {
@@ -269,6 +272,8 @@ function saleCandidates(state, options = {}) {
     const reserved = { ...reservedEquipmentAmounts(state), ...(options.reserved || {}) };
     return Object.values(state?.inventory || {}).flatMap((item) => {
         const selfId = Number(item?.selfId || 0);
+        if (ClanCrafting.clanIdFor(state) && (ClanCrafting.isResource(selfId)
+            || Number(state.stats?.clanMaterialDemand?.[selfId] || 0) > 0)) return [];
         const amount = Number(item?.amount || 0);
         const rawEquippedCount = Number(item?.equippedCount ?? (item?.equipped ? 1 : 0));
         const equippedCount = Math.max(0, Number.isFinite(rawEquippedCount) ? rawEquippedCount : 0);

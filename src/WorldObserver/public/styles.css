@@ -1258,6 +1258,23 @@ svg.empty-glyph { width: 38px; height: 38px; }
 .clan-management-save button { min-width: 94px; border: 1px solid var(--gold); color: #111; background: var(--gold); }
 .clan-management-save span { color: var(--faint); font-size: 9px; }
 .clan-management-save span.is-error { color: var(--red); }
+/* Residence details remain visible for player clans without an automatic finance goal. */
+.clan-hall-card { margin: 22px 0; padding: 20px; border: 1px solid rgba(216, 185, 109, 0.28); border-radius: 10px; background: rgba(216, 185, 109, 0.035); }
+.clan-hall-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.clan-hall-card h4 { margin-top: 6px; color: var(--text); font-size: 20px; letter-spacing: -0.025em; overflow-wrap: anywhere; }
+.clan-hall-card p { margin-top: 7px; color: var(--muted); font-size: 11px; line-height: 1.5; }
+.clan-hall-badge { padding: 5px 8px; flex-shrink: 0; border: 1px solid var(--line); border-radius: 5px; color: var(--gold); font-size: 10px; }
+.clan-hall-badge.is-overdue { color: var(--red); }
+.clan-hall-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px; margin: 18px 0; }
+.clan-hall-facts dt, .clan-hall-service > span { color: var(--faint); font-size: 10px; }
+.clan-hall-facts dd { margin: 5px 0 0; color: var(--text); font-size: 11px; line-height: 1.5; }
+.clan-hall-services { display: grid; grid-template-columns: repeat(auto-fit, minmax(125px, 1fr)); gap: 8px; }
+.clan-hall-service { padding: 10px 12px; border: 1px solid var(--line-soft); border-radius: 6px; }
+.clan-hall-service strong { display: block; margin-top: 5px; color: var(--muted); font-size: 12px; }
+.clan-hall-service.is-active strong { color: var(--gold); }
+.clan-hall-service small { display: block; margin-top: 4px; color: var(--red); font-size: 10px; }
+.clan-hall-finance { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line-soft); }
+.clan-hall-finance > strong { color: var(--muted); font-size: 11px; }
 .clan-metric-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; overflow: hidden; border-bottom: 1px solid var(--line-soft); background: var(--line-soft); }
 .clan-metric-grid > div { min-width: 0; padding: 16px 14px; background: #0b1517; }
 .clan-metric-grid span, .clan-metric-grid small { display: block; color: var(--faint); font-size: 9px; }

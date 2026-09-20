@@ -1,3 +1,4 @@
+const ClanMembershipPolicy = require('../../Clan/ClanMembershipPolicy');
 const Database = invoke('Database');
 const Config = invoke('GameServer/Bot/Population/PopulationConfig');
 
@@ -73,6 +74,8 @@ function normalize(row) {
 }
 
 function rowFromParty(party) {
+    const leader = invoke('GameServer/Bot/Population/BotLifeState').cachedState?.(Number(party.leaderId));
+    party = ClanMembershipPolicy.reconcileParty(party, leader?.stats?.clanId);
     const timestamp = now();
     const membership = normalizeMembership(party);
     return {

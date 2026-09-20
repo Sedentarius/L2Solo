@@ -208,6 +208,7 @@ const ACTIVITY_LABELS = Object.freeze({
     buy: 'Buying',
     complete_errand: 'Finishing an errand',
     crafting: 'Crafting',
+    clan_hall: 'Visiting clan hall',
     craft: 'Crafting',
     dead: 'Dead',
     find_party: 'Looking for party',
@@ -1208,6 +1209,55 @@ function clanManagementMarkup(clan) {
     `;
 }
 
+function clanHallMarkup(finance) {
+    if (!finance) return '';
+    const hall = finance.hall;
+    const goal = finance.goal || {};
+    const status = ({ saving: 'Saving for purchase', bidding: 'Bid submitted',
+        saving_upgrade: 'Saving for an upgrade', maintaining: 'Maintaining the hall',
+        waiting_auction: 'Waiting for an auction' })[goal.status];
+    const savings = Number(goal.target) > 0
+        ? `<p>${number(goal.progress || 0)} / ${number(goal.target)} Adena · development reserve ${number(finance.protected || 0)}</p>` : '';
+    if (!hall) {
+        if (!status && !finance.bid) return '';
+        return `<section class="clan-hall-card" aria-label="Clan hall auction">
+            <span class="section-kicker">Clan hall</span><h4>${text(status || 'Bid submitted')}</h4>
+            ${savings}${finance.bid ? `<p>Bid: ${number(finance.bid.amount)} Adena</p>` : ''}
+        </section>`;
+    }
+    let functions = hall.functions;
+    if (!functions) {
+        try { functions = JSON.parse(hall.functionsJson || '{}'); } catch (_) { functions = {}; }
+    }
+    functions = functions || {};
+    const now = Date.now();
+    const paid = Number(hall.serviceDueAt) > now;
+    const overdue = Number(hall.rentDueAt) > 0 && Number(hall.rentDueAt) <= now;
+    const date = (timestamp) => Number(timestamp) > 0
+        ? new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'short', year: 'numeric',
+            hour: '2-digit', minute: '2-digit', hourCycle: 'h23', timeZone: 'UTC', timeZoneName: 'short' }).format(Number(timestamp)) : '—';
+    const service = (key, label, value) => `<div class="clan-hall-service${paid && Number(functions[key]) > 0 ? ' is-active' : ''}">
+        <span>${label}</span><strong>${Number(functions[key]) > 0 ? value : 'Not enabled'}</strong>
+        ${!paid && Number(functions[key]) > 0 ? '<small>Payment due</small>' : ''}</div>`;
+    return `<section class="clan-hall-card" aria-label="Owned clan hall">
+        <div class="clan-hall-heading"><div><span class="section-kicker">Clan hall</span>
+            <h4>${text(hall.name)}</h4><p>${text(hall.town)} · Grade ${text(({ 1: 'C', 2: 'B', 3: 'A' })[hall.grade])}</p>
+        </div><span class="clan-hall-badge${overdue ? ' is-overdue' : ''}">${overdue ? 'Rent overdue' : 'Owned'}</span></div>
+        <dl class="clan-hall-facts">
+            <div><dt>Weekly rent</dt><dd>${number(hall.weeklyRent)} Adena</dd></div>
+            <div><dt>${overdue ? 'Rent was due' : 'Next rent'}</dt><dd>${text(date(hall.rentDueAt))}</dd></div>
+            <div><dt>Service renewal</dt><dd>${text(date(hall.serviceDueAt))}</dd></div>
+        </dl>
+        <div class="clan-hall-services">
+            ${service('hp', 'HP recovery', `+${number(functions.hp)}%`)}
+            ${service('mp', 'MP recovery', `+${number(functions.mp)}%`)}
+            ${service('exp', 'EXP restoration', `${number(functions.exp)}%`)}
+            ${service('support', 'Support magic', `Level ${number(functions.support)}`)}
+        </div>
+        ${status && Number(goal.target) > 0 ? `<div class="clan-hall-finance"><strong>${text(status)}</strong>${savings}</div>` : ''}
+    </section>`;
+}
+
 function renderClanDetail() {
     if (!els.clanDetail) return;
     state.clanDetailDeferredRender = false;
@@ -1243,6 +1293,7 @@ function renderClanDetail() {
             </div>
         </div>
         ${clanManagementMarkup(clan)}
+        ${clanHallMarkup(detail.clanHall)}
         <div class="clan-metric-grid">
             <div><span>Members</span><strong>${number(clan.memberCount)}</strong><small>${number(clan.botMembers)} bots</small></div>
             <div><span>Average level</span><strong>${number(clan.averageLevel)}</strong><small>range ${number(clan.lowestLevel)}–${number(clan.highestLevel)}</small></div>

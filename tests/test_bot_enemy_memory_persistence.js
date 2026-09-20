@@ -20,7 +20,8 @@ async function run() {
         VALUES (1, 'bot_memory_test', 'MemoryBot', 0, 0, 100, 100, 0, 0, 0, 0, 0, 0, 0)`);
     const saved = { execute: Database.execute, location: Database.updateCharacterLocation,
         experience: Database.updateCharacterExperience, vitals: Database.updateCharacterVitals,
-        recover: Owner.recoverStartupLeases, dirty: Coordinator.markDirty };
+        recover: Owner.recoverStartupLeases, dirty: Coordinator.markDirty,
+        membership: Database.reconcileBotClanMembership };
     let writes = 0;
     try {
         Database.execute = async ([sql, params = []]) => {
@@ -32,6 +33,7 @@ async function run() {
         };
         Database.updateCharacterLocation = Database.updateCharacterExperience = Database.updateCharacterVitals = async () => {};
         Owner.recoverStartupLeases = async () => ({ affectedRows: 0 });
+        Database.reconcileBotClanMembership = async () => ({ repairedMembers: 0, repairedParties: 0 });
         Coordinator.markDirty = () => {};
         assert(await Life.init());
         const state = await Life.upsertState({ characterId: 1, name: 'MemoryBot', accountName: 'bot_memory_test',
@@ -71,6 +73,7 @@ async function run() {
         Database.execute = saved.execute; Database.updateCharacterLocation = saved.location;
         Database.updateCharacterExperience = saved.experience; Database.updateCharacterVitals = saved.vitals;
         Owner.recoverStartupLeases = saved.recover; Coordinator.markDirty = saved.dirty;
+        Database.reconcileBotClanMembership = saved.membership;
         db.close(); fs.rmSync(dir, { recursive: true, force: true });
     }
     console.log('Bot enemy memory SQLite persistence checks passed');

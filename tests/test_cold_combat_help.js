@@ -4,6 +4,7 @@ invoke('GameServer/DataCache').init();
 const Resolver = invoke('GameServer/Bot/Population/BackgroundResolver');
 const Party = invoke('GameServer/Bot/Population/BackgroundPartyResolver');
 const Profile = invoke('GameServer/Bot/Population/ColdCombatProfile');
+const Encounter = require('../src/GameServer/Bot/Population/ColdPveEncounter');
 const Memory = require('../src/GameServer/Social/InteractionMemory');
 const P = require('../src/GameServer/Social/InteractionMemoryPolicy');
 const ColdHelp = require('../src/GameServer/Social/ColdCombatHelpMemory');
@@ -51,10 +52,23 @@ for (const key of ['combatActions', 'skillUses', 'heals']) {
 const soloHealer = fighter(3, 1, 30, [healerSkill]);
 soloHealer.activity = 'hunting';
 delete soloHealer.party;
-const soloInput = JSON.stringify(soloHealer);
+const soloProfile = Profile.profileFor(soloHealer, at);
+Object.assign(soloHealer.vitals, { maxHp: soloProfile.maxHp, mp: soloProfile.maxMp, maxMp: soloProfile.maxMp });
 const soloResolve = state => Resolver.resolveSolo({ state, spot, elapsedMs: 1, timestamp: at, rng: () => 0.5 });
+const resting = soloResolve(soloHealer);
+assert.strictEqual(resting.patch.activity, 'resting', 'an injured idle solo bot must recover before starting a fight');
+assert.strictEqual(resting.patch.stats.lastReason, 'solo_recovery_needed');
+assert.strictEqual(resting.debug.heals, 0, 'pre-fight rest must not invent a combat heal');
+assert.strictEqual(resting.patch.vitals.mp, soloHealer.vitals.mp);
+
+// Healing belongs to the ongoing fight, which must bypass admission for a new one.
+const soloMob = { level: 20, maxHp: spot.mob.hp, pAtk: 1, pAtkRnd: 0, pDef: 1, mDef: 1,
+    accur: 1, evasion: 0, critical: 0, atkSpd: 253, mAtk: 1, castSpd: 333 };
+soloHealer.stats.pveEncounter = Encounter.save(null, Encounter.key([soloHealer], spot, 0),
+    soloMob, soloMob.maxHp, at, { botReadyAt: 0, mobReadyAt: 0 });
+const soloInput = JSON.stringify(soloHealer);
 const soloHealed = soloResolve(soloHealer);
-assert(soloHealed.debug.heals > 0, 'an injured cold solo bot must cast its learned heal');
+assert(soloHealed.debug.heals > 0, 'an injured cold solo bot must cast its learned heal during an ongoing fight');
 assert(soloHealed.patch.vitals.hp > soloHealer.vitals.hp, 'solo healing must actually restore HP');
 assert(soloHealed.patch.vitals.mp < soloHealer.vitals.mp, 'solo healing must pay MP');
 assert(soloHealed.patch.stats.coldCombat.cooldowns[1011] > at, 'solo healing must persist reuse');
@@ -71,9 +85,9 @@ for (const state of unavailable) assert.strictEqual(soloResolve(state).debug.hea
     'healthy, out-of-mana, and cooldown-bound solo bots must not cast a heal');
 for (const skill of [{ ...healerSkill, selfId: 45 }, { ...healerSkill, selfId: 109, power: 20 }]) {
     const state = { ...soloHealer, stats: { ...soloHealer.stats,
+        pveEncounter: { ...soloHealer.stats.pveEncounter, hp: 1 },
         coldCombat: { ...soloHealer.stats.coldCombat, skills: [skill] } } };
-    const won = Resolver.resolveSolo({ state, spot: { ...spot, mob: { hp: 1, damage: 1 } },
-        elapsedMs: 1, timestamp: at, rng: () => 0.5 });
+    const won = soloResolve(state);
     assert(won.debug.wins > 0 && won.debug.heals > 0, 'self and percentage heals must survive a winning solo result');
     assert(won.patch.vitals.hp > state.vitals.hp);
 }

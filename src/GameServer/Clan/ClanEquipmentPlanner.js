@@ -3,6 +3,7 @@ const GearAcquisitionPlanner = invoke('GameServer/Bot/AI/GearAcquisitionPlanner'
 const DataCache = invoke('GameServer/DataCache');
 const Policy = require('./ClanEquipmentPolicy');
 const Config = require('./ClanSimulationConfig');
+const Crafting = require('./ClanCraftingPolicy');
 const number = (value, fallback = 0) => Number.isFinite(Number(value)) ? Number(value) : fallback;
 
 function plannerState(member) {
@@ -55,7 +56,7 @@ function overlayWarehouseMaterials(state, plan, warehouseRows = []) {
     };
 }
 
-function planForMember(member, spots = [], warehouseRows = [], options = {}) {
+function calculate(member, spots = [], warehouseRows = [], options = {}) {
     const planningMember = options.ignoreExistingPlan ? {
         ...member,
         stats: { ...(member?.stats || {}), equipmentPlan: undefined }
@@ -64,6 +65,10 @@ function planForMember(member, spots = [], warehouseRows = [], options = {}) {
     const state = plannerState(planningMember);
     const plannerOptions = {
         spots,
+        clanCrafting: true,
+        craftRecipes: options.craftRecipes,
+        ...(options.recipeId ? { recipeId: options.recipeId } : {}),
+        allowedRecipeIds: options.allowedRecipeIds ? new Set(options.allowedRecipeIds) : undefined,
         maxExpectedKills: number(options.maxExpectedKills, Config.equipmentMaxExpectedKills),
         spoilCapable: options.spoilCapable === true,
         ...(options.occupancy ? { occupancy: options.occupancy } : {}),
@@ -157,6 +162,38 @@ function planForMember(member, spots = [], warehouseRows = [], options = {}) {
         if (options.throwOnError) throw error;
         return { status: 'blocked', reason: 'gear_planner_unavailable', strategy: 'none', target: null };
     }
+}
+
+function planForMember(member, spots = [], warehouseRows = [], options = {}) {
+    const inventory = member.inventory || {};
+    const pooled = Crafting.stockInventory(inventory, warehouseRows);
+    // Recalculate craft shortages against the pooled inventory before routing.
+    const previous = member.stats?.equipmentPlan;
+    const state = { ...member, inventory: pooled, stats: { ...(member.stats || {}) } };
+    if (previous?.strategy === 'craft') delete state.stats.equipmentPlan;
+    const retainedRecipe = previous?.strategy === 'craft' && previous.status !== 'blocked' && !options.ignoreExistingPlan
+        && !(options.excludedTargetIds || []).map(Number).includes(Number(previous.target?.selfId))
+        ? Number(previous.recipeId) : null;
+    const plan = calculate(state, spots, [], { ...options, recipeId: retainedRecipe });
+    if (plan?.strategy !== 'craft') return plan;
+    const providers = {};
+    const componentRecipes = {};
+    const recipes = invoke('GameServer/Items/C4RecipeItems');
+    const byProduct = new Map((options.craftRecipes || []).map(recipe => [Number(recipe.productId), recipe]));
+    const visit = (recipe, seen = new Set()) => {
+        if (!recipe || seen.has(recipe.recipeId)) return;
+        seen.add(recipe.recipeId);
+        if (options.craftProviders?.[recipe.recipeId]) providers[recipe.recipeId] = options.craftProviders[recipe.recipeId];
+        for (const material of recipe.materials || []) {
+            const child = byProduct.get(Number(material.selfId)) || recipes.resolveByProductId(material.selfId);
+            if (child) { componentRecipes[material.selfId] = child.recipeId; visit(child, seen); }
+        }
+    };
+    visit(recipes.resolveByRecipeId(plan.recipeId));
+    plan.craftProviders = providers;
+    plan.componentRecipes = componentRecipes;
+    return { ...plan, warehouseMaterials: Crafting.warehouseMaterials(plan, inventory, warehouseRows),
+        ...(Object.keys(providers).length ? { craftProviders: providers } : {}) };
 }
 
 module.exports = { planForMember };

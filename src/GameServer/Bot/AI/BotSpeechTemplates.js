@@ -555,6 +555,16 @@ const voices = {
         ['weary', 'Getting tired of dying. Could really use a leveling party.'],
         ['reserved', 'Rough time leveling. Died a few times. Any room in a party?']
     ],
+    'clan.task_hunt': [
+        ['warm', 'Clan hunt for {item}: heading out with {name}.'],
+        ['driven', 'Gathering {item} for the clan with {name}.'],
+        ['calm', 'Off to collect {item} for the clan with {name}.']
+    ],
+    'clan.task_spoil': [
+        ['warm', 'Clan spoil run for {item}: heading out with {name}.'],
+        ['driven', 'Going to spoil {item} for the clan with {name}.'],
+        ['calm', 'Spoiling {item} for our clan craft with {name}.']
+    ],
     'clan.party_help': [
         ['warm', 'Of course, {name}. Come along, we have room for you.'],
         ['social', '{name}, come join us. Let us level together.'],

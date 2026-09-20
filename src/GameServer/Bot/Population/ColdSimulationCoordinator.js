@@ -77,7 +77,7 @@ function admitSoloRouteTravelState(nextState, baseState, profiles, occupancy, ti
 
     const { travel: _travel, ...stats } = nextState.stats || {};
     return {
-        state: {
+        state: SpotRiskPolicy.withCapacityBackoff({
             ...nextState,
             activity: baseState?.activity || 'hunting',
             spotId: baseState?.spotId || nextState.spotId,
@@ -88,7 +88,7 @@ function admitSoloRouteTravelState(nextState, baseState, profiles, occupancy, ti
                 nextResolveAt: timestamp + 1000
             },
             stats
-        },
+        }, travel.spotId, timestamp),
         admitted: false,
         checked: true
     };
@@ -765,6 +765,7 @@ class ColdSimulationCoordinator {
         return {
             spot,
             interactionMemory: invoke('GameServer/Social/InteractionMemoryRuntime').snapshot(Number(state.characterId)),
+            clanHallServices: invoke('GameServer/ClanHall/ColdVisit').needed(state),
             pressure,
             targetNpcId: party ? require('./PartyHuntingTarget').npcId(party, state)
                 : directDropTargetNpcId(state.stats?.equipmentPlan),
@@ -1323,7 +1324,7 @@ class ColdSimulationCoordinator {
 
     async handleCommitResults(results = []) {
         const releaseTokens = results.filter((result) => !result.ok && result.proposal?.token).map((result) => result.proposal.token);
-        if (releaseTokens.length) await ColdSimulationOwner.releaseBatch(releaseTokens).catch(() => []);
+        if (releaseTokens.length) await ColdSimulationOwner.releaseBatch(releaseTokens, { releaseInvalidated: true }).catch(() => []);
         const index = this.contextIndex({ compactPartyMembers: true });
         const acknowledgements = results.map((result) => {
             const state = LifeState.cachedState(result.characterId) || result.nextState || result.proposal?.baseState || null;
@@ -1341,7 +1342,7 @@ class ColdSimulationCoordinator {
 
     async handleReleaseRequest(message) {
         const tokens = (message.payload.releases || []).map((entry) => entry.token).filter(Boolean);
-        const released = await ColdSimulationOwner.releaseBatch(tokens).catch(() => []);
+        const released = await ColdSimulationOwner.releaseBatch(tokens, { releaseInvalidated: true }).catch(() => []);
         const index = this.contextIndex({ compactPartyMembers: true });
         const results = released.map((result) => {
             const state = LifeState.cachedState(result.characterId);
@@ -1373,6 +1374,8 @@ class ColdSimulationCoordinator {
                         ok: result?.ok !== false,
                         characterId: request.characterId,
                         reason: result?.reason || (result?.ok === false ? 'command_rejected' : 'command_applied'),
+                        ...(result?.ok === false ? { retryAfterMs: Math.max(1000,
+                            Number(result.retryAfterMs) || (result.reason === 'missing_spot' ? 30000 : 5000)) } : {}),
                         state: nextState,
                         context: this.contextFor(nextState, this.contextIndex({ compactPartyMembers: true }))
                     });

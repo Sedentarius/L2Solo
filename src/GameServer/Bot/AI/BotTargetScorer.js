@@ -52,7 +52,8 @@ function score(context = {}) {
         return { eligible: false, score: -Infinity, reason: 'retry_cooldown', reasons: ['retry_cooldown'] };
     }
     if (!context.incomingThreat && context.targetMatchup?.eligible === false) {
-        return { eligible: false, score: -Infinity, reason: 'target_resistance', reasons: ['target_resistance'] };
+        const reason = context.targetMatchup.reason || 'target_resistance';
+        return { eligible: false, score: -Infinity, reason, reasons: [reason] };
     }
     if (!context.incomingThreat && levelGap > MAX_LEVEL_ADVANTAGE) {
         return { eligible: false, score: -Infinity, reason: 'level_too_high', reasons: ['level_too_high'] };

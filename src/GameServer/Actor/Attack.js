@@ -294,6 +294,8 @@ class Attack {
 
             const semantic = skill.fetchSemantic?.() || {};
             const targets = this.resolveSkillTargets(session, actor, creature, skill);
+            const corpseAreaCast = skill.fetchTargetKind?.() === 'corpse_mob'
+                && semantic.sourceTarget === 'area' && semantic.skillType === C4SkillRules.DAMAGE;
             const selfEffectOnly = targets.length === 0
                 && semantic.sourceTarget === 'aura'
                 && !!semantic.selfEffect;
@@ -303,7 +305,7 @@ class Attack {
                 && !semantic.selfEffect;
             const executionTargets = selfEffectOnly ? [actor] : targets;
 
-            if (executionTargets.length === 0 && !emptyEnemyAuraCast) {
+            if (executionTargets.length === 0 && !emptyEnemyAuraCast && !corpseAreaCast) {
                 actor.state.setCasts(false);
                 invoke('GameServer/Bot/AI/BotSupportPlanner').cancelSupportCast(session, actor);
                 invoke('GameServer/Bot/AI/BotPartyChat').cancelExpectedSkillResult(session, actor, creature, skill);
@@ -357,6 +359,9 @@ class Attack {
                 return;
             }
 
+            if (corpseAreaCast) {
+                invoke('GameServer/World/Generics/NpcDecay').decay(invoke('GameServer/World/World'), creature);
+            }
             executionTargets.forEach((target) => {
                 if (skill.fetchTargetKind?.() === 'enemy') invoke('GameServer/Bot/AI/BotMobCompetition').record(actor, target);
                 this.restoreShotState(actor, shotState);
@@ -555,13 +560,17 @@ class Attack {
         const nearby = this.fetchSkillTargetsInRadius(actor, center.fetchLocX(), center.fetchLocY(), radius);
         const targets = [primary, ...nearby];
         const seen = new Set();
+        // A corpse selects the explosion center; its victims must be living enemies.
+        const victimSkill = skill.fetchTargetKind?.() === 'corpse_mob'
+            ? { fetchTargetKind: () => 'enemy' }
+            : skill;
 
         return targets.filter((target) => {
             const id = target?.fetchId?.();
             if (!id || seen.has(id)) return false;
             seen.add(id);
 
-            if (!this.isValidSkillTarget(target, skill, actor)) return false;
+            if (!this.isValidSkillTarget(target, victimSkill, actor)) return false;
             if (this.distance2d(center, target) > radius) return false;
             if (sourceTarget === 'front_area' && !this.isFacing(actor, target, 120)) return false;
             return true;

@@ -66,6 +66,7 @@ const DataCache = {
             ...validateModel(path + 'Npcs/c4_raid_boss_minions'),
             ...C4LateTownGatekeepers.npcs,
             ...require('./World/GiranMammon').npcs,
+            ...validateModel(path + 'Npcs/clan_halls'),
             ...C4SevenSignsDungeonTeleports.npcs
         ], npcAiTypes);
         DataCache.npcs = RaidBossBalance.weakenTemplates(DataCache.npcs);
@@ -107,6 +108,7 @@ const DataCache = {
             ...validateModel(path + 'Npcs/Spawns/c4_raid_bosses'),
             ...C4LateTownGatekeepers.spawns,
             ...require('./World/GiranMammon').spawns,
+            ...validateModel(path + 'Npcs/Spawns/clan_halls'),
             ...C4SevenSignsDungeonTeleports.spawns,
             ...require('../../data/Pets/c4-quest-npcs.json').spawns,
             ...validateModel(path + 'Npcs/Spawns/c4_heine'),

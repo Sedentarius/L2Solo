@@ -74,6 +74,9 @@ function state(characterId, revision, activity = 'hunting') {
     }).reason, 'legacy_travel');
     assert.strictEqual(Owner.eligibility(state(characterId, 0), { hasWarehouseWorkflow: true }).reason, 'warehouse_state');
     assert.strictEqual(Owner.eligibility({ ...state(characterId, 0), stats: { warehouseErrand: {} } }).reason, 'warehouse_state');
+    assert(Owner.eligibility({ ...state(characterId, 0), stats: { craftReturn: { loc: {} },
+        equipmentPlan: { status: 'deferred', strategy: 'none' } } }).ok,
+    'an abandoned craft return point is not an active crafting service');
 
     const initialState = state(characterId, 0);
     BotLifeState.acceptSimulationOwnership(characterId, initialState.simulation, initialState);
@@ -296,6 +299,34 @@ function state(characterId, revision, activity = 'hunting') {
         leaseUntil: 11200
     });
     assert.strictEqual(activeWarehouseClaim.reason, 'warehouse_state', 'an active warehouse workflow must remain legacy-main');
+
+    await Database.execute(['UPDATE bot_life_state SET statsJson = ? WHERE characterId = ?',
+        [JSON.stringify({ craftReturn: { loc: { locX: 1, locY: 2 } } }), characterId]]);
+    const inventoryRace = await Owner.claim({ ...resting,
+        simulation: { ownerId: Owner.LEGACY_OWNER_ID, revision: warehouseReleased.revision }
+    }, { timestamp: 6300, leaseMs: 5000, leaseId: 'inventory-race' });
+    assert(inventoryRace.ok);
+    const inventoryAfterClanWrite = JSON.stringify({ '1869': { selfId: 1869, amount: 42 } });
+    await Database.execute([`UPDATE bot_life_state SET simulationRevision = simulationRevision + 1,
+        inventorySummary = ?, statsJson = ? WHERE characterId = ?`,
+    [inventoryAfterClanWrite, JSON.stringify({ clanInventoryRevision: inventoryRace.revision + 1 }), characterId]]);
+    const rejectedCommit = await Owner.commit(inventoryRace, resting, { timestamp: 6400 });
+    assert.strictEqual(rejectedCommit.reason, 'stale_revision');
+    assert.strictEqual((await Owner.releaseBatch([inventoryRace], { timestamp: 6400 }))[0].reason, 'stale_revision',
+        'ordinary release retains revision fencing');
+    const releasedRace = (await Owner.releaseBatch([inventoryRace], { timestamp: 6400, releaseInvalidated: true }))[0];
+    assert(releasedRace.ok, 'a rejected operation must release its own unchanged lease after a clan inventory write');
+    const [afterRace] = await Database.execute(['SELECT * FROM bot_life_state WHERE characterId = ?', [characterId]]);
+    assert.strictEqual(afterRace.inventorySummary, inventoryAfterClanWrite, 'release must preserve new inventory');
+    assert.strictEqual(JSON.parse(afterRace.statsJson).clanInventoryRevision, inventoryRace.revision + 1);
+    assert.strictEqual(afterRace.simulationLeaseId, null);
+    assert.strictEqual(afterRace.simulationOwner, Owner.LEGACY_OWNER_ID);
+    const freshClaim = await Owner.claim({ ...resting, simulation: { revision: releasedRace.revision } },
+        { timestamp: 6500, leaseMs: 5000, leaseId: 'after-inventory-race' });
+    assert(freshClaim.ok, 'the bot can resume simulation after releasing the abandoned lease');
+    assert(!(await Owner.releaseBatch([inventoryRace], { timestamp: 6600, releaseInvalidated: true }))[0].ok,
+        'a late rejection must not release a newer lease');
+    assert((await Owner.release(freshClaim, { timestamp: 6600 })).ok);
 
     const dbStats = Database.stats();
     assert.strictEqual(path.resolve(dbStats.path), path.resolve(databasePath), 'all owner operations must use the one configured SQLite gateway');
