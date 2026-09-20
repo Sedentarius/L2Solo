@@ -314,31 +314,39 @@ async function main() {
     await click(nightmare, 169, 'start');
     const nightmareRandom = Math.random;
     try {
-        Math.random = () => 0.3;
+        // The reference cascades two independent rolls: the perfect skull first,
+        // then a cracked one. A roll of 0.25 misses the 20% perfect tier and
+        // lands inside the 30% cracked tier.
+        Math.random = () => 0.25;
         await QuestService.onKill(nightmare, { fetchSelfId: () => 25 });
         assert.equal(count(nightmare, 1030), 1);
-        assert.match(await talk(nightmare, 7145), /skull is still missing/);
         Math.random = () => 0;
         await QuestService.onKill(nightmare, { fetchSelfId: () => 105 });
     } finally { Math.random = nightmareRandom; }
     assert.equal(count(nightmare, 1031), 1);
     assert.equal(state(nightmare, 169).getInt('cond'), 2);
-    await QuestService.onKill(nightmare, { fetchSelfId: () => 25 });
-    assert.equal(count(nightmare, 1031), 1, 'drops stop after the perfect skull');
+    try {
+        // Once the perfect skull is held its tier is capped, and the reference
+        // keeps paying out cracked skulls until the quest is handed in.
+        Math.random = () => 0.25;
+        await QuestService.onKill(nightmare, { fetchSelfId: () => 25 });
+    } finally { Math.random = nightmareRandom; }
+    assert.equal(count(nightmare, 1031), 1, 'the perfect skull never drops twice');
+    assert.equal(count(nightmare, 1030), 2, 'cracked skulls keep dropping after cond 2');
     await WriteQueue.flushAll();
     nightmare = await sessionFor(12);
     assert.equal(state(nightmare, 169).getInt('cond'), 2);
-    assert.match(await talk(nightmare, 7145), /nightmare is ended/);
+    assert.match(await talk(nightmare, 7145), /task is complete/);
     assert.equal(state(nightmare, 169).isCompleted(), true);
     assert.equal(count(nightmare, 1031), 0);
     assert.equal(count(nightmare, 31), 1);
     assert.equal(count(nightmare, 1030), 0);
-    assert.equal(count(nightmare, 57), 17020);
+    assert.equal(count(nightmare, 57), 17000 + 2 * 20, 'two cracked skulls pay 20 adena each');
     assert.match(await talk(nightmare, 7145), /already completed/);
     await click(nightmare, 169, 'start');
     assert.equal(state(nightmare, 169).isCompleted(), true, 'a stale start link cannot restart the quest');
     assert.equal(count(nightmare, 31), 1);
-    assert.equal(count(nightmare, 57), 17020);
+    assert.equal(count(nightmare, 57), 17000 + 2 * 20);
 
     // Hand-in follows actual inventory, including interrupted stage updates.
     for (const [id, cond, skulls] of [[13, '1', 1], [14, '2', 0]]) {
@@ -388,17 +396,32 @@ async function main() {
     assert.equal(state(seduction, 170).isCompleted(), true);
     assert.equal(count(seduction, 57), 102680);
 
-    for (const [id, recipient, event, total] of [
-        [16, 7255, 'haprock_finish', 5000],
-        [17, 7210, 'norman_finish', 22000]
-    ]) {
-        let kin = await sessionFor(id);
+    // Q167 has exactly the reference's three branches. Selling Carlon's letter
+    // outright ends the quest for 3000; forwarding it pays 2000 and only Norman
+    // can settle the remaining 20000. The old local extra payout at Haprock
+    // after forwarding does not exist in C4 and is gone.
+    {
+        let kin = await sessionFor(16);
         kin.actor.fetchLevel = () => 19;
         await talk(kin, 7350);
         await click(kin, 167, 'start');
         assert.equal(count(kin, 1076), 1);
         await click(kin, 167, 'haprock');
-        assert.equal(count(kin, 1076), 1, 'letter cannot be delivered at the starting NPC');
+        assert.equal(count(kin, 1076), 1, 'letter cannot be handed over at the starting NPC');
+        assert.match(await talk(kin, 7255), /quest 167 haprock_sell/);
+        await click(kin, 167, 'haprock_sell');
+        assert.equal(state(kin, 167).isCompleted(), true, 'the outright sale ends the quest');
+        assert.equal(count(kin, 1076), 0);
+        assert.equal(count(kin, 1106), 0, 'the outright sale issues no Norman letter');
+        assert.equal(count(kin, 57), 3000);
+        await click(kin, 167, 'haprock_sell');
+        assert.equal(count(kin, 57), 3000, 'the sale cannot be replayed');
+    }
+    {
+        let kin = await sessionFor(17);
+        kin.actor.fetchLevel = () => 19;
+        await talk(kin, 7350);
+        await click(kin, 167, 'start');
         assert.match(await talk(kin, 7255), /quest 167 haprock/);
         await click(kin, 167, 'haprock');
         assert.equal(state(kin, 167).getInt('cond'), 2);
@@ -406,25 +429,28 @@ async function main() {
         assert.equal(count(kin, 1106), 1);
         assert.equal(count(kin, 57), 2000);
         await click(kin, 167, 'haprock');
-        assert.equal(count(kin, 1106), 1);
+        assert.equal(count(kin, 1106), 1, 'forwarding cannot be replayed');
         assert.equal(count(kin, 57), 2000);
-        await click(kin, 167, 'norman_finish');
-        assert.equal(state(kin, 167).isCompleted(), false, 'Norman delivery cannot run at Haprock');
+        await click(kin, 167, 'haprock_sell');
+        assert.equal(count(kin, 57), 2000, "Carlon's letter is gone, so it cannot be sold again");
+        assert.equal(state(kin, 167).isCompleted(), false);
+
         await WriteQueue.flushAll();
-        kin = await sessionFor(id);
+        kin = await sessionFor(17);
         kin.actor.fetchLevel = () => 19;
-        assert.match(await talk(kin, recipient), new RegExp(`quest 167 ${event}`));
-        await click(kin, 167, event);
+        assert.match(await talk(kin, 7210), /quest 167 norman_finish/);
+        await click(kin, 167, 'norman_finish');
         assert.equal(state(kin, 167).isCompleted(), true);
         assert.equal(count(kin, 1106), 0);
-        assert.equal(count(kin, 57), total);
-        await click(kin, 167, event);
+        assert.equal(count(kin, 57), 22000);
+        await click(kin, 167, 'norman_finish');
         await talk(kin, 7350);
         await click(kin, 167, 'start');
         assert.equal(state(kin, 167).isCompleted(), true);
         assert.equal(count(kin, 1076), 0);
-        assert.equal(count(kin, 57), total);
+        assert.equal(count(kin, 57), 22000);
     }
+
     const lostLetter = await sessionFor(18);
     lostLetter.actor.fetchLevel = () => 19;
     await talk(lostLetter, 7350);
@@ -528,7 +554,7 @@ async function main() {
     const restoredNightmare = await sessionFor(12);
     assert.equal(state(restoredNightmare, 169).isCompleted(), true);
     assert.equal(count(restoredNightmare, 31), 1);
-    assert.equal(count(restoredNightmare, 57), 17020);
+    assert.equal(count(restoredNightmare, 57), 17000 + 2 * 20);
     assert.equal(count(restoredNightmare, 1030), 0);
     assert.equal(count(restoredNightmare, 1031), 0);
     const restoredCraftsman = await sessionFor(11);

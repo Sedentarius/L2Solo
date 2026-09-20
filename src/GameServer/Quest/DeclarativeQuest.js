@@ -18,7 +18,14 @@ function validate(definition) {
             || stage.sources.some(src => !Number.isInteger(src.npc) || !src.gives?.length))) throw new Error('Unresolved gather set');
         if(stage.deliveries && (stage.type!=='DELIVER' || !stage.deliveries.length || !stage.objectives?.length || stage.deliveries.some(d=>!Number.isInteger(d.npc)||!d.takes?.length))) throw new Error('Unresolved delivery set');
         for (const drop of stage.drops || []) {
-            if (!Number.isInteger(drop.npc) || !Number.isFinite(drop.chance) || drop.chance <= 0 || drop.chance > 1) throw new Error('Unresolved quest drop');
+            if (!Number.isInteger(drop.npc)) throw new Error('Unresolved quest drop');
+            for (const key of ['items', 'cascade']) {
+                if (!drop[key]) continue;
+                if (!drop[key].length || drop[key].some(spec => !Number.isInteger(spec.item)
+                    || !Number.isFinite(spec.chance) || spec.chance <= 0 || spec.chance > 1)) throw new Error('Unresolved quest drop');
+            }
+            if (drop.items || drop.cascade) continue;
+            if (!Number.isFinite(drop.chance) || drop.chance <= 0 || drop.chance > 1) throw new Error('Unresolved quest drop');
         }
     }
 }
@@ -70,7 +77,7 @@ function create(definition) {
     const questItemIds=[...new Set([...(d.questItems||[]), ...(d.startItems||[]).map(x=>x[0]),
         ...deliveries.flatMap(s=>[...(s.takes||[]),...(s.gives||[])].map(x=>x[0])),
         ...sources.flatMap(s=>[...(s.takes||[]),...(s.gives||[])].map(x=>x[0])),
-        ...d.stages.flatMap(s=>[s.item,...(s.drops||[]).flatMap(x=>[x.item,...(x.outcomes||[]).map(o=>o.item)]),
+        ...d.stages.flatMap(s=>[s.item,...(s.drops||[]).flatMap(x=>[x.item,...(x.outcomes||[]).map(o=>o.item),...(x.items||[]).map(o=>o.item),...(x.cascade||[]).map(o=>o.item)]),
             ...(s.transforms||[]).map(x=>x.to),...(s.sideDrops||[]).map(x=>x.item),
             ...(s.gives||[]).map(x=>x[0]),...(s.takes||[]).map(x=>x[0])]).filter(Boolean)])];
     const cleanup=state=>questItemIds.map(id=>[id,count(state,id)]).filter(([,n])=>n>0);
@@ -256,7 +263,16 @@ function create(definition) {
                 if(source.event) return page(d.name,`<a action="bypass -h quest ${d.id} ${source.event}">${source.label||'Continue.'}</a>`);
                 return (await gather(state,stage,source)) || page(d.name,describe(stage));
             }
-            if (stage.type === 'KILL_COLLECT') return page(d.name, `${describe(stage)}<br>${objectives(stage).map(([id,n])=>`${itemName(id)}: ${count(state,id)}/${n}`).join('<br>')}`);
+            if (stage.type === 'KILL_COLLECT') {
+                // A database written before the drop and its cond advance became
+                // one transaction can hold a satisfied objective at the old cond.
+                // Advancing here lets such a character finish instead of being stuck.
+                if (objectives(stage).every(([item,amount])=>count(state,item)>=amount)) {
+                    await step(state,{variables:{...state.variables,cond:String(state.getInt('cond')+1)}});
+                    return quest.onTalk(state, npc);
+                }
+                return page(d.name, `${describe(stage)}<br>${objectives(stage).map(([id,n])=>`${itemName(id)}: ${count(state,id)}/${n}`).join('<br>')}`);
+            }
             if(stage.recover && id===stage.recover.npc
                 && (stage.takes||[]).some(([item,n])=>count(state,item)<n)) {
                 if(stage.recover.event) return page(d.name,`<a action="bypass -h quest ${d.id} ${stage.recover.event}">${stage.recover.label||'Continue.'}</a>`);
@@ -273,10 +289,57 @@ function create(definition) {
         },
         async onKill(state, npc) {
             if (!state.isStarted()) return;
-            const stage = stageFor(state);
-            if (!['KILL_COLLECT','COLLECT'].includes(stage?.type)) return;
+            let stage = stageFor(state);
+            // A stage marked keepDropping keeps yielding its secondary tokens after
+            // its objective is met, until the player actually hands the quest in
+            // (Q169 keeps paying out cracked skulls once the perfect one is found).
+            let carried = false;
+            if (!['KILL_COLLECT','COLLECT'].includes(stage?.type)) {
+                const previous = d.stages[state.getInt('cond') - 2];
+                if (!previous?.keepDropping || !['KILL_COLLECT','COLLECT'].includes(previous.type)) return;
+                stage = previous;
+                carried = true;
+            }
             const drop = stage.drops.find(d => d.npc === Number(npc.fetchSelfId()));
             if(!drop) return;
+            // A cascade mirrors the reference's if / else-if chains: each tier rolls
+            // independently, and a tier that is capped out or whose roll fails
+            // falls through to the next one. The first success wins (Q169's
+            // perfect skull, otherwise a cracked one).
+            if(drop.cascade) {
+                for(const spec of drop.cascade) {
+                    const cap=spec.cap || objectives(stage).find(([id])=>id===spec.item)?.[1] || Infinity;
+                    if(count(state,spec.item)>=cap) continue;
+                    if(Math.random()>=spec.chance) continue;
+                    const goals=objectives(stage);
+                    const done=!carried && goals.length>0 && goals.every(([id,amount])=>
+                        count(state,id)+(id===spec.item?1:0)>=amount);
+                    await step(state,{gives:[[spec.item,1]],variables:{...state.variables,
+                        cond:String(state.getInt('cond')+(done?1:0))}});
+                    state.playSound(done?'ItemSound.quest_middle':'ItemSound.quest_itemget');
+                    return;
+                }
+                return;
+            }
+            // Some targets roll several independent tokens on one kill, each with
+            // its own chance and its own cap (Q163's four poems).
+            if(drop.items) {
+                const gives=[];
+                for(const spec of drop.items) {
+                    const cap=spec.cap || objectives(stage).find(([id])=>id===spec.item)?.[1] || Infinity;
+                    if(count(state,spec.item)>=cap) continue;
+                    if(Math.random()>=spec.chance) continue;
+                    gives.push([spec.item,1]);
+                }
+                if(!gives.length) return;
+                const goals=objectives(stage);
+                const done=!carried && goals.length>0 && goals.every(([id,amount])=>
+                    count(state,id)+gives.filter(([item])=>item===id).length>=amount);
+                await step(state,{gives,variables:{...state.variables,
+                    cond:String(state.getInt('cond')+(done?1:0))}});
+                state.playSound(done?'ItemSound.quest_middle':'ItemSound.quest_itemget');
+                return;
+            }
             let item = drop.item || stage.item;
             if(drop.outcomes) {
                 let roll=Math.random();
@@ -293,7 +356,7 @@ function create(definition) {
             }
             amount = Math.min(amount, cap - count(state, item));
             const goals=objectives(stage);
-            const complete = goals.length>0 && goals.every(([id,n])=>count(state,id)+(id===item?amount:0)>=n);
+            const complete = !carried && goals.length>0 && goals.every(([id,n])=>count(state,id)+(id===item?amount:0)>=n);
             const extra=(stage.sideDrops||[]).filter(d=>Math.random()<d.chance).map(d=>[d.item,1]);
             let gives=[[item,amount],...extra],next=state.getInt('cond')+(complete?1:0);
             const takes=[];
