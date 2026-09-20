@@ -2418,4 +2418,9 @@
     "template": { "kind": "Weapon.Blunt", "name": "Ubiquitous Axe", "class1": 0, "class2": 0, "mass": 1850, "price": 244000 },
     "stats": { "pAtk": 31, "pAtkRnd": 20, "mAtk": 21, "atkSpd": 379, "crit": 40, "accur": 4.75 },
     "etc": { "slot": 7, "mp": 0, "soulshot": 2, "spiritshot": 2, "rank": "none", "cristals": 0 }
+},{
+    "selfId": 6529,
+    "template": { "kind": "Weapon.Etc", "name": "Baby Duck Rod", "class1": 0, "class2": 0, "mass": 1000, "price": 30000 },
+    "stats": { "pAtk": 1, "pAtkRnd": 1, "mAtk": 1, "atkSpd": 325, "crit": 1, "accur": -3.75 },
+    "etc": { "slot": 14, "mp": 0, "soulshot": 0, "spiritshot": 0, "rank": "none", "cristals": 0 }
 }]

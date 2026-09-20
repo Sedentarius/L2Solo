@@ -14091,6 +14091,50 @@
     "template": { "kind": "Other.None", "name": "Ritron's Dessert Recipe", "class1": 4, "class2": 5, "mass": 10, "price": 40000 },
     "etc": { "stackable": false, "consumable": false }
 },{
+    "selfId": 6521,
+    "template": { "kind": "Other.None", "name": "Green Colored Lure - High Grade", "class1": 4, "class2": 5, "mass": 3, "price": 150 },
+    "etc": { "stackable": true, "consumable": false }
+},{
+    "selfId": 6535,
+    "template": { "kind": "Other.None", "name": "Fishing Shot: non-grade", "class1": 4, "class2": 5, "mass": 3, "price": 3 },
+    "etc": { "stackable": true, "consumable": false }
+},{
+    "selfId": 7173,
+    "template": { "kind": "Other.Quest", "name": "Feather Ornament", "class1": 4, "class2": 3, "mass": 0, "price": 0 },
+    "etc": { "stackable": true, "consumable": false }
+},{
+    "selfId": 7174,
+    "template": { "kind": "Other.Quest", "name": "Tooth of Totem", "class1": 4, "class2": 3, "mass": 0, "price": 0 },
+    "etc": { "stackable": true, "consumable": false }
+},{
+    "selfId": 7175,
+    "template": { "kind": "Other.Quest", "name": "Tooth of Dragon", "class1": 4, "class2": 3, "mass": 0, "price": 0 },
+    "etc": { "stackable": true, "consumable": false }
+},{
+    "selfId": 7176,
+    "template": { "kind": "Other.Quest", "name": "Letter of Iris", "class1": 4, "class2": 3, "mass": 0, "price": 0 },
+    "etc": { "stackable": true, "consumable": false }
+},{
+    "selfId": 7177,
+    "template": { "kind": "Other.Quest", "name": "Letter of Rohmer", "class1": 4, "class2": 3, "mass": 0, "price": 0 },
+    "etc": { "stackable": true, "consumable": false }
+},{
+    "selfId": 7178,
+    "template": { "kind": "Other.Quest", "name": "Black Bone Necklace", "class1": 4, "class2": 3, "mass": 0, "price": 0 },
+    "etc": { "stackable": true, "consumable": false }
+},{
+    "selfId": 7179,
+    "template": { "kind": "Other.Quest", "name": "Red Bone Necklace", "class1": 4, "class2": 3, "mass": 0, "price": 0 },
+    "etc": { "stackable": true, "consumable": false }
+},{
+    "selfId": 7180,
+    "template": { "kind": "Other.Quest", "name": "Incense Pouch", "class1": 4, "class2": 3, "mass": 0, "price": 0 },
+    "etc": { "stackable": true, "consumable": false }
+},{
+    "selfId": 7181,
+    "template": { "kind": "Other.Quest", "name": "Gem of Maille Lizardman", "class1": 4, "class2": 3, "mass": 0, "price": 0 },
+    "etc": { "stackable": true, "consumable": false }
+},{
     "selfId": 5262,
     "template": { "kind": "Other.Shot", "name": "Greater Compressed Package of Blessed Spiritshots: No-grade", "class1": 4, "class2": 0, "mass": 750, "price": 38500 },
     "etc": { "stackable": true, "consumable": false }

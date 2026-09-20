@@ -1,109 +1,157 @@
-const L = 7386,
-  I = 7034,
-  R = 7344,
-  F = 7173,
-  T = 7174,
-  D = 7175,
-  LI = 7176,
-  LR = 7177,
-  REW = [
-    [45, 5200],
-    [627, 1500],
-    [1123, 3200],
-    [605, 3200],
-  ];
-const Q = () => invoke("GameServer/Quest/QuestService"),
-  p = (t, x, a = "") => `<html><body>${t}:<br>${x}<br><br>${a}</body></html>`,
-  n = (s, id) =>
-    s.session.actor.backpack.fetchItemFromSelfId(id)?.fetchAmount() || 0;
+// Q38 Dragon Fangs. Source: MOBIUS_C4 6674a607 Q00038_DragonFangs.
+//
+// NPC ids are L2Solo native datapack ids (reference id - 23000); mob ids are
+// the reference id - 20000, which also covers the 21xxx Langk variants
+// (21100 -> 1100, 21101 -> 1101).
+//
+// Two hunts with one errand between them: a hundred feather ornaments that drop
+// on every kill, then a letter carried between Iris and Rohmer, then fifty
+// dragon teeth at half chance. Iris pays one of four reward sets, drawn evenly.
+const LUIS = 7386;
+const IRIS = 7034;
+const ROHMER = 7344;
+
+const FEATHER = 7173;
+const TOOTH_OF_TOTEM = 7174;
+const TOOTH_OF_DRAGON = 7175;
+const LETTER_OF_IRIS = 7176;
+const LETTER_OF_ROHMER = 7177;
+
+// [target, item, required, chance]; the reference expresses the chance out of
+// one million, so a feather always drops and a tooth drops half the time.
+const DROPS = [
+    { npcs: [1100, 357], cond: 1, item: FEATHER, required: 100, chance: 1 },
+    { npcs: [1101, 356], cond: 6, item: TOOTH_OF_DRAGON, required: 50, chance: 0.5 }
+];
+// [item, adena]
+const REWARDS = [[45, 5200], [627, 1500], [1123, 3200], [605, 3200]];
+
+const MIN_LEVEL = 19;
+
+const step = (state, options) => require('../QuestStep').apply(state, options);
+const count = (state, selfId) => state.session.actor.backpack.fetchItems()
+    .filter((item) => item.fetchSelfId() === selfId)
+    .reduce((sum, item) => sum + item.fetchAmount(), 0);
+const adena = (amount) => Math.floor(amount * invoke('GameServer/ProgressionRates').profile().questAdena);
+const page = (who, text, action = '') => `<html><body>${who}:<br>${text}<br><br>${action}</body></html>`;
+const link = (event, label) => `<a action="bypass -h quest 38 ${event}">${label}</a>`;
+
+// Each hand-over consumes what it is given and advances in the same commit.
+const HANDOVERS = {
+    feathers: { npc: LUIS, cond: 2, takes: [[FEATHER, 100]], gives: [[TOOTH_OF_TOTEM, 1]],
+        text: 'Take the totem tooth to Iris in Gludio.' },
+    iris: { npc: IRIS, cond: 3, takes: [[TOOTH_OF_TOTEM, 1]], gives: [[LETTER_OF_IRIS, 1]],
+        text: 'Carry this letter to Rohmer.' },
+    rohmer: { npc: ROHMER, cond: 4, takes: [[LETTER_OF_IRIS, 1]], gives: [[LETTER_OF_ROHMER, 1]],
+        text: 'Take my reply back to Iris.' },
+    back: { npc: IRIS, cond: 5, takes: [[LETTER_OF_ROHMER, 1]], gives: [],
+        text: 'Bring me fifty Teeth of Dragon.' }
+};
+
 module.exports = {
-  id: 38,
-  name: "Dragon Fangs",
-  npcs: [L, I, R],
-  startNpcs: [L],
-  killNpcs: [1100, 357, 1101, 356],
-  eventNpc: (e) =>
-    ({ start: L, feathers: L, iris: I, rohmer: R, returnIris: I, reward: I })[
-      e
-    ] ?? null,
-  async onEvent(s, e) {
-    const q = Q(),
-      c = s.getInt("cond");
-    if (e === "start" && !s.isStarted()) {
-      if (s.session.actor.fetchLevel() < 19) return null;
-      await s.setState("started");
-      await s.set("cond", 1);
-      return p("Luis", "Collect 100 Feather Ornaments.");
+    id: 38,
+    name: 'Dragon Fangs',
+    npcs: [LUIS, IRIS, ROHMER],
+    startNpcs: [LUIS],
+    killNpcs: DROPS.flatMap((drop) => drop.npcs),
+    eventNpc: (event) => (event === 'start' ? LUIS : event === 'reward' ? IRIS : HANDOVERS[event]?.npc ?? null),
+    canTalk: () => true,
+
+    async onEvent(state, event) {
+        if (event === 'start') {
+            if (state.isStarted() || state.isCompleted()) return null;
+            if (Number(state.session.actor.fetchLevel()) < MIN_LEVEL) return null;
+            await step(state, { variables: { ...state.variables, cond: '1' } });
+            state.playSound('ItemSound.quest_accept');
+            return page('Luis', 'Bring me a hundred Feather Ornaments.');
+        }
+        if (!state.isStarted()) return null;
+        const cond = state.getInt('cond');
+
+        const handover = HANDOVERS[event];
+        if (handover) {
+            if (cond !== handover.cond) return null;
+            if (!handover.takes.every(([selfId, amount]) => count(state, selfId) >= amount)) return null;
+            await step(state, {
+                takes: handover.takes, gives: handover.gives,
+                variables: { ...state.variables, cond: String(cond + 1) }
+            });
+            state.playSound('ItemSound.quest_middle');
+            return page(handover.npc === LUIS ? 'Luis' : handover.npc === IRIS ? 'Iris' : 'Rohmer', handover.text);
+        }
+
+        if (event === 'reward') {
+            if (cond !== 7 || count(state, TOOTH_OF_DRAGON) < 50) return null;
+            const [item, money] = REWARDS[Math.floor(Math.random() * REWARDS.length)];
+            await step(state, {
+                takes: [[TOOTH_OF_DRAGON, 50]], gives: [[item, 1], [57, adena(money)]],
+                status: 'completed', variables: { ...state.variables, cond: '0' }
+            });
+            state.playSound('ItemSound.quest_finish');
+            return page('Iris', 'The dragon is answered. Take this with my thanks.');
+        }
+        return null;
+    },
+
+    async onTalk(state, npc) {
+        const id = Number(npc.fetchSelfId());
+        if (!this.npcs.includes(id)) return null;
+        if (state.isCompleted()) return page('Luis', 'You have already done this for us.');
+        if (!state.isStarted()) {
+            if (id !== LUIS) return null;
+            if (Number(state.session.actor.fetchLevel()) < MIN_LEVEL) {
+                return page('Luis', `This is no errand for anyone below level ${MIN_LEVEL}.`);
+            }
+            return page('Luis', 'The lizardmen wear the feathers of something far worse.',
+                link('start', 'Ask what he needs.'));
+        }
+        // A database written before the drop and its cond advance became one
+        // transaction can hold a finished collection at the old cond. Settling
+        // it here lets such a character continue instead of being stuck.
+        const stalled = DROPS.find((drop) => drop.cond === state.getInt('cond')
+            && count(state, drop.item) >= drop.required);
+        if (stalled) {
+            await step(state, { variables: { ...state.variables, cond: String(stalled.cond + 1) } });
+            return this.onTalk(state, npc);
+        }
+        const cond = state.getInt('cond');
+
+        if (id === LUIS) {
+            if (cond === 1) return page('Luis', `Feather Ornament: ${count(state, FEATHER)}/100.`);
+            if (cond === 2) {
+                return page('Luis', 'You have the feathers.', link('feathers', 'Hand them over.'));
+            }
+            return page('Luis', 'Iris is the one to speak to now.');
+        }
+
+        if (id === ROHMER) {
+            if (cond === 4) return page('Rohmer', "Iris has written to me.", link('rohmer', 'Deliver the letter.'));
+            return page('Rohmer', 'We have nothing to discuss.');
+        }
+
+        // IRIS
+        if (cond === 3) return page('Iris', 'That tooth is no totem.', link('iris', 'Show her the tooth.'));
+        if (cond === 5) return page('Iris', "Rohmer has answered.", link('back', 'Hand over the reply.'));
+        if (cond === 6) return page('Iris', `Tooth of Dragon: ${count(state, TOOTH_OF_DRAGON)}/50.`);
+        if (cond === 7) return page('Iris', 'Fifty teeth, exactly as I asked.', link('reward', 'Hand them over.'));
+        return page('Iris', 'Finish what Luis asked of you first.');
+    },
+
+    async onKill(state, npc) {
+        if (!state.isStarted()) return;
+        const id = Number(npc.fetchSelfId());
+        const cond = state.getInt('cond');
+        const drop = DROPS.find((entry) => entry.cond === cond && entry.npcs.includes(id));
+        if (!drop) return;
+        const held = count(state, drop.item);
+        if (held >= drop.required) return;
+        if (Math.random() >= drop.chance) return;
+        const complete = held + 1 >= drop.required;
+        // The token and the cond it completes commit together.
+        await step(state, {
+            gives: [[drop.item, 1]],
+            variables: { ...state.variables, cond: String(cond + (complete ? 1 : 0)) }
+        });
+        state.playSound(complete ? 'ItemSound.quest_middle' : 'ItemSound.quest_itemget');
     }
-    if (e === "feathers" && c === 2) {
-      await q.takeItem(s.session, F, 100);
-      await q.giveItem(s.session, T, 1);
-      await s.set("cond", 3);
-      return p("Luis", "Take the totem tooth to Iris.");
-    }
-    if (e === "iris" && c === 3) {
-      await q.takeItem(s.session, T);
-      await q.giveItem(s.session, LI, 1);
-      await s.set("cond", 4);
-      return p("Iris", "Take this to Rohmer.");
-    }
-    if (e === "rohmer" && c === 4) {
-      await q.takeItem(s.session, LI);
-      await q.giveItem(s.session, LR, 1);
-      await s.set("cond", 5);
-      return p("Rohmer", "Return to Iris.");
-    }
-    if (e === "returnIris" && c === 5) {
-      await q.takeItem(s.session, LR);
-      await s.set("cond", 6);
-      return p("Iris", "Collect 50 dragon teeth.");
-    }
-    if (e === "reward" && c === 7) {
-      await q.takeItem(s.session, D, 50);
-      const r = REW[Math.floor(Math.random() * REW.length)];
-      await q.giveItem(s.session, r[0], 1);
-      await q.rewardAdena(s.session, r[1]);
-      await s.exit(false);
-      return p("Iris", "Your reward.");
-    }
-    return null;
-  },
-  async onTalk(s, x) {
-    if (!s.isStarted())
-      return p("Luis", '<a action="bypass -h quest 38 start">Accept.</a>');
-    const c = s.getInt("cond"),
-      id = x.fetchSelfId(),
-      e =
-        id === L && c === 2
-          ? "feathers"
-          : id === I && c === 3
-            ? "iris"
-            : id === R && c === 4
-              ? "rohmer"
-              : id === I && c === 5
-                ? "returnIris"
-                : id === I && c === 7
-                  ? "reward"
-                  : null;
-    return e
-      ? p("Quest", '<a action="bypass -h quest 38 ' + e + '">Continue.</a>')
-      : p("Quest", "Continue.");
-  },
-  async onKill(s, m) {
-    const c = s.getInt("cond"),
-      id = m.fetchSelfId();
-    if (c === 1 && [1100, 357].includes(id) && n(s, F) < 100) {
-      await Q().giveItem(s.session, F, 1);
-      if (n(s, F) >= 100) await s.set("cond", 2);
-    }
-    if (
-      c === 6 &&
-      [1101, 356].includes(id) &&
-      Math.random() < 0.5 &&
-      n(s, D) < 50
-    ) {
-      await Q().giveItem(s.session, D, 1);
-      if (n(s, D) >= 50) await s.set("cond", 7);
-    }
-  },
 };

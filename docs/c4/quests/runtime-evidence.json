@@ -80,18 +80,20 @@
     "reviewedRequirements": []
   },
   "38": {
-    "certified": false,
-    "runtimeBlocker": {
-      "code": "MISSING_NPC_TEMPLATES",
-      "detail": "Required combat templates 1100/1101 are absent; old non-atomic hand-ins also need recovery."
-    }
+    "certified": true,
+    "tests": [
+      "tests/test_c4_lizardman_invader_quests.js"
+    ],
+    "bridge": "REVIEWED_DELIVERY_ROUTE",
+    "reviewedRequirements": []
   },
   "39": {
-    "certified": false,
-    "runtimeBlocker": {
-      "code": "MISSING_NPC_TEMPLATES",
-      "detail": "Required combat template 925 is absent; old non-atomic hand-ins also need recovery."
-    }
+    "certified": true,
+    "tests": [
+      "tests/test_c4_lizardman_invader_quests.js"
+    ],
+    "bridge": "REVIEWED_DELIVERY_ROUTE",
+    "reviewedRequirements": []
   },
   "45": {
     "certified": true,
@@ -925,7 +927,7 @@
     }
   },
   "_certification": {
-    "generatedAt": "2026-09-20T04:39:16.801Z",
+    "generatedAt": "2026-09-20T04:50:38.644Z",
     "sourceHashes": {
       "config/default.ini": "14f3852373656b264d1e9f367252519f82072cb0dea69e465c968a775acb29c3",
       "config/local.example.ini": "cb13f57c7e72f2b6f55e342378bb9acc974e7f7c0ab6708a6ed8f5d0dc8f8fa0",
@@ -974,13 +976,13 @@
       "data/Items/Others/c4_valley_of_saints.json": "04f32940f8994116d0cc8730a5b0c1f6123975852e0d1f911f81e962b61bac71",
       "data/Items/Others/c4_varka_silenos_stronghold.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
       "data/Items/Others/c4_wall_of_argos.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
-      "data/Items/Others/others.json": "14e6d9029ec286f3eddf86ddfd80afabdedf72d040695b7451a2f5bc7e0906c9",
+      "data/Items/Others/others.json": "dae5caf8a75482b7c771a7459c5481a8f7af45d6a8aa9249d948c1399e22e650",
       "data/Items/Weapons/.schema.json": "03fc149c9107d3ce4b3d5f1e36cbfe8f255205d5f9b95cb3e67418414cf9cbea",
       "data/Items/Weapons/c4_necropolis_of_sacrifice.json": "dc8ed6d6ad90dbcfad3f2d18ed254389ae12f1477702bdea58566496b8534656",
       "data/Items/Weapons/c4_raid_bosses.json": "d5ac7a78f17bcf720c34b59c773eb5207b17a3ff2493a5933babdf55ea584c02",
       "data/Items/Weapons/c4_s_grade.json": "63477124d162f269079f68e91240a40e3e3ef211764004dd0c8979edc21d6d48",
       "data/Items/Weapons/c4_special_ability_weapons.json": "971fbb589161105fcf82be68c73719204253799363325bb6de4e62226dfc5606",
-      "data/Items/Weapons/weapons.json": "563326bb86da9a53bba979e85b7732af609dff4106eef885d0ca141c8e426c2f",
+      "data/Items/Weapons/weapons.json": "d13b2f46484f007fba892bdfd230ce96ba3dd253bdd21cfd08919c6cdeb1254a",
       "data/Items/c4_unseal.json": "09bd3472111c01be713aa0fe9bf445f231be6822a9aaad8f560890873c43fce6",
       "data/Npcs/.schema.json": "8f4eb99d47dbc0de58612bc143376f5c55295668adf8ecca47eb03c991db2c3e",
       "data/Npcs/Minions/c4_raid_bosses.json": "7e2ad029a61274efecbf68a32907205be6b9f32e5f3a08d95b6b1b6d14ce6e9c",
@@ -1108,6 +1110,7 @@
       "data/Npcs/Spawns/c4_necropolis_of_saints.json": "8bdb32a87d9bf216ad74ca3b0a1dc5691af1654e39e247c6ba2d639bb6d39a62",
       "data/Npcs/Spawns/c4_necropolis_of_the_disciples.json": "dff621e8bed4bce8e43d1aa03a131eac0770ceb580c0419e69ffb2cba85a3b6c",
       "data/Npcs/Spawns/c4_necropolis_of_worshipers.json": "ef35b7a3bd0ec08c7151f8850fb21f7591de986aab08396c63f0e13cdc3179d7",
+      "data/Npcs/Spawns/c4_quest_content.json": "2d3b4d82008ae08efa40e4d7d00d5523a366ffe4e9b9533fd42a0a080a3cdc22",
       "data/Npcs/Spawns/c4_raid_bosses.json": "3c0ca2a453e3e6cf2cf3541c3e195bd2769bbbc84b3230bf7605f2443764be25",
       "data/Npcs/Spawns/c4_shrine_of_loyalty.json": "aa7137ce91859297888475b262b489d8d691cdf427c318aadf7311dfc9fd3544",
       "data/Npcs/Spawns/c4_swamp_of_screams.json": "3a29f0d5e92ed7f0dd98eec5459c058240ef6a71f7c38535b585ff3f7260949e",
@@ -1150,7 +1153,7 @@
       "data/Npcs/c4_necropolis_of_saints.json": "e2f8707e139cc70f7b328c6cf3c3fe81f8d14d03477f758366e9a869d1326f4b",
       "data/Npcs/c4_necropolis_of_the_disciples.json": "65e30c1aa65ed33ac109935b4d7a3a0c03574996e8ca0fde107cb730c27d905c",
       "data/Npcs/c4_necropolis_of_worshipers.json": "fd9c36224065b259d50dd17c4513c85a01330c53c73fbb6e5d9baed58cd6cb84",
-      "data/Npcs/c4_quest_content.json": "837dd0f339274d3160318ede156c46c0c17a691cefc06015fd6c9b9fe5c02613",
+      "data/Npcs/c4_quest_content.json": "6550ed686a725138862af27bb6b57bfe4a1d966f0d83223e9a578810bb9fab88",
       "data/Npcs/c4_raid_boss_minions.json": "516b959332985c4b098ebdc763a4079187a3feeda2f3215326177cfc00e40566",
       "data/Npcs/c4_raid_bosses.json": "aefc7ae40168901eb99d5633341fc600f90db89e5203da03bb9d49d31d85e8f7",
       "data/Npcs/c4_shrine_of_loyalty.json": "44e9f46a8036ad2b7df135aa7e7e1291071dc13d4b320af6a8099f2e5e4f378f",
@@ -1191,7 +1194,7 @@
       "database/sql/sqlite.sql": "546a3888eb03901ccb1d4a52aa75349c3cebd96a201d2f0526d353f49f3f177b",
       "scripts/benchmark-interaction-memory.js": "d196e3f8dfb3fb49554d5081f339228a16a01c5ee606c2eca3f2987f45d3327b",
       "scripts/benchmark-town-navigation.js": "a03ca379db4ea4d1f55a50a4eea637962970f240c4557c7903ae925d5ea4d211",
-      "scripts/certify-c4-quests.js": "3375599803071ea56833ae86730a3cfcc67e5a7dfc26b0baed4a1e0d58c580f4",
+      "scripts/certify-c4-quests.js": "e170f2338292e1d2e20d62cb8078e009295c1cca6e6d2ff126e95e7950754ef4",
       "scripts/check-c4-quests.js": "094eec7789f23d33445e3d00452eb7d2640c7fdbc3d342d38997f25db218c0b2",
       "scripts/check-quest-registry.js": "a05ecd2fe1e6f62d6c7eed1629dad48be13a2023682a11201c2a89d07ed46da2",
       "scripts/check-syntax.js": "f18315645fba6bbdb1b80b103fc5006970e56f804f9c72759be6dea1f067b9b5",
@@ -1254,7 +1257,7 @@
       "scripts/run-tests-p0-b3.js": "07046504ac2f221826f1fdf599c30f0f53b61c44ec50f57371b3f1bc52982cc6",
       "scripts/run-tests-p0-b4.js": "309423b431c59b4f612c6041156952e5fe63cf65fff1256c5b10c3fb165a0af4",
       "scripts/run-tests-p0-b5.js": "a3f8e96312ed5ac1fe873005a8db1b7f008aa6db9df60f8d17780c509e94e71e",
-      "scripts/run-tests.js": "478b42c4ce34f090822f301f379d8ce1bb51befcc0cd983d5cd7a685342ff8a4",
+      "scripts/run-tests.js": "d9c2e09036316f21b6ef523d6543c19ffaf81ed899edfc7b7ec3a1b299ab1615",
       "scripts/saved-games.js": "9d2f0c14084ad5403231e4e99e03388909c7fda432ff9c0ea7f44d829cf7b388",
       "scripts/simulate-bot-chat.js": "8b15f0e010fd24aca99c7cbc1e769cb40af0671afd45d9401a24b3b7e845bb01",
       "scripts/start.js": "4b47531f68f1733a1b4a9bb03626626cb83802594dd59a7aa20a2e61241a21b4",
@@ -1636,7 +1639,7 @@
       "src/GameServer/Crafting/ManufactureShop.js": "1de7ff64fe9a96539f0c402b4d26ba8e47a656e6c9bb747db683327dedc166e6",
       "src/GameServer/Crafting/RecipeCrafting.js": "e655483df8a7f1ca864c6ae772db42b0696718517ed7970d9f808b63f42195bd",
       "src/GameServer/Crystallize.js": "fbdcd57dc351062ae1e9c67aaea197cd319c84ccb04e735f01763e43c591f85e",
-      "src/GameServer/DataCache.js": "b59d0730581acb055c59df93006d5b7fca8fc9204be144736a08ac03f3013c33",
+      "src/GameServer/DataCache.js": "3840e9d63cb0597c9bb782c8976d2f3263f4e177495a296057eda4d9b173bf04",
       "src/GameServer/DevConsole.js": "fd3f3d0f26dc9e5dd7e0145163441efc7a884d3216a425fdf660cf0d5424da8e",
       "src/GameServer/Effects/BuffCatalog.js": "1c768070f718c5102c8e7efc78d5fe566c1e328d6881ac0a180feb0c32d411cf",
       "src/GameServer/Effects/EffectRestrictions.js": "23e1919987be8c42f9ff636b0c6c73e7b70d17ddb8f4fa0aac007578e59e5716",
@@ -1920,7 +1923,7 @@
       "src/GameServer/Quest/DeclarativeQuest.js": "f55d951d6a1a9ecde5b90a3a704305392d16e6d99c4d8597a8f29235941636f3",
       "src/GameServer/Quest/FirstProfessionProof.js": "836445225f11c0b25f3b30e1549adfdaecf1c3ee750a087b5442d786f4ecef2a",
       "src/GameServer/Quest/LowLevelDefinitions.js": "ea283610484f28c446d23491e7efbddd947d616c2b8731823d41423742680e61",
-      "src/GameServer/Quest/QuestRegistry.js": "2aaa310bbe50bc3a17eab8c635d20a87e703c7f301eeadbb9bc15506b03a873c",
+      "src/GameServer/Quest/QuestRegistry.js": "584995761b1c55c920423bc7d37b09e53e2003860b138560af54c6e318077e13",
       "src/GameServer/Quest/QuestService.js": "9810b2461b6f94345c1038d3ecf6ca57204600b7df56e699970e642d18cf100f",
       "src/GameServer/Quest/QuestState.js": "d764e7fac7367002c151fd44e0006e6e8b27556d8586af4f40b73e4703d69e46",
       "src/GameServer/Quest/QuestStep.js": "8e23c3b873a54dc6cd083b3f3cae470ada26957cb8651a95372c19081572a1b3",
@@ -1955,8 +1958,8 @@
       "src/GameServer/Quest/quests/Q035_FindGlitteringJewelry.js": "cab47eb8297ea79ae5fa66933bca805410ed761b7c0f414016d4399645cfa9c5",
       "src/GameServer/Quest/quests/Q036_MakeASewingKit.js": "ef1da8b8783f1ad21d893e9638f72c8a2566a690725d4450aca8bb5a3a65a555",
       "src/GameServer/Quest/quests/Q037_MakeFormalWear.js": "37ec51ad991f4a6b2a027974269886185eb2a8b3c71958153439c99008903821",
-      "src/GameServer/Quest/quests/Q038_DragonFangs.js": "6263ff3ef5b6a265e657ba4788ae153bd836f4a4607dd2d850ffc637387e653d",
-      "src/GameServer/Quest/quests/Q039_RedEyedInvaders.js": "d00eff62a950a755a87be8d270866dbc6f7869b757c49450b0d1ca0aabc00b5b",
+      "src/GameServer/Quest/quests/Q038_DragonFangs.js": "fbc360b70b282064a3a872116dd18eecc2082b8cbeae3dee5c0393f721b4463d",
+      "src/GameServer/Quest/quests/Q039_RedEyedInvaders.js": "715338b97ac85fbf754e9a2816cd0e236dfe10201489622872b882b6504863ae",
       "src/GameServer/Quest/quests/Q042_HelpTheUncle.js": "6e17ad356999e801650fcef28aaaaadfd01e52866e5cf6102504c2bbcbe6e641",
       "src/GameServer/Quest/quests/Q043_HelpTheSister.js": "ddec6ebd440ff7a53c69443917455ad414d7775b317fd332c96ad9cd4a202c17",
       "src/GameServer/Quest/quests/Q044_HelpTheSon.js": "ad0ffc7eaf7579fdec05cee602290b89bcd810dabc5e9d29fe0886477310e4b0",
@@ -2001,6 +2004,9 @@
       "src/GameServer/Quest/quests/Q276_TotemOfTheHestui.js": "5b0a8fa876546a216bd5e0c78e5c51a828409bdfdb59b71a5664cfc53808161d",
       "src/GameServer/Quest/quests/Q293_TheHiddenVeins.js": "851f75d8b9f9bd7fd60e4b53f68c611608bc456828ab18ebaac8afaf3252701e",
       "src/GameServer/Quest/quests/Q340_SubjugationOfLizardmen.js": "5397794aeaed442b619d67f3cada05e937ed95060075c43fec226fecc3c1e3a1",
+      "src/GameServer/Quest/quests/Q363_SorrowfulSoundOfFlute.js": "a43a91c925fb4e12bb7cbb4f04867461e69f81cccf68f958a36f501c4f59fdec",
+      "src/GameServer/Quest/quests/Q364_JovialAccordion.js": "9fab34805dfce5791eb2577b54f90b43069b380844ddd59c3721155981c8ecd2",
+      "src/GameServer/Quest/quests/Q378_GrandFeast.js": "7046ac383bbf8a49cd38b670e1f30c123fa366127b3011de4262f3decb274d58",
       "src/GameServer/Quest/quests/Q401_PathToWarrior.js": "ecce5421f89c063a41bcaa8840a664820b36c1d9b479cce38ffc2f41c9b9a912",
       "src/GameServer/Quest/quests/Q402_PathToKnight.js": "43d562b15dc44a74b6ad80dd85c6c2d3bdb4f24395abd806e142a0155a3093b4",
       "src/GameServer/Quest/quests/Q403_PathToRogue.js": "303ac2437695649ebd9020ee5a344b28108d621f431b7f5abaaf38d8fd90052b",
@@ -3220,6 +3226,7 @@
       "tests/test_c4_legacy_monsters.js": "5bc09953f7def55c9379b25ad868631ed1f440dd811d0fe20bfdf60abf416325",
       "tests/test_c4_lizardmen_quest.js": "1022ce62fcf3597c17d8877ae770749e11b58fc6c995579033a0847dcc9bdaad",
       "tests/test_c4_low_level_raid_bosses.js": "2f3ad1b0bae9d218f626c2882cf9c315d4d6c2244ba878dab956b6fdc86cb457",
+      "tests/test_c4_music_feast_quests.js": "c1218882aba915f496e24d9ef03ba8b2fbfba49a80276adb83dbccd4c34fccf2",
       "tests/test_c4_necropolis_of_ascetics.js": "1102df74859d86534d7fcc5980c5720acefc6916168c80e46d41df85684b95a6",
       "tests/test_c4_necropolis_of_martyrs.js": "9abe12a93d43d10cbcd96d696b7232fb40f5e0ea9964cec8f38cfb6deb7a693b",
       "tests/test_c4_necropolis_of_patriots.js": "63a1116d926e495d1ae4d917c3759158dfd56cecb82059e7b608e9049de31ec8",
@@ -3490,8 +3497,8 @@
       "tests/test_quest_availability.js": "8ec12ac73aad560e6da81a5cab4910e744bfaa75ec6ce6b87563a28873d358ae",
       "tests/test_quest_character_switch.js": "450f74860657c7ced99c1638649996f6387bec56ba944e630a5eacde1e864bba",
       "tests/test_quest_handins.js": "966bd390f10cfaf96d672f0d24cf0e756338a08b091cb45ae5f615a1ef2bc251",
-      "tests/test_quest_packets.js": "0cee45809cbf6495191f08448ab30eca92680286f283f184e1b3747a3435d874",
-      "tests/test_quest_registry_integrity.js": "4efaa469a264186c0cc93bc4208f6530a8643005c976aa333aacca55f5b8a59b",
+      "tests/test_quest_packets.js": "be84cc15330a58a2a78a2e1c21bdf421a21996f8c7f0cd7055302c79c67a94e6",
+      "tests/test_quest_registry_integrity.js": "36bc50f53351449721dfd88fee677e67e4482b1038f11153ea9cc92b89291ca8",
       "tests/test_quest_runtime.js": "d0e4478d0801a858dbf8102cfe2c5cd029107e724b6afba02c8511f6149c6eb3",
       "tests/test_quest_spawn_radar.js": "91d3b95a956bd853ab25de1c3bfc67064bfc5c2807958109279fee74eefe3742",
       "tests/test_raid_boss_balance.js": "50d937f03684db2fbd7b66e3b207fa15725528140941b6d6bf792b711f0fdc5e",
@@ -3570,8 +3577,8 @@
       "tests/test_world_observer_world_state.js": "1694e9a8d888d7495da71f79d1ac6fc0f27b69a28b33e5f73753529cacce9c78",
       "tests/test_world_visible_users.js": "53949729f44132946b001ebe4ace8644ffac482aea9953a0ffa80829dac74aab",
       "tests/test_world_wipe.js": "d7f3aa5197dc8359c9542250394fc0ccd96010402be9c83b0576696ec47cf89c",
-      "tests/test_c4_music_feast_quests.js": "c1218882aba915f496e24d9ef03ba8b2fbfba49a80276adb83dbccd4c34fccf2",
-      "docs/c4/quests/runtime-review.json": "6036c20de0693db26c6f8c59ccf639b65115c7d41c2c69bc92454f335f41fded",
+      "tests/test_c4_lizardman_invader_quests.js": "1a7ea190dcb17c0afb51a23a2a12dde82e6e43d2594d4f1fe8ffbfe6fd794034",
+      "docs/c4/quests/runtime-review.json": "b9b6bdb46a0cff187858eced006725b1fe068c029da63b445a5afb56863993d3",
       "docs/c4/quests/C4_QUEST_MASTER_INVENTORY.jsonl": "9f63e96d5fe25e0ce21f81027b805d8a4cc556e25e8f17b74a179ff316befc86"
     },
     "tests": [
@@ -3613,6 +3620,10 @@
       },
       {
         "path": "tests/test_c4_music_feast_quests.js",
+        "exitCode": 0
+      },
+      {
+        "path": "tests/test_c4_lizardman_invader_quests.js",
         "exitCode": 0
       },
       {

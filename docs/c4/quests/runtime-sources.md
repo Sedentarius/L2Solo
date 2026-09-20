@@ -216,3 +216,52 @@ the sums 11, 19 and 35 are shown to be unreachable by construction. Its
 remaining inputs, Jonas's three recipes and Ritron's Dessert Recipe, come from
 quests above level 20 and therefore outside this catalogue; their templates
 exist, which is what this catalogue is responsible for.
+
+## Q38 and Q39: the three missing quest monsters
+
+Both quests were blocked on absent monsters, and both turned out to need more
+than the blocker text said: nine quest items (7173-7181) and Q39's three
+fishing rewards (6521, 6529, 6535) were missing too.
+
+**The monsters.** Native 1100 Langk Lizardman Sentinel (reference 21100), 1101
+Langk Lizardman Shaman (21101) and 925 Giant Araneid (20925) are authored in
+`data/Npcs/c4_quest_content.json`, spawned from the reference's own coordinates
+in `data/Npcs/Spawns/c4_quest_content.json` (23, 28 and 46 authored points
+respectively, at the reference's own respawn delays), and given their full
+reference drop and spoil tables in `data/Npcs/Rewards/c4_quest_content.json`.
+They are ordinary world monsters, not quest spawns: the reference registers them
+through `addKillId` only, with no `addSpawn` anywhere, so they are authored as
+permanent population.
+
+Their combat stats needed a decision. Identity is taken from the reference -
+name, level, aggression, race, collision, weapon, clan, movement speed - and so
+are the drop tables. The level-driven combat curve is taken from a named local
+monster of the same level instead, because the local datapack's curve is its own
+and disagrees with the pinned reference for every monster that already exists in
+both: local HP is uniformly the reference's times about 1.579, local movement is
+the reference's times 1.1, and local `rewards.exp` is the reference's exp divided
+by the square of the level (verified exactly against 152, 294 and 140). The
+models used are 152 Lizardman for the Sentinel, 921 Maille Lizardman Guard for
+the Shaman and 140 Giant Leech for the Araneid - each the same level and, where
+possible, the same family. Nothing was invented: every number is either the
+reference's or an existing local monster's.
+
+One reference detail is deliberately not carried over. Giant Araneid declares
+`sNpcPropHpRate` 0.5, but the local datapack does not honour that field anywhere:
+every existing monster whose reference entry carries a rate still has exactly its
+level cohort's HP. Applying it here would have made this one monster the only
+exception in the datapack.
+
+**The quests.** Both handlers were legacy compressed scripts with non-atomic
+hand-ins and one real defect each. Q38's rewrite puts every hand-over and its
+condition in one commit and keeps the reference's own chances (a feather on every
+kill, a tooth on half). Q39's old handler dropped necklaces at 50% where the
+reference drops them always, and advanced on the *sum* of the two necklaces
+rather than on both stacks being full - which let a player finish the first
+collection with a hundred of one colour and none of the other. Both are fixed,
+and the paired check is asserted directly.
+
+Both quests also gained the same recovery the declarative engine already has: a
+collection that is already full advances when its NPC is next talked to, so a
+character whose database predates atomic quest steps is not stranded at the
+collecting condition.

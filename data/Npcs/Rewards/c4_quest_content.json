@@ -1,0 +1,381 @@
+[
+    {
+        "selfId": 1100,
+        "template": {
+            "name": "Langk Lizardman Sentinel"
+        },
+        "spoils": [
+            {
+                "overall": 100,
+                "items": [
+                    {
+                        "selfId": 1800,
+                        "name": "Recipe: Piece Bone Breastplate",
+                        "min": 1,
+                        "max": 1,
+                        "chance": 8.3774
+                    }
+                ]
+            },
+            {
+                "overall": 100,
+                "items": [
+                    {
+                        "selfId": 1897,
+                        "name": "Necklace of Wisdom Chain",
+                        "min": 1,
+                        "max": 1,
+                        "chance": 6.3429
+                    }
+                ]
+            },
+            {
+                "overall": 100,
+                "items": [
+                    {
+                        "selfId": 1924,
+                        "name": "Leather Helmet Design",
+                        "min": 1,
+                        "max": 1,
+                        "chance": 8.5936
+                    }
+                ]
+            }
+        ],
+        "rewards": [
+            {
+                "overall": 70,
+                "items": [
+                    {
+                        "selfId": 57,
+                        "name": "Adena",
+                        "min": 125,
+                        "max": 213,
+                        "chance": 100
+                    }
+                ]
+            },
+            {
+                "overall": 0.2878,
+                "items": [
+                    {
+                        "selfId": 845,
+                        "name": "Cat's Eye Earring",
+                        "min": 1,
+                        "max": 1,
+                        "chance": 30.7853
+                    },
+                    {
+                        "selfId": 877,
+                        "name": "Ring of Wisdom",
+                        "min": 1,
+                        "max": 1,
+                        "chance": 46.2126
+                    },
+                    {
+                        "selfId": 908,
+                        "name": "Necklace of Wisdom",
+                        "min": 1,
+                        "max": 1,
+                        "chance": 23.0021
+                    }
+                ]
+            },
+            {
+                "overall": 13.9211,
+                "items": [
+                    {
+                        "selfId": 1897,
+                        "name": "Necklace of Wisdom Chain",
+                        "min": 1,
+                        "max": 1,
+                        "chance": 6.73007
+                    },
+                    {
+                        "selfId": 1817,
+                        "name": "Recipe: Cord",
+                        "min": 1,
+                        "max": 1,
+                        "chance": 5.65329
+                    },
+                    {
+                        "selfId": 1864,
+                        "name": "Stem",
+                        "min": 1,
+                        "max": 1,
+                        "chance": 56.5264
+                    },
+                    {
+                        "selfId": 1869,
+                        "name": "Iron Ore",
+                        "min": 1,
+                        "max": 1,
+                        "chance": 28.2636
+                    },
+                    {
+                        "selfId": 1880,
+                        "name": "Steel",
+                        "min": 1,
+                        "max": 1,
+                        "chance": 2.82664
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "selfId": 1101,
+        "template": {
+            "name": "Langk Lizardman Shaman"
+        },
+        "spoils": [
+            {
+                "overall": 100,
+                "items": [
+                    {
+                        "selfId": 1865,
+                        "name": "Varnish",
+                        "min": 1,
+                        "max": 1,
+                        "chance": 33.2824
+                    }
+                ]
+            },
+            {
+                "overall": 100,
+                "items": [
+                    {
+                        "selfId": 1870,
+                        "name": "Coal",
+                        "min": 1,
+                        "max": 1,
+                        "chance": 33.2824
+                    }
+                ]
+            },
+            {
+                "overall": 100,
+                "items": [
+                    {
+                        "selfId": 1898,
+                        "name": "Blue Diamond Necklace Gem",
+                        "min": 1,
+                        "max": 1,
+                        "chance": 3.4188
+                    }
+                ]
+            }
+        ],
+        "rewards": [
+            {
+                "overall": 70,
+                "items": [
+                    {
+                        "selfId": 57,
+                        "name": "Adena",
+                        "min": 148,
+                        "max": 273,
+                        "chance": 100
+                    }
+                ]
+            },
+            {
+                "overall": 0.2132,
+                "items": [
+                    {
+                        "selfId": 39,
+                        "name": "Boots",
+                        "min": 1,
+                        "max": 1,
+                        "chance": 50
+                    },
+                    {
+                        "selfId": 51,
+                        "name": "Bracer",
+                        "min": 1,
+                        "max": 1,
+                        "chance": 50
+                    }
+                ]
+            },
+            {
+                "overall": 13.9631,
+                "items": [
+                    {
+                        "selfId": 1930,
+                        "name": "Boot Lining",
+                        "min": 1,
+                        "max": 1,
+                        "chance": 12.036
+                    },
+                    {
+                        "selfId": 1865,
+                        "name": "Varnish",
+                        "min": 1,
+                        "max": 1,
+                        "chance": 28.1635
+                    },
+                    {
+                        "selfId": 1870,
+                        "name": "Coal",
+                        "min": 1,
+                        "max": 1,
+                        "chance": 28.1635
+                    },
+                    {
+                        "selfId": 5163,
+                        "name": "Recipe: Blessed Spiritshot (D) Compressed Package (100%)",
+                        "min": 1,
+                        "max": 1,
+                        "chance": 1.12654
+                    },
+                    {
+                        "selfId": 6035,
+                        "name": "Magic Haste Potion",
+                        "min": 1,
+                        "max": 1,
+                        "chance": 2.3469
+                    },
+                    {
+                        "selfId": 6666,
+                        "name": "Deluxe Chest Key - Grade 2",
+                        "min": 1,
+                        "max": 1,
+                        "chance": 28.1635
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "selfId": 925,
+        "template": {
+            "name": "Giant Araneid"
+        },
+        "spoils": [
+            {
+                "overall": 100,
+                "items": [
+                    {
+                        "selfId": 1874,
+                        "name": "Oriharukon Ore",
+                        "min": 1,
+                        "max": 1,
+                        "chance": 1.0384
+                    }
+                ]
+            },
+            {
+                "overall": 100,
+                "items": [
+                    {
+                        "selfId": 2016,
+                        "name": "Composition Bow Shaft",
+                        "min": 1,
+                        "max": 1,
+                        "chance": 0.1825
+                    }
+                ]
+            },
+            {
+                "overall": 100,
+                "items": [
+                    {
+                        "selfId": 2258,
+                        "name": "Recipe: Temptation of Abyss",
+                        "min": 1,
+                        "max": 1,
+                        "chance": 0.3808
+                    }
+                ]
+            }
+        ],
+        "rewards": [
+            {
+                "overall": 70,
+                "items": [
+                    {
+                        "selfId": 57,
+                        "name": "Adena",
+                        "min": 69,
+                        "max": 128,
+                        "chance": 100
+                    }
+                ]
+            },
+            {
+                "overall": 0.0936,
+                "items": [
+                    {
+                        "selfId": 846,
+                        "name": "Coral Earring",
+                        "min": 1,
+                        "max": 1,
+                        "chance": 30.7692
+                    },
+                    {
+                        "selfId": 878,
+                        "name": "Blue Coral Ring",
+                        "min": 1,
+                        "max": 1,
+                        "chance": 46.047
+                    },
+                    {
+                        "selfId": 909,
+                        "name": "Blue Diamond Necklace",
+                        "min": 1,
+                        "max": 1,
+                        "chance": 23.1838
+                    }
+                ]
+            },
+            {
+                "overall": 9.5531,
+                "items": [
+                    {
+                        "selfId": 1898,
+                        "name": "Blue Diamond Necklace Gem",
+                        "min": 1,
+                        "max": 1,
+                        "chance": 2.47459
+                    },
+                    {
+                        "selfId": 1881,
+                        "name": "Coarse Bone Powder",
+                        "min": 1,
+                        "max": 1,
+                        "chance": 2.5688
+                    },
+                    {
+                        "selfId": 1872,
+                        "name": "Animal Bone",
+                        "min": 1,
+                        "max": 1,
+                        "chance": 25.687
+                    },
+                    {
+                        "selfId": 1867,
+                        "name": "Animal Skin",
+                        "min": 1,
+                        "max": 1,
+                        "chance": 25.687
+                    },
+                    {
+                        "selfId": 1060,
+                        "name": "Lesser Healing Potion",
+                        "min": 1,
+                        "max": 1,
+                        "chance": 42.8112
+                    },
+                    {
+                        "selfId": 5273,
+                        "name": "Recipe: Greater Spiritshot (D) Compressed Package(100%)",
+                        "min": 1,
+                        "max": 1,
+                        "chance": 0.77148
+                    }
+                ]
+            }
+        ]
+    }
+]

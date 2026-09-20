@@ -80,18 +80,20 @@
     "reviewedRequirements": []
   },
   "38": {
-    "certified": false,
-    "runtimeBlocker": {
-      "code": "MISSING_NPC_TEMPLATES",
-      "detail": "Required combat templates 1100/1101 are absent; old non-atomic hand-ins also need recovery."
-    }
+    "certified": true,
+    "tests": [
+      "tests/test_c4_lizardman_invader_quests.js"
+    ],
+    "bridge": "REVIEWED_DELIVERY_ROUTE",
+    "reviewedRequirements": []
   },
   "39": {
-    "certified": false,
-    "runtimeBlocker": {
-      "code": "MISSING_NPC_TEMPLATES",
-      "detail": "Required combat template 925 is absent; old non-atomic hand-ins also need recovery."
-    }
+    "certified": true,
+    "tests": [
+      "tests/test_c4_lizardman_invader_quests.js"
+    ],
+    "bridge": "REVIEWED_DELIVERY_ROUTE",
+    "reviewedRequirements": []
   },
   "45": {
     "certified": true,

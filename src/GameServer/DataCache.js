@@ -119,6 +119,7 @@ const DataCache = {
         DataCache.npcRewards      = [
             ...require('../../data/Pets/c4-quest-npcs.json').rewards,
             ...validateModel(path + 'Npcs/Rewards/rewards').filter((reward) => reward.selfId !== 135),
+            ...validateModel(path + 'Npcs/Rewards/c4_quest_content'),
             ...validateModel(path + 'Npcs/Rewards/c4_swamp_of_screams'),
             ...validateModel(path + 'Npcs/Rewards/c4_garden_of_beasts'),
             ...validateModel(path + 'Npcs/Rewards/c4_valley_of_saints'),

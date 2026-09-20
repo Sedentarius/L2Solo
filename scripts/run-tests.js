@@ -15,6 +15,7 @@ const tests = [
     'tests/test_c4_orc_bounty_quests.js',
     'tests/test_c4_lizardmen_quest.js',
     'tests/test_c4_music_feast_quests.js',
+    'tests/test_c4_lizardman_invader_quests.js',
     'tests/test_bot_quest_bridge_foundation.js',
     'tests/test_bot_quest_bridge_kill_collect.js',
     'tests/test_bot_quest_bridge_deliver_complete.js',
