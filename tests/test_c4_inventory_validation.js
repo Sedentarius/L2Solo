@@ -19,5 +19,16 @@ evidence._certification.sourceHashes['src/GameServer/ClassTransfer.js']=hash('sr
 assert.equal(audit({evidence}).rows.find(r=>r.questId===401).status,'VERIFIED');
 assert.equal(clean.capabilities.genericGoalResolver,'PRESENT');
 assert.equal(clean.capabilities.scriptedSpawnHot,'PRESENT');
-assert(clean.rows.find(r=>r.questId===379).blocker.includes('MISSING_ITEM_TEMPLATES'));
+// A disabled registry entry must surface its own reason and never be reported
+// as runnable, whichever quests happen to be disabled at the time.
+const registry=require('../src/GameServer/Quest/QuestRegistry');
+const disabled=registry.entries.filter(e=>e.id&&e.status==='disabled');
+assert(disabled.length,'the registry still distinguishes disabled entries');
+for(const entry of disabled) {
+    const row=clean.rows.find(r=>r.questId===entry.id);
+    if(!row) continue;
+    assert.equal(row.registered,false,`Q${entry.id} is not reported as registered`);
+    assert.equal(row.status,'PARTIAL/BLOCKED',`Q${entry.id} is reported blocked`);
+    assert.equal(row.blocker,entry.reason,`Q${entry.id} surfaces its own reason`);
+}
 console.log('Inventory duplicates, orphan registration, proof mismatch, quarantine and stale certification checks passed');

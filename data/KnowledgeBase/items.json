@@ -535127,6 +535127,156 @@
   },
   {
     "grade": "none",
+    "id": 5893,
+    "kind": "Other.Quest",
+    "name": "Leaf of Eucalyptus",
+    "sources": {
+      "drops": [],
+      "spoils": []
+    },
+    "template": {
+      "etc": {
+        "consumable": false,
+        "stackable": true
+      },
+      "selfId": 5893,
+      "template": {
+        "class1": 4,
+        "class2": 3,
+        "kind": "Other.Quest",
+        "mass": 0,
+        "name": "Leaf of Eucalyptus",
+        "price": 0
+      }
+    }
+  },
+  {
+    "grade": "none",
+    "id": 5894,
+    "kind": "Other.Quest",
+    "name": "Stone of Chill",
+    "sources": {
+      "drops": [],
+      "spoils": []
+    },
+    "template": {
+      "etc": {
+        "consumable": false,
+        "stackable": true
+      },
+      "selfId": 5894,
+      "template": {
+        "class1": 4,
+        "class2": 3,
+        "kind": "Other.Quest",
+        "mass": 0,
+        "name": "Stone of Chill",
+        "price": 0
+      }
+    }
+  },
+  {
+    "grade": "none",
+    "id": 5956,
+    "kind": "Other.None",
+    "name": "15 Year Old Wine",
+    "sources": {
+      "drops": [],
+      "spoils": []
+    },
+    "template": {
+      "etc": {
+        "consumable": false,
+        "stackable": true
+      },
+      "selfId": 5956,
+      "template": {
+        "class1": 4,
+        "class2": 5,
+        "kind": "Other.None",
+        "mass": 20,
+        "name": "15 Year Old Wine",
+        "price": 5900
+      }
+    }
+  },
+  {
+    "grade": "none",
+    "id": 5957,
+    "kind": "Other.None",
+    "name": "30 Year Old Wine",
+    "sources": {
+      "drops": [],
+      "spoils": []
+    },
+    "template": {
+      "etc": {
+        "consumable": false,
+        "stackable": true
+      },
+      "selfId": 5957,
+      "template": {
+        "class1": 4,
+        "class2": 5,
+        "kind": "Other.None",
+        "mass": 20,
+        "name": "30 Year Old Wine",
+        "price": 7900
+      }
+    }
+  },
+  {
+    "grade": "none",
+    "id": 5958,
+    "kind": "Other.None",
+    "name": "60 Year Old Wine",
+    "sources": {
+      "drops": [],
+      "spoils": []
+    },
+    "template": {
+      "etc": {
+        "consumable": false,
+        "stackable": true
+      },
+      "selfId": 5958,
+      "template": {
+        "class1": 4,
+        "class2": 5,
+        "kind": "Other.None",
+        "mass": 20,
+        "name": "60 Year Old Wine",
+        "price": 30900
+      }
+    }
+  },
+  {
+    "grade": "none",
+    "id": 5959,
+    "kind": "Other.None",
+    "name": "Ritron's Dessert Recipe",
+    "sources": {
+      "drops": [],
+      "spoils": []
+    },
+    "template": {
+      "etc": {
+        "consumable": false,
+        "stackable": false
+      },
+      "selfId": 5959,
+      "template": {
+        "class1": 4,
+        "class2": 5,
+        "kind": "Other.None",
+        "mass": 10,
+        "name": "Ritron's Dessert Recipe",
+        "price": 40000
+      }
+    }
+  },
+  {
+    "grade": "none",
     "id": 6035,
     "kind": "Other",
     "name": "Magic Haste Potion",

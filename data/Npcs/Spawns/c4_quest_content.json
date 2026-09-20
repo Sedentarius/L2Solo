@@ -1,0 +1,98 @@
+[
+    {
+        "selfId": "c4_quest_content",
+        "bounds": [],
+        "spawns": [
+            {
+                "selfId": 7956,
+                "name": "Nanarin",
+                "coords": [
+                    {
+                        "locX": 17025,
+                        "locY": 146070,
+                        "locZ": -3074,
+                        "head": 35523
+                    }
+                ],
+                "total": 1,
+                "respawn": 60,
+                "bias": 0
+            },
+            {
+                "selfId": 7957,
+                "name": "Swan",
+                "coords": [
+                    {
+                        "locX": 18378,
+                        "locY": 145052,
+                        "locZ": -3074,
+                        "head": 64312
+                    }
+                ],
+                "total": 1,
+                "respawn": 60,
+                "bias": 0
+            },
+            {
+                "selfId": 7958,
+                "name": "Galion",
+                "coords": [
+                    {
+                        "locX": 44721,
+                        "locY": 190698,
+                        "locZ": -3626,
+                        "head": 28672
+                    }
+                ],
+                "total": 1,
+                "respawn": 60,
+                "bias": 0
+            },
+            {
+                "selfId": 7959,
+                "name": "Barbado",
+                "coords": [
+                    {
+                        "locX": 20175,
+                        "locY": 145480,
+                        "locZ": -3114,
+                        "head": 16384
+                    }
+                ],
+                "total": 1,
+                "respawn": 60,
+                "bias": 0
+            },
+            {
+                "selfId": 7960,
+                "name": "Beer Chest",
+                "coords": [
+                    {
+                        "locX": 21025,
+                        "locY": 144931,
+                        "locZ": -3070,
+                        "head": 40960
+                    }
+                ],
+                "total": 1,
+                "respawn": 60,
+                "bias": 0
+            },
+            {
+                "selfId": 7961,
+                "name": "Cloth Chest",
+                "coords": [
+                    {
+                        "locX": 19490,
+                        "locY": 145930,
+                        "locZ": -3072,
+                        "head": 0
+                    }
+                ],
+                "total": 1,
+                "respawn": 60,
+                "bias": 0
+            }
+        ]
+    }
+]

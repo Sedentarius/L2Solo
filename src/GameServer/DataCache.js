@@ -108,6 +108,7 @@ const DataCache = {
             ...validateModel(path + 'Npcs/Spawns/c4_catacomb_of_the_forbidden_path'),
             ...validateModel(path + 'Npcs/Spawns/c4_low_level_raid_bosses'),
             ...validateModel(path + 'Npcs/Spawns/c4_raid_bosses'),
+            ...validateModel(path + 'Npcs/Spawns/c4_quest_content'),
             ...C4LateTownGatekeepers.spawns,
             ...require('./World/GiranMammon').spawns,
             ...C4SevenSignsDungeonTeleports.spawns,

@@ -152,3 +152,67 @@ choice: the temple mission (consume the cargo, advance to condition 2) or a flat
 4090 adena, which itself splits into continuing the cargo hunt at condition 1 and
 `exitQuest(true)` — a repeatable release, not a completion. Only the temple route
 reaches Weisz's single 14700 adena completion.
+
+## The music, wine and feast chain: Q362, Q363, Q364, Q379 and Q378
+
+These five were blocked together because they share one datapack gap, and they
+are genuinely one chain: Q379 pours the wine, Q364 writes the musical score, and
+Q378 consumes both at Ranspo's banquet.
+
+**Restored NPCs.** Native 7956 Nanarin, 7957 Swan, 7958 Galion, 7959 Barbado,
+7960 Beer Chest and 7961 Cloth Chest were absent. All six are authored in
+`data/Npcs/c4_quest_content.json` from the pinned reference's own stats, and
+spawned in `data/Npcs/Spawns/c4_quest_content.json` at the reference's own
+coordinates — Nanarin, Swan, Barbado and the two chests in Dion, Galion on the
+road at 21_23. Those coordinates were not guessed: every Dion NPC that already
+existed locally (Ranspo 7594, Harlan 7074, Woodrow 7837) carries byte-identical
+coordinates to the pinned spawn files, so the same files are authoritative for
+the six that were missing.
+
+**Restored items.** 5893 Leaf of Eucalyptus, 5894 Stone of Chill, 5956/5957/5958
+the fifteen-, thirty- and sixty-year wines and 5959 Ritron's Dessert Recipe are
+added to `data/Items/Others/others.json` with the source's own stackability,
+weight and price. The two ingredients are quest items; the wines and the recipe
+are ordinary tradable goods, which is why they survive the quest that made them
+and can be carried into Q378.
+
+**Q362 Bard's Mandolin** is a pure talk chain and is expressed as a reviewed
+definition: Woodrow names Galion, Galion hands over Swan's flute, Swan adds his
+letter, Nanarin takes both, Swan pays 10000 adena and the Theme of Journey. The
+reference exits repeatable, so it can be run again. Swan is both the start NPC
+and a mid-chain stage, which is new for the declarative engine; the shared
+walker in `test_c4_declarative_quests.js` now only probes "the start NPC does
+not advance somebody else's stage" when the stage is in fact somebody else's,
+and asserts it rather than ignoring the result.
+
+**Q363 Sorrowful Sound of Flute** is scripted because its outcome lives in a
+variable, not in an item. Any one of five townspeople will give an opinion;
+Nanarin then takes one of three props on stage; Barbado records whether it was
+the flute. Only the flute pays the Theme of Solitude. The verdict and the props
+are settled in one transaction, so a prop can never be carried into a second
+report, and a failed performance releases the quest for another attempt.
+
+**Q364 Jovial Accordion** is scripted for its chest mechanic. Swan hands over two
+keys; each key opens its chest exactly once and finds the goods only half the
+time, so a run can recover two, one or nothing. Returning the goods to Sabrin and
+Xaber is what counts: Swan pays a hundred adena only for both, still advances for
+one, and — when both keys are spent and nothing was recovered — simply ends the
+errand, exactly as the reference does.
+
+**Q379 Fantasy Wine** keeps its existing reviewed definition; only the
+`MISSING_ITEM_TEMPLATES` block is lifted. The reference's `getRandom(10)` split
+(under 3, under 9, otherwise) is the definition's 3/6/1 choice weights. One
+difference is deliberate: the reference's `giveItems` is unconditional, so a kill
+after the eightieth leaf pushes the count past 80 while the hand-in demands
+exactly 80 — the declarative engine caps each objective at its own total, which
+keeps the quest finishable. The reference's "give up" page is covered by the
+client's ordinary quest-abandon button, which routes through `onAbort`.
+
+**Q378 Magnificent Feast** is scored, not randomised. The wine contributes 1, 2
+or 4, the food recipe 8, 16 or 32, and the musical score is required but adds
+nothing, which is exactly why only nine totals exist. All nine reward rows are
+implemented verbatim and certified individually — item, amount and adena — and
+the sums 11, 19 and 35 are shown to be unreachable by construction. Its
+remaining inputs, Jonas's three recipes and Ritron's Dessert Recipe, come from
+quests above level 20 and therefore outside this catalogue; their templates
+exist, which is what this catalogue is responsible for.

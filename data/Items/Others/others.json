@@ -14067,6 +14067,30 @@
     "template": { "kind": "Other.Shot", "name": "Spiritshot: No Grade for Beginners", "class1": 4, "class2": 5, "mass": 1, "price": 0 },
     "etc": { "stackable": true, "consumable": false }
 },{
+    "selfId": 5893,
+    "template": { "kind": "Other.Quest", "name": "Leaf of Eucalyptus", "class1": 4, "class2": 3, "mass": 0, "price": 0 },
+    "etc": { "stackable": true, "consumable": false }
+},{
+    "selfId": 5894,
+    "template": { "kind": "Other.Quest", "name": "Stone of Chill", "class1": 4, "class2": 3, "mass": 0, "price": 0 },
+    "etc": { "stackable": true, "consumable": false }
+},{
+    "selfId": 5956,
+    "template": { "kind": "Other.None", "name": "15 Year Old Wine", "class1": 4, "class2": 5, "mass": 20, "price": 5900 },
+    "etc": { "stackable": true, "consumable": false }
+},{
+    "selfId": 5957,
+    "template": { "kind": "Other.None", "name": "30 Year Old Wine", "class1": 4, "class2": 5, "mass": 20, "price": 7900 },
+    "etc": { "stackable": true, "consumable": false }
+},{
+    "selfId": 5958,
+    "template": { "kind": "Other.None", "name": "60 Year Old Wine", "class1": 4, "class2": 5, "mass": 20, "price": 30900 },
+    "etc": { "stackable": true, "consumable": false }
+},{
+    "selfId": 5959,
+    "template": { "kind": "Other.None", "name": "Ritron's Dessert Recipe", "class1": 4, "class2": 5, "mass": 10, "price": 40000 },
+    "etc": { "stackable": false, "consumable": false }
+},{
     "selfId": 5262,
     "template": { "kind": "Other.Shot", "name": "Greater Compressed Package of Blessed Spiritshots: No-grade", "class1": 4, "class2": 0, "mass": 750, "price": 38500 },
     "etc": { "stackable": true, "consumable": false }

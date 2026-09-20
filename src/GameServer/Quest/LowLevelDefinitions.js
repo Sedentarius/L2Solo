@@ -59,10 +59,24 @@ const definitions = [
     { id:274,name:'Skirmish with the Werewolves',minLevel:9,race:3,startNpc:7569,repeatable:true,requiredAny:[1506,1507],
         stages:[{type:'KILL_COLLECT',item:1477,count:40,drops:[363,364].map(npc=>({npc,chance:1})),sideDrops:[{item:1501,chance:.06}]},
             {type:'COMPLETE',npc:7569,takes:[[1477,40]],consumeAll:[1501]}],reward:{adena:3500,perItemAdena:[[1501,600]]} },
-    { id:379,name:'Fantasy Wine',minLevel:20,startNpc:7074,repeatable:true,blocked:'MISSING_ITEM_TEMPLATES: 5893,5894,5956,5957,5958',
+    // Harlan's wine. The reference rolls getRandom(10): under 3 the fifteen-year
+    // wine, under 9 the thirty-year, otherwise the sixty-year. The weights below
+    // are that same ten-part split. Its templates are now authored, so the
+    // MISSING_ITEM_TEMPLATES block is lifted.
+    { id:379,name:'Fantasy Wine',minLevel:20,startNpc:7074,repeatable:true,
         stages:[{type:'KILL_COLLECT',objectives:[[5893,80],[5894,100]],drops:[{npc:291,item:5893,chance:1},{npc:292,item:5894,chance:1}]},
             {type:'COMPLETE',npc:7074,takes:[[5893,80],[5894,100]]}],
         reward:{choices:[{weight:3,items:[[5956,1]]},{weight:6,items:[[5957,1]]},{weight:1,items:[[5958,1]]}]} },
+    // Swan's mandolin. A pure talk chain: Woodrow names Galion, Galion hands over
+    // the flute, Swan adds his letter, Nanarin takes both, and Swan pays. The
+    // reference exits repeatable, so the errand can be run again.
+    { id:362,name:"Bard's Mandolin",minLevel:15,startNpc:7957,repeatable:true,questItems:[4316,4317],
+        stages:[{type:'TALK',npc:7837},
+            {type:'TALK',npc:7958,gives:[[4316,1]]},
+            {type:'TALK',npc:7957,gives:[[4317,1]]},
+            {type:'TALK',npc:7956,takes:[[4316,1],[4317,1]]},
+            {type:'COMPLETE',npc:7957}],
+        reward:{adena:10000,items:[[4410,1]]} },
     { id:263,name:'Orc Subjugation',minLevel:8,race:2,startNpc:7346,repeatable:true,
         stages:[{type:'COLLECT',npc:7346,prices:[[1116,20],[1117,30]],bonusAt:10,bonusAdena:1000,
             drops:[385,386,387,388].map(npc=>({npc,item:npc===385?1116:1117,chance:.5}))}] },

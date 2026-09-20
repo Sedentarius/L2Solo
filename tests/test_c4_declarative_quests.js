@@ -382,13 +382,27 @@ async function main() {
         } finally {Math.random=random;}
         assert.equal(await amount(d.id,objective.item),objective.count,'bounded collection');
         }
-        if(d.repeatable) {
+        // A repeatable hunting quest has to be reachable by the autonomous
+        // catalogue: somewhere to start it and somewhere to hunt. A repeatable
+        // talk chain such as Q362 has no kill target at all, so it has no
+        // hunting spot by construction and is not asked for one.
+        if(d.repeatable && d.stages.some(x=>['KILL_COLLECT','COLLECT'].includes(x.type))) {
         const spec=Catalog.specFor(d.id);
         assert(spec && Catalog.npcLocation(d.startNpc),`Q${d.id} has authored start location`);
         assert(Catalog.killSpot(spec,{level:20}),`Q${d.id} has a real hunting spot`);
         }
+        // Every repeatable definition still needs a start NPC that exists in the
+        // world, bot catalogue or not.
+        if(d.repeatable) assert(Catalog.npcLocation(d.startNpc),`Q${d.id} start NPC is spawned`);
         for(const stage of d.stages.filter(x=>['TALK','DELIVER'].includes(x.type))) {
-            await quest.onTalk(state,{fetchSelfId:()=>d.startNpc});
+            // Talking to the start NPC must not advance a stage that belongs to
+            // somebody else. Q362 puts Swan himself in the middle of his own
+            // chain, so the probe only applies when the stage is not his.
+            if(stage.npc!==d.startNpc) {
+                const held=state.getInt('cond');
+                await quest.onTalk(state,{fetchSelfId:()=>d.startNpc});
+                assert.equal(state.getInt('cond'),held,`Q${d.id} start NPC does not advance another stage`);
+            }
             const cond=state.getInt('cond');
             const stale=await sessionFor(d.id);
             await quest.onTalk(state,{fetchSelfId:()=>stage.npc});

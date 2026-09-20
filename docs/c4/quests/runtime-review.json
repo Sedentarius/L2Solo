@@ -645,39 +645,44 @@
     "reviewedRequirements": []
   },
   "362": {
-    "certified": false,
-    "runtimeBlocker": {
-      "code": "MISSING_NPC_TEMPLATES",
-      "detail": "Music-quest NPCs Swan/Galion/Nanarin are absent at native IDs 7957/7958/7956."
-    }
+    "certified": true,
+    "tests": [
+      "tests/test_c4_music_feast_quests.js"
+    ],
+    "bridge": "REVIEWED_DELIVERY_ROUTE",
+    "reviewedRequirements": []
   },
   "363": {
-    "certified": false,
-    "runtimeBlocker": {
-      "code": "MISSING_NPC_TEMPLATES",
-      "detail": "Music-quest NPCs Swan/Galion/Nanarin are absent at native IDs 7957/7958/7956."
-    }
+    "certified": true,
+    "tests": [
+      "tests/test_c4_music_feast_quests.js"
+    ],
+    "bridge": "REVIEWED_DELIVERY_ROUTE",
+    "reviewedRequirements": []
   },
   "364": {
-    "certified": false,
-    "runtimeBlocker": {
-      "code": "MISSING_NPC_TEMPLATES",
-      "detail": "Music-quest NPCs Swan/Galion/Nanarin are absent at native IDs 7957/7958/7956."
-    }
+    "certified": true,
+    "tests": [
+      "tests/test_c4_music_feast_quests.js"
+    ],
+    "bridge": "REVIEWED_DELIVERY_ROUTE",
+    "reviewedRequirements": []
   },
   "378": {
-    "certified": false,
-    "blocker": {
-      "code": "BRANCH_DEFINITION_PENDING",
-      "detail": "No absent generic resolver demonstrated. Retail exchanges, branches or source details need reviewed definitions and tests."
-    }
+    "certified": true,
+    "tests": [
+      "tests/test_c4_music_feast_quests.js"
+    ],
+    "bridge": "REVIEWED_DELIVERY_ROUTE",
+    "reviewedRequirements": []
   },
   "379": {
-    "certified": false,
-    "runtimeBlocker": {
-      "code": "MISSING_ITEM_TEMPLATES",
-      "detail": "Reviewed definition is disabled: 5893/5894/5956/5957/5958 absent."
-    }
+    "certified": true,
+    "tests": [
+      "tests/test_c4_music_feast_quests.js"
+    ],
+    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "reviewedRequirements": []
   },
   "385": {
     "certified": false,
