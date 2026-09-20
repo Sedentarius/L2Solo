@@ -134,60 +134,68 @@
     "reviewedRequirements": []
   },
   "101": {
-    "certified": false,
-    "certificationBlocker": {
-      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-    }
+    "certified": true,
+    "tests": [
+      "tests/test_c4_class_quests.js"
+    ],
+    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "reviewedRequirements": []
   },
   "102": {
-    "certified": false,
-    "certificationBlocker": {
-      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-    }
+    "certified": true,
+    "tests": [
+      "tests/test_c4_class_quests.js"
+    ],
+    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "reviewedRequirements": []
   },
   "103": {
-    "certified": false,
-    "certificationBlocker": {
-      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-    }
+    "certified": true,
+    "tests": [
+      "tests/test_c4_class_quests.js"
+    ],
+    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "reviewedRequirements": []
   },
   "104": {
-    "certified": false,
-    "certificationBlocker": {
-      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-    }
+    "certified": true,
+    "tests": [
+      "tests/test_c4_class_quests.js"
+    ],
+    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "reviewedRequirements": []
   },
   "105": {
-    "certified": false,
-    "certificationBlocker": {
-      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-    }
+    "certified": true,
+    "tests": [
+      "tests/test_c4_class_quests.js"
+    ],
+    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "reviewedRequirements": []
   },
   "106": {
-    "certified": false,
-    "certificationBlocker": {
-      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-    }
+    "certified": true,
+    "tests": [
+      "tests/test_c4_class_quests.js"
+    ],
+    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "reviewedRequirements": []
   },
   "107": {
-    "certified": false,
-    "certificationBlocker": {
-      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-    }
+    "certified": true,
+    "tests": [
+      "tests/test_c4_class_quests.js"
+    ],
+    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "reviewedRequirements": []
   },
   "108": {
-    "certified": false,
-    "certificationBlocker": {
-      "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-      "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-    }
+    "certified": true,
+    "tests": [
+      "tests/test_c4_class_quests.js"
+    ],
+    "bridge": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+    "reviewedRequirements": []
   },
   "151": {
     "certified": true,
@@ -326,11 +334,12 @@
     }
   },
   "257": {
-    "certified": false,
-    "blocker": {
-      "code": "NEWBIE_REWARD_STATE_UNRESOLVED",
-      "detail": "Ordinary payouts are reviewed; shared once-per-character beginner-shot eligibility/receipt must be reconciled before complete implementation."
-    }
+    "certified": true,
+    "tests": [
+      "tests/test_c4_beginner_quests.js"
+    ],
+    "bridge": "REVIEWED_COLLECT_ROUTE",
+    "reviewedRequirements": []
   },
   "258": {
     "certified": true,
@@ -349,11 +358,12 @@
     "reviewedRequirements": []
   },
   "260": {
-    "certified": false,
-    "blocker": {
-      "code": "NEWBIE_REWARD_STATE_UNRESOLVED",
-      "detail": "Ordinary payouts are reviewed; shared once-per-character beginner-shot eligibility/receipt must be reconciled before complete implementation."
-    }
+    "certified": true,
+    "tests": [
+      "tests/test_c4_beginner_quests.js"
+    ],
+    "bridge": "REVIEWED_COLLECT_ROUTE",
+    "reviewedRequirements": []
   },
   "261": {
     "certified": true,
@@ -388,11 +398,12 @@
     "reviewedRequirements": []
   },
   "265": {
-    "certified": false,
-    "blocker": {
-      "code": "NEWBIE_REWARD_STATE_UNRESOLVED",
-      "detail": "Ordinary payouts are reviewed; shared once-per-character beginner-shot eligibility/receipt must be reconciled before complete implementation."
-    }
+    "certified": true,
+    "tests": [
+      "tests/test_c4_beginner_quests.js"
+    ],
+    "bridge": "REVIEWED_COLLECT_ROUTE",
+    "reviewedRequirements": []
   },
   "266": {
     "certified": false,
@@ -425,11 +436,12 @@
     "reviewedRequirements": []
   },
   "273": {
-    "certified": false,
-    "blocker": {
-      "code": "NEWBIE_REWARD_STATE_UNRESOLVED",
-      "detail": "Ordinary payouts are reviewed; shared once-per-character beginner-shot eligibility/receipt must be reconciled before complete implementation."
-    }
+    "certified": true,
+    "tests": [
+      "tests/test_c4_beginner_quests.js"
+    ],
+    "bridge": "REVIEWED_COLLECT_ROUTE",
+    "reviewedRequirements": []
   },
   "274": {
     "certified": true,
@@ -478,11 +490,12 @@
     "reviewedRequirements": []
   },
   "293": {
-    "certified": false,
-    "blocker": {
-      "code": "NEWBIE_REWARD_STATE_UNRESOLVED",
-      "detail": "Ordinary payouts are reviewed; shared once-per-character beginner-shot eligibility/receipt must be reconciled before complete implementation."
-    }
+    "certified": true,
+    "tests": [
+      "tests/test_c4_beginner_quests.js"
+    ],
+    "bridge": "REVIEWED_COLLECT_ROUTE",
+    "reviewedRequirements": []
   },
   "294": {
     "certified": true,
@@ -926,9 +939,9 @@
     }
   },
   "_certification": {
-    "generatedAt": "2026-09-20T00:50:08.161Z",
+    "generatedAt": "2026-09-20T01:09:10.392Z",
     "sourceHashes": {
-      "config/default.ini": "96c5b1a32a804077d614935524645d3a5b1d4ed4ef5fe104a78b02a12e7d1625",
+      "config/default.ini": "14f3852373656b264d1e9f367252519f82072cb0dea69e465c968a775acb29c3",
       "config/local.example.ini": "cb13f57c7e72f2b6f55e342378bb9acc974e7f7c0ab6708a6ed8f5d0dc8f8fa0",
       "data/Items/Armors/.schema.json": "3920273718d82dad3b5855bdaede956a6d8f62e02adcfc9414f75a0b1fb6071e",
       "data/Items/Armors/armors.json": "eae29cf708486898d84c3bdb8a8062c091d36abfb76fe1ac146541d39e9695e6",
@@ -1188,10 +1201,10 @@
       "data/Templates/Spawns/spawns.json": "1c0593c903e2f17d7e5e80ad47eb04b1301ee74143571473ffd1febfa3035c64",
       "data/Templates/templates.json": "323ca9dc4566d9512e3db10e8698c50341e8ea28a46d4cfd5d9aaac13efcb9b6",
       "database/sql/database.sql": "6d0a6c79f4076e8f54a1ea63f21dd9936864a3ed1cf03503d332b8fc9882e86f",
-      "database/sql/sqlite.sql": "15753058753aa50408eedc68de4b2178080e123b2f2ff5c66dbcc3a5221b53cf",
+      "database/sql/sqlite.sql": "546a3888eb03901ccb1d4a52aa75349c3cebd96a201d2f0526d353f49f3f177b",
       "scripts/benchmark-interaction-memory.js": "d196e3f8dfb3fb49554d5081f339228a16a01c5ee606c2eca3f2987f45d3327b",
       "scripts/benchmark-town-navigation.js": "a03ca379db4ea4d1f55a50a4eea637962970f240c4557c7903ae925d5ea4d211",
-      "scripts/certify-c4-quests.js": "bc4f739040510d2a4dbb285a1e28f32458b2c470d053a67028025d8d06e08362",
+      "scripts/certify-c4-quests.js": "24def260982b773add4718c91c488b1c63da008e9967e6a0395381b22a98fabf",
       "scripts/check-c4-quests.js": "094eec7789f23d33445e3d00452eb7d2640c7fdbc3d342d38997f25db218c0b2",
       "scripts/check-quest-registry.js": "a05ecd2fe1e6f62d6c7eed1629dad48be13a2023682a11201c2a89d07ed46da2",
       "scripts/check-syntax.js": "f18315645fba6bbdb1b80b103fc5006970e56f804f9c72759be6dea1f067b9b5",
@@ -1254,7 +1267,7 @@
       "scripts/run-tests-p0-b3.js": "07046504ac2f221826f1fdf599c30f0f53b61c44ec50f57371b3f1bc52982cc6",
       "scripts/run-tests-p0-b4.js": "309423b431c59b4f612c6041156952e5fe63cf65fff1256c5b10c3fb165a0af4",
       "scripts/run-tests-p0-b5.js": "a3f8e96312ed5ac1fe873005a8db1b7f008aa6db9df60f8d17780c509e94e71e",
-      "scripts/run-tests.js": "8fd25f407182ce4d6db7dede54a67c651ce7db5288fb315f0d3b3be26ee3ab03",
+      "scripts/run-tests.js": "c2b497544284c5051acbafab2972e486f287fff26b26c9c3c2ff1d2167a60c24",
       "scripts/saved-games.js": "9d2f0c14084ad5403231e4e99e03388909c7fda432ff9c0ea7f44d829cf7b388",
       "scripts/simulate-bot-chat.js": "8b15f0e010fd24aca99c7cbc1e769cb40af0671afd45d9401a24b3b7e845bb01",
       "scripts/start.js": "4b47531f68f1733a1b4a9bb03626626cb83802594dd59a7aa20a2e61241a21b4",
@@ -1276,7 +1289,7 @@
       "src/AuthenticationServer/Network/Response/ServerList.js": "13f6abe044f2c58679f162000ab4d6671a36ba81166d6ed6bffe05de66643c72",
       "src/AuthenticationServer/Network/Response/index.js": "8980bdd76b95dc91dea6e1a7b720668c5d5dba79668517944bcddc4ce2cda1f5",
       "src/AuthenticationServer/Session.js": "20b60968aaaef8715bac0c4ad3b1359b8b921a87ff1137370bae595712aad1cd",
-      "src/Database.js": "a19069fd2d307a7b4720f243e47f7519215fa5fba09ce512702f6a5817dd40ae",
+      "src/Database.js": "e0db6a5d017db6f510c6f253c66fe091d757036b70f68878f1081c8dddaede38",
       "src/DatabaseCheckpointCoordinator.js": "cd32ca09433fa733314cf4340fb1c3fd07800a5a7cbc3911498662fe7e332519",
       "src/DatabaseCheckpointWorker.js": "e10c8360a695cd195b1a1b9c863310363fabe7b42537c97effd66289eb0fbba1",
       "src/DatabasePartyCandidateProjection.js": "7925c2155f6ce5debe4493576d3f5fa6aadd3a3fec564fb8ad148eca814dccd2",
@@ -1914,13 +1927,16 @@
       "src/GameServer/Progression/OverhitReward.js": "e4f12e67f88f9c23c67263c8b03e65a20e7619e31085ac7794f896444f1f876e",
       "src/GameServer/Progression/ProgressionCap.js": "efdcf417d1af764e5a997906211fec7f95c4d2da98313746c894065aedbc2744",
       "src/GameServer/ProgressionRates.js": "95d06283ab218b645938906b708d59bbcfbae6c715aad37532a469a47bfafdf8",
-      "src/GameServer/Quest/DeclarativeQuest.js": "c3d22111e3b6d34c3b6e7c43c4ee0fd844b7a9a815e4c1e7d5c3aa7715b68e24",
+      "src/GameServer/Quest/BeginnerQuestDefinitions.js": "dd507787a04ccb99d792539f11b193baad04ce3bf3b15710374c530d52d49c8a",
+      "src/GameServer/Quest/BeginnerReward.js": "282f4d6b53a65aecdc7a3c2c93298dfef6f14777ca48d20c88e1dae4c3e84e5a",
+      "src/GameServer/Quest/ClassQuestReward.js": "245d4bca4f9a73983deb9cb0e19821810bee0e5bc831842ec96e6377916f6ea3",
+      "src/GameServer/Quest/DeclarativeQuest.js": "0c9c4092c8d33ae4e489b6522e1fb1b7070544df3d01728c14ff5888468e3c34",
       "src/GameServer/Quest/FirstProfessionProof.js": "836445225f11c0b25f3b30e1549adfdaecf1c3ee750a087b5442d786f4ecef2a",
       "src/GameServer/Quest/LowLevelDefinitions.js": "6fbb937001742755760ef38ed3faf61567a58595b3534bc194b2d4e41aec065f",
-      "src/GameServer/Quest/QuestRegistry.js": "620d5e7083fe46b9463ff19881fbfc7de80ecc3f4e4be889c86de702c93f22ee",
+      "src/GameServer/Quest/QuestRegistry.js": "f8afe4d2e5d1d3754f0db9054ee6f43f9532b72df7cc4836553beee065d84990",
       "src/GameServer/Quest/QuestService.js": "9810b2461b6f94345c1038d3ecf6ca57204600b7df56e699970e642d18cf100f",
       "src/GameServer/Quest/QuestState.js": "d764e7fac7367002c151fd44e0006e6e8b27556d8586af4f40b73e4703d69e46",
-      "src/GameServer/Quest/QuestStep.js": "92c7a9cbfcdb7eb353dde1e5539b0d00b68ef6320d485f297e8c4ae1f5e4bd8b",
+      "src/GameServer/Quest/QuestStep.js": "8e23c3b873a54dc6cd083b3f3cae470ada26957cb8651a95372c19081572a1b3",
       "src/GameServer/Quest/RecoveredLowLevelDefinitions.js": "82b2fe72bed05e35b4806e4bf8a8a4864f5a62e7e73e4a145eb6e6114b0073f5",
       "src/GameServer/Quest/StarterQuestDefinitions.js": "dfee921b7cc816002b790c88602bf381487b284f0f4c47ac0bae077a02890cce",
       "src/GameServer/Quest/quests/FormalWear.js": "3a28863c3a0c18e03eae081fdf967dcefa99a8aa0875510a8a4ab2749d2493c1",
@@ -1961,14 +1977,14 @@
       "src/GameServer/Quest/quests/Q047_IntoTheDarkForest.js": "43faae4ed9eb9a126f884b84b843ed1d0b3f5cf9c38f3669dcbea697409d4cd1",
       "src/GameServer/Quest/quests/Q048_ToTheImmortalPlateau.js": "2b85130c8579bdf27de3f48b4f08844c13c1a25d6e206790dc0b3f9a039fa3c6",
       "src/GameServer/Quest/quests/Q049_TheRoadHome.js": "b34a8e027820ffa806a706cff74e0e875931a75572c51d4eb93772b4dcb9f0d3",
-      "src/GameServer/Quest/quests/Q101_SwordOfSolidarity.js": "3b37a43d832f505ad0115fb49a649c3bce548cae5a41fca469c2d7fa8bd9d8be",
-      "src/GameServer/Quest/quests/Q102_FungusFever.js": "ff6d1b01460317ab558be349a93ac80f75265d05ba84249820d321c3a9f5b951",
-      "src/GameServer/Quest/quests/Q103_SpiritOfCraftsman.js": "c288d187972d5e98f2afbfa8fa624fd31d106b0b364b2d8a2cceda34871d2395",
-      "src/GameServer/Quest/quests/Q104_SpiritOfMirrors.js": "f182b11e4450f9196063b575142d8cd2cb889d5ea628c259f7e3d74fe2e8bd37",
-      "src/GameServer/Quest/quests/Q105_SkirmishWithTheOrcs.js": "bd4e2eb34b0234e1c6282003ae482d4d37ceb7ff7a4e02d2332acf87c2051615",
-      "src/GameServer/Quest/quests/Q106_ForgottenTruth.js": "c6d25c7f4783362cffee1a2ba7308ffaa6e282a8cd7b9fdf17924222dca6ee65",
-      "src/GameServer/Quest/quests/Q107_MercilessPunishment.js": "2d034accd449de251fef7eb9c63412743fd4bd919cb42ba0fb60ab5cf079b659",
-      "src/GameServer/Quest/quests/Q108_JumbleTumbleDiamondFuss.js": "40e9bad6c457932725eb379cf7678450e69e51993636ab9afe3dad387318e4b3",
+      "src/GameServer/Quest/quests/Q101_SwordOfSolidarity.js": "eb4963d12e445762cd0d36117083ecb95c56dde43037c158d10584f2f9ef408b",
+      "src/GameServer/Quest/quests/Q102_FungusFever.js": "9795cf27ee33ac339a15233f147ca377bb6a30c6e49adca083194c2ef49a7bff",
+      "src/GameServer/Quest/quests/Q103_SpiritOfCraftsman.js": "4abe62da25926b7f8558939d27e211be4392b3335575a4d96397f4e18d397480",
+      "src/GameServer/Quest/quests/Q104_SpiritOfMirrors.js": "0a8a5323320171bfb8044495edf407b39c06a49aa799b86dfe90cc2200853c3e",
+      "src/GameServer/Quest/quests/Q105_SkirmishWithTheOrcs.js": "370fb934b595d40bc3ecaf5d56fdd861f647407af17d711b1cecced9e56cd6e9",
+      "src/GameServer/Quest/quests/Q106_ForgottenTruth.js": "85b06545308973e42726c53249c0f09a60284ecb857cc24d868b2926f892f6e4",
+      "src/GameServer/Quest/quests/Q107_MercilessPunishment.js": "6f140d620bfb771f09cb463ab0b7c5a81f9b2416d8b2b55aec2a25311178c785",
+      "src/GameServer/Quest/quests/Q108_JumbleTumbleDiamondFuss.js": "e58cc6ce30ae64e3d5e7d8e219b456e4907d22b6a9aca0e3143c6b6a147d56f9",
       "src/GameServer/Quest/quests/Q151_CureForFeverDisease.js": "a8ad0c58fc32e1df51b42499c5bb353ffd5c1630ac93d9ea35fd8afcfb78616b",
       "src/GameServer/Quest/quests/Q152_ShardsOfGolem.js": "6f6fbf7efd4104494c4846ff229406d48f521f20822e35617de4e1b5677b0ae1",
       "src/GameServer/Quest/quests/Q153_DeliverGoods.js": "6d7aa04d935a8eec8323b5beb10af3185c912b7f7b091a79997cd509837989b6",
@@ -1989,6 +2005,11 @@
       "src/GameServer/Quest/quests/Q168_DeliverSupplies.js": "b69e7c4b57eec0ba25cee9762787428c88260dedac8355f2a07d9be3810f7e2d",
       "src/GameServer/Quest/quests/Q169_OffspringOfNightmares.js": "360dbe73f073c204a28146df4188b802c87284f25198de593fe1daa98e7d6a6e",
       "src/GameServer/Quest/quests/Q170_DangerousSeduction.js": "bfb26303001e6229d8ce1c87a3f7f76c74f95b4389a8e8bcba3e9dad908781b9",
+      "src/GameServer/Quest/quests/Q257_TheGuardIsBusy.js": "cc140813b138bcc5bcccb74c5a1d8411f249340288e080fab112c45e71964153",
+      "src/GameServer/Quest/quests/Q260_OrcHunting.js": "c4c30fd066a5a2922887ed23d3d1b33586f6837870832f72006e29e702286c2d",
+      "src/GameServer/Quest/quests/Q265_BondsOfSlavery.js": "00a074ed743ecc46396d00810fe86678e7e3139ec01bdc8975c6ff0c21594dfd",
+      "src/GameServer/Quest/quests/Q273_InvadersOfTheHolyLand.js": "a7cec38cc11041f635885d7b29528773fc0d603c908fb0f4234a1d62710b94af",
+      "src/GameServer/Quest/quests/Q293_TheHiddenVeins.js": "851f75d8b9f9bd7fd60e4b53f68c611608bc456828ab18ebaac8afaf3252701e",
       "src/GameServer/Quest/quests/Q401_PathToWarrior.js": "ecce5421f89c063a41bcaa8840a664820b36c1d9b479cce38ffc2f41c9b9a912",
       "src/GameServer/Quest/quests/Q402_PathToKnight.js": "43d562b15dc44a74b6ad80dd85c6c2d3bdb4f24395abd806e142a0155a3093b4",
       "src/GameServer/Quest/quests/Q403_PathToRogue.js": "c85b93ec68b8f0a51fb02c8a90c435be8e58294ceed822bda318133471221113",
@@ -3003,7 +3024,8 @@
       "tests/fixtures/companion_path_worker.js": "f05a88b3afa43c6789b9590ab0a9e3f9a85386ba3bb64ade5363fe8aca15b913",
       "tests/helpers/assert_c4_monster_location.js": "cda8f67e97daac4ef6eb2ab5df4b11b799339a6ff2574b791845b3f49e8336d9",
       "tests/helpers/assert_monster_empty_before_slice.js": "16d92110624f64ceb4219af07cf86bd7c3d8a14defdcea93d50524b76202721a",
-      "tests/helpers/c4QuestHarness.js": "f55fd87a3af9bf57cbd1d3667206993abf49ca98b6da920056fa020229dfca25",
+      "tests/helpers/c4QuestHarness.js": "2f29cea7e120738d4b700c4af236da27ce02664224da58407373eb330ad00ada",
+      "tests/helpers/legacyCharacterSchema.js": "457b9931fbebc1f87afbe2025b1aa44cb65228b0b91a87ce70d86c3f712ae6cc",
       "tests/helpers/verify_geodata_when_available.js": "84c75f6390b3482123b50d0e6fc406465bb8637e1cc7c3ab2d29c324841f9537",
       "tests/test_admin_saved_locations.js": "1baed3d5fbfa387d934d84ade82e50a71fa50beea5aef6b4d20765718cde8a13",
       "tests/test_admin_tools.js": "06b71eca779680c9240dc73fb3487b6a6684ad0e9d2aaeee7b3cb0682243170e",
@@ -3181,6 +3203,7 @@
       "tests/test_bot_warehouse.js": "1c35cc5603126441f66d14a72500750654fb7d3baaaed883c4404aefb8068f3c",
       "tests/test_buffer_healer_skills.js": "5430abf8b38a4d586bda6cf32de74062508a977917e8da461b3e3534197f03ec",
       "tests/test_c4_alligator_island.js": "a5c610eecf59de50a95fe07502927b1349dc9a795ad0bb2e8c4adfda10ef5d8d",
+      "tests/test_c4_beginner_quests.js": "56a8ca8ffba30b6d747a094321eeecc003cfb1abde4a0eeca700be996774246b",
       "tests/test_c4_buff_modifiers.js": "141b6f85ba9266b1c607ea5b673a6454439295dd8dccb5749352c81a9f0f63d8",
       "tests/test_c4_catacomb_of_dark_omen.js": "89046e30bf1bde89610191d3ef370760e7f9483b0470c0fce6b1521c5b39fb2c",
       "tests/test_c4_catacomb_of_the_apostate.js": "e10dd4a22b015f7bf62af4d7f974351b46facb515dec3cd76e6b4d98097c1d89",
@@ -3188,6 +3211,7 @@
       "tests/test_c4_catacomb_of_the_forbidden_path.js": "34b298536274c75bf26d7d3e46caf9efd20962022545e26e776c47c59cc0b151",
       "tests/test_c4_catacomb_of_the_heretics.js": "8c7518910d0d7a6b51bff87d1b74eece6bfa537d4185349340a7732dfc1b3077",
       "tests/test_c4_catacomb_of_the_witch.js": "c1d38225c2ae603c9b4a3ca37e59dc96609dafd4e0a26578097f24feea9d0664",
+      "tests/test_c4_class_quests.js": "2701cf4c8a5f6a8e2411393ae58843ed20bc1c520e23848c408cb26905616a72",
       "tests/test_c4_cruma_tower_teleports.js": "27b6d1098baf149e0206a829d735a1737b5d509cebf56e2e859d286362b6458a",
       "tests/test_c4_declarative_quests.js": "1d1a1108fbf9b4b11270fd020c8a3c27cb73f04e4f058d8b87efb6668e7b748d",
       "tests/test_c4_devastated_castle.js": "c9925f0981f023e72456b26336cc7cfa67fb788ab46f3722ceec06f2bfa134f1",
@@ -3471,8 +3495,8 @@
       "tests/test_quest_availability.js": "8c86c1106a7da942581d9f535a890c93227521e224f3a5fbfdcc9ad0fde25e7e",
       "tests/test_quest_character_switch.js": "450f74860657c7ced99c1638649996f6387bec56ba944e630a5eacde1e864bba",
       "tests/test_quest_handins.js": "0ff9a5ecab99781773b4b7c821d455d6728cb3517f6b8be2ac3e358a9f133c74",
-      "tests/test_quest_packets.js": "ec2e27c9399640cfaca53a3f4e4c741405e692896da0979ef7da08f1bead30d3",
-      "tests/test_quest_registry_integrity.js": "d9d7a2787ad3597db3243fd0a431f8fe5768cfba3b70daf74dbe7e91a13395f2",
+      "tests/test_quest_packets.js": "4ae32e7bd97286c71c90f564058dbbee2e1bb1dc60815952717569d188fc25d1",
+      "tests/test_quest_registry_integrity.js": "ee55a533f66fde9c49daea175086b8b8d7cc1af2763d76b7c3049129dd522c5a",
       "tests/test_quest_runtime.js": "d0e4478d0801a858dbf8102cfe2c5cd029107e724b6afba02c8511f6149c6eb3",
       "tests/test_quest_spawn_radar.js": "91d3b95a956bd853ab25de1c3bfc67064bfc5c2807958109279fee74eefe3742",
       "tests/test_raid_boss_balance.js": "50d937f03684db2fbd7b66e3b207fa15725528140941b6d6bf792b711f0fdc5e",
@@ -3551,7 +3575,7 @@
       "tests/test_world_observer_world_state.js": "1694e9a8d888d7495da71f79d1ac6fc0f27b69a28b33e5f73753529cacce9c78",
       "tests/test_world_visible_users.js": "53949729f44132946b001ebe4ace8644ffac482aea9953a0ffa80829dac74aab",
       "tests/test_world_wipe.js": "d7f3aa5197dc8359c9542250394fc0ccd96010402be9c83b0576696ec47cf89c",
-      "docs/c4/quests/runtime-review.json": "c4f361d49b30df2c1b12e23e9abdaf750fde3b3c557c95a9b85d0a7d12e24e7f",
+      "docs/c4/quests/runtime-review.json": "c5e157b3f0a51e05c81552cbd24118ca55e3f045894396615cb014eafc279de0",
       "docs/c4/quests/C4_QUEST_MASTER_INVENTORY.jsonl": "9f63e96d5fe25e0ce21f81027b805d8a4cc556e25e8f17b74a179ff316befc86"
     },
     "tests": [
@@ -3565,6 +3589,14 @@
       },
       {
         "path": "tests/test_c4_starter_quests.js",
+        "exitCode": 0
+      },
+      {
+        "path": "tests/test_c4_beginner_quests.js",
+        "exitCode": 0
+      },
+      {
+        "path": "tests/test_c4_class_quests.js",
         "exitCode": 0
       },
       {

@@ -2,10 +2,10 @@
   "errors": [],
   "confirmedInScope": 107,
   "counts": {
-    "VERIFIED": 49,
-    "IMPLEMENTED": 35,
+    "VERIFIED": 62,
+    "IMPLEMENTED": 27,
     "PARTIAL/BLOCKED": 14,
-    "MISSING": 9
+    "MISSING": 4
   },
   "capabilities": {
     "genericGoalResolver": "PRESENT",
@@ -14,7 +14,7 @@
     "partyQuestSharing": "NOT_CERTIFIED",
     "note": "Existing NPC spawns and script events do not certify cold encounter ownership, timers or party credit."
   },
-  "registeredInScope": 86,
+  "registeredInScope": 91,
   "proofContracts": 18,
   "driftCount": 296,
   "scopeDriftCount": 107,
@@ -2144,26 +2144,25 @@
       "name": "Sword of Solidarity",
       "inScope": true,
       "quarantined": false,
-      "status": "IMPLEMENTED",
+      "status": "VERIFIED",
       "script": "Q101_SwordOfSolidarity.js",
       "definitionId": null,
       "registered": true,
       "tests": [
-        "tests/test_quest_runtime.js"
+        "tests/test_quest_runtime.js",
+        "tests/test_c4_class_quests.js"
       ],
       "blocker": null,
-      "certificationBlocker": {
-        "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-        "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-      },
+      "certificationBlocker": null,
       "professionProofContract": null,
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "NOT_CERTIFIED",
-        "reviewedRequirements": null,
+        "questAdapter": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+        "reviewedRequirements": [],
         "requirementsNeedingReview": []
       },
       "drift": [
+        "status:IMPLEMENTED->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -2172,25 +2171,24 @@
       "name": "Sea of Spores Fever",
       "inScope": true,
       "quarantined": false,
-      "status": "IMPLEMENTED",
+      "status": "VERIFIED",
       "script": "Q102_FungusFever.js",
       "definitionId": null,
       "registered": true,
-      "tests": [],
+      "tests": [
+        "tests/test_c4_class_quests.js"
+      ],
       "blocker": null,
-      "certificationBlocker": {
-        "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-        "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-      },
+      "certificationBlocker": null,
       "professionProofContract": null,
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "NOT_CERTIFIED",
-        "reviewedRequirements": null,
+        "questAdapter": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+        "reviewedRequirements": [],
         "requirementsNeedingReview": []
       },
       "drift": [
-        "status:REGISTERED_UNTESTED->IMPLEMENTED",
+        "status:REGISTERED_UNTESTED->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -2199,28 +2197,24 @@
       "name": "Spirit of Craftsman",
       "inScope": true,
       "quarantined": false,
-      "status": "IMPLEMENTED",
+      "status": "VERIFIED",
       "script": "Q103_SpiritOfCraftsman.js",
       "definitionId": null,
       "registered": true,
-      "tests": [],
+      "tests": [
+        "tests/test_c4_class_quests.js"
+      ],
       "blocker": null,
-      "certificationBlocker": {
-        "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-        "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-      },
+      "certificationBlocker": null,
       "professionProofContract": null,
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "NOT_CERTIFIED",
-        "reviewedRequirements": null,
-        "requirementsNeedingReview": [
-          "PARTY_QUEST_PRIMITIVE",
-          "SCRIPTED_SPAWN_PRIMITIVE"
-        ]
+        "questAdapter": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+        "reviewedRequirements": [],
+        "requirementsNeedingReview": []
       },
       "drift": [
-        "status:REGISTERED_UNTESTED->IMPLEMENTED",
+        "status:REGISTERED_UNTESTED->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -2229,26 +2223,25 @@
       "name": "Spirit of Mirrors",
       "inScope": true,
       "quarantined": false,
-      "status": "IMPLEMENTED",
+      "status": "VERIFIED",
       "script": "Q104_SpiritOfMirrors.js",
       "definitionId": null,
       "registered": true,
       "tests": [
-        "tests/test_quest_runtime.js"
+        "tests/test_quest_runtime.js",
+        "tests/test_c4_class_quests.js"
       ],
       "blocker": null,
-      "certificationBlocker": {
-        "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-        "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-      },
+      "certificationBlocker": null,
       "professionProofContract": null,
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "NOT_CERTIFIED",
-        "reviewedRequirements": null,
+        "questAdapter": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+        "reviewedRequirements": [],
         "requirementsNeedingReview": []
       },
       "drift": [
+        "status:IMPLEMENTED->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -2257,26 +2250,25 @@
       "name": "Skirmish with the Orcs",
       "inScope": true,
       "quarantined": false,
-      "status": "IMPLEMENTED",
+      "status": "VERIFIED",
       "script": "Q105_SkirmishWithTheOrcs.js",
       "definitionId": null,
       "registered": true,
       "tests": [
-        "tests/test_quest_runtime.js"
+        "tests/test_quest_runtime.js",
+        "tests/test_c4_class_quests.js"
       ],
       "blocker": null,
-      "certificationBlocker": {
-        "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-        "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-      },
+      "certificationBlocker": null,
       "professionProofContract": null,
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "NOT_CERTIFIED",
-        "reviewedRequirements": null,
+        "questAdapter": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+        "reviewedRequirements": [],
         "requirementsNeedingReview": []
       },
       "drift": [
+        "status:IMPLEMENTED->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -2285,25 +2277,24 @@
       "name": "Forgotten Truth",
       "inScope": true,
       "quarantined": false,
-      "status": "IMPLEMENTED",
+      "status": "VERIFIED",
       "script": "Q106_ForgottenTruth.js",
       "definitionId": null,
       "registered": true,
-      "tests": [],
+      "tests": [
+        "tests/test_c4_class_quests.js"
+      ],
       "blocker": null,
-      "certificationBlocker": {
-        "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-        "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-      },
+      "certificationBlocker": null,
       "professionProofContract": null,
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "NOT_CERTIFIED",
-        "reviewedRequirements": null,
+        "questAdapter": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+        "reviewedRequirements": [],
         "requirementsNeedingReview": []
       },
       "drift": [
-        "status:REGISTERED_UNTESTED->IMPLEMENTED",
+        "status:REGISTERED_UNTESTED->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -2312,28 +2303,25 @@
       "name": "Merciless Punishment",
       "inScope": true,
       "quarantined": false,
-      "status": "IMPLEMENTED",
+      "status": "VERIFIED",
       "script": "Q107_MercilessPunishment.js",
       "definitionId": null,
       "registered": true,
       "tests": [
-        "tests/test_quest_runtime.js"
+        "tests/test_quest_runtime.js",
+        "tests/test_c4_class_quests.js"
       ],
       "blocker": null,
-      "certificationBlocker": {
-        "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-        "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-      },
+      "certificationBlocker": null,
       "professionProofContract": null,
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "NOT_CERTIFIED",
-        "reviewedRequirements": null,
-        "requirementsNeedingReview": [
-          "ESCORT_PRIMITIVE"
-        ]
+        "questAdapter": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+        "reviewedRequirements": [],
+        "requirementsNeedingReview": []
       },
       "drift": [
+        "status:IMPLEMENTED->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -2342,25 +2330,24 @@
       "name": "Jumble, Tumble, Diamond Fuss",
       "inScope": true,
       "quarantined": false,
-      "status": "IMPLEMENTED",
+      "status": "VERIFIED",
       "script": "Q108_JumbleTumbleDiamondFuss.js",
       "definitionId": null,
       "registered": true,
-      "tests": [],
+      "tests": [
+        "tests/test_c4_class_quests.js"
+      ],
       "blocker": null,
-      "certificationBlocker": {
-        "code": "FULL_LIFECYCLE_CERTIFICATION_PENDING",
-        "detail": "Existing handlers and any listed unit checks do not prove every hand-in, restart, reward and handoff."
-      },
+      "certificationBlocker": null,
       "professionProofContract": null,
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "NOT_CERTIFIED",
-        "reviewedRequirements": null,
+        "questAdapter": "HANDLERS_CERTIFIED_ROUTE_PENDING",
+        "reviewedRequirements": [],
         "requirementsNeedingReview": []
       },
       "drift": [
-        "status:REGISTERED_UNTESTED->IMPLEMENTED",
+        "status:REGISTERED_UNTESTED->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -3724,24 +3711,26 @@
       "name": "The Guard is Busy",
       "inScope": true,
       "quarantined": false,
-      "status": "MISSING",
-      "script": null,
+      "status": "VERIFIED",
+      "script": "Q257_TheGuardIsBusy.js",
       "definitionId": null,
-      "registered": false,
-      "tests": [],
-      "blocker": {
-        "code": "NEWBIE_REWARD_STATE_UNRESOLVED",
-        "detail": "Ordinary payouts are reviewed; shared once-per-character beginner-shot eligibility/receipt must be reconciled before complete implementation."
-      },
+      "registered": true,
+      "tests": [
+        "tests/test_c4_beginner_quests.js"
+      ],
+      "blocker": null,
       "certificationBlocker": null,
       "professionProofContract": null,
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "NOT_CERTIFIED",
-        "reviewedRequirements": null,
+        "questAdapter": "REVIEWED_COLLECT_ROUTE",
+        "reviewedRequirements": [],
         "requirementsNeedingReview": []
       },
       "drift": [
+        "script_existence",
+        "registration",
+        "status:MISSING->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -3806,24 +3795,26 @@
       "name": "Hunt the Orcs",
       "inScope": true,
       "quarantined": false,
-      "status": "MISSING",
-      "script": null,
+      "status": "VERIFIED",
+      "script": "Q260_OrcHunting.js",
       "definitionId": null,
-      "registered": false,
-      "tests": [],
-      "blocker": {
-        "code": "NEWBIE_REWARD_STATE_UNRESOLVED",
-        "detail": "Ordinary payouts are reviewed; shared once-per-character beginner-shot eligibility/receipt must be reconciled before complete implementation."
-      },
+      "registered": true,
+      "tests": [
+        "tests/test_c4_beginner_quests.js"
+      ],
+      "blocker": null,
       "certificationBlocker": null,
       "professionProofContract": null,
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "NOT_CERTIFIED",
-        "reviewedRequirements": null,
+        "questAdapter": "REVIEWED_COLLECT_ROUTE",
+        "reviewedRequirements": [],
         "requirementsNeedingReview": []
       },
       "drift": [
+        "script_existence",
+        "registration",
+        "status:MISSING->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -3944,24 +3935,26 @@
       "name": "Chains of Slavery",
       "inScope": true,
       "quarantined": false,
-      "status": "MISSING",
-      "script": null,
+      "status": "VERIFIED",
+      "script": "Q265_BondsOfSlavery.js",
       "definitionId": null,
-      "registered": false,
-      "tests": [],
-      "blocker": {
-        "code": "NEWBIE_REWARD_STATE_UNRESOLVED",
-        "detail": "Ordinary payouts are reviewed; shared once-per-character beginner-shot eligibility/receipt must be reconciled before complete implementation."
-      },
+      "registered": true,
+      "tests": [
+        "tests/test_c4_beginner_quests.js"
+      ],
+      "blocker": null,
       "certificationBlocker": null,
       "professionProofContract": null,
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "NOT_CERTIFIED",
-        "reviewedRequirements": null,
+        "questAdapter": "REVIEWED_COLLECT_ROUTE",
+        "reviewedRequirements": [],
         "requirementsNeedingReview": []
       },
       "drift": [
+        "script_existence",
+        "registration",
+        "status:MISSING->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -4082,24 +4075,26 @@
       "name": "Invaders of the Holy Land",
       "inScope": true,
       "quarantined": false,
-      "status": "MISSING",
-      "script": null,
+      "status": "VERIFIED",
+      "script": "Q273_InvadersOfTheHolyLand.js",
       "definitionId": null,
-      "registered": false,
-      "tests": [],
-      "blocker": {
-        "code": "NEWBIE_REWARD_STATE_UNRESOLVED",
-        "detail": "Ordinary payouts are reviewed; shared once-per-character beginner-shot eligibility/receipt must be reconciled before complete implementation."
-      },
+      "registered": true,
+      "tests": [
+        "tests/test_c4_beginner_quests.js"
+      ],
+      "blocker": null,
       "certificationBlocker": null,
       "professionProofContract": null,
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "NOT_CERTIFIED",
-        "reviewedRequirements": null,
+        "questAdapter": "REVIEWED_COLLECT_ROUTE",
+        "reviewedRequirements": [],
         "requirementsNeedingReview": []
       },
       "drift": [
+        "script_existence",
+        "registration",
+        "status:MISSING->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
@@ -4278,24 +4273,26 @@
       "name": "The Hidden Veins",
       "inScope": true,
       "quarantined": false,
-      "status": "MISSING",
-      "script": null,
+      "status": "VERIFIED",
+      "script": "Q293_TheHiddenVeins.js",
       "definitionId": null,
-      "registered": false,
-      "tests": [],
-      "blocker": {
-        "code": "NEWBIE_REWARD_STATE_UNRESOLVED",
-        "detail": "Ordinary payouts are reviewed; shared once-per-character beginner-shot eligibility/receipt must be reconciled before complete implementation."
-      },
+      "registered": true,
+      "tests": [
+        "tests/test_c4_beginner_quests.js"
+      ],
+      "blocker": null,
       "certificationBlocker": null,
       "professionProofContract": null,
       "bridge": {
         "genericResolver": "PRESENT",
-        "questAdapter": "NOT_CERTIFIED",
-        "reviewedRequirements": null,
+        "questAdapter": "REVIEWED_COLLECT_ROUTE",
+        "reviewedRequirements": [],
         "requirementsNeedingReview": []
       },
       "drift": [
+        "script_existence",
+        "registration",
+        "status:MISSING->VERIFIED",
         "generic_bridge_already_exists"
       ]
     },
