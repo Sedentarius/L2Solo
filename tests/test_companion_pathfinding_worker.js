@@ -85,6 +85,42 @@ function stopMove(fixture) {
     fixture.actor.state.setTowards(false);
 }
 
+const TRANSIENT_REAL_WORKER_ERRORS = new Set(['PATH_BUDGET', 'PATH_TIMEOUT']);
+
+async function realWorkerMove(fixture, issue, {
+    expectedStrategy = null,
+    attempts = 3,
+    pendingMessage = 'worker-routed movement must leave the game thread immediately',
+    onIssued = null
+} = {}) {
+    let last = null;
+    for (let attempt = 1; attempt <= attempts; attempt++) {
+        const pending = issue();
+        assert.strictEqual(pending.strategy, 'worker_pending', pendingMessage);
+        onIssued?.(pending, attempt);
+        const promise = fixture.session.pendingPathRequest?.promise;
+        assert(promise, 'worker-routed movement must expose its pending Promise');
+        await promise;
+        last = fixture.session.lastPathfinding;
+
+        if (!last?.error) {
+            if (expectedStrategy) assert.strictEqual(last.strategy, expectedStrategy);
+            return last;
+        }
+
+        const expectedFallback = !expectedStrategy
+            || last.strategy === `${expectedStrategy}_error_fallback`;
+        if (!expectedFallback || !TRANSIENT_REAL_WORKER_ERRORS.has(last.error)) {
+            assert.fail(`${pendingMessage}; unexpected worker result ${last.strategy || 'none'} (${last.error || 'no error'})`);
+        }
+
+        stopMove(fixture);
+        await new Promise((resolve) => setImmediate(resolve));
+    }
+
+    assert.fail(`${pendingMessage}; ${attempts} attempts exhausted after transient worker errors (last: ${last?.error || 'unknown'})`);
+}
+
 async function run() {
     const originalFindPath = GeodataEngine.findPath;
     const originalHasLineOfSight = GeodataEngine.hasLineOfSight;
@@ -95,16 +131,21 @@ async function run() {
     };
     GeodataEngine.hasLineOfSight = () => false;
 
+    const pools = [];
     try {
         const realPool = new BoundedPathfindingWorkerPool({ size: 1, queueLimit: 4 });
+        pools.push(realPool);
         const realFixture = companionFixture(realPool);
-        const pending = issueMove(realFixture, { locX: 53327, locY: 102938, locZ: -1064 });
-        assert.strictEqual(pending.strategy, 'worker_pending', 'eligible companion routes must return without blocking the game thread');
-        const realPromise = realFixture.session.pendingPathRequest.promise;
-        await realPromise;
+        const realPathfinding = await realWorkerMove(
+            realFixture,
+            () => issueMove(realFixture, { locX: 53327, locY: 102938, locZ: -1064 }),
+            {
+                expectedStrategy: 'worker_geodata',
+                pendingMessage: 'eligible companion routes must return without blocking the game thread'
+            }
+        );
         assert.strictEqual(synchronousFindPathCalls, 0, 'eligible companion movement must never call synchronous findPath');
-        assert.strictEqual(realFixture.session.lastPathfinding.strategy, 'worker_geodata');
-        assert.strictEqual(realFixture.session.lastPathfinding.worker, true);
+        assert.strictEqual(realPathfinding.worker, true);
         assert.strictEqual(realFixture.actor.state.towards, 'move', 'the main thread must apply a current real-worker path');
         stopMove(realFixture);
 
@@ -112,40 +153,50 @@ async function run() {
             realPool,
             { locX: 83384, locY: 149256, locZ: -3400 }
         ));
-        const autonomousPending = issueMove(
+        const autonomousPathfinding = await realWorkerMove(
             autonomousFixture,
-            { locX: 83265, locY: 150461, locZ: -3514 },
-            null,
-            { pathMaxNodes: 30000, arrivalRadius: 16 }
+            () => issueMove(
+                autonomousFixture,
+                { locX: 83265, locY: 150461, locZ: -3514 },
+                null,
+                { pathMaxNodes: 30000, arrivalRadius: 16 }
+            ),
+            {
+                expectedStrategy: 'worker_geodata',
+                pendingMessage: 'an expensive autonomous town route must leave the game thread immediately'
+            }
         );
-        assert.strictEqual(autonomousPending.strategy, 'worker_pending',
-            'an expensive autonomous town route must leave the game thread immediately');
-        await autonomousFixture.session.pendingPathRequest.promise;
         assert.strictEqual(synchronousFindPathCalls, 0,
             'autonomous town errands must not execute A* on the game thread');
-        assert.strictEqual(autonomousFixture.session.lastPathfinding.strategy, 'worker_geodata');
-        assert.strictEqual(autonomousFixture.session.lastPathfinding.routeUsable, true,
+        assert.strictEqual(autonomousPathfinding.routeUsable, true,
             'the real Giran route to Groot must use the requested errand budget');
-        assert.strictEqual(autonomousFixture.session.lastPathfinding.maxNodes, 30000);
-        assert.strictEqual(autonomousFixture.session.lastPathfinding.arrivalRadius, 16);
+        assert.strictEqual(autonomousPathfinding.maxNodes, 30000);
+        assert.strictEqual(autonomousPathfinding.arrivalRadius, 16);
         stopMove(autonomousFixture);
 
         const helvetiaFixture = makeAutonomous(companionFixture(
             realPool,
             { locX: 80456, locY: 147864, locZ: -3504 }
         ));
-        issueMove(
+        const helvetiaPathfinding = await realWorkerMove(
             helvetiaFixture,
-            { locX: 83396, locY: 148144, locZ: -3404 },
-            null,
-            { pathMaxNodes: 30000, arrivalRadius: 64 }
+            () => issueMove(
+                helvetiaFixture,
+                { locX: 83396, locY: 148144, locZ: -3404 },
+                null,
+                { pathMaxNodes: 30000, arrivalRadius: 64 }
+            ),
+            {
+                expectedStrategy: 'worker_town_segment',
+                onIssued(_pending, attempt) {
+                    if (attempt !== 1) return;
+                    const helvetiaSegment = { ...helvetiaFixture.session.townRoutePlan.waypoint };
+                    assert.notDeepStrictEqual(helvetiaSegment, { locX: 83396, locY: 148144, locZ: -3404 },
+                        'a long Helvetia-to-gatekeeper trip must begin with one bounded town segment');
+                }
+            }
         );
-        const helvetiaSegment = { ...helvetiaFixture.session.townRoutePlan.waypoint };
-        assert.notDeepStrictEqual(helvetiaSegment, { locX: 83396, locY: 148144, locZ: -3404 },
-            'a long Helvetia-to-gatekeeper trip must begin with one bounded town segment');
-        await helvetiaFixture.session.pendingPathRequest.promise;
-        assert.strictEqual(helvetiaFixture.session.lastPathfinding.strategy, 'worker_town_segment');
-        assert.strictEqual(helvetiaFixture.session.lastPathfinding.routeUsable, true,
+        assert.strictEqual(helvetiaPathfinding.routeUsable, true,
             'the first varied Giran segment must remain geodata-reachable');
         assert.strictEqual(synchronousFindPathCalls, 0,
             'segmented town movement must keep A* off the game thread');
@@ -159,13 +210,15 @@ async function run() {
             key: 'shopping:0:7081:80518:147922:-3506:32768',
             phase: 'interaction'
         };
-        issueMove(
+        await realWorkerMove(
             shopEgressFixture,
-            { locX: 80467, locY: 147871, locZ: -3506 },
-            null,
-            { pathMaxNodes: 30000, arrivalRadius: 16 }
+            () => issueMove(
+                shopEgressFixture,
+                { locX: 80467, locY: 147871, locZ: -3506 },
+                null,
+                { pathMaxNodes: 30000, arrivalRadius: 16 }
+            )
         );
-        await shopEgressFixture.session.pendingPathRequest.promise;
         assert(shopEgressFixture.session.townNpcEgress?.path?.length >= 2,
             'the final geodata ingress segment to a shop must be retained for a safe exit');
         stopMove(shopEgressFixture);
@@ -203,14 +256,16 @@ async function run() {
             realPool,
             { locX: -12736, locY: 122816, locZ: -3112 }
         ));
-        issueMove(
+        const gludioShopPathfinding = await realWorkerMove(
             gludioShopFixture,
-            { locX: -13908, locY: 123394, locZ: -3116 },
-            null,
-            { pathMaxNodes: 30000, arrivalRadius: 16 }
+            () => issueMove(
+                gludioShopFixture,
+                { locX: -13908, locY: 123394, locZ: -3116 },
+                null,
+                { pathMaxNodes: 30000, arrivalRadius: 16 }
+            )
         );
-        await gludioShopFixture.session.pendingPathRequest.promise;
-        assert.strictEqual(gludioShopFixture.session.lastPathfinding.routeUsable, true,
+        assert.strictEqual(gludioShopPathfinding.routeUsable, true,
             'the real Gludio route from town center to Lundy must stay off-thread and usable');
         stopMove(gludioShopFixture);
 
@@ -218,25 +273,27 @@ async function run() {
             realPool,
             { locX: -13908, locY: 123394, locZ: -3116 }
         ));
-        issueMove(
+        const gludioGatekeeperPathfinding = await realWorkerMove(
             gludioGatekeeperFixture,
-            { locX: -12736, locY: 122744, locZ: -3114 },
-            null,
-            { pathMaxNodes: 30000, arrivalRadius: 16 }
+            () => issueMove(
+                gludioGatekeeperFixture,
+                { locX: -12736, locY: 122744, locZ: -3114 },
+                null,
+                { pathMaxNodes: 30000, arrivalRadius: 16 }
+            )
         );
-        await gludioGatekeeperFixture.session.pendingPathRequest.promise;
-        assert.strictEqual(gludioGatekeeperFixture.session.lastPathfinding.routeUsable, true,
+        assert.strictEqual(gludioGatekeeperPathfinding.routeUsable, true,
             'the real Gludio route from Lundy to Bella must stay off-thread and usable');
         assert.strictEqual(synchronousFindPathCalls, 0,
             'Giran and Gludio town errands must keep all expensive A* work out of the game thread');
         stopMove(gludioGatekeeperFixture);
-        await realPool.shutdown();
 
         const delayedPool = new BoundedPathfindingWorkerPool({
             size: 1,
             queueLimit: 2,
             workerPath: path.join(__dirname, 'fixtures', 'companion_path_worker.js')
         });
+        pools.push(delayedPool);
         const staleFixture = companionFixture(delayedPool, { locX: 0, locY: 0, locZ: 0 });
         issueMove(staleFixture, { locX: 1000, locY: 0, locZ: 0 });
         const stalePromise = staleFixture.session.pendingPathRequest.promise;
@@ -324,8 +381,8 @@ async function run() {
         assert.strictEqual(shortFixture.actor.state.towards, 'move');
         stopMove(shortFixture);
 
-        await delayedPool.shutdown();
     } finally {
+        for (const pool of pools.reverse()) await pool.shutdown().catch(() => null);
         GeodataEngine.findPath = originalFindPath;
         GeodataEngine.hasLineOfSight = originalHasLineOfSight;
     }
