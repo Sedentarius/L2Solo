@@ -41,6 +41,7 @@ function clearSurface(loc) {
 
 function resolve(state, options = {}) {
     const fixed = options.keepStoreLocation === true;
+    const summoned = options.forceNearPlayer === true && !fixed;
     const savedSpot = state?.spotId ? SpotService.findById(state.spotId) : null;
     const source = fixed ? (options.storeLoc || state?.loc)
         : options.forceNearPlayer ? options.playerLoc
@@ -52,7 +53,7 @@ function resolve(state, options = {}) {
     const acceptable = (point) => {
         if (player) {
             const dist = distance(point, player);
-            if (dist < Config.activationMinPlayerDistance || dist > Config.activationRadius) return null;
+            if (dist < (summoned ? 0 : Config.activationMinPlayerDistance) || dist > Config.activationRadius) return null;
         }
         const loc = clearSurface(point);
         if (!loc || !connected(anchor, loc)) return null;
@@ -61,6 +62,17 @@ function resolve(state, options = {}) {
     if (fixed) {
         const loc = clearSurface(anchor);
         return loc ? { loc, spot: SpotService.findCurrentSpot(loc) || null } : null;
+    }
+    if (summoned) {
+        for (const radius of [48, 80, 128, 192, 256]) {
+            for (let i = 0; i < 8; i++) {
+                const angle = i * Math.PI / 4;
+                const locX = Math.round(anchor.locX + Math.cos(angle) * radius);
+                const locY = Math.round(anchor.locY + Math.sin(angle) * radius);
+                const placement = acceptable({ locX, locY, locZ: Geo.getHeight(locX, locY, anchor.locZ) });
+                if (placement) return placement;
+            }
+        }
     }
     for (let i = 0; i < Config.activationPlacementAttempts; i++) {
         const angle = Math.random() * Math.PI * 2;

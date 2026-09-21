@@ -6,6 +6,8 @@ const BotAvailability = invoke('GameServer/Bot/AI/BotAvailability');
 const BotSocialMemory = invoke('GameServer/Bot/AI/BotSocialMemory');
 const InteractionMemory = invoke('GameServer/Social/InteractionMemoryRuntime');
 const originalAssess = InteractionMemory.assess;
+const ClanService = invoke('GameServer/Clan/ClanService');
+const originalFindClan = ClanService.findById;
 
 function actor(id, level, clanId = 0, options = {}) {
     return {
@@ -33,6 +35,9 @@ const originalPeekSnapshot = BotSocialMemory.peekSnapshot;
 const originalRelationship = BotSocialMemory.relationship;
 
 try {
+    let clanMembers = [2000006, 2000024];
+    ClanService.findById = id => Number(id) === 6000001
+        ? { members: clanMembers.map(id => ({ id })) } : null;
     InteractionMemory.assess = () => ({ ready: true, personal: null });
     let memory = { trust: 0, familiarity: 0, recentlyAbandonedAt: null };
     let snapshotReads = 0;
@@ -113,8 +118,10 @@ try {
         assert.strictEqual(result.available, true, `a clan invitation must interrupt ${activity}`);
         result = BotAvailability.evaluateState(clanPlayer, { ...clanState, staticService: true });
         assert.strictEqual(result.reason, 'merchant_duty', 'clan priority must still exclude fixed services');
+        clanMembers = [];
         result = BotAvailability.evaluateState(clanPlayer, { ...clanState, stats: { clanId: 6000002 } });
         assert.strictEqual(result.available, false, 'another clan must not gain the clan summon override');
+        clanMembers = [2000006, 2000024];
     }
 
     const farColdBot = {
@@ -261,6 +268,7 @@ try {
 
     console.log('Bot availability checks passed');
 } finally {
+    ClanService.findById = originalFindClan;
     InteractionMemory.assess = originalAssess;
     BotSocialMemory.getSnapshot = originalGetSnapshot;
     BotSocialMemory.peekSnapshot = originalPeekSnapshot;

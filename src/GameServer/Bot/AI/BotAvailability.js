@@ -51,7 +51,12 @@ function clanIdOf(subject) {
 function sameClan(player, botSubject) {
     const playerClanId = clanIdOf(player);
     if (playerClanId === 0) return false;
-    return playerClanId === clanIdOf(botSubject);
+    if (botSubject?.actor || botSubject?.fetchClanId) {
+        return playerClanId === clanIdOf(botSubject);
+    }
+    const clan = invoke('GameServer/Clan/ClanService').findById(playerClanId);
+    const botId = subjectId(botSubject);
+    return botId > 0 && !!clan?.members?.some(member => Number(member.id) === botId);
 }
 
 function subjectName(subject) {
@@ -116,8 +121,8 @@ const BotAvailability = {
         let reason = 'available';
         if (staticService) reason = 'merchant_duty';
         else if (botSession.hotBackgroundPartyId || botSession.hotCompetitionCommit) reason = 'already_grouped';
-        else if (!options.forceFriend && result.relationshipReason) reason = result.relationshipReason;
         else if (result.clanmate) reason = 'available';
+        else if (!options.forceFriend && result.relationshipReason) reason = result.relationshipReason;
         else if (player.isDead && player.isDead()) reason = 'player_dead';
         else if (bot.isDead && bot.isDead()) reason = 'bot_dead';
         else if (!options.forceFriend && botSession.plan === 'merchant') reason = 'merchant_duty';
@@ -150,8 +155,8 @@ const BotAvailability = {
 
         let reason = 'available';
         if (staticService) reason = 'merchant_duty';
-        else if (!options.forceFriend && result.relationshipReason) reason = result.relationshipReason;
         else if (result.clanmate) reason = 'available';
+        else if (!options.forceFriend && result.relationshipReason) reason = result.relationshipReason;
         else if (!options.forceFriend && state.activity === 'traveling') reason = 'in_transit';
         else if (!options.forceFriend && state.activity === 'pk_hunting') reason = 'pk_encounter_only';
         else if (player.isDead && player.isDead()) reason = 'player_dead';

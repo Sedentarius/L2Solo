@@ -6,6 +6,8 @@ const Runtime = invoke('GameServer/Social/InteractionMemoryRuntime');
 const Policy = require('../src/GameServer/Social/InteractionMemoryPolicy');
 const Bridge = require('../src/GameServer/Social/PlayerPartyRelationship');
 const Revenge = require('../src/GameServer/Social/RevengePolicy');
+const ClanService = invoke('GameServer/Clan/ClanService');
+const originalFindClan = ClanService.findById;
 const original = { get: Legacy.getSnapshot, peek: Legacy.peekSnapshot, clans: Runtime.clanSocial };
 const actor = (id, clanId = 0) => ({ fetchId: () => id, fetchName: () => `Actor${id}`,
     fetchLevel: () => 40, fetchClanId: () => clanId, fetchLocX: () => 0, fetchLocY: () => 0,
@@ -40,8 +42,10 @@ const event = type => {
         assert.strictEqual(result.reason, 'relationship_hostile');
         assert.strictEqual(result.relationship, 'hostile');
     }
+    ClanService.findById = id => Number(id) === 77 ? { members: [{ id: botId }] } : null;
     hot.actor = actor(botId, 77); player.actor = actor(501, 77); cold.stats.clanId = 77;
-    assert(assessBoth().every(r => r.reason === 'relationship_hostile'), 'clan membership cannot erase personal harm');
+    assert(assessBoth().every(r => r.available), 'clan invitations take priority over personal hostility');
+    assert(assessBoth().every(r => r.relationship === 'hostile'), 'invitation priority preserves personal history');
     assert(Availability.evaluate(player, hot, { timestamp: at, forceFriend: true }).available,
         'the explicit const-friend override remains authoritative');
     hot.actor = actor(botId); player.actor = actor(501); cold.stats.clanId = 0;
@@ -92,6 +96,7 @@ const event = type => {
     }
     console.log('Player party relationship: hot/cold parity, revenge, reconciliation, clan context, pending memory and no duplicate credit passed');
 } finally {
+    ClanService.findById = originalFindClan;
     Legacy.getSnapshot = original.get; Legacy.peekSnapshot = original.peek; Runtime.clanSocial = original.clans;
     Runtime.views.delete(botId); Runtime.snapshots.delete(botId);
 } })().catch(error => { console.error(error); process.exitCode = 1; });

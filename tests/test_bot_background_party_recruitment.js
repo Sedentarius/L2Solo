@@ -18,6 +18,7 @@ const ColdSimulationCoordinator = invoke('GameServer/Bot/Population/ColdSimulati
 const World = invoke('GameServer/World/World');
 const BotSocialMemory = invoke('GameServer/Bot/AI/BotSocialMemory');
 const PartyCompanionService = invoke('GameServer/Bot/AI/PartyCompanionService');
+const ClanService = invoke('GameServer/Clan/ClanService');
 
 const originals = {
     active: PartyState.active,
@@ -394,6 +395,7 @@ async function run() {
     assert.strictEqual(summonedState.stats.travel, null, 'the stale background route must be cleared before the bot spawns');
 
     const inviteOriginals = {
+        findClanById: ClanService.findById,
         findByName: LifeState.findByName,
         findSessionByName: BotManager.findSessionByName,
         botTell: BotManager.botTell,
@@ -427,8 +429,11 @@ async function run() {
                 name: `ClanSummon${index}`,
                 level: 55,
                 activity,
-                stats: { ...travelingState.stats, clanId: 77 }
+                // Cold snapshots can lag behind the current clan roster.
+                stats: { ...travelingState.stats, clanId: 0 }
             };
+            ClanService.findById = id => Number(id) === 77
+                ? { id: 77, members: [{ id: clanState.characterId }] } : null;
             let hotSession = null;
             let attached = false;
             invoke('GameServer/Social/InteractionMemoryRuntime').accept(
@@ -466,6 +471,7 @@ async function run() {
             assert.strictEqual(attached, true, 'the activated clan bot must proceed to party attachment');
         }
     } finally {
+        ClanService.findById = inviteOriginals.findClanById;
         LifeState.findByName = inviteOriginals.findByName;
         BotManager.findSessionByName = inviteOriginals.findSessionByName;
         BotManager.botTell = inviteOriginals.botTell;
