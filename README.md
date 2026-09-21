@@ -36,6 +36,7 @@ Optional but recommended for a better experience
 
 ## Latest updates
 
+- **2026-09-21** L2Solo client mod, server-side mod support, in-game items db
 - **2026-09-20** Clan halls, clan craft goals, clan WH resources collection, fixes and improvements
 - **2026-09-17** Death exp penalties, overhit bonus, max level setting, bot lucky protection
 - **2026-09-17** Gameplay fixes, clan progression, skills, and town services
