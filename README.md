@@ -14,11 +14,15 @@ Nothing is auto-generated. Everything in the world is the result of a player's o
 
 🏗️ Work in progress. Playable.
 
+
 💬 [Discord](https://discord.gg/dXsQ8SJA7k)
 Support, updates, and communication. Join the Discord to stay up to date with development.
 
 ⚔️ [Game client](https://drive.google.com/file/d/1u0nW3m9c6Hql8sR9POQAcvglxIno23lv/view?usp=sharing)
 Clean C4 client protocol 656
+
+🧩 [L2Solo client mod](https://drive.google.com/file/d/1kDHcZubwtFvI4h8C93YDpE9Ctasll56Z/view?usp=sharing)
+Optional but recommended for a better experience
 
 
 💻 Simulation - everything that is happening in the game world besides player actions.
