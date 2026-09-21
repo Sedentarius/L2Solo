@@ -41,7 +41,7 @@ function normalize(row) {
         role: profession.classId === null ? (stats.role || profession.role) : profession.role
     };
 }
-function list(playerId, where, currentPage) {
+function list(playerId, where, currentPage, size = PAGE_SIZE, lookahead = false) {
     return Database.execute([`SELECT l.characterId AS botId, l.characterName AS name, l.level, l.activity, l.currentRegion, l.statsJson, c.classId, s.trust, s.familiarity, f.status,
         CASE WHEN r.botId IS NULL THEN 0 ELSE 1 END AS selected
         FROM bot_social_memory s INNER JOIN bot_life_state l ON l.characterId = s.botId
@@ -51,7 +51,7 @@ function list(playerId, where, currentPage) {
         WHERE s.playerId = ? AND ${where}
         ${staticServiceSql('l')}
         ORDER BY s.trust DESC, s.familiarity DESC, l.characterName COLLATE NOCASE LIMIT ? OFFSET ?`,
-        [playerId, ...staticMerchantNames, PAGE_SIZE, page(currentPage) * PAGE_SIZE]
+        [playerId, ...staticMerchantNames, size + (lookahead ? 1 : 0), page(currentPage) * size]
     ]).then((rows) => rows.map(normalize).filter((bot) => !BotServiceIdentity.isStaticService(bot)));
 }
 
@@ -60,6 +60,12 @@ const BotFriendship = {
     init() { return Database.execute(['SELECT 1 FROM bot_friendships LIMIT 1', []], 'schema:bot-friends').catch(() => null); },
     listFriends(player, currentPage = 0) { const playerId = id(player); return playerId ? list(playerId, "f.status = 'accepted'", currentPage) : Promise.resolve([]); },
     listCandidates(player, currentPage = 0) { const playerId = id(player); return playerId ? list(playerId, "s.trust > 0 AND (f.status IS NULL OR f.status <> 'accepted')", currentPage) : Promise.resolve([]); },
+    listWindowPage(player, mode, currentPage = 0) {
+        const playerId = id(player);
+        const where = mode === 'add' ? "s.trust > 0 AND (f.status IS NULL OR f.status <> 'accepted')" : "f.status = 'accepted'";
+        return (playerId ? list(playerId, where, currentPage, 8, true) : Promise.resolve([]))
+            .then((rows) => ({ rows: rows.slice(0, 8), hasNext: rows.length > 8 }));
+    },
     isFriend(player, botId) {
         const playerId = id(player);
         if (!playerId || !botId) return Promise.resolve(false);

@@ -68,6 +68,10 @@ options.default.Database.path = path.join(dir, 'test.sqlite');
             const dependencies = {
                 'GameServer/Network/Response': { logoutSuccess: () => 'logout', restart: () => 'restart' },
                 'GameServer/Network/Shared': { fetchCharacters: async () => [], enterCharacterHall: () => {} },
+                'GameServer/World/Generics/NativeUiSession': { reset(_session, options) {
+                    assert.strictEqual(options.clearDirection, true);
+                    events.push('reset-ui');
+                } },
                 'GameServer/World/ArenaDuelService': { release() {} },
                 'GameServer/Effects/EffectTicker': { clearAll() {} }
             };
@@ -75,10 +79,10 @@ options.default.Database.path = path.join(dir, 'test.sqlite');
             vm.runInNewContext(fs.readFileSync(require.resolve(`../src/GameServer/Network/Request/${name}`), 'utf8'), context);
             const pending = context.module.exports({ actor: { destructor: () => events.push('destroy') },
                 persistCharacterStatus: () => save, dataSendToMe: () => events.push('reply') });
-            assert.deepStrictEqual(events, []);
+            assert.deepStrictEqual(events, ['reset-ui']);
             finishSave();
             await pending;
-            assert.deepStrictEqual(events, ['destroy', 'reply']);
+            assert.deepStrictEqual(events, ['reset-ui', 'destroy', 'reply']);
         }
         Database.init();
         await Database.createAccount('reuse_test', 'test');

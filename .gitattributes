@@ -1,0 +1,2 @@
+# The catalog generator and manifest hashes compare exact serialized bytes.
+/data/KnowledgeBase/*.json text eol=lf
