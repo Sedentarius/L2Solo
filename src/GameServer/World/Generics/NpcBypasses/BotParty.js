@@ -241,6 +241,10 @@ function footer(state) {
 function render(session, requestedPage) {
     const actor = session.actor;
     if (!actor) return;
+    if (session.nativeFinderVersion === 1) {
+        if (session.nativeFinderOpen) renderNative(session);
+        return;
+    }
 
     const state = menuState(session);
     if (requestedPage !== undefined) state.page = requestedPage;
@@ -266,7 +270,54 @@ function render(session, requestedPage) {
 
 function open(session) {
     resetState(session);
+    if (session.nativeFinderVersion === 1) {
+        session.nativeFinderOpen = true;
+        return renderNative(session, true);
+    }
     render(session);
+}
+
+// Native presentation keeps the existing catalog and invite authority. Only the
+// visible page evaluates availability; opening All must not load 2,000 memories.
+function nativeState(session) {
+    if (!session.nativeFinderState) {
+        const level = Number(session.actor?.fetchLevel?.() || 0);
+        session.nativeFinderState = {
+            query: '', level: LEVEL_RANGES.find((r) => level >= r.min && level <= r.max)?.key || 'all',
+            role: 'all', page: 0
+        };
+    }
+    return session.nativeFinderState;
+}
+
+function renderNative(session, open = false, message = '') {
+    if (!session.actor || !session.nativeFinderOpen || session.nativeFinderVersion !== 1) return;
+    const state = nativeState(session);
+    const catalog = candidateCatalog(session);
+    const range = LEVEL_RANGES.find((r) => r.key === state.level);
+    const role = ROLE_FILTERS.find((r) => r.key === state.role);
+    const candidates = catalog.filter((c) => (
+        (!state.query || c.name.toLowerCase().includes(state.query.toLowerCase())) &&
+        (!range || (c.level >= range.min && c.level <= range.max)) &&
+        (state.role === 'all' || (state.role === 'spoiler' ? c.profession.role === 'spoiler' : role?.roles.includes(c.profession.role)))
+    )).sort(compareCandidates);
+    const pages = Math.max(1, Math.ceil(candidates.length / CANDIDATES_PER_PAGE));
+    state.page = Math.min(pages - 1, Math.max(0, Math.floor(Number(state.page) || 0)));
+    const visible = candidates.slice(state.page * CANDIDATES_PER_PAGE, (state.page + 1) * CANDIDATES_PER_PAGE);
+    session.nativeFinderVisible = visible.map((c) => c.name);
+    const rows = visible.map((c) => {
+        const availability = candidateAvailability(session, c);
+        return {
+            name: c.name, level: c.level, classId: c.profession.classId ?? 0,
+            className: c.profession.className || 'Unknown class', role: c.profession.role,
+            available: availability.available, reason: availability.reasonText || '',
+            phase: c.phase === 'hot' ? 'active' : 'background'
+        };
+    });
+    const Protocol = invoke('GameServer/World/Generics/NativeFinderProtocol');
+    session.dataSendToMe(ServerResponse.npcHtml(session.actor.fetchId(), Protocol.encode({
+        ...state, pages, total: candidates.length, open, message
+    }, rows)));
 }
 
 function botParty(session, parts) {
@@ -330,5 +381,8 @@ botParty.open = open;
 botParty.CANDIDATES_PER_PAGE = CANDIDATES_PER_PAGE;
 botParty.LEVEL_RANGES = LEVEL_RANGES;
 botParty.ROLE_FILTERS = ROLE_FILTERS;
+botParty.nativeState = nativeState;
+botParty.renderNative = renderNative;
+botParty.searchText = searchText;
 
 module.exports = botParty;

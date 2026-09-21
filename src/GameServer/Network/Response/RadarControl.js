@@ -1,7 +1,7 @@
 const SendPacket = invoke('Packet/Send');
 
-// C4 RadarControl (0xEB): the client expects the radar to be armed before
-// receiving the visible waypoint marker.
+// C4 RadarControl (0xEB): action 0 adds a point and enables the overhead
+// arrow; 1 removes a point only; 2 disables the arrow and clears all points.
 function radarControl(showRadar, type, locX, locY, locZ) {
     const packet = new SendPacket(0xeb);
 

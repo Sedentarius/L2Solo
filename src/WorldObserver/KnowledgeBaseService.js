@@ -344,7 +344,7 @@ function createKnowledgeBaseService({ dataDir, progressionRates, iconFor = null 
         };
     }
 
-    function listItems({ q = '', category = 'all', grade = 'all', page = 1, limit = DEFAULT_PAGE_SIZE } = {}) {
+    function listItems({ q = '', category = 'all', grade = 'all', page = 1, limit = DEFAULT_PAGE_SIZE, exactFirst = false } = {}) {
         const data = load();
         const needle = normalize(q);
         const selectedCategory = normalize(category) || 'all';
@@ -354,7 +354,9 @@ function createKnowledgeBaseService({ dataDir, progressionRates, iconFor = null 
             .filter((item) => !needle || normalize(`${item.name} ${item.id} ${item.kind}`).includes(needle))
             .filter((item) => selectedCategory === 'all' || itemCategory(item.kind) === selectedCategory)
             .filter((item) => selectedGrade === 'all' || itemGrade(item) === selectedGrade)
-            .sort((left, right) => left.name.localeCompare(right.name) || Number(left.id) - Number(right.id))
+            .sort((left, right) => (exactFirst && needle
+                ? Number(normalize(right.name) === needle || String(right.id) === needle) - Number(normalize(left.name) === needle || String(left.id) === needle)
+                : 0) || left.name.localeCompare(right.name) || Number(left.id) - Number(right.id))
             .map((item) => itemSummary(item, iconFor));
         return { ...pageResult(results, page, limit), rateProfile: rateProfile() };
     }

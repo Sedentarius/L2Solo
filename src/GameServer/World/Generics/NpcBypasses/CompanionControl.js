@@ -270,7 +270,7 @@ function renderModePanel(settings, count) {
     ].join('');
 }
 
-function renderCompanionCard(companionSession, settings) {
+function companionView(companionSession, settings) {
     const bot = companionSession.actor;
     const isPuller = isAssignedPuller(companionSession, settings);
     const stayActive = companionSession.botStay === true;
@@ -301,6 +301,19 @@ function renderCompanionCard(companionSession, settings) {
     const note = blocker || debuff || buffWarning || targetEvaluation || target || 'ready';
     const noteColor = blocker || debuff ? Html.COLOR.warn : Html.COLOR.muted;
     const canPull = ['tank', 'dagger', 'dps'].includes(role);
+    return {
+        id: bot.fetchId(), name: bot.fetchName(), level: bot.fetchLevel(),
+        className: profession.className || 'Unknown profession', role, stance,
+        order: roleDecision, note, canPull, isPuller, stayActive, noteColor
+    };
+}
+
+function renderCompanionCard(companionSession, settings) {
+    const bot = companionSession.actor;
+    const view = companionView(companionSession, settings);
+    const { isPuller, stayActive, role, stance, note, noteColor, canPull } = view;
+    const roleDecision = view.order;
+    const profession = { className: view.className };
     const primaryAction = stayActive
         ? { label: 'Follow', command: `companion-control follow ${bot.fetchName()}`, color: Html.COLOR.ok }
         : { label: 'Hold', command: `companion-control stay ${bot.fetchName()}` };
@@ -366,12 +379,21 @@ function companionControl(session, parts) {
     renderCompanionPanel(session, requestedPage);
 }
 
-function renderCompanionPanel(session, requestedPage = 0) {
+function renderCompanionPanel(session, requestedPage = 0, options = {}) {
     const actor = session.actor;
     if (!actor) return;
 
     const myCompanions = orderedCompanionSessions(session);
     const settings = PartyCompanionService.getSettings(session);
+
+    if (session.nativePartyUiVersion === 1) {
+        if (options.open === true) session.nativePartyUiOpen = true;
+        if (!session.nativePartyUiOpen) return;
+        const Protocol = invoke('GameServer/World/Generics/NativePartyProtocol');
+        const payload = Protocol.encode(settings, myCompanions.map((member) => companionView(member, settings)), options);
+        session.dataSendToMe(ServerResponse.npcHtml(actor.fetchId(), payload));
+        return;
+    }
 
     if (myCompanions.length === 0) {
         const html = Html.page(

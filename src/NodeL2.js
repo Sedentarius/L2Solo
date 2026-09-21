@@ -100,6 +100,8 @@ Database.init(() => {
         const AfkTrade = invoke('GameServer/AfkTrade/AfkTradeService');
         await AfkTrade.init();
 
+        invoke('GameServer/World/Generics/NativeKnowledgeBase').warmup();
+
         new Server('AuthServer', options.default.AuthServer, (socket) => {
             return new AuthSession(socket);
         });
