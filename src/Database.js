@@ -1129,7 +1129,19 @@ function applySchemaMigrations() {
                 resolutionReason TEXT NOT NULL DEFAULT ''
             );
         `);
-        }]
+        }],
+        [42, () => connection.exec(`
+            CREATE INDEX IF NOT EXISTS clan_actions_uncompacted_details
+                ON clan_actions(resolvedAt, id)
+                WHERE status IN ('succeeded', 'failed', 'cancelled')
+                  AND (payloadJson <> '{}' OR resultJson <> '{}');
+            CREATE INDEX IF NOT EXISTS clan_goal_events_uncompacted_details
+                ON clan_goal_events(occurredAt, id)
+                WHERE eventType IN ('action_succeeded', 'action_failed', 'action_cancelled')
+                  AND payloadJson <> '{}';
+            DROP INDEX IF EXISTS clan_actions_terminal_retention;
+            DROP INDEX IF EXISTS clan_goal_events_action_retention;
+        `)]
     ];
     const applied = new Set(connection.prepare('SELECT version FROM schema_migrations').all().map((row) => Number(row.version)));
     migrations.forEach(([version, apply]) => {
