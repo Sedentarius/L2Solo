@@ -72,7 +72,7 @@ const world = {
     npc: {
         spawns: [], nextId: 1000000, grid: {},
         periodMode: 'day', periodRevision: 0,
-        periodDefinitions: [day, night, dayTwo, nightTwo]
+        periodDefinitions: [day, night, dayTwo, nightTwo, night, always]
     },
     indexSpawnsInGrid() {
         this.npc.gridRevisions = Number(this.npc.gridRevisions || 0) + 1;
@@ -104,6 +104,9 @@ assert.strictEqual(packets.at(-1)[0], 0x1d, 'night transition must broadcast the
 assert.strictEqual(RemoveNpc.canRespawnDefinition(world, day, 0), false,
     'a pending day respawn must be invalidated when the period revision changes');
 
+assert.deepStrictEqual(DayNightSpawnManager.changeMode(world, 'night'), { changed: false, removed: 0, spawned: 0 },
+    'repeated transitions and repeated definitions must not duplicate NPCs');
+
 const secondChange = DayNightSpawnManager.changeMode(world, 'day');
 assert.deepStrictEqual(secondChange, { changed: true, removed: 2, spawned: 2 });
 assert.deepStrictEqual(world.npc.spawns.map((npc) => npc.spawnDefinition.spawn.period).sort(), ['always', 'day', 'day']);
@@ -111,5 +114,39 @@ assert.strictEqual(packets.at(-1)[0], 0x1c, 'day transition must broadcast the C
 assert.strictEqual(RemoveNpc.canRespawnDefinition(world, day, world.npc.periodRevision), true);
 assert.strictEqual(RemoveNpc.canRespawnDefinition(world, always, 0), true,
     'always-on respawns must survive period changes');
+
+// Counting accesses makes the performance regression deterministic: presence
+// checks must scale with world size plus definitions, not their product.
+let definitionReads = 0;
+const ordinary = definition('always', 1500);
+const largeWorld = {
+    user: { sessions: [] },
+    npc: {
+        periodMode: 'day', periodRevision: 0,
+        spawns: Array.from({ length: 1000 }, () => ({
+            get spawnDefinition() { definitionReads += 1; return ordinary; }
+        })),
+        periodDefinitions: Array.from({ length: 100 }, (_, index) => definition('night', 2000 + index))
+    }
+};
+largeWorld.npc.periodDefinitions.push(largeWorld.npc.periodDefinitions[0]);
+const originalSpawn = SpawnNpcs.spawnNpc;
+let attempts = 0;
+try {
+    SpawnNpcs.spawnNpc = (target, spawnDefinition) => {
+        attempts += 1;
+        if (attempts === 1) return null; // A failed spawn may retry a duplicate definition.
+        const npc = { spawnDefinition };
+        target.npc.spawns.push(npc);
+        return npc;
+    };
+    assert.deepStrictEqual(DayNightSpawnManager.changeMode(largeWorld, 'night'),
+        { changed: true, removed: 0, spawned: 100 });
+    assert.strictEqual(attempts, 101);
+    assert(definitionReads <= 3000, 'period transition must not rescan the world for each definition');
+    assert.strictEqual(new Set(largeWorld.npc.spawns.slice(1000).map(npc => npc.spawnDefinition)).size, 100);
+} finally {
+    SpawnNpcs.spawnNpc = originalSpawn;
+}
 
 console.log('C4 day/night spawn lifecycle checks passed');

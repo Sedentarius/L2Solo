@@ -1,5 +1,6 @@
 const BotGear = invoke('GameServer/Bot/AI/BotGear');
 const DataCache = invoke('GameServer/DataCache');
+const BotMarketPricing = invoke('GameServer/Bot/Economy/BotMarketPricing');
 const ItemDisposition = invoke('GameServer/Bot/Economy/ItemDisposition');
 const GearLifecycle = invoke('GameServer/Bot/AI/GearLifecycle');
 const PersonaEconomicPolicy = invoke('GameServer/Bot/Economy/PersonaEconomicPolicy');
@@ -119,7 +120,10 @@ function equipmentNeed(state) {
     const usingPlannedTarget = Number(selectedItem.selfId) === Number(plannedTarget?.selfId);
     const template = itemBySelfId(selectedItem.selfId);
     const plannedMarket = usingPlannedTarget ? acquisitionPlan?.market : null;
-    const price = Math.max(1, Number(plannedMarket?.price || template?.template?.price || 0));
+    const quotedPrice = Math.max(0, Number(plannedMarket?.price || 0));
+    const price = quotedPrice || BotMarketPricing.referencePrice({
+        selfId: selectedItem.selfId, basePrice: template?.template?.price
+    });
     return {
         currentItem,
         desiredRank,
@@ -131,6 +135,7 @@ function equipmentNeed(state) {
             price
         },
         marketTown: plannedMarket?.town || null,
+        priceSource: quotedPrice > 0 ? 'offer' : 'reference',
         reserve: Number(plannedMarket?.reserve || 0),
         clanRequired: acquisitionPlan?.clanGoal?.priority === 'required',
         npcProgression: plannedMarket?.sourceType === 'npc'
@@ -202,6 +207,7 @@ function evaluate(state = {}, options = {}) {
                     ? weaponUpgrade ? 'adena_for_weapon_upgrade' : 'adena_for_gear_upgrade'
                     : weaponUpgrade ? 'market_search_for_weapon' : 'market_search_for_gear',
                 estimatedCost: gear.desiredItem.price,
+                priceSource: gear.priceSource,
                 reserve: gear.reserve,
                 requiredAdena,
                 marketTown: gear.marketTown,

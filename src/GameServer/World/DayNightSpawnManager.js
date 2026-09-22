@@ -46,11 +46,17 @@ function changeMode(world, nextMode, response = ServerResponse) {
     inactive.forEach(stopNpc);
     const removed = NpcDecay.decayMany(world, inactive);
 
+    // Build once after removal; scanning every NPC for each periodic spawn
+    // stalls the world at sunrise/sunset on a populated map.
+    const presentDefinitions = new Set((world.npc.spawns || []).map((npc) => npc.spawnDefinition));
     let spawned = 0;
     (world.npc.periodDefinitions || []).forEach((definition) => {
         if (!SpawnNpcs.isPeriodActive(definition.spawn, mode)) return;
-        if ((world.npc.spawns || []).some((npc) => npc.spawnDefinition === definition)) return;
-        if (SpawnNpcs.spawnNpc(world, definition)) spawned += 1;
+        if (presentDefinitions.has(definition)) return;
+        if (SpawnNpcs.spawnNpc(world, definition)) {
+            presentDefinitions.add(definition);
+            spawned += 1;
+        }
     });
 
     broadcast(world, mode, response);

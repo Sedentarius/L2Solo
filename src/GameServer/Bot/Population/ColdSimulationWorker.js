@@ -45,6 +45,8 @@ global.invoke = (module) => {
     return originalInvoke(module);
 };
 
+const BotMarketPricing = invoke('GameServer/Bot/Economy/BotMarketPricing');
+BotMarketPricing.useNpcOfferSnapshot([]);
 const BackgroundResolver = invoke('GameServer/Bot/Population/BackgroundResolver');
 const BackgroundPartyResolver = invoke('GameServer/Bot/Population/BackgroundPartyResolver');
 const Config = invoke('GameServer/Bot/Population/PopulationConfig');
@@ -342,6 +344,7 @@ async function handle(message) {
         if (payload.catalog === 'npc_offers') {
             planningNpcOfferRows.push(...(payload.rows || []));
             if (payload.done) {
+                BotMarketPricing.useNpcOfferSnapshot(planningNpcOfferRows);
                 planningNpcCatalog = ColdNpcPlanningCatalog.createLookup(planningNpcOfferRows);
                 planningNpcOfferRows = [];
             }

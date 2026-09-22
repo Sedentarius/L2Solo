@@ -549,6 +549,16 @@ function open(state, options = {}) {
         return Promise.resolve({ state, listed: false, reason: 'not_shopping' });
     }
     const timestamp = Number(options.now) || Date.now();
+    if (Number(state.stats?.marketSellRetryAfter || 0) > timestamp) {
+        if (!options.forcedCleanup) return Promise.resolve({ state, listed: false, reason: 'sell_retry_cooldown' });
+        // Cleanup may bypass the travel delay, but must not open another WTS.
+        return preTradeNpcCleanup(state, options.forcedCleanup, timestamp).then((cleanup) => (
+            BotWarehouse.depositCold({
+                ...cleanup.state,
+                stats: { ...cleanup.state.stats, marketSellRetryAfter: state.stats.marketSellRetryAfter }
+            }).then((warehouse) => ({ ...cleanup, state: warehouse.state, reason: 'sell_retry_cleanup' }))
+        ));
+    }
     const deferSellRetry = (nextState) => ({
         ...nextState,
         stats: {
@@ -707,10 +717,27 @@ function listingNextReviewAt(items, storeExpiresAt, timestamp) {
     return Math.min(Number(storeExpiresAt || timestamp + LISTING_REVIEW_MS), timestamp + LISTING_REVIEW_MS, speculativeExpiry);
 }
 
+function pricingAfterReview(state, store, timestamp, expired = false) {
+    const pricing = { ...(state.stats?.marketPricing || {}) };
+    for (const item of store.items || []) {
+        if (Number(item.count || 0) <= 0) continue;
+        const speculativeFailed = item.marketReason === 'speculative_demand'
+            && (expired || Number(item.marketExpiresAt || store.expiresAt || Infinity) <= timestamp);
+        if (!expired && !speculativeFailed) continue;
+        const previous = pricing[item.selfId] || {};
+        pricing[item.selfId] = {
+            ...previous,
+            percent: Math.max(50, Number(previous.percent || 100) - 5),
+            lastAdjustedAt: timestamp,
+            ...(speculativeFailed ? { speculativeFailedAt: timestamp, failedSpeculativePrice: Number(item.price) } : {})
+        };
+    }
+    return pricing;
+}
+
 function closeSellStore(state, timestamp, reason) {
     const store = state.stats.marketStore;
     const hasStock = stockUnits(store) > 0;
-    const penalizePrice = reason === 'expired';
     const nextState = {
         ...state,
         activity: 'shopping',
@@ -718,12 +745,7 @@ function closeSellStore(state, timestamp, reason) {
             ...(state.stats || {}),
             marketStore: null,
             marketSellRetryAfter: hasStock ? timestamp + SELL_RETRY_DELAY_MS : null,
-            marketPricing: penalizePrice ? (store.items || []).reduce((pricing, item) => {
-                if (Number(item.count || 0) <= 0) return pricing;
-                const previous = Number(pricing[item.selfId]?.percent || 100);
-                pricing[item.selfId] = { percent: Math.max(50, previous - 5), lastAdjustedAt: timestamp };
-                return pricing;
-            }, { ...(state.stats?.marketPricing || {}) }) : state.stats?.marketPricing || {}
+            marketPricing: pricingAfterReview(state, store, timestamp, reason === 'expired')
         },
         timing: { ...(state.timing || {}), nextResolveAt: timestamp }
     };
@@ -746,7 +768,7 @@ function closeSellStore(state, timestamp, reason) {
             // for a later scheduler command.
             const returning = reason === 'sold_out'
                 ? liquidatedState
-                : GoalExecutor.finishMarketVisit(liquidatedState, timestamp) || liquidatedState;
+                : GoalExecutor.finishMarketVisit(liquidatedState, timestamp, { recoverMissingReturn: true }) || liquidatedState;
             return LifeState.upsertState(returning, `cold_market_${reason}`)
                 .then((saved) => ({
                     state: saved || returning,
@@ -768,6 +790,7 @@ function revalidateListing(state, timestamp) {
         ...state,
         stats: {
             ...(state.stats || {}),
+            marketPricing: pricingAfterReview(state, store, timestamp),
             marketStore: {
                 ...store,
                 items,
@@ -786,7 +809,6 @@ function revalidateListing(state, timestamp) {
 
 function hotClosedState(state, store, timestamp, reason) {
     const hasStock = stockUnits(store) > 0;
-    const penalizePrice = reason === 'expired';
     return {
         ...state,
         phase: 'hot',
@@ -795,12 +817,7 @@ function hotClosedState(state, store, timestamp, reason) {
             ...(state.stats || {}),
             marketStore: null,
             marketSellRetryAfter: hasStock ? timestamp + SELL_RETRY_DELAY_MS : null,
-            marketPricing: penalizePrice ? (store.items || []).reduce((pricing, item) => {
-                if (Number(item.count || 0) <= 0) return pricing;
-                const previous = Number(pricing[item.selfId]?.percent || 100);
-                pricing[item.selfId] = { percent: Math.max(50, previous - 5), lastAdjustedAt: timestamp };
-                return pricing;
-            }, { ...(state.stats?.marketPricing || {}) }) : state.stats?.marketPricing || {}
+            marketPricing: pricingAfterReview(state, store, timestamp, reason === 'expired')
         },
         timing: { ...(state.timing || {}), nextResolveAt: timestamp }
     };
@@ -869,7 +886,8 @@ async function resolveHotSession(session, timestamp = Date.now()) {
     };
     const nextState = {
         ...runtimeState,
-        stats: { ...(runtimeState.stats || {}), marketStore: nextStore }
+        stats: { ...(runtimeState.stats || {}), marketStore: nextStore,
+            marketPricing: pricingAfterReview(runtimeState, store, timestamp) }
     };
     const applied = await BotMerchantStoreService.applyLifecycle(session, nextState, 'hot_market_demand_revalidated');
     if (!applied.ok) return { state, closed: false, maintained: false, reason: applied.reason };

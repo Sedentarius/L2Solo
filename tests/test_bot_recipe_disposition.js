@@ -13,7 +13,7 @@ DataCache.init();
 
 const recipe = C4RecipeItems.resolve(2298);
 const lowGradeRecipe = C4RecipeItems.resolve(2250);
-const spellbook = DataCache.items.find((item) => /spellbook/i.test(item?.template?.name || ''));
+const spellbook = DataCache.items.find((item) => item?.template?.kind === 'Other.Spellbook');
 assert(recipe && lowGradeRecipe && spellbook, 'the datapack must contain recipe and spellbook fixtures');
 
 const original = {

@@ -1,5 +1,4 @@
 const Crafting = require('./ClanCraftingPolicy');
-const Recipes = invoke('GameServer/Items/C4RecipeItems');
 const LifeState = invoke('GameServer/Bot/Population/BotLifeState');
 const cursors = new Map();
 const Database = invoke('Database');
@@ -70,7 +69,7 @@ async function resolveClan(clan, options = {}) {
     const beneficiary = (clan.members || []).find(member => number(member.characterId) === number(goal?.target?.memberId));
     const plan = beneficiary?.stats?.equipmentPlan;
     const demand = plan?.strategy === 'craft' && plan.clanGoal?.goalKey === goal?.goalKey
-        ? Object.fromEntries([...Crafting.requirements(Recipes.resolveByRecipeId(plan.recipeId), beneficiary.inventory, null, 1, plan.craftProviders, plan.componentRecipes)]
+        ? Object.fromEntries([...Crafting.requirements(Crafting.resolveRecipe(plan.recipeId), beneficiary.inventory, null, 1, plan.craftProviders, plan.componentRecipes)]
             .map(([id, amount]) => [id, Math.max(0, amount - number(beneficiary.inventory?.[id]?.amount))])) : {};
     const cursor = cursors.get(number(clan.id)) || 0;
     members = [...members.filter(member => member.characterId > cursor), ...members.filter(member => member.characterId <= cursor)];

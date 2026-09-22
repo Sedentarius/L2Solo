@@ -4,6 +4,7 @@ require('../src/Global');
 
 const DataCache = invoke('GameServer/DataCache');
 const Database = invoke('Database');
+const originalReconcileClanGoals = Database.reconcileBotClanGoals;
 const World = invoke('GameServer/World/World');
 const GoalState = invoke('GameServer/Bot/Goals/GoalState');
 const ColdMarketService = invoke('GameServer/Bot/Economy/ColdMarketService');
@@ -24,6 +25,9 @@ const originals = {
     updateItemEquipState: Database.updateItemEquipState,
     setItem: Database.setItem,
     syncInventorySummary: Database.syncInventorySummary,
+    updateCharacterLocation: Database.updateCharacterLocation,
+    updateCharacterExperience: Database.updateCharacterExperience,
+    updateCharacterVitals: Database.updateCharacterVitals,
     clearGoal: GoalState.clear,
     user: World.user,
     bestOffer: MarketOpportunity.bestOffer,
@@ -41,6 +45,10 @@ const playerStore = {
 
 async function run() {
     Database.reconcileBotClanMembership = async () => ({ repairedMembers: 0, repairedParties: 0 });
+    Database.reconcileBotClanGoals = async () => ({ repairedMembers: 0, repairedParties: 0 });
+    Database.updateCharacterLocation = async () => {};
+    Database.updateCharacterExperience = async () => {};
+    Database.updateCharacterVitals = async () => {};
     MarketTelemetry.reset();
     Database.execute = (statement) => {
         calls.push({ type: 'execute', statement });
@@ -204,7 +212,21 @@ async function run() {
         status: 'active',
         plan: { expectedBenefit: 'market_search_for_weapon', marketTown: 'Dion' }
     });
-    assert.strictEqual(otherTownGoal.reason, 'different_market_town', 'a batch visit must not substitute an offer from the wrong town');
+    assert.strictEqual(otherTownGoal.reason, 'market_destination_corrected', 'a stale journey must continue to the requested town');
+    assert.strictEqual(otherTownGoal.state.stats.travel.townName, 'Dion');
+    const returnPoint = { loc: { locX: 100, locY: 200, locZ: 0 }, regionName: 'Field' };
+    const corrected = await ColdMarketService.tryPurchase({
+        ...state, stats: { ...state.stats, marketReturn: returnPoint }
+    }, { ...goal, plan: { expectedBenefit: 'market_search_for_weapon', marketTown: 'Goddard' } });
+    assert.strictEqual(corrected.state.stats.travel.townName, 'Goddard');
+    assert.deepStrictEqual(corrected.state.stats.marketReturn, returnPoint,
+        'correcting a persisted wrong-town journey must keep the original hunting return');
+    const unknownTown = await ColdMarketService.tryPurchase(state, {
+        ...goal, plan: { expectedBenefit: 'market_search_for_weapon', marketTown: 'Unknown town' }
+    });
+    assert.strictEqual(unknownTown.reason, 'different_market_town');
+    assert(unknownTown.state.stats.marketRetryAfter > Date.now(),
+        'an unavailable destination must back off instead of immediately repeating');
 
     let blockedReserveCalls = 0;
     MarketOpportunity.bestOffer = () => ({ selfId: 626, price: 24090, sourceType: 'npc' });
@@ -477,12 +499,16 @@ run().catch((err) => {
     process.exitCode = 1;
 }).finally(() => {
     Database.reconcileBotClanMembership = originals.reconcileBotClanMembership;
+    Database.reconcileBotClanGoals = originalReconcileClanGoals;
     Database.execute = originals.execute;
     Database.fetchItems = originals.fetchItems;
     Database.updateItemAmount = originals.updateItemAmount;
     Database.updateItemEquipState = originals.updateItemEquipState;
     Database.setItem = originals.setItem;
     Database.syncInventorySummary = originals.syncInventorySummary;
+    Database.updateCharacterLocation = originals.updateCharacterLocation;
+    Database.updateCharacterExperience = originals.updateCharacterExperience;
+    Database.updateCharacterVitals = originals.updateCharacterVitals;
     GoalState.clear = originals.clearGoal;
     World.user = originals.user;
     MarketOpportunity.bestOffer = originals.bestOffer;

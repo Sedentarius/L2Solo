@@ -170,16 +170,17 @@ function selectTargetMember(members = [], plans = new Map(), previousGoal = null
     const selected = ranked[0] || null;
     if (!selected) return null;
 
-    // Keep a current beneficiary only while its equipment debt is at least as
-    // important as the best alternative. This gives a nearly-finished craft a
-    // small stability bonus, but lets a weaker tank/healer or a materially
-    // worse-equipped member take over at the next clan review.
+    // Keep a current beneficiary through small changes in equipment debt,
+    // but let a materially worse-equipped member take over at the next review.
     if (previousMember && isAcquisitionPlan(previousPlan)
         && previousPlan.status !== 'blocked'
         && previousGoal?.status !== 'completed'
         && !options.previousFulfilled) {
         const previousPriority = equipmentPriority(previousMember, previousPlan, options);
-        if (memberId(selected.member) === previousMemberId || previousPriority >= selected.priority) {
+        // Small score fluctuations (level changes, a ready component, one
+        // minor slot) must not bounce the assignment between two members.
+        // A full grade of debt remains enough to preempt the current target.
+        if (memberId(selected.member) === previousMemberId || previousPriority + 30 >= selected.priority) {
             return { member: previousMember, plan: previousPlan, priority: previousPriority, preserved: true };
         }
     }

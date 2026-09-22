@@ -93,6 +93,16 @@ try {
     assert(Cold.npcForSpot(hard, () => 0, { matchupProfiles: [mage], soloSafety: true, maxTargetLevel: 27 }).avoided,
         'cold target selection uses the same lowered difficulty as routing');
     assert(!Cold.npcForSpot(easy, () => 0, { matchupProfiles: [mage], soloSafety: true, maxTargetLevel: 27 }).avoided);
+    const stranded = { ...state, level: 35 };
+    assert.strictEqual(Spots.findForState(stranded, { matchupProfiles: [mage], occupancy: {}, timestamp: at })?.id, 'easy',
+        'without safe camps near its own level, a weak bot can resume on lower-level safe ground');
+    assert.strictEqual(Spots.findForState(stranded, { matchupProfiles: [mage], occupancy: {}, timestamp: at,
+        excludedSpotIds: new Set(['easy']) }), null, 'lower-level recovery still honors failed-spot exclusions');
+    const otherEasy = { ...easy, id: 'other-easy', density: 20 };
+    Spots.cache = [hard, easy, otherEasy];
+    assert.strictEqual(Spots.findForState({ ...stranded, spotId: easy.id }, {
+        matchupProfiles: [mage], occupancy: {}, timestamp: at })?.id, 'easy',
+    'a safe lower-level fallback must not become an endless travel loop between comparable camps');
 } finally { Spots.cache = original; }
 
 const Resolver = invoke('GameServer/Bot/Population/BackgroundResolver');

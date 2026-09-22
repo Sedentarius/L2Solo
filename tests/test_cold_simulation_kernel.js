@@ -229,6 +229,15 @@ function state(characterId = 1, overrides = {}) {
     assert.strictEqual(routeStates[0].stats.travel.spotId, 'mid-level-field');
 
     assert.strictEqual(lifecycleKind(state(2, { activity: 'crafting' })), 'command');
+    const clanDuty = { status: 'open', priority: 'required', clanGoalKey: 'clan:1:gear' };
+    for (const activity of ['shopping', 'crafting', 'merchant']) {
+        assert.strictEqual(lifecycleKind(state(2, { activity, stats: { clanPartyObjective: clanDuty } })), 'command',
+            'a required clan objective must not bypass unfinished town services');
+    }
+    assert.strictEqual(lifecycleKind(state(2, { activity: 'hunting', stats: { clanPartyObjective: clanDuty } })), 'resolver',
+        'a finished service must still preserve the clan assembly wait before solo hunting');
+    assert.strictEqual(lifecycleKind(state(2, { activity: 'party_wait', stats: { clanPartyObjective: clanDuty } })), 'resolver',
+        'actual clan assembly must remain in the pure worker wait path');
     for (const plan of [{ status: 'complete' }, { status: 'deferred', strategy: 'none' },
         { status: 'active', strategy: 'craft' }]) {
         assert.strictEqual(lifecycleKind(state(2, { stats: {

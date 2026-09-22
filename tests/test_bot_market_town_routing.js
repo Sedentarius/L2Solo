@@ -91,14 +91,14 @@ assert(ListingService.isDionDMarketStallLocation(dionStall), 'Dion D-grade listi
 
 const gludioStaticStalls = ListingService.staticMerchantStalls('Gludio', ListingService.isGludioDMarketStallLocation);
 assert.strictEqual(gludioStaticStalls.length, 5, 'all fixed Gludio merchants must reserve their market stalls');
-const gludioCandidateNearLysa = ListingService.chooseGludioDMarketStall(
+const gludioCandidateNearMeryJane = ListingService.chooseGludioDMarketStall(
     (() => {
         const values = [60 / 390, 970 / 1080];
         return () => values.shift() ?? 0;
     })(),
     gludioStaticStalls
 );
-assert(Math.hypot(gludioCandidateNearLysa.locX - MerchantStoreConfigs.Lysa.locX, gludioCandidateNearLysa.locY - MerchantStoreConfigs.Lysa.locY) >= ListingService.GLUDIO_D_STALL_MIN_DISTANCE, 'dynamic Gludio stalls must keep their distance from fixed merchants');
+assert(Math.hypot(gludioCandidateNearMeryJane.locX - MerchantStoreConfigs.MeryJane.locX, gludioCandidateNearMeryJane.locY - MerchantStoreConfigs.MeryJane.locY) >= ListingService.GLUDIO_D_STALL_MIN_DISTANCE, 'dynamic Gludio stalls must keep their distance from fixed merchants');
 
 const noGradeState = {
     ...state,

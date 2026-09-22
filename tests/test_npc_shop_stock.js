@@ -57,11 +57,11 @@ for (const npcId of [7004, 7137, 7150, 7519, 7561, 7063, 7254, 7315, 7081, 7180,
 }
 
 const shotStores = [
-    ['Tia', 'Talking Island', 0], ['Elya', 'Elven Village', 0], ['Dena', 'Dark Elven Village', 0],
-    ['Orik', 'Orc Village', 0], ['Bran', 'Dwarven Village', 0], ['Rolf', 'Gludin', 1],
-    ['Sila', 'Gludio', 1], ['Tara', 'Dion', 1], ['Eris', 'Giran', 2], ['Sera', 'Oren', 3],
-    ['Nora', "Hunter's Village", 3], ['Lina', 'Heine', 3], ['Mila', 'Aden', 4],
-    ['Sven', 'Goddard', 5], ['Runa', 'Rune', 5]
+    ['Pingu', 'Talking Island', 0], ['Kent8', 'Elven Village', 0], ['FakinMachine', 'Dark Elven Village', 0],
+    ['Mochito', 'Orc Village', 0], ['DubDub', 'Dwarven Village', 0], ['J3dSanta', 'Gludin', 1],
+    ['Musa', 'Gludio', 1], ['Reanimator', 'Dion', 1], ['Squeesh', 'Giran', 2], ['M3tLa', 'Oren', 3],
+    ['Petec', "Hunter's Village", 3], ['Original91', 'Heine', 3], ['Lowfiles', 'Aden', 4],
+    ['TinWh1skey', 'Goddard', 5], ['Ora', 'Rune', 5]
 ];
 const shotIdsByGrade = [
     [1835, 2509, 3947], [1463, 2510, 3948], [1464, 2511, 3949],
@@ -79,14 +79,14 @@ for (const [name, town, grade] of shotStores) {
     });
 }
 
-assert(Math.hypot(MerchantStoreConfigs.Rolf.locX + 80826, MerchantStoreConfigs.Rolf.locY - 149775) < 1000,
+assert(Math.hypot(MerchantStoreConfigs.J3dSanta.locX + 80826, MerchantStoreConfigs.J3dSanta.locY - 149775) < 1000,
     'Gludin shot merchant must be placed inside the town square');
 
 // These stalls were captured beside each town's gatekeeper and checked against
 // the loaded geodata. Keeping the Z value on the actual floor prevents private
 // stores from being hidden in a building or on another vertical layer.
 const accessibleStalls = [
-    'Elya', 'Dena', 'Orik', 'Bran', 'Iris', 'Helga', 'Oskar', 'Selin', 'Sera', 'Nora', 'Mila'
+    'Kent8', 'FakinMachine', 'Mochito', 'DubDub', 'StayTun3d', 'BarterKing', 'Puffy', 'NastyDream', 'M3tLa', 'Petec', 'Lowfiles'
 ];
 for (const name of accessibleStalls) {
     const store = MerchantStoreConfigs[name];

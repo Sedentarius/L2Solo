@@ -74,7 +74,14 @@ const ColdMarketService = {
             return Promise.resolve({ state, purchased: false, reason: 'no_purchase_goal' });
         }
         if (goal.plan?.marketTown && String(goal.plan.marketTown) !== String(state.currentRegion)) {
-            return Promise.resolve({ state, purchased: false, reason: 'different_market_town' });
+            const travel = GoalExecutor.beginMarketTravel({ ...state, activity: 'hunting' }, goal);
+            if (travel) {
+                travel.stats.marketReturn = state.stats?.marketReturn || travel.stats.marketReturn;
+                return LifeState.upsertState(travel, 'market_destination_corrected').then((saved) => ({
+                    state: saved || state, purchased: false, reason: 'market_destination_corrected'
+                }));
+            }
+            return retryAfterFailedPurchase(state, goal, 'different_market_town');
         }
 
         const lowTierGearPurchase = activeGearPurchase && Number(state.level || 1) < 40;

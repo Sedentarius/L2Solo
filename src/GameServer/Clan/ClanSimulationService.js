@@ -185,13 +185,6 @@ function selectRecruitment(founder, candidates, required) {
     return selected;
 }
 
-function defaultClanName(candidate) {
-    const base = String(candidate.name || `Covenant${candidate.characterId}`)
-        .replace(/[^A-Za-z0-9]/g, '')
-        .slice(0, 10) || `Covenant${candidate.characterId}`;
-    return `${base}Pledge`.slice(0, 16);
-}
-
 async function joinExisting(candidate, clan, suitability) {
     const result = await Database.joinAutonomousClan({
         clanId: clan.id,
@@ -235,9 +228,8 @@ async function resolveCandidate(candidate, options = {}) {
             return { ok: false, code: eligibility.reasons[0] || Contracts.REASON_CODES.FOUNDER_NO_QUORUM, eligibility, recruits };
         }
 
-        const name = options.name || defaultClanName(candidate);
         const result = await Database.createAutonomousClan({
-            name,
+            name: options.name,
             leaderId: candidate.characterId,
             memberIds: [candidate.characterId, ...recruits.map((entry) => entry.characterId)],
             founderQuorum: Config.founderQuorum,

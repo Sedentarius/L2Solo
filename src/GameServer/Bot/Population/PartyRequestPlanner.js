@@ -43,9 +43,12 @@ function clanPartyObjectiveForState(state) {
 }
 
 function partyRequestForPlan(state, plan, timestamp = Date.now()) {
+    const previous = state?.stats?.partyRequest;
+    // Travel and recovery are part of returning to solo hunting. Neither may
+    // erase the recruitment cooldown before the bot gets its first fight.
+    if (require('./PartyAssemblyRecovery').coolingDown(state, timestamp)) return previous;
     if (plan?.levelingRecovery) return null;
     if (!partyRequestEligible(state)) return null;
-    const previous = state.stats?.partyRequest;
     const sharedTarget = previous?.reason === 'shared_target' && ['open', 'deferred'].includes(previous.status)
         && plan?.status === 'active' && previous.spotId === plan.next?.spotId
         && Number(previous.npcId) === Number(plan.next?.npcId || plan.targetNpcId)
@@ -98,6 +101,7 @@ function partyRequestForPlan(state, plan, timestamp = Date.now()) {
 }
 
 function partyObjectiveForState(state) {
+    if (require('./PartyAssemblyRecovery').coolingDown(state)) return null;
     if (state?.stats?.equipmentPlan?.levelingRecovery) return null;
     const request = state?.stats?.partyRequest;
     const clanObjective = clanPartyObjectiveForState(state);

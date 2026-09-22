@@ -8,9 +8,10 @@ const MARKET_TRAVEL_MS = 25 * 1000;
 const GATEKEEPER_SPOT_TRAVEL_MS = 25 * 1000;
 
 function marketTown(name = 'Giran') {
+    const town = Object.values(TownRespawn.towns).find((candidate) => candidate.name === name);
     return TownPathfinder.towns.find((town) => town.name === name)
         || MarketTownPolicy.marketTown(name)
-        || TownPathfinder.towns.find((town) => town.name === 'Giran')
+        || (town && { name: town.name, center: { locX: town.locX, locY: town.locY, locZ: town.locZ } })
         || null;
 }
 
@@ -67,15 +68,30 @@ function beginMarketTravel(state, goal, timestamp = Date.now()) {
     };
 }
 
-function finishMarketVisit(state, timestamp = Date.now()) {
+function finishMarketVisit(state, timestamp = Date.now(), options = {}) {
     if (!state || !['shopping', 'merchant'].includes(state.activity)) return null;
     let destination = state.stats?.marketReturn;
     const returningParty = state.stats?.partyMarketReturn
         ? invoke('GameServer/Bot/Population/BackgroundPartyState').find(state.stats.partyMarketReturn.partyId) : null;
-    const clanReturn = !!state.stats?.partyMarketReturn;
+    let clanReturn = !!state.stats?.partyMarketReturn;
     if (returningParty?.status === 'active') {
         const leader = invoke('GameServer/Bot/Population/BotLifeState').cachedState(returningParty.leaderId);
         if (leader?.loc) destination = { loc: leader.loc, spotId: returningParty.spotId, regionName: leader.currentRegion };
+    }
+    if (!destination?.loc && options.recoverMissingReturn) {
+        const fallback = invoke('GameServer/Bot/Population/SpotProfiles').findForState({
+            ...state, activity: 'hunting'
+        }, { timestamp });
+        const loc = fallback && SpotService.arrivalPointForState(state, fallback);
+        if (loc) {
+            destination = { loc, spotId: fallback.id, regionName: fallback.name };
+            clanReturn = false;
+        }
+        else return {
+            ...state, activity: 'resting',
+            stats: { ...state.stats, marketReturn: null, partyMarketReturn: null, restUntil: timestamp + 30000 },
+            timing: { ...state.timing, activityStartedAt: timestamp, nextResolveAt: timestamp + 30000 }
+        };
     }
     if (!destination?.loc) return null;
 
@@ -115,6 +131,7 @@ function finishMarketVisit(state, timestamp = Date.now()) {
         activity: 'traveling',
         stats: {
             ...(routedState.stats || {}),
+            ...(clanReturn ? {} : { partyMarketReturn: null }),
             travel: {
                 reason: spotBackoff ? 'death_pressure_replan' : 'return_after_market',
                 from,

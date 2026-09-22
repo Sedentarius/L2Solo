@@ -122,19 +122,21 @@ async function run() {
     await townSecond;
     await budgetPool.shutdown();
 
-    const realPool = new BoundedPathfindingWorkerPool({ size: 1, queueLimit: 2 });
-    const realPath = await realPool.request({
-        startX: 53027,
-        startY: 102938,
-        startZ: -1064,
-        endX: 53027,
-        endY: 102938,
-        endZ: -1064,
-        maxNodes: 32
-    }, { key: 'integration:1', timeoutMs: 15000 });
-    assert.deepStrictEqual(realPath, [{ locX: 53027, locY: 102938, locZ: -1064 }],
-        'the real worker boundary must return a structured-clone-safe geodata path');
-    await realPool.shutdown();
+    if (process.env.L2NODE_SKIP_RAW_GEODATA_TESTS !== '1') {
+        const realPool = new BoundedPathfindingWorkerPool({ size: 1, queueLimit: 2 });
+        const realPath = await realPool.request({
+            startX: 53027,
+            startY: 102938,
+            startZ: -1064,
+            endX: 53027,
+            endY: 102938,
+            endZ: -1064,
+            maxNodes: 32
+        }, { key: 'integration:1', timeoutMs: 15000 });
+        assert.deepStrictEqual(realPath, [{ locX: 53027, locY: 102938, locZ: -1064 }],
+            'the real worker boundary must return a structured-clone-safe geodata path');
+        await realPool.shutdown();
+    }
     console.log('Pathfinding worker pool checks passed');
 }
 

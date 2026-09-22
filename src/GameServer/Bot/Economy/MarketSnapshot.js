@@ -389,9 +389,10 @@ function buildDetail({ states = [], stores = [], transactions = MarketTelemetry.
 async function detail() {
     const itemsById = cachedItemsById();
     const states = LifeState.allStates(5000);
-    const [afk, history] = await Promise.all([
+    const [afk, history, storeHistory] = await Promise.all([
         Database.fetchAfkTradeShops(null, { activeOnly: true }).catch(() => []),
-        Database.fetchMarketTradeOverview().catch(() => null)
+        Database.fetchMarketTradeOverview().catch(() => null),
+        Database.fetchMarketStoreHistory().catch(() => null)
     ]);
     const stores = [
         ...dynamicStores(states, itemsById),
@@ -399,7 +400,7 @@ async function detail() {
         ...playerStores(World.user?.sessions || [], itemsById),
         ...afkStores(afk, itemsById)
     ];
-    return buildDetail({ states, stores, transactions: MarketTelemetry.transactions(), history, itemsById });
+    return { ...buildDetail({ states, stores, transactions: MarketTelemetry.transactions(), history, itemsById }), storeHistory };
 }
 
 function history(selfId, options = {}) {

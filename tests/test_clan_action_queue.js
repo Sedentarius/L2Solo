@@ -128,6 +128,19 @@ async function main() {
         });
         assert.strictEqual(created.ok, true);
         await verifyQueueStats(created.clanId);
+        try {
+            const at = Date.now();
+            const supply = await Database.enqueueClanAction({ clanId: created.clanId,
+                actionKey: 'fairness:supply', actionType: 'supplies', priority: 40,
+                availableAt: at - 60 * 60000 });
+            await Database.enqueueClanAction({ clanId: created.clanId,
+                actionKey: 'fairness:plan', actionType: 'goal_plan', priority: 75, availableAt: at });
+            const claim = await Database.claimClanAction({ at });
+            assert.strictEqual(claim.action.id, supply.actionId,
+                'old supplies must get a turn despite a fresh higher-priority plan');
+        } finally {
+            await Database.execute(["DELETE FROM clan_actions WHERE actionKey IN ('fairness:supply', 'fairness:plan')", []]);
+        }
 
         const initialActions = await Database.fetchClanActions({ clanId: created.clanId, limit: 10 });
         assert.strictEqual(initialActions.length, 1);
@@ -475,8 +488,8 @@ async function main() {
         );
         assert.strictEqual(
             ClanActionService.reviewDelayFor('goal_plan', { type: 'equipment' }, { changed: true }),
-            0,
-            'a productive goal change may advance immediately'
+            ClanActionService.config.equipmentReviewMs,
+            'changing an equipment assignment must leave time to execute it before replanning'
         );
 
         const readyRoster = [4, 15, 21, 11, 56].map((classId) => ({ classId, phase: 'cold' }));

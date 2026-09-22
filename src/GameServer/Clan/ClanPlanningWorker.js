@@ -63,6 +63,7 @@ parentPort.on('message', (message) => {
             else process.env.L2NODE_PROGRESSION_RATE = context.progressionRate;
             offers = indexOffers(context.offers);
             npcOffers = indexOffers(context.npcOffers);
+            invoke('GameServer/Bot/Economy/BotMarketPricing').useNpcOfferSnapshot(context.npcOffers);
             planner ||= require('./ClanEquipmentPlanner');
             const forbidden = Object.keys(require.cache).some((filename) =>
                 /[\\/]src[\\/]Database\.js$|[\\/]World[\\/]World\.js$|[\\/]Bot[\\/]BotManager\.js$/.test(filename));

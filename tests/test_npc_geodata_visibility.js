@@ -107,7 +107,9 @@ GeodataEngine.hasGeo = originalHasGeo;
 GeodataEngine.hasLineOfSight = originalHasLineOfSight;
 
 const crumaRegion = path.join(GeodataEngine.getGeodataDir(), '20_21.l2j');
-if (fs.existsSync(crumaRegion)) {
+if (process.env.L2NODE_SKIP_RAW_GEODATA_TESTS === '1') {
+    console.log('SKIP: raw Cruma geodata checks are in npm run test:geodata');
+} else if (fs.existsSync(crumaRegion)) {
     assert.strictEqual(
         GeodataEngine.hasLineOfSight(23741, 117274, -12089, 23765, 117288, -9047),
         false,

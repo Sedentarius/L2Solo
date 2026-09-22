@@ -21,28 +21,30 @@ function samplePoint(from, to) {
 
 try {
     Spots.findCurrentSpot = () => null;
-    invoke('GameServer/Geodata/VirtualObstacles/index').init();
-    // Real Giran geodata and the exact coordinates from EloraMoss's activation.
-    assert.strictEqual(Geo.getHeight(roof.locX, roof.locY, anchor.locZ), roof.locZ);
-    assert.strictEqual(Geo.hasLineOfSight(anchor.locX, anchor.locY, anchor.locZ,
-        roof.locX, roof.locY, roof.locZ), false);
-    samplePoint(anchor, roof);
-    const result = Placement.resolve({ loc: anchor });
-    assert.deepStrictEqual(result.loc, { ...anchor, locZ: -3400 },
-        'roof samples must be rejected and fall back to the verified original street');
-    const nearPlayer = { ...anchor, locX: anchor.locX + 50 };
-    assert.strictEqual(Placement.resolve({ loc: anchor }, { playerLoc: nearPlayer }), null,
-        'exhaustion must not push the bot into an unchecked point to satisfy player distance');
+    if (process.env.L2NODE_SKIP_RAW_GEODATA_TESTS !== '1') {
+        invoke('GameServer/Geodata/VirtualObstacles/index').init();
+        // Real Giran geodata and the exact coordinates from EloraMoss's activation.
+        assert.strictEqual(Geo.getHeight(roof.locX, roof.locY, anchor.locZ), roof.locZ);
+        assert.strictEqual(Geo.hasLineOfSight(anchor.locX, anchor.locY, anchor.locZ,
+            roof.locX, roof.locY, roof.locZ), false);
+        samplePoint(anchor, roof);
+        const result = Placement.resolve({ loc: anchor });
+        assert.deepStrictEqual(result.loc, { ...anchor, locZ: -3400 },
+            'roof samples must be rejected and fall back to the verified original street');
+        const nearPlayer = { ...anchor, locX: anchor.locX + 50 };
+        assert.strictEqual(Placement.resolve({ loc: anchor }, { playerLoc: nearPlayer }), null,
+            'exhaustion must not push the bot into an unchecked point to satisfy player distance');
 
-    // Deterministic sample coverage on real geometry, without starting a server.
-    let seed = 12345;
-    Math.random = () => ((seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0) / 4294967296);
-    for (let i = 0; i < 100; i++) {
-        const selected = Placement.resolve({ loc: anchor });
-        assert(selected);
-        const p = selected.loc;
-        assert(Geo.hasLineOfSight(anchor.locX, anchor.locY, anchor.locZ, p.locX, p.locY, p.locZ));
-        assert(Geo.getCellData(p.locX, p.locY, p.locZ).nswe);
+        // Deterministic sample coverage on real geometry, without starting a server.
+        let seed = 12345;
+        Math.random = () => ((seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0) / 4294967296);
+        for (let i = 0; i < 100; i++) {
+            const selected = Placement.resolve({ loc: anchor });
+            assert(selected);
+            const p = selected.loc;
+            assert(Geo.hasLineOfSight(anchor.locX, anchor.locY, anchor.locZ, p.locX, p.locY, p.locZ));
+            assert(Geo.getCellData(p.locX, p.locY, p.locZ).nswe);
+        }
     }
 
     const flat = { locX: 0, locY: 0, locZ: 0 };

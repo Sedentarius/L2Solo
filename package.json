@@ -15,6 +15,7 @@
         "check:knowledge-base": "node scripts/generate-knowledge-base.js --check",
         "check": "node scripts/check-syntax.js",
         "test": "node scripts/run-tests.js",
+        "test:geodata": "npm run geodata && node scripts/run-tests.js --geodata",
         "load:mixed": "node scripts/mixed-runtime-load-test.js",
         "wipe:bots": "node scripts/wipe-bots.js"
     },

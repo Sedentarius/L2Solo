@@ -4,6 +4,7 @@ require('../src/Global');
 
 const DataCache = invoke('GameServer/DataCache');
 const Database = invoke('Database');
+const originalReconcileClanGoals = Database.reconcileBotClanGoals;
 const LifeState = invoke('GameServer/Bot/Population/BotLifeState');
 const ItemDisposition = invoke('GameServer/Bot/Economy/ItemDisposition');
 const MarketListingPolicy = invoke('GameServer/Bot/Economy/MarketListingPolicy');
@@ -17,7 +18,7 @@ DataCache.init();
 const marketItem = DataCache.items.find((item) => (
     item?.etc?.rank === 'c' && item.template?.kind?.startsWith('Weapon.') && Number(item.template?.price || 0) > 1000
 ));
-const spellbook = DataCache.items.find((item) => /spellbook/i.test(item?.template?.name || ''));
+const spellbook = DataCache.items.find((item) => item?.template?.kind === 'Other.Spellbook');
 const equippedItem = DataCache.items.find((item) => (
     item !== marketItem && item?.etc?.rank === 'c' && Number(item.etc?.slot || 0) === Number(marketItem?.etc?.slot || 0)
 ));
@@ -50,6 +51,7 @@ const calls = [];
 
 async function run() {
     Database.reconcileBotClanMembership = async () => ({ repairedMembers: 0, repairedParties: 0 });
+    Database.reconcileBotClanGoals = async () => ({ repairedMembers: 0, repairedParties: 0 });
     Database.execute = () => Promise.resolve([]);
     Database.fetchItems = () => Promise.resolve([
         { id: 20, selfId: 57, amount: 500, equipped: false, slot: 0 },
@@ -191,6 +193,15 @@ async function run() {
     const opened = await ListingService.open(state, listingOptions);
     assert.strictEqual(opened.listed, true);
     assert.strictEqual(opened.state.activity, 'merchant');
+    const cooldownState = { ...state, stats: { ...state.stats, marketSellRetryAfter: 500000 } };
+    const cooldown = await ListingService.open(cooldownState, listingOptions);
+    assert.strictEqual(cooldown.listed, false, 'an already-shopping bot must obey its retry pause at the store entry point');
+    assert.strictEqual(cooldown.reason, 'sell_retry_cooldown');
+    const cleanupDuringCooldown = await ListingService.open(cooldownState, {
+        ...listingOptions, forcedCleanup: { reason: 'inventory_capacity' }
+    });
+    assert.strictEqual(cleanupDuringCooldown.listed, false, 'forced cleanup must not reopen a speculative WTS');
+    assert.strictEqual(cleanupDuringCooldown.state.stats.marketSellRetryAfter, 500000, 'cleanup must preserve the trading pause');
     assert.strictEqual(opened.state.stats.marketStore.title, marketItem.template.name.slice(0, 28), 'a dynamic store title should name its actual stock');
     assert(opened.state.stats.marketStore.title.length <= 28, 'a dynamic store title must fit the compact C4 store overlay');
     assert(ListingService.isGiranPlazaStallLocation(opened.state.loc), 'a Giran store must use the captured trading square and avoid its central column');
@@ -306,6 +317,39 @@ async function run() {
     assert.strictEqual(expiredResult.warehouseCount, 1);
     assert(Number(expiredResult.state.stats.marketSellRetryAfter) > 62000, 'valuable unsold stock needs a later market retry');
 
+    const SpotProfiles = invoke('GameServer/Bot/Population/SpotProfiles');
+    const SpotService = invoke('GameServer/Bot/AI/SpotService');
+    const previousFindSpot = SpotProfiles.findForState;
+    const previousArrival = SpotService.arrivalPointForState;
+    try {
+        SpotProfiles.findForState = () => null;
+        const stranded = { ...state, stats: { ...state.stats, marketReturn: null } };
+        const recovery = GoalExecutor.finishMarketVisit(stranded, 62000, { recoverMissingReturn: true });
+        assert.strictEqual(recovery.activity, 'resting', 'a missing return route must leave shopping and schedule a retry');
+        assert.strictEqual(recovery.timing.nextResolveAt, 92000);
+        SpotProfiles.findForState = () => ({ id: 'recovery', name: 'Recovery field' });
+        SpotService.arrivalPointForState = () => ({ locX: 100, locY: 100, locZ: 0 });
+        const routed = GoalExecutor.finishMarketVisit(stranded, 62000, { recoverMissingReturn: true });
+        assert.strictEqual(routed.activity, 'traveling');
+        assert.strictEqual(routed.stats.travel.spotId, 'recovery');
+        const stalePartyReturn = { ...stranded, stats: {
+            ...stranded.stats, partyMarketReturn: { partyId: 'dissolved-party' }
+        } };
+        const soloReturn = GoalExecutor.finishMarketVisit(stalePartyReturn, 62000, { recoverMissingReturn: true });
+        assert.strictEqual(soloReturn.stats.travel.arrivalActivity, 'hunting',
+            'a fallback route must not wait for a dissolved party');
+        assert.strictEqual(soloReturn.stats.partyMarketReturn, null,
+            'solo recovery must discard the obsolete party return token');
+        SpotProfiles.findForState = () => null;
+        const soloRest = GoalExecutor.finishMarketVisit(stalePartyReturn, 62000, { recoverMissingReturn: true });
+        assert.strictEqual(soloRest.activity, 'resting');
+        assert.strictEqual(soloRest.stats.partyMarketReturn, null,
+            'resting recovery must also discard the obsolete party return token');
+    } finally {
+        SpotProfiles.findForState = previousFindSpot;
+        SpotService.arrivalPointForState = previousArrival;
+    }
+
     const demandReviewOpened = await ListingService.open(
         { ...state, characterId: 91, name: 'DemandReviewSeller' },
         { ...listingOptions, durationMs: 300000 }
@@ -352,6 +396,17 @@ async function run() {
     const mixedReview = await ListingService.resolve(mixedOpened.state, 1001 + ListingService.SPECULATIVE_LISTING_MS);
     assert.strictEqual(mixedReview.closed, false, 'active-demand stock should keep the mixed store open');
     assert.deepStrictEqual(mixedReview.state.stats.marketStore.items.map((item) => Number(item.selfId)), [Number(marketItem.selfId)], 'expired speculative stock must be pruned independently');
+    assert(mixedReview.state.stats.marketPricing[speculativeItem.selfId].speculativeFailedAt > 0,
+        'pruning a speculative line from a mixed shop must remember its failed attempt');
+    const retryItem = { ...speculativeLine, count: 1 };
+    const retryDecision = MarketListingPolicy.classify(mixedReview.state, retryItem, {
+        states: [latentBuyer], now: 2000000
+    });
+    assert.strictEqual(retryDecision.reason, 'speculative_already_tried', 'an elapsed global pause alone must not repeat an unsuccessful item');
+    const readyBuyer = { ...latentBuyer, stats: { equipmentPlan: { ...latentBuyer.stats.equipmentPlan, strategy: 'market' } } };
+    assert.strictEqual(MarketListingPolicy.classify(mixedReview.state, retryItem, {
+        states: [readyBuyer], now: 2000000
+    }).action, 'list', 'real funded demand must permit selling a previously unsuccessful item');
     LifeState.allStates = originals.allStates;
 
     const staleReviewAt = 61001;
@@ -408,6 +463,19 @@ async function run() {
     assert.strictEqual(hotSession.plan, 'shopping');
     assert.strictEqual(privateStoreType, 0);
     assert.strictEqual(liveStore.items.length, 0, 'closed hot WTS stock must disappear from live offer discovery');
+
+    liveStore = {
+        ...mixedOpened.state.stats.marketStore,
+        items: mixedOpened.state.stats.marketStore.items.map((item) => ({ ...item }))
+    };
+    hotSession.plan = 'merchant';
+    hotSession.coldMarketState = { ...mixedOpened.state, phase: 'hot' };
+    LifeState.allStates = () => [marketBuyer, latentBuyer];
+    const hotMixedReview = await ListingService.resolveHotSession(hotSession, 302000);
+    assert.strictEqual(hotMixedReview.closed, false, 'a hot shop must retain its funded line after the speculative line expires');
+    assert.deepStrictEqual(liveStore.items.map((item) => Number(item.selfId)), [Number(marketItem.selfId)]);
+    assert.strictEqual(hotSession.coldMarketState.stats.marketPricing[speculativeItem.selfId].speculativeFailedAt, 302000,
+        'hot maintenance must remember failed speculative stock just like cold maintenance');
     LifeState.allStates = originals.allStates;
 
     const misplacedExpired = await ListingService.open(
@@ -438,6 +506,7 @@ run().catch((err) => {
     process.exitCode = 1;
 }).finally(() => {
     Database.reconcileBotClanMembership = originals.reconcileBotClanMembership;
+    Database.reconcileBotClanGoals = originalReconcileClanGoals;
     Database.execute = originals.execute;
     Database.fetchItems = originals.fetchItems;
     Database.fetchWarehouseItems = originals.fetchWarehouseItems;

@@ -1,6 +1,6 @@
 const ClanCrafting = require('../../Clan/ClanCraftingPolicy');
 const DataCache = invoke('GameServer/DataCache');
-const BotEconomyPricing = invoke('GameServer/Bot/Economy/BotEconomyPricing');
+const BotMarketPricing = invoke('GameServer/Bot/Economy/BotMarketPricing');
 const C4RecipeItems = invoke('GameServer/Items/C4RecipeItems');
 const C4EnchantScrolls = invoke('GameServer/Items/C4EnchantScrolls');
 const CraftShopService = invoke('GameServer/Bot/Economy/CraftShopService');
@@ -34,7 +34,13 @@ function priceFor(state, item, template) {
     const seed = (Number(state.characterId || 0) * 31) + (Number(item.selfId || 0) * 17);
     const percent = 70 + (Math.abs(seed) % 21);
     const adjustment = Math.max(50, Math.min(100, Number(state?.stats?.marketPricing?.[Number(item.selfId)]?.percent || 100)));
-    return BotEconomyPricing.scalePrice(basePrice * percent * adjustment / 10000);
+    return BotMarketPricing.priceAt({ ...item, basePrice, enchant: saleEnchant(item) }, percent * adjustment / 10000);
+}
+
+function saleEnchant(item) {
+    return Math.max(Number(item?.enchant || 0), ...(item?.instances || [])
+        .filter((instance) => !instance.equipped)
+        .map((instance) => Number(instance.enchant || 0)));
 }
 
 function basePrice(item, template = templateFor(item?.selfId)) {
@@ -66,9 +72,17 @@ function isRecipeItem(item, template = templateFor(item?.selfId)) {
             || String(item?.name || template?.template?.name || '').toLowerCase().startsWith('recipe'));
 }
 
+function isEquipmentItem(item, template) {
+    return [kindFor(item, template), template?.template?.kind || ''].some(value =>
+        value.startsWith('Weapon.') || value.startsWith('Armor.'));
+}
+
 function isSkillBookItem(item, template = templateFor(item?.selfId)) {
     const kind = kindFor(item, template);
     const name = String(item?.name || template?.template?.name || '').toLowerCase();
+    // Caster weapons such as Apprentice's Spellbook are equipment, even
+    // when a legacy inventory summary has lost its kind.
+    if (isEquipmentItem(item, template)) return false;
     return kind.startsWith('Other.Spellbook')
         || name.includes('spellbook')
         || /^amulet\b/.test(name);
@@ -84,6 +98,7 @@ function isBelowCGrade(item) {
 }
 
 function isNpcOnlyItem(item, template = templateFor(item?.selfId)) {
+    if (isEquipmentItem(item, template)) return false;
     const kind = kindFor(item, template);
     return NPC_ONLY_KINDS.some((prefix) => kind.startsWith(prefix))
         || isRecipeItem(item, template)
@@ -122,30 +137,23 @@ function inventorySlotCount(state = {}) {
     }, 0);
 }
 
-function npcOnlySlotCount(state = {}) {
-    return Object.values(state.inventory || {}).reduce((total, item) => {
-        if (!isNpcOnlyItem(item)) return total;
-        const amount = Math.max(0, Number(item?.amount || 0));
-        // NPC liquidation can leave a zero-amount summary entry behind while
-        // its old non-stackable instances are still present in the snapshot.
-        // Those instances are no longer inventory and must not retrigger town
-        // cleanup.
-        if (amount <= 0) return total;
-        if (Array.isArray(item?.instances)) return total + Math.min(amount, item.instances.length);
-        if (item?.stackable === false) return total + amount;
-        return total + 1;
+function liquidationSlotCount(state, predicate) {
+    // Share reservations, equipped-copy protection and trade eligibility with
+    // the sale path: cleanup must describe work the town visit can execute.
+    return saleCandidates(state, { unlimited: true }).reduce((total, item) => {
+        if (!predicate(item)) return total;
+        const source = state.inventory?.[item.selfId];
+        return total + (source?.stackable === false || Array.isArray(source?.instances)
+            ? item.count : 1);
     }, 0);
 }
 
+function npcOnlySlotCount(state = {}) {
+    return liquidationSlotCount(state, isNpcOnlyItem);
+}
+
 function skillBookSlotCount(state = {}) {
-    return Object.values(state.inventory || {}).reduce((total, item) => {
-        if (!isSkillBookItem(item)) return total;
-        const amount = Math.max(0, Number(item?.amount || 0));
-        if (amount <= 0) return total;
-        if (Array.isArray(item?.instances)) return total + Math.min(amount, item.instances.length);
-        if (item?.stackable === false) return total + amount;
-        return total + 1;
-    }, 0);
+    return liquidationSlotCount(state, isSkillBookItem);
 }
 
 function inventoryCleanupNeed(state = {}, options = {}) {
@@ -177,7 +185,7 @@ function reservedCraftAmounts(state) {
     const plan = state?.stats?.equipmentPlan;
     if (!['active', 'component_ready', 'ready_to_craft'].includes(plan?.status) || plan.strategy !== 'craft') return {};
     if (plan.clanGoal?.clanId && plan.recipeId) return Object.fromEntries(ClanCrafting.requirements(
-        C4RecipeItems.resolveByRecipeId(plan.recipeId), state.inventory, null, 1, plan.craftProviders, plan.componentRecipes));
+        ClanCrafting.resolveRecipe(plan.recipeId), state.inventory, null, 1, plan.craftProviders, plan.componentRecipes));
     const reserved = {};
     const reserve = (materials, multiplier = 1, visited = new Set()) => {
         for (const material of materials || []) {
@@ -312,6 +320,9 @@ function saleCandidates(state, options = {}) {
             kind,
             rank: item.rank || template?.etc?.rank || 'none',
             count: sellableCount,
+            // A stack can mix enchant levels; do not advertise its highest
+            // enchant as if every instance had it. Only mark comparability.
+            npcComparable: saleEnchant(item) === 0,
             price,
             basePrice: base
         }];
@@ -361,9 +372,14 @@ function isWarehouseCandidate(item, template = templateFor(item?.selfId)) {
 
 function warehouseCandidates(state) {
     const reserved = reservedEquipmentAmounts(state);
-    return Object.values(state?.inventory || {}).filter((item) => (
-        !reserved[Number(item?.selfId || 0)] && isWarehouseCandidate(item)
-    ));
+    return Object.values(state?.inventory || {}).flatMap((item) => {
+        const equipped = Math.max(0, Number(item.equippedCount ?? (item.equipped ? 1 : 0)) || 0);
+        // Reservations include equipped copies, as in unreservedActorItems.
+        const keep = Math.max(equipped, Number(reserved[Number(item.selfId)] || 0));
+        const amount = Math.max(0, Number(item.amount || 0) - keep);
+        const candidate = { ...item, amount, equipped: false, equippedCount: 0, equippedSlots: [], slot: 0 };
+        return amount > 0 && isWarehouseCandidate(candidate) ? [candidate] : [];
+    });
 }
 
 function saleSummary(state, options = {}) {

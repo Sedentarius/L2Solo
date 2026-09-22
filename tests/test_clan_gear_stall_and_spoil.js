@@ -105,10 +105,10 @@ async function main() {
         const members = Array.from({ length: 10 }, (_, index) => ({
             characterId: index + 1,
             phase: 'cold',
-            level: 40 - index,
+            level: 40 - Math.min(index, 4),
             stats: { classId: index === 9 ? 54 : index === 0 ? 4 : index === 1 ? 15 : index === 2 ? 17 : 1 }
         }));
-        const roster = EquipmentService.equipmentRoster({ members }, members[0], null, plan(99101, 10, 'spoil'));
+        const roster = EquipmentService.equipmentRoster({ id: 7, members }, members[0], null, plan(99101, 10, 'spoil'));
         assert(roster.includes(10), 'a spoil-backed clan goal must explicitly reserve a spoiler in its operation roster');
 
         const currentPlan = plan(99101, 100);

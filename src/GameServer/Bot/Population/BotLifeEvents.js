@@ -164,14 +164,24 @@ const BotLifeEvents = {
             `DELETE FROM ${TABLE}
             WHERE characterId = ?
             AND id NOT IN (
-                SELECT id FROM (
-                    SELECT id FROM ${TABLE}
-                    WHERE characterId = ?
-                    ORDER BY weight DESC, createdAt DESC
-                    LIMIT ${MAX_EVENTS_PER_BOT}
-                ) keep_rows
+                WITH recent AS (
+                    SELECT id FROM ${TABLE} WHERE characterId = ?
+                    ORDER BY createdAt DESC, id DESC LIMIT 10
+                ), milestones AS (
+                    SELECT id FROM ${TABLE} WHERE characterId = ?
+                        AND eventType IN ('equipment_craft', 'dual_sword_combine', 'component_craft',
+                            'gear_acquisition_started', 'craft_materials_ready', 'level_up', 'class_change')
+                        AND id NOT IN (SELECT id FROM recent)
+                    ORDER BY createdAt DESC, id DESC LIMIT 5
+                ), important AS (
+                    SELECT id FROM ${TABLE} WHERE characterId = ?
+                        AND id NOT IN (SELECT id FROM recent UNION SELECT id FROM milestones)
+                    ORDER BY weight DESC, createdAt DESC, id DESC
+                    LIMIT (${MAX_EVENTS_PER_BOT} - (SELECT COUNT(*) FROM recent) - (SELECT COUNT(*) FROM milestones))
+                )
+                SELECT id FROM recent UNION SELECT id FROM milestones UNION SELECT id FROM important
             )`,
-            [characterId, characterId]
+            [characterId, characterId, characterId, characterId]
         ]).catch(() => null);
     }
 };
