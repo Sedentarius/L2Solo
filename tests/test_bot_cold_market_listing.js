@@ -4,6 +4,7 @@ require('../src/Global');
 
 const DataCache = invoke('GameServer/DataCache');
 const Database = invoke('Database');
+const originalReconcileClanGoals = Database.reconcileBotClanGoals;
 const LifeState = invoke('GameServer/Bot/Population/BotLifeState');
 const ItemDisposition = invoke('GameServer/Bot/Economy/ItemDisposition');
 const MarketListingPolicy = invoke('GameServer/Bot/Economy/MarketListingPolicy');
@@ -50,6 +51,7 @@ const calls = [];
 
 async function run() {
     Database.reconcileBotClanMembership = async () => ({ repairedMembers: 0, repairedParties: 0 });
+    Database.reconcileBotClanGoals = async () => ({ repairedMembers: 0, repairedParties: 0 });
     Database.execute = () => Promise.resolve([]);
     Database.fetchItems = () => Promise.resolve([
         { id: 20, selfId: 57, amount: 500, equipped: false, slot: 0 },
@@ -491,6 +493,7 @@ run().catch((err) => {
     process.exitCode = 1;
 }).finally(() => {
     Database.reconcileBotClanMembership = originals.reconcileBotClanMembership;
+    Database.reconcileBotClanGoals = originalReconcileClanGoals;
     Database.execute = originals.execute;
     Database.fetchItems = originals.fetchItems;
     Database.fetchWarehouseItems = originals.fetchWarehouseItems;

@@ -4,6 +4,7 @@ require('../src/Global');
 
 const DataCache = invoke('GameServer/DataCache');
 const Database = invoke('Database');
+const originalReconcileClanGoals = Database.reconcileBotClanGoals;
 const World = invoke('GameServer/World/World');
 const GoalState = invoke('GameServer/Bot/Goals/GoalState');
 const ColdMarketService = invoke('GameServer/Bot/Economy/ColdMarketService');
@@ -44,6 +45,7 @@ const playerStore = {
 
 async function run() {
     Database.reconcileBotClanMembership = async () => ({ repairedMembers: 0, repairedParties: 0 });
+    Database.reconcileBotClanGoals = async () => ({ repairedMembers: 0, repairedParties: 0 });
     Database.updateCharacterLocation = async () => {};
     Database.updateCharacterExperience = async () => {};
     Database.updateCharacterVitals = async () => {};
@@ -497,6 +499,7 @@ run().catch((err) => {
     process.exitCode = 1;
 }).finally(() => {
     Database.reconcileBotClanMembership = originals.reconcileBotClanMembership;
+    Database.reconcileBotClanGoals = originalReconcileClanGoals;
     Database.execute = originals.execute;
     Database.fetchItems = originals.fetchItems;
     Database.updateItemAmount = originals.updateItemAmount;

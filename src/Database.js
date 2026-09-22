@@ -1631,7 +1631,8 @@ function preserveColdVersionedStats(row, patch = {}) {
         const proposed = {
             activity: next.activity || row?.activity, stats: incoming
         };
-        const repaired = require('./GameServer/Clan/ClanMembershipPolicy').reconcileState(proposed);
+        const policy = require('./GameServer/Clan/ClanMembershipPolicy');
+        const repaired = policy.reconcileState(policy.preserveGoalInvalidation(proposed, current));
         if (repaired !== proposed) {
             next.statsJson = JSON.stringify(repaired.stats);
             if (repaired.activity !== proposed.activity) next.activity = repaired.activity;
@@ -2189,6 +2190,7 @@ const ClanMembership = require('./GameServer/Clan/ClanMembershipRepository')({ a
 
 const Database = {
     reconcileBotClanMembership: ClanMembership.reconcile,
+    reconcileBotClanGoals: ClanMembership.reconcileGoals,
     init(callback = () => {}) {
         try {
             shuttingDown = false;
@@ -5513,8 +5515,9 @@ const Database = {
                     timestamp
                 ]);
             }
-            return { ok: true, clanId: clan, goal: state.goal, updatedAt: timestamp };
-        }, 'clan-goal:update');
+            return { ok: true, clanId: clan, goal: state.goal, updatedAt: timestamp,
+                membershipRepair: ClanMembership.repairGoalsUnsafe([clan]) };
+        }, 'clan-goal:update').then(ClanMembership.publish);
     },
     recordClanGoalEvent({ clanId, eventType, goalType = '', plan = '', reasonCode = '', payload = {} } = {}) {
         if (!Number(clanId) || !String(eventType || '').trim()) return Promise.resolve({ ok: false, code: 'invalid_goal_event' });

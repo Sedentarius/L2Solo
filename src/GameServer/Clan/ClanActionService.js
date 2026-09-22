@@ -206,6 +206,7 @@ async function resolveProduction(clan) {
         WHERE clanId = ? AND json_extract(stateJson, '$.updatedAt') = ?`,
     [JSON.stringify(result.goal), Date.now(), clan.id, result.expectedUpdatedAt]]);
     if (Number(update.affectedRows) !== 1) return { ok: false, reason: 'production_snapshot_changed' };
+    await Database.reconcileBotClanGoals([clan.id]);
     return { ok: true, goal: result.goal };
 }
 

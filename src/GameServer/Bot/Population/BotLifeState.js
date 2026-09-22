@@ -665,7 +665,8 @@ function preserveVersionedAppearanceForSave(row) {
 
 function save(row) {
     const proposed = { activity: row.activity, stats: parseJson(row.statsJson, {}) };
-    const reconciled = ClanMembershipPolicy.reconcileState(proposed);
+    const reconciled = ClanMembershipPolicy.reconcileState(ClanMembershipPolicy.preserveGoalInvalidation(
+        proposed, cache.get(Number(row.characterId))?.stats));
     if (reconciled !== proposed) {
         row.activity = reconciled.activity;
         row.statsJson = safeJson(reconciled.stats);
@@ -1438,7 +1439,7 @@ const BotLifeState = {
                     (SELECT karma FROM characters WHERE id = characterId))
                 WHERE COALESCE(json_extract(statsJson, '$.karma'), 0)
                     <> (SELECT karma FROM characters WHERE id = characterId)`, []]))
-            .then(() => recoverStaleHotStates()).then(() => recoverDissolvedPartyMembers()).then(() => recoverStaleCraftWaits()).then(() => migrateAcquisitionPartyWaits()).then(() => clearPassivePartyRequests()).then(() => expireStalePartyRequests()).then(() => discardInvalidEquipmentPlans()).then(() => discardFulfilledEquipmentPlans()).then(() => hydrateCache()).then((count) => {
+            .then(() => Database.reconcileBotClanGoals?.()).then(() => recoverStaleHotStates()).then(() => recoverDissolvedPartyMembers()).then(() => recoverStaleCraftWaits()).then(() => migrateAcquisitionPartyWaits()).then(() => clearPassivePartyRequests()).then(() => expireStalePartyRequests()).then(() => discardInvalidEquipmentPlans()).then(() => discardFulfilledEquipmentPlans()).then(() => hydrateCache()).then((count) => {
             const repairs = [...cache.values()]
                 .map(canonicalizeAreaState)
                 .map(recoverOrphanedGiranState)

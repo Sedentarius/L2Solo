@@ -371,15 +371,10 @@ async function cleanupHistoricalBatch(options = {}) {
 function craftRequests(state, warehouseItems) {
     const plan = state?.stats?.equipmentPlan;
     if (!['active', 'component_ready', 'ready_to_craft'].includes(plan?.status) || plan.strategy !== 'craft') return [];
-    return (plan.materials || []).flatMap((material) => {
-        const selfId = Number(material.selfId || 0);
-        const stored = (warehouseItems || []).filter((item) => Number(item.selfId) === selfId)
-            .reduce((sum, item) => sum + Number(item.amount || 0), 0);
-        const owned = Number(state?.inventory?.[String(selfId)]?.amount || 0);
-        const missing = Math.max(0, Number(material.amount || 0) - owned);
-        const amount = Math.min(stored, missing);
-        return amount > 0 ? [{ selfId, amount, reason: 'craft' }] : [];
-    });
+    const Crafting = require('../../Clan/ClanCraftingPolicy');
+    if (Crafting.isPersonalCraft(state)) return [];
+    return Crafting.warehouseMaterials(plan, state.inventory || {}, warehouseItems || [])
+        .map(item => ({ ...item, reason: 'craft' }));
 }
 
 function marketRequests(state, warehouseItems, reserved = new Map(), options = {}) {

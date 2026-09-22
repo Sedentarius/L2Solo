@@ -63,7 +63,15 @@ function requirements(recipe, inventory = {}, allowedRecipeIds = null, count = 1
 
 function warehouseMaterials(plan, inventory, rows) {
     const recipe = resolveRecipe(plan?.recipeId);
-    const combined = stockInventory(inventory, rows);
+    // Personal storage rows have no kind, and dual recipes also consume weapons.
+    // Count all available stock here; the recipe tree selects relevant items.
+    const combined = { ...inventory };
+    for (const row of rows) {
+        const id = Number(row.selfId);
+        const amount = Math.max(0, Number(row.amount || 0) - Number(row.reservedAmount || 0));
+        combined[id] = { ...(combined[id] || {}), selfId: id,
+            amount: Number(combined[id]?.amount || 0) + amount };
+    }
     const demand = recipe ? requirements(recipe, combined, null, 1, plan.craftProviders, plan.componentRecipes) : new Map((plan?.materials || []).map(m => [Number(m.selfId), Number(m.amount)]));
     const available = new Map();
     for (const row of rows) available.set(Number(row.selfId), (available.get(Number(row.selfId)) || 0)

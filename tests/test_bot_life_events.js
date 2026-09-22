@@ -48,6 +48,22 @@ Database.init();
     assert.strictEqual(Number(retained[0].count), 20,
         'recordMany must finish its awaited prune before resolving');
 
+    await LifeEvents.record(characterId, 'component_craft', 'made Cokes', {}, 2);
+    await LifeEvents.record(characterId, 'equipment_craft', 'made weapon', {}, 3);
+    await LifeEvents.record(characterId, 'hunt', 'recent hunt', {}, 1);
+    let history = await Database.execute(['SELECT * FROM bot_life_events WHERE characterId = ?', [characterId]]);
+    for (const type of ['component_craft', 'equipment_craft', 'hunt']) {
+        assert(history.some(row => row.eventType === type), `${type} must survive older deaths`);
+    }
+    // Push the manufacture outside the recent window. Its milestone slot remains.
+    await LifeEvents.recordMany(characterId, Array.from({ length: 15 }, (_, index) => ({
+        type: 'death', summary: `later death ${index}`, weight: 4, meta: { index }
+    })));
+    history = await Database.execute(['SELECT * FROM bot_life_events WHERE characterId = ?', [characterId]]);
+    assert.equal(history.length, 20);
+    assert(history.some(row => row.eventType === 'equipment_craft'));
+    assert(history.some(row => row.eventType === 'component_craft'));
+
     console.log('Bot life event coalescing and awaited retention checks passed');
 })().catch((error) => {
     console.error(error);
