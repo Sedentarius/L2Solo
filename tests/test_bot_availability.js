@@ -212,7 +212,7 @@ try {
     assert.strictEqual(result.available, false, 'const friend overrides must never recruit a fixed merchant');
     assert.strictEqual(result.reason, 'merchant_duty');
 
-    const configuredMerchant = session(actor(2000018, 1, 0, { name: 'Nika' }), {
+    const configuredMerchant = session(actor(2000018, 1, 0, { name: 'IslandMats' }), {
         plan: 'merchant',
         coldLifeState: { stats: { classId: 53 } }
     });
