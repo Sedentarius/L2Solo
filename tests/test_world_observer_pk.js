@@ -184,7 +184,7 @@ assert.strictEqual(craftService.staticService, true, 'dedicated cold craft stati
 
 const configuredMerchantState = Observer.compactStateBot({
     characterId: 50,
-    name: 'Nika',
+    name: '4manda',
     level: 1,
     phase: 'hot',
     activity: 'merchant',

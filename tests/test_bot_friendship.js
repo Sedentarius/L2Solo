@@ -29,7 +29,7 @@ Database.execute = ([sql]) => {
             selected: 0
         }, {
             botId: 104,
-            name: 'Nika',
+            name: '4manda',
             level: 1,
             classId: 53,
             statsJson: JSON.stringify({ classId: 53 }),
@@ -72,7 +72,7 @@ Promise.all([
     assert.strictEqual(staticService.reason, 'merchant_duty', 'fixed craft services must not be eligible for friendship');
     const configuredMerchant = await BotFriendship.request({ characterId: 42 }, {
         characterId: 104,
-        name: 'Nika',
+        name: '4manda',
         activity: 'merchant',
         stats: { classId: 53 }
     });
