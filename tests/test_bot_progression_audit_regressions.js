@@ -140,17 +140,19 @@ async function checkMissingSpotRecovery() {
     const Life = invoke('GameServer/Bot/Population/BotLifeState');
     const Events = invoke('GameServer/Bot/Population/BotLifeEvents');
     const Goals = invoke('GameServer/Bot/Goals/GoalService');
-    const originals = { ensure: Spots.ensure, occupancy: Spots.currentOccupancy, find: Spots.findForState, save: Life.upsertState };
+    const originals = { ensure: Spots.ensure, occupancy: Spots.currentOccupancy, find: Spots.findForState,
+        save: Life.upsertState, cachedState: Life.cachedState };
     const state = { ...polearm, characterId: 100, phase: 'cold', activity: 'hunting', inventory: {},
         adena: 0, stats: { classId: 3 }, timing: { nextResolveAt: 1 } };
     let savedReason;
+    let saves = 0;
     const originalEvents = Events.recordMany;
     const originalReview = Goals.review;
     try {
         Spots.ensure = () => [];
         Spots.currentOccupancy = () => ({});
         Spots.findForState = () => null;
-        Life.upsertState = async (next, reason) => { savedReason = reason; return next; };
+        Life.upsertState = async (next, reason) => { savedReason = reason; saves += 1; return next; };
         Events.recordMany = async () => [];
         const before = Date.now();
         const result = await Population.resolveColdState(state, { precomputedPlan: {
@@ -185,9 +187,24 @@ async function checkMissingSpotRecovery() {
         assert.strictEqual(savedReason, 'goal_market_travel_before_combat');
         assert.strictEqual(purchasedTrip.state.stats.travel.reason, 'market_search_for_weapon',
             'a funded two-handed weapon must leave for market before a worker fight can exhaust the buyer again');
+        const savesBeforeStaleTrip = saves;
+        let current = buyer;
+        Life.cachedState = () => current;
+        Goals.review = async () => {
+            current = { ...buyer, inventory: { ...buyer.inventory, newlyAcquired: { amount: 1 } } };
+            return { current: { type: 'upgrade_gear', plan: { expectedBenefit: 'market_search_for_weapon' } } };
+        };
+        const staleTrip = await Population.executeWorkerLifecycleCommand(buyer, {
+            precomputedResult: { patch: { activity: 'resting' } }
+        });
+        assert.strictEqual(staleTrip.reason, 'state_changed',
+            'a concurrent state update during goal review must prevent stale market travel');
+        assert.strictEqual(staleTrip.state, current);
+        assert.strictEqual(saves, savesBeforeStaleTrip, 'the stale market trip must not write another lifecycle state');
     } finally {
         Spots.ensure = originals.ensure; Spots.currentOccupancy = originals.occupancy;
         Spots.findForState = originals.find; Life.upsertState = originals.save;
+        Life.cachedState = originals.cachedState;
         Events.recordMany = originalEvents;
         Goals.review = originalReview;
     }

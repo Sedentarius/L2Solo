@@ -332,6 +332,19 @@ async function run() {
         const routed = GoalExecutor.finishMarketVisit(stranded, 62000, { recoverMissingReturn: true });
         assert.strictEqual(routed.activity, 'traveling');
         assert.strictEqual(routed.stats.travel.spotId, 'recovery');
+        const stalePartyReturn = { ...stranded, stats: {
+            ...stranded.stats, partyMarketReturn: { partyId: 'dissolved-party' }
+        } };
+        const soloReturn = GoalExecutor.finishMarketVisit(stalePartyReturn, 62000, { recoverMissingReturn: true });
+        assert.strictEqual(soloReturn.stats.travel.arrivalActivity, 'hunting',
+            'a fallback route must not wait for a dissolved party');
+        assert.strictEqual(soloReturn.stats.partyMarketReturn, null,
+            'solo recovery must discard the obsolete party return token');
+        SpotProfiles.findForState = () => null;
+        const soloRest = GoalExecutor.finishMarketVisit(stalePartyReturn, 62000, { recoverMissingReturn: true });
+        assert.strictEqual(soloRest.activity, 'resting');
+        assert.strictEqual(soloRest.stats.partyMarketReturn, null,
+            'resting recovery must also discard the obsolete party return token');
     } finally {
         SpotProfiles.findForState = previousFindSpot;
         SpotService.arrivalPointForState = previousArrival;

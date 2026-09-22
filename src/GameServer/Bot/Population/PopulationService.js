@@ -3712,7 +3712,11 @@ const PopulationService = {
         if (!joinedBackgroundParty(state) && !state.stats?.pveEncounter && !state.stats?.pvpEncounter
             && canResumeAffordableMarketPlan(state)) {
             const goal = await GoalService.review(state);
-            const travel = GoalExecutor.beginMarketTravel(state, goal?.current);
+            const current = LifeState.cachedState(state.characterId) || state;
+            if (current !== state || joinedBackgroundParty(current) || current.phase !== 'cold') {
+                return { ok: false, reason: 'state_changed', state: current };
+            }
+            const travel = GoalExecutor.beginMarketTravel(current, goal?.current);
             if (travel) {
                 const saved = await LifeState.upsertState(travel, 'goal_market_travel_before_combat');
                 return { ok: !!saved, state: saved || state,

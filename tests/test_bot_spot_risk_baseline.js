@@ -4,7 +4,6 @@ require('../src/Global');
 
 const DataCache = invoke('GameServer/DataCache');
 const Database = invoke('Database');
-const originalReconcileClanGoals = Database.reconcileBotClanGoals;
 const LifeState = invoke('GameServer/Bot/Population/BotLifeState');
 const SpotRiskPolicy = invoke('GameServer/Bot/Population/SpotRiskPolicy');
 
@@ -12,6 +11,7 @@ DataCache.init();
 
 const originals = {
     reconcileBotClanMembership: Database.reconcileBotClanMembership,
+    reconcileBotClanGoals: Database.reconcileBotClanGoals,
     execute: Database.execute,
     syncInventorySummary: Database.syncInventorySummary,
     updateCharacterLocation: Database.updateCharacterLocation,
