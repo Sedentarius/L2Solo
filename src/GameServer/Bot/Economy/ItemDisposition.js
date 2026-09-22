@@ -1,6 +1,6 @@
 const ClanCrafting = require('../../Clan/ClanCraftingPolicy');
 const DataCache = invoke('GameServer/DataCache');
-const BotEconomyPricing = invoke('GameServer/Bot/Economy/BotEconomyPricing');
+const BotMarketPricing = invoke('GameServer/Bot/Economy/BotMarketPricing');
 const C4RecipeItems = invoke('GameServer/Items/C4RecipeItems');
 const C4EnchantScrolls = invoke('GameServer/Items/C4EnchantScrolls');
 const CraftShopService = invoke('GameServer/Bot/Economy/CraftShopService');
@@ -34,7 +34,13 @@ function priceFor(state, item, template) {
     const seed = (Number(state.characterId || 0) * 31) + (Number(item.selfId || 0) * 17);
     const percent = 70 + (Math.abs(seed) % 21);
     const adjustment = Math.max(50, Math.min(100, Number(state?.stats?.marketPricing?.[Number(item.selfId)]?.percent || 100)));
-    return BotEconomyPricing.scalePrice(basePrice * percent * adjustment / 10000);
+    return BotMarketPricing.priceAt({ ...item, basePrice, enchant: saleEnchant(item) }, percent * adjustment / 10000);
+}
+
+function saleEnchant(item) {
+    return Math.max(Number(item?.enchant || 0), ...(item?.instances || [])
+        .filter((instance) => !instance.equipped)
+        .map((instance) => Number(instance.enchant || 0)));
 }
 
 function basePrice(item, template = templateFor(item?.selfId)) {
@@ -312,6 +318,9 @@ function saleCandidates(state, options = {}) {
             kind,
             rank: item.rank || template?.etc?.rank || 'none',
             count: sellableCount,
+            // A stack can mix enchant levels; do not advertise its highest
+            // enchant as if every instance had it. Only mark comparability.
+            npcComparable: saleEnchant(item) === 0,
             price,
             basePrice: base
         }];
@@ -361,9 +370,14 @@ function isWarehouseCandidate(item, template = templateFor(item?.selfId)) {
 
 function warehouseCandidates(state) {
     const reserved = reservedEquipmentAmounts(state);
-    return Object.values(state?.inventory || {}).filter((item) => (
-        !reserved[Number(item?.selfId || 0)] && isWarehouseCandidate(item)
-    ));
+    return Object.values(state?.inventory || {}).flatMap((item) => {
+        const equipped = Math.max(0, Number(item.equippedCount ?? (item.equipped ? 1 : 0)) || 0);
+        // Reservations include equipped copies, as in unreservedActorItems.
+        const keep = Math.max(equipped, Number(reserved[Number(item.selfId)] || 0));
+        const amount = Math.max(0, Number(item.amount || 0) - keep);
+        const candidate = { ...item, amount, equipped: false, equippedCount: 0, equippedSlots: [], slot: 0 };
+        return amount > 0 && isWarehouseCandidate(candidate) ? [candidate] : [];
+    });
 }
 
 function saleSummary(state, options = {}) {

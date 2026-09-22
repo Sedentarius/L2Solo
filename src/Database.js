@@ -1141,7 +1141,8 @@ function applySchemaMigrations() {
                   AND payloadJson <> '{}';
             DROP INDEX IF EXISTS clan_actions_terminal_retention;
             DROP INDEX IF EXISTS clan_goal_events_action_retention;
-        `)]
+        `)],
+        [43, () => connection.exec(fs.readFileSync(path.join(__dirname, '../database/sql/market-store-history.sql'), 'utf8'))]
     ];
     const applied = new Set(connection.prepare('SELECT version FROM schema_migrations').all().map((row) => Number(row.version)));
     migrations.forEach(([version, apply]) => {
@@ -2257,6 +2258,27 @@ const Database = {
             }
             return { inserted: result.affectedRows > 0, id: result.affectedRows > 0 ? result.insertId || null : null };
         }, { operation: 'market:trade-record', read: false });
+    },
+
+    fetchMarketStoreHistory({ timestamp = now(), rangeMs = 24 * 60 * 60 * 1000, recentLimit = 100 } = {}) {
+        const since = Number(timestamp) - Math.max(1, Math.min(MARKET_TRADE_RETENTION_MS, Number(rangeMs) || 86400000));
+        const limit = Math.max(1, Math.min(500, Math.floor(Number(recentLimit) || 100)));
+        return enqueue(() => ({
+            retentionDays: 90,
+            since,
+            byEvent: all(`SELECT eventType, storeType, reason, COUNT(*) AS events
+                FROM market_store_events WHERE occurredAt >= ?
+                GROUP BY eventType, storeType, reason`, [since]),
+            byItem: all(`SELECT CAST(json_extract(item.value, '$.selfId') AS INTEGER) AS selfId,
+                    json_extract(item.value, '$.name') AS name, events.storeType, COUNT(*) AS openings
+                FROM market_store_events events, json_each(events.itemsJson) item
+                WHERE events.occurredAt >= ? AND events.eventType = 'opened'
+                GROUP BY selfId, events.storeType ORDER BY openings DESC, selfId LIMIT 100`, [since]),
+            recent: all(`SELECT * FROM market_store_events WHERE occurredAt >= ?
+                ORDER BY occurredAt DESC, id DESC LIMIT ${limit}`, [since]).map(({ itemsJson, ...event }) => ({
+                ...event, items: JSON.parse(itemsJson)
+            }))
+        }), { operation: 'market:store-history', read: true });
     },
 
     fetchMarketTradeOverview({ timestamp = now(), recentLimit = 200 } = {}) {

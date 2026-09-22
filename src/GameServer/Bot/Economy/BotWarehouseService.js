@@ -196,8 +196,14 @@ async function depositColdUnlocked(state, candidates) {
             remaining -= amount;
         }
         inventory[String(candidate.selfId)] = {
-            ...candidate,
-            amount: Math.max(0, Number(candidate.amount || 0) - amount)
+            ...inventory[String(candidate.selfId)],
+            amount: Math.max(0, Number(inventory[String(candidate.selfId)]?.amount || 0) - amount),
+            ...(Array.isArray(inventory[String(candidate.selfId)]?.instances) ? {
+                instances: inventory[String(candidate.selfId)].instances.map((instance) => {
+                    const source = sources.find((row) => Number(row.id) === Number(instance.id));
+                    return source ? { ...instance, amount: Number(source.amount) } : instance;
+                }).filter((instance) => Number(instance.amount) > 0)
+            } : {})
         };
         retained.set(Number(candidate.selfId), Number(retained.get(Number(candidate.selfId)) || 0) + amount);
         if (amount > 0) stored.push({ selfId: candidate.selfId, name: candidate.name, amount });

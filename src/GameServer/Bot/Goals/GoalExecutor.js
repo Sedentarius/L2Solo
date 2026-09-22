@@ -67,7 +67,7 @@ function beginMarketTravel(state, goal, timestamp = Date.now()) {
     };
 }
 
-function finishMarketVisit(state, timestamp = Date.now()) {
+function finishMarketVisit(state, timestamp = Date.now(), options = {}) {
     if (!state || !['shopping', 'merchant'].includes(state.activity)) return null;
     let destination = state.stats?.marketReturn;
     const returningParty = state.stats?.partyMarketReturn
@@ -76,6 +76,18 @@ function finishMarketVisit(state, timestamp = Date.now()) {
     if (returningParty?.status === 'active') {
         const leader = invoke('GameServer/Bot/Population/BotLifeState').cachedState(returningParty.leaderId);
         if (leader?.loc) destination = { loc: leader.loc, spotId: returningParty.spotId, regionName: leader.currentRegion };
+    }
+    if (!destination?.loc && options.recoverMissingReturn) {
+        const fallback = invoke('GameServer/Bot/Population/SpotProfiles').findForState({
+            ...state, activity: 'hunting'
+        }, { timestamp });
+        const loc = fallback && SpotService.arrivalPointForState(state, fallback);
+        if (loc) destination = { loc, spotId: fallback.id, regionName: fallback.name };
+        else return {
+            ...state, activity: 'resting',
+            stats: { ...state.stats, marketReturn: null, restUntil: timestamp + 30000 },
+            timing: { ...state.timing, activityStartedAt: timestamp, nextResolveAt: timestamp + 30000 }
+        };
     }
     if (!destination?.loc) return null;
 
