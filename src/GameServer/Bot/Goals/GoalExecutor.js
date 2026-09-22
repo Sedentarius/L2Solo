@@ -8,9 +8,10 @@ const MARKET_TRAVEL_MS = 25 * 1000;
 const GATEKEEPER_SPOT_TRAVEL_MS = 25 * 1000;
 
 function marketTown(name = 'Giran') {
+    const town = Object.values(TownRespawn.towns).find((candidate) => candidate.name === name);
     return TownPathfinder.towns.find((town) => town.name === name)
         || MarketTownPolicy.marketTown(name)
-        || TownPathfinder.towns.find((town) => town.name === 'Giran')
+        || (town && { name: town.name, center: { locX: town.locX, locY: town.locY, locZ: town.locZ } })
         || null;
 }
 

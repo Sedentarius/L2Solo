@@ -59,10 +59,21 @@ options.default.Database.path = path.join(directory, 'world.sqlite');
     assert.strictEqual((await Database.execute(["SELECT id FROM market_store_events WHERE storeId='old'"])).length, 0,
         'the bounded retention sweep must remove events older than 90 days');
     assert.strictEqual((await Database.execute(['SELECT version FROM schema_migrations WHERE version=43'])).length, 1);
+    // Emulate a deployed v43 database with a false closure for a still-open shop.
+    await Database.execute([`INSERT INTO market_store_events
+        (storeId,characterId,characterName,storeType,eventType,reason,occurredAt,openedAt,itemsJson)
+        VALUES ('fourth',7,'ShopTest',1,'closed','cold_market_buy_store',?,?,'[]')`, [timestamp, timestamp]]);
+    await Database.execute(['DELETE FROM schema_migrations WHERE version=44']);
+    await Database.execute(['DROP TRIGGER market_store_update']);
+    await Database.execute([`CREATE TRIGGER market_store_update AFTER UPDATE ON bot_life_state
+        BEGIN SELECT RAISE(FAIL, 'obsolete journal trigger'); END`]);
     await Database.close();
     Database.init();
+    assert.strictEqual((await Database.execute(['SELECT version FROM schema_migrations WHERE version=44'])).length, 1);
+    await update(shop('fourth'), 'market_purchase', 'shopping');
+    await update(shop('fourth'), 'cold_market_buy_partial');
     history = await Database.fetchMarketStoreHistory({ timestamp: timestamp + 2000 });
-    assert.strictEqual(history.recent.length, 7, 'opening and closing history must survive a database reopen');
+    assert.strictEqual(history.recent.length, 7, 'upgrade must repair the false closure and preserve real history');
     assert.strictEqual((await Database.execute(['PRAGMA quick_check']))[0].quick_check, 'ok');
     await Database.close();
     fs.rmSync(directory, { recursive: true, force: true });

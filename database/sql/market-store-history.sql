@@ -16,7 +16,8 @@ CREATE INDEX IF NOT EXISTS market_store_events_recent ON market_store_events(occ
 CREATE INDEX IF NOT EXISTS market_store_events_owner ON market_store_events(characterId, occurredAt);
 
 -- Journal the persisted transition in the same transaction as the bot state.
--- Phase changes and price reviews keep the same store and create no new event.
+-- Store identity survives intermediate purchase writes in shopping activity.
+-- Only removing/replacing that identity closes a store, including partial WTBs.
 CREATE TRIGGER IF NOT EXISTS market_store_insert AFTER INSERT ON bot_life_state
 WHEN NEW.activity = 'merchant' AND COALESCE(json_extract(NEW.statsJson, '$.marketStore.id'), '') <> ''
 BEGIN
@@ -35,7 +36,7 @@ BEGIN
 END;
 
 CREATE TRIGGER IF NOT EXISTS market_store_update AFTER UPDATE OF activity, statsJson ON bot_life_state
-WHEN OLD.activity = 'merchant' OR NEW.activity = 'merchant'
+WHEN COALESCE(json_extract(OLD.statsJson, '$.marketStore.id'), '') <> '' OR NEW.activity = 'merchant'
 BEGIN
     INSERT OR IGNORE INTO market_store_events
         (storeId, characterId, characterName, storeType, eventType, reason, occurredAt, openedAt, town, itemsJson)
@@ -45,10 +46,8 @@ BEGIN
         COALESCE(json_extract(OLD.statsJson, '$.marketStore.openedAt'), OLD.updatedAt),
         json_extract(OLD.statsJson, '$.marketStore.town'),
         COALESCE(json_extract(OLD.statsJson, '$.marketStore.items'), '[]')
-    WHERE OLD.activity = 'merchant'
-        AND COALESCE(json_extract(OLD.statsJson, '$.marketStore.id'), '') <> ''
-        AND (NEW.activity <> 'merchant' OR
-            COALESCE(json_extract(NEW.statsJson, '$.marketStore.id'), '') <> json_extract(OLD.statsJson, '$.marketStore.id'));
+    WHERE COALESCE(json_extract(OLD.statsJson, '$.marketStore.id'), '') <> ''
+        AND COALESCE(json_extract(NEW.statsJson, '$.marketStore.id'), '') <> json_extract(OLD.statsJson, '$.marketStore.id');
 
     INSERT OR IGNORE INTO market_store_events
         (storeId, characterId, characterName, storeType, eventType, reason, occurredAt, openedAt, town, itemsJson)
@@ -60,8 +59,7 @@ BEGIN
         COALESCE(json_extract(NEW.statsJson, '$.marketStore.items'), '[]')
     WHERE NEW.activity = 'merchant'
         AND COALESCE(json_extract(NEW.statsJson, '$.marketStore.id'), '') <> ''
-        AND (OLD.activity <> 'merchant' OR
-            COALESCE(json_extract(OLD.statsJson, '$.marketStore.id'), '') <> json_extract(NEW.statsJson, '$.marketStore.id'));
+        AND COALESCE(json_extract(OLD.statsJson, '$.marketStore.id'), '') <> json_extract(NEW.statsJson, '$.marketStore.id');
 
     DELETE FROM market_store_events WHERE id IN (
         SELECT id FROM market_store_events WHERE occurredAt < NEW.updatedAt - 7776000000

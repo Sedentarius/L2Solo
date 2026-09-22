@@ -258,6 +258,9 @@ function lifecycleKind(state = {}, context = {}) {
         || (state.activity === 'resting' && Number(stats.restUntil || 0) > 0)) return 'resolver';
     if (require('./PartyMarketBreak').ready(state)) return 'command';
     if (stats.partyMarketReturn && ['shopping', 'merchant'].includes(state.activity)) return 'command';
+    // Finish town services before waiting for a clan hunt. The pure shopping
+    // resolver only advances its deadline and cannot buy, sell or leave town.
+    if (['shopping', 'crafting', 'merchant'].includes(state.activity)) return 'command';
     if (require('./ClanPartyDuty').waiting(state)) return 'resolver';
     if (!SIMPLE_ACTIVITIES.has(String(state.activity || ''))) return 'command';
     // craftReturn is a saved destination, not an outstanding crafting action.

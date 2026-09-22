@@ -1142,7 +1142,19 @@ function applySchemaMigrations() {
             DROP INDEX IF EXISTS clan_actions_terminal_retention;
             DROP INDEX IF EXISTS clan_goal_events_action_retention;
         `)],
-        [43, () => connection.exec(fs.readFileSync(path.join(__dirname, '../database/sql/market-store-history.sql'), 'utf8'))]
+        [43, () => connection.exec(fs.readFileSync(path.join(__dirname, '../database/sql/market-store-history.sql'), 'utf8'))],
+        [44, () => {
+            connection.exec(`
+                DROP TRIGGER IF EXISTS market_store_insert;
+                DROP TRIGGER IF EXISTS market_store_update;
+                DELETE FROM market_store_events
+                WHERE eventType = 'closed' AND storeId IN (
+                    SELECT json_extract(statsJson, '$.marketStore.id') FROM bot_life_state
+                    WHERE json_extract(statsJson, '$.marketStore.id') IS NOT NULL
+                );
+            `);
+            connection.exec(fs.readFileSync(path.join(__dirname, '../database/sql/market-store-history.sql'), 'utf8'));
+        }]
     ];
     const applied = new Set(connection.prepare('SELECT version FROM schema_migrations').all().map((row) => Number(row.version)));
     migrations.forEach(([version, apply]) => {
