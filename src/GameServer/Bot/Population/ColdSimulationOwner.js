@@ -99,7 +99,7 @@ function withPersistedStats(state, result) {
     if (!state || typeof result?.row?.statsJson !== 'string') return state;
     try {
         const stats = JSON.parse(result.row.statsJson);
-        return stats && typeof stats === 'object' ? { ...state, stats } : state;
+        return stats && typeof stats === 'object' ? { ...state, name: result.row.characterName || state.name, stats } : state;
     } catch (_) {
         return state;
     }

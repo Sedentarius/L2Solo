@@ -226,16 +226,7 @@ function migratePopulationNames(states = []) {
         const base = migrationBaseFor(state);
 
         return uniqueNameFor(index, 0, state.characterId, base).then((name) => {
-            const nextState = {
-                ...state,
-                name,
-                stats: { ...(state.stats || {}), nameGeneratorVersion: NAME_GENERATOR_VERSION }
-            };
-            const rename = name === state.name
-                ? Promise.resolve()
-                : Database.updateCharacterName(state.characterId, name);
-
-            return rename.then(() => LifeState.upsertState(nextState, 'generated_name_migration'));
+            return LifeState.acceptNameMetadata(state.characterId, name, NAME_GENERATOR_VERSION);
         });
     }), Promise.resolve()).then(() => candidates.length);
 }
@@ -579,6 +570,7 @@ const GeneratedColdSeeder = {
     baseForIndex,
     sexForIndex,
     migratePopulationAppearances,
+    migratePopulationNames,
     APPEARANCE_VERSION,
     nameFor,
     cooperativeEach,
@@ -638,7 +630,7 @@ const GeneratedColdSeeder = {
 
         this.running = true;
         return Promise.resolve()
-            .then(() => migratePopulationNames(LifeState.allStates(50000)))
+            .then(() => migratePopulationNames(LifeState.populationSeedStates()))
             .then(() => migratePopulationAppearances(LifeState.allStates(50000)))
             .then(() => {
             const plan = SeedPlanner.plan(

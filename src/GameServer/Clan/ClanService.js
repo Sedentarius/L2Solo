@@ -100,6 +100,7 @@ function liveMember(member) {
         const bot = invoke('GameServer/Bot/Population/BotLifeState').cachedState(member.id);
         return normalizeMember({
             ...member,
+            name: bot?.name || member.name,
             level: bot?.level ?? member.level,
             classId: bot?.stats?.classId ?? member.classId,
             isOnline: Boolean(bot)
@@ -153,6 +154,13 @@ const ClanService = {
 
     init() {
         return ensureSchema()
+            .then(() => Database.migrateAutonomousClanNames().catch((err) => {
+                utils.infoWarn('Clan', 'name migration deferred: %s', err.message);
+                return { renamed: [] };
+            }))
+            .then((result) => {
+                if (result.renamed.length) utils.infoSuccess('Clan', 'renamed %d legacy bot clans', result.renamed.length);
+            })
             .then(() => this.reload())
             .then(() => ClanCrestService.ensureAutonomousClans())
             .then((result) => result.assigned ? this.reload() : this.all())
@@ -497,12 +505,30 @@ const ClanService = {
         if (!member) return;
         const level = Number(bot.level ?? member.level);
         const classId = Number(bot.stats?.classId ?? member.classId);
-        if (member.level === level && member.classId === classId) return;
+        const nameChanged = Boolean(bot.name) && member.name !== bot.name;
+        if (member.level === level && member.classId === classId && !nameChanged) return;
         Object.assign(member, { level, classId, online: true });
+        if (nameChanged) {
+            this.renameMember(bot.characterId, bot.name);
+            return;
+        }
         const recipients = clanOnlineSessions(clan).filter(s => s.actor?.fetchIsOnline?.());
         if (!recipients.length) return;
         const packet = invoke('GameServer/Network/Response').pledgeShowMemberListUpdate(member);
         recipients.forEach(s => s.dataSendToMe(packet));
+    },
+    renameMember(characterId, name) {
+        const clan = [...state.clans.values()].find(c => c.members.some(m => m.id === Number(characterId)));
+        const member = clan?.members.find(m => m.id === Number(characterId));
+        if (!member || !name || member.name === name) return;
+        member.name = name;
+        const Response = invoke('GameServer/Network/Response');
+        // C4 incremental member updates are keyed by name. A rename requires
+        // replacing the roster so the old row cannot survive in an open window.
+        clanOnlineSessions(clan).filter(s => s.actor?.fetchIsOnline?.()).forEach(s => {
+            s.dataSendToMe(Response.pledgeShowMemberListDeleteAll());
+            s.dataSendToMe(Response.pledgeShowMemberListAll(this.refreshOnlineMembers(clan), s.actor));
+        });
     },
     broadcastMemberPresence(actor) {
         const clanId = Number(actor?.fetchClanId?.() || 0);

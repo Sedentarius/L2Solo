@@ -1,0 +1,785 @@
+{
+  "version": 1,
+  "sources": {
+    "reborn-1": {
+      "url": "https://l2reborn.org/ranking/",
+      "server": "Origins x3~x1",
+      "observedAt": "2026-09-22"
+    },
+    "reborn-2": {
+      "url": "https://l2reborn.org/ranking/",
+      "server": "Eternal x10",
+      "observedAt": "2026-09-22"
+    },
+    "reborn-3": {
+      "url": "https://l2reborn.org/ranking/",
+      "server": "Aden x3~x1",
+      "observedAt": "2026-09-22"
+    },
+    "reborn-4": {
+      "url": "https://l2reborn.org/ranking/",
+      "server": "Forever x15",
+      "observedAt": "2026-09-22"
+    },
+    "reborn-5": {
+      "url": "https://l2reborn.org/ranking/",
+      "server": "Signature x1",
+      "observedAt": "2026-09-22"
+    },
+    "reborn-6": {
+      "url": "https://l2reborn.org/ranking/",
+      "server": "Guardian x1",
+      "observedAt": "2026-09-22"
+    },
+    "reborn-9": {
+      "url": "https://l2reborn.org/ranking/",
+      "server": "Eternal x10~x30",
+      "observedAt": "2026-09-22"
+    },
+    "reborn-10": {
+      "url": "https://l2reborn.org/ranking/",
+      "server": "Goddard x3~x1",
+      "observedAt": "2026-09-22"
+    },
+    "ncsoft-bartz": {
+      "url": "https://about.ncsoft.com/artbook/en/lineage2/",
+      "server": "Bartz (Korea), 2003-2004",
+      "observedAt": "2026-09-22"
+    }
+  },
+  "entries": [
+    {
+      "name": "Abyss",
+      "source": "reborn-1"
+    },
+    {
+      "name": "Aeris",
+      "source": "reborn-2"
+    },
+    {
+      "name": "Alendria",
+      "source": "reborn-5"
+    },
+    {
+      "name": "ALIGATORS",
+      "source": "reborn-2"
+    },
+    {
+      "name": "AltR",
+      "source": "reborn-1"
+    },
+    {
+      "name": "AngelsOfDeath",
+      "source": "reborn-1"
+    },
+    {
+      "name": "AntiSoCial",
+      "source": "reborn-2"
+    },
+    {
+      "name": "AoW",
+      "source": "reborn-4"
+    },
+    {
+      "name": "Arcane",
+      "source": "reborn-2"
+    },
+    {
+      "name": "AwakenedDemons",
+      "source": "reborn-2"
+    },
+    {
+      "name": "BadBoys",
+      "source": "reborn-3"
+    },
+    {
+      "name": "BadReputation",
+      "source": "reborn-4"
+    },
+    {
+      "name": "BalalaikaUnited",
+      "source": "reborn-2"
+    },
+    {
+      "name": "Beyond",
+      "source": "reborn-2"
+    },
+    {
+      "name": "BigBrothers",
+      "source": "reborn-2"
+    },
+    {
+      "name": "BlackMighty",
+      "source": "reborn-5"
+    },
+    {
+      "name": "BlackNINJAS",
+      "source": "reborn-4"
+    },
+    {
+      "name": "Blaze",
+      "source": "reborn-5"
+    },
+    {
+      "name": "BloodBound",
+      "source": "reborn-1"
+    },
+    {
+      "name": "BloodyOath",
+      "source": "reborn-1"
+    },
+    {
+      "name": "Boomers",
+      "source": "reborn-5"
+    },
+    {
+      "name": "BRACTWOSTALI",
+      "source": "reborn-4"
+    },
+    {
+      "name": "Brazilians",
+      "source": "reborn-2"
+    },
+    {
+      "name": "BrotherHood",
+      "source": "reborn-3"
+    },
+    {
+      "name": "BrothersRoad",
+      "source": "reborn-5"
+    },
+    {
+      "name": "BrumbalovaArmada",
+      "source": "reborn-10"
+    },
+    {
+      "name": "BurnedBanners",
+      "source": "reborn-5"
+    },
+    {
+      "name": "CasteloNegro",
+      "source": "reborn-6"
+    },
+    {
+      "name": "Casual",
+      "source": "reborn-6"
+    },
+    {
+      "name": "Challengers",
+      "source": "reborn-3"
+    },
+    {
+      "name": "Chaos",
+      "source": "reborn-4"
+    },
+    {
+      "name": "ChumBucket",
+      "source": "reborn-4"
+    },
+    {
+      "name": "CivilUnrest",
+      "source": "reborn-1"
+    },
+    {
+      "name": "CLOWNS",
+      "source": "reborn-5"
+    },
+    {
+      "name": "Condemned",
+      "source": "reborn-6"
+    },
+    {
+      "name": "Corajudos",
+      "source": "reborn-6"
+    },
+    {
+      "name": "CosmicPower",
+      "source": "reborn-1"
+    },
+    {
+      "name": "CreamCrackers",
+      "source": "reborn-4"
+    },
+    {
+      "name": "CrimsonDaybreak",
+      "source": "reborn-5"
+    },
+    {
+      "name": "DarkSide",
+      "source": "reborn-6"
+    },
+    {
+      "name": "DarkVoid",
+      "source": "reborn-10"
+    },
+    {
+      "name": "DarkWorld",
+      "source": "reborn-2"
+    },
+    {
+      "name": "DeathIsEternal",
+      "source": "reborn-3"
+    },
+    {
+      "name": "Decepticons",
+      "source": "reborn-5"
+    },
+    {
+      "name": "Diretoria",
+      "source": "reborn-6"
+    },
+    {
+      "name": "DogsOfWar",
+      "source": "reborn-3"
+    },
+    {
+      "name": "DragonKnights",
+      "source": "reborn-5"
+    },
+    {
+      "name": "DreamLand",
+      "source": "reborn-3"
+    },
+    {
+      "name": "DreamzTeam",
+      "source": "reborn-2"
+    },
+    {
+      "name": "drunkLizards",
+      "source": "reborn-2"
+    },
+    {
+      "name": "DrunkNeighbors",
+      "source": "reborn-1"
+    },
+    {
+      "name": "Dwarves",
+      "source": "reborn-5"
+    },
+    {
+      "name": "Eclipse",
+      "source": "reborn-1"
+    },
+    {
+      "name": "Elysium",
+      "source": "reborn-10"
+    },
+    {
+      "name": "EmotionalDMG",
+      "source": "reborn-2"
+    },
+    {
+      "name": "EternalTempest",
+      "source": "reborn-4"
+    },
+    {
+      "name": "EvilHordes",
+      "source": "reborn-9"
+    },
+    {
+      "name": "eXecutors",
+      "source": "reborn-10"
+    },
+    {
+      "name": "ExitGaming",
+      "source": "reborn-2"
+    },
+    {
+      "name": "FarEast",
+      "source": "reborn-3"
+    },
+    {
+      "name": "Fear",
+      "source": "reborn-1"
+    },
+    {
+      "name": "FearFactory",
+      "source": "reborn-5"
+    },
+    {
+      "name": "FightClub",
+      "source": "reborn-3"
+    },
+    {
+      "name": "FocusMiss",
+      "source": "reborn-1"
+    },
+    {
+      "name": "ForestSentinels",
+      "source": "reborn-5"
+    },
+    {
+      "name": "Forgotten",
+      "source": "reborn-5"
+    },
+    {
+      "name": "ForTheHorde",
+      "source": "reborn-5"
+    },
+    {
+      "name": "FreeBorn",
+      "source": "reborn-5"
+    },
+    {
+      "name": "GEORGIANS",
+      "source": "reborn-2"
+    },
+    {
+      "name": "GoDs",
+      "source": "reborn-6"
+    },
+    {
+      "name": "GoldenHour",
+      "source": "reborn-2"
+    },
+    {
+      "name": "GrimoireHeart",
+      "source": "reborn-10"
+    },
+    {
+      "name": "GROMDA",
+      "source": "reborn-6"
+    },
+    {
+      "name": "Guarani",
+      "source": "reborn-4"
+    },
+    {
+      "name": "HaterS",
+      "source": "reborn-1"
+    },
+    {
+      "name": "Hysteria",
+      "source": "reborn-1"
+    },
+    {
+      "name": "Ignited",
+      "source": "reborn-1"
+    },
+    {
+      "name": "Immortal",
+      "source": "reborn-5"
+    },
+    {
+      "name": "Infected",
+      "source": "reborn-2"
+    },
+    {
+      "name": "InFerNaL",
+      "source": "reborn-2"
+    },
+    {
+      "name": "Influence",
+      "source": "reborn-6"
+    },
+    {
+      "name": "IQtest",
+      "source": "reborn-6"
+    },
+    {
+      "name": "Isengard",
+      "source": "reborn-5"
+    },
+    {
+      "name": "JollyButchers",
+      "source": "reborn-6"
+    },
+    {
+      "name": "Just4Fun",
+      "source": "reborn-9"
+    },
+    {
+      "name": "Kantora",
+      "source": "reborn-9"
+    },
+    {
+      "name": "KarmaLovers",
+      "source": "reborn-10"
+    },
+    {
+      "name": "Kriminalides",
+      "source": "reborn-2"
+    },
+    {
+      "name": "KunLun",
+      "source": "reborn-1"
+    },
+    {
+      "name": "LandLords",
+      "source": "reborn-6"
+    },
+    {
+      "name": "LastKingdom",
+      "source": "reborn-2"
+    },
+    {
+      "name": "LatinGame",
+      "source": "reborn-2"
+    },
+    {
+      "name": "LeadNeverFollow",
+      "source": "reborn-9"
+    },
+    {
+      "name": "LilPigs",
+      "source": "reborn-4"
+    },
+    {
+      "name": "LimitBreak",
+      "source": "reborn-5"
+    },
+    {
+      "name": "LionHeart",
+      "source": "reborn-3"
+    },
+    {
+      "name": "LuckyStrike",
+      "source": "reborn-1"
+    },
+    {
+      "name": "Lustre",
+      "source": "reborn-3"
+    },
+    {
+      "name": "Magic",
+      "source": "reborn-5"
+    },
+    {
+      "name": "Masquerade",
+      "source": "reborn-1"
+    },
+    {
+      "name": "MATRIX",
+      "source": "reborn-6"
+    },
+    {
+      "name": "MichiRONIN",
+      "source": "reborn-2"
+    },
+    {
+      "name": "Minefield",
+      "source": "reborn-5"
+    },
+    {
+      "name": "Minions",
+      "source": "reborn-5"
+    },
+    {
+      "name": "monkeybusiness",
+      "source": "reborn-4"
+    },
+    {
+      "name": "NaughtyFurballs",
+      "source": "reborn-10"
+    },
+    {
+      "name": "NewEra",
+      "source": "reborn-4"
+    },
+    {
+      "name": "NewLegacy",
+      "source": "reborn-1"
+    },
+    {
+      "name": "Nieogary",
+      "source": "reborn-2"
+    },
+    {
+      "name": "Nogrod",
+      "source": "reborn-2"
+    },
+    {
+      "name": "Noisia",
+      "source": "reborn-1"
+    },
+    {
+      "name": "Notabene",
+      "source": "reborn-2"
+    },
+    {
+      "name": "OhMyDog",
+      "source": "reborn-6"
+    },
+    {
+      "name": "OldDogs",
+      "source": "reborn-1"
+    },
+    {
+      "name": "OldDragons",
+      "source": "reborn-3"
+    },
+    {
+      "name": "OldFriends",
+      "source": "reborn-2"
+    },
+    {
+      "name": "OLDGODS",
+      "source": "reborn-1"
+    },
+    {
+      "name": "Olympus",
+      "source": "reborn-6"
+    },
+    {
+      "name": "OMNI",
+      "source": "reborn-9"
+    },
+    {
+      "name": "OnionRings",
+      "source": "reborn-4"
+    },
+    {
+      "name": "OnlyFails",
+      "source": "reborn-2"
+    },
+    {
+      "name": "OrdenOfChaos",
+      "source": "reborn-2"
+    },
+    {
+      "name": "OrzelBialy",
+      "source": "reborn-2"
+    },
+    {
+      "name": "OverDose",
+      "source": "reborn-10"
+    },
+    {
+      "name": "PartyBoomers",
+      "source": "reborn-4"
+    },
+    {
+      "name": "PasSympa",
+      "source": "reborn-1"
+    },
+    {
+      "name": "Pirateking",
+      "source": "reborn-5"
+    },
+    {
+      "name": "PixelKnights",
+      "source": "reborn-2"
+    },
+    {
+      "name": "Praetorian",
+      "source": "reborn-1"
+    },
+    {
+      "name": "PublicEnemy",
+      "source": "reborn-1"
+    },
+    {
+      "name": "QUESTIONMARK",
+      "source": "reborn-4"
+    },
+    {
+      "name": "RandomKnights",
+      "source": "reborn-4"
+    },
+    {
+      "name": "RedAngels",
+      "source": "reborn-4"
+    },
+    {
+      "name": "Reinforces",
+      "source": "reborn-6"
+    },
+    {
+      "name": "Reknown",
+      "source": "reborn-1"
+    },
+    {
+      "name": "Resistance",
+      "source": "reborn-2"
+    },
+    {
+      "name": "ResoluteTeam",
+      "source": "reborn-3"
+    },
+    {
+      "name": "ReUnion",
+      "source": "reborn-1"
+    },
+    {
+      "name": "Revengers",
+      "source": "reborn-4"
+    },
+    {
+      "name": "Revolution",
+      "source": "reborn-2"
+    },
+    {
+      "name": "Rhapsody",
+      "source": "reborn-9"
+    },
+    {
+      "name": "Rise",
+      "source": "reborn-2"
+    },
+    {
+      "name": "RoyalPlayers",
+      "source": "reborn-2"
+    },
+    {
+      "name": "Rush",
+      "source": "reborn-3"
+    },
+    {
+      "name": "Ruthless",
+      "source": "reborn-2"
+    },
+    {
+      "name": "SamiSwoi",
+      "source": "reborn-5"
+    },
+    {
+      "name": "Selbstjustiz",
+      "source": "reborn-2"
+    },
+    {
+      "name": "ShineEternal",
+      "source": "reborn-1"
+    },
+    {
+      "name": "ShootingStarS",
+      "source": "reborn-1"
+    },
+    {
+      "name": "ShrimpBoat",
+      "source": "reborn-5"
+    },
+    {
+      "name": "Skydas",
+      "source": "reborn-1"
+    },
+    {
+      "name": "Smurfs",
+      "source": "reborn-2"
+    },
+    {
+      "name": "Snowballerz",
+      "source": "reborn-4"
+    },
+    {
+      "name": "SpartanLaw",
+      "source": "reborn-3"
+    },
+    {
+      "name": "SpotTaken",
+      "source": "reborn-1"
+    },
+    {
+      "name": "Starborne",
+      "source": "reborn-6"
+    },
+    {
+      "name": "StarlightBrigade",
+      "source": "reborn-4"
+    },
+    {
+      "name": "StreetFighters",
+      "source": "reborn-2"
+    },
+    {
+      "name": "StrongHold",
+      "source": "reborn-2"
+    },
+    {
+      "name": "Syndicate",
+      "source": "reborn-4"
+    },
+    {
+      "name": "SystemOfADown",
+      "source": "reborn-2"
+    },
+    {
+      "name": "TerrorNoturno",
+      "source": "reborn-2"
+    },
+    {
+      "name": "TheCriticalError",
+      "source": "reborn-3"
+    },
+    {
+      "name": "TheGreatWall",
+      "source": "reborn-5"
+    },
+    {
+      "name": "TheGuardianS",
+      "source": "reborn-5"
+    },
+    {
+      "name": "ToNearestVillage",
+      "source": "reborn-1"
+    },
+    {
+      "name": "Tormented",
+      "source": "reborn-6"
+    },
+    {
+      "name": "ToxicForce",
+      "source": "reborn-4"
+    },
+    {
+      "name": "TropaDeElite",
+      "source": "reborn-1"
+    },
+    {
+      "name": "TropaFantasma",
+      "source": "reborn-4"
+    },
+    {
+      "name": "Unknown",
+      "source": "reborn-1"
+    },
+    {
+      "name": "Valhalla",
+      "source": "reborn-2"
+    },
+    {
+      "name": "Vertex",
+      "source": "reborn-9"
+    },
+    {
+      "name": "VisioN",
+      "source": "reborn-2"
+    },
+    {
+      "name": "Void",
+      "source": "reborn-1"
+    },
+    {
+      "name": "VORTEX",
+      "source": "reborn-3"
+    },
+    {
+      "name": "WarAndHate",
+      "source": "reborn-2"
+    },
+    {
+      "name": "WestsideRiders",
+      "source": "reborn-4"
+    },
+    {
+      "name": "Wolfpack",
+      "source": "reborn-5"
+    },
+    {
+      "name": "WhiteRavens",
+      "source": "reborn-1"
+    },
+    {
+      "name": "HEX",
+      "source": "reborn-1"
+    },
+    {
+      "name": "GENESIS",
+      "source": "ncsoft-bartz"
+    },
+    {
+      "name": "HarryPotter",
+      "source": "ncsoft-bartz",
+      "originalName": "Harry Potter"
+    }
+  ]
+}

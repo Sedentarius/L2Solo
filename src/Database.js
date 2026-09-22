@@ -5,6 +5,7 @@ const Statements = require('./DatabaseStatements');
 const CheckpointCoordinator = require('./DatabaseCheckpointCoordinator');
 const { XP_DIVIDER: KARMA_XP_DIVIDER } = require('./GameServer/Karma');
 const InteractionMemoryPolicy = require('./GameServer/Social/InteractionMemoryPolicy');
+const ClanNameCatalog = require('./GameServer/Clan/ClanNameCatalog');
 
 let connection;
 let queryTail = Promise.resolve();
@@ -1622,6 +1623,13 @@ function preserveColdVersionedStats(row, patch = {}) {
     if (Object.prototype.hasOwnProperty.call(next, 'statsJson')) {
         next.statsJson = preserveVersionedAppearanceStats(row?.statsJson, next.statsJson);
         const current = jsonObject(row?.statsJson), incoming = jsonObject(next.statsJson);
+        if (Number(current.nameGeneratorVersion || 0) > Number(incoming.nameGeneratorVersion || 0)) {
+            incoming.nameGeneratorVersion = current.nameGeneratorVersion;
+            next.statsJson = JSON.stringify(incoming);
+        }
+        if (Number(current.nameGeneratorVersion || 0) > 0 && 'characterName' in next) {
+            next.characterName = row.characterName;
+        }
         if (Number(current.clanMembershipVersion || 0) > Number(incoming.clanMembershipVersion || 0)) {
             for (const key of ['clanId', 'clanMembershipVersion', 'clanDiscipline', 'clanPartyObjective']) incoming[key] = current[key];
             if (Number(current.clanDiscipline?.clanId) > 0
@@ -5201,6 +5209,35 @@ const Database = {
                 row: coldSimulationRow(id), memorySnapshots: memory.snapshots };
         }, 'clan-social:expel'));
     },
+    migrateAutonomousClanNames({ dryRun = false } = {}) {
+        return inTransaction(() => {
+            const occupied = new Set(all('SELECT name FROM clans').map((row) => row.name.toLowerCase()));
+            const candidates = all(`SELECT c.id, c.name, c.leaderId, s.stateJson,
+                    leader.username, life.accountName, life.statsJson
+                FROM clans c
+                JOIN clan_simulation_clans s ON s.clanId = c.id AND s.mode = 'autonomous'
+                JOIN characters leader ON leader.id = c.leaderId
+                LEFT JOIN bot_life_state life ON life.characterId = leader.id
+                ORDER BY c.id`);
+            const renamed = [];
+            for (const clan of candidates) {
+                const state = jsonObject(clan.stateJson);
+                if (!generatedBotRow(clan) || !ClanNameCatalog.isLegacyName(clan.name)
+                    || Number(state.naming?.version || 0) >= ClanNameCatalog.VERSION) continue;
+                const entry = ClanNameCatalog.select(clan.id, occupied);
+                if (!entry) throw new Error('clan name catalog exhausted');
+                occupied.add(entry.name.toLowerCase());
+                const naming = { version: ClanNameCatalog.VERSION, source: entry.source, previousName: clan.name };
+                if (!dryRun) {
+                    write('UPDATE clans SET name = ? WHERE id = ?', [entry.name, clan.id]);
+                    write('UPDATE clan_simulation_clans SET stateJson = ? WHERE clanId = ?',
+                        [JSON.stringify({ ...state, naming }), clan.id]);
+                }
+                renamed.push({ clanId: clan.id, previousName: clan.name, name: entry.name, source: entry.source });
+            }
+            return { renamed };
+        }, 'clan-simulation:name-migration');
+    },
     createAutonomousClan({
         name,
         leaderId,
@@ -5213,7 +5250,7 @@ const Database = {
         const uniqueMemberIds = [...new Set(memberIds.map(Number).filter((id) => Number.isSafeInteger(id) && id > 0))]
             .sort((left, right) => left - right);
         return inTransaction(() => {
-            if (!String(name || '').trim() || !Number(leaderId) || uniqueMemberIds.length < Number(founderQuorum || 5)) {
+            if (!Number(leaderId) || uniqueMemberIds.length < Number(founderQuorum || 5)) {
                 return { ok: false, code: 'founder_no_quorum' };
             }
             if (!uniqueMemberIds.includes(Number(leaderId))) {
@@ -5247,7 +5284,12 @@ const Database = {
                 return { ok: false, code: 'founder_population_limit', population: Number(population.population), maxBotMembers: maxMembers };
             }
 
-            const inserted = write('INSERT INTO clans (name, leaderId) VALUES (?, ?)', [String(name).trim(), Number(leaderId)]);
+            const requestedName = String(name || '').trim();
+            const generatedName = requestedName ? null : ClanNameCatalog.select(leaderId,
+                all('SELECT name FROM clans').map((row) => row.name));
+            if (!requestedName && !generatedName) return { ok: false, code: 'name_pool_exhausted' };
+            const clanName = requestedName || generatedName.name;
+            const inserted = write('INSERT INTO clans (name, leaderId) VALUES (?, ?)', [clanName, Number(leaderId)]);
             const clanId = Number(inserted.insertId);
             const update = write(`UPDATE characters
                 SET clanId = ?,
@@ -5259,6 +5301,7 @@ const Database = {
 
             const timestamp = now();
             const state = simulationState(stateJson, clanId, leaderId, uniqueMemberIds, timestamp);
+            if (generatedName) state.naming = { version: ClanNameCatalog.VERSION, source: generatedName.source };
             write(`INSERT INTO clan_simulation_clans (clanId, version, mode, createdAt, updatedAt, stateJson)
                 VALUES (?, ?, 'autonomous', ?, ?, ?)`, [clanId, 1, timestamp, timestamp, JSON.stringify(state)]);
             write(`INSERT INTO clan_actions
@@ -6795,6 +6838,17 @@ const Database = {
     deleteMacroShortcuts(characterId, macroId) { return remove('shortcuts', 'characterId = ? AND kind = 4 AND id = ?', [characterId, macroId], 'shortcut:delete-macro'); },
     updateCharacterLocation(id, coords) { return withCharacterFlush(id, () => update('characters', { locX: coords.locX, locY: coords.locY, locZ: coords.locZ, head: coords.head ?? -1 }, 'id = ?', [id], 'character:location')); },
     updateCharacterName(id, name) { return withCharacterFlush(id, () => update('characters', { name }, 'id = ?', [id], 'character:name')); },
+    updateGeneratedBotName(id, name, version) {
+        const characterId = Number(id);
+        return withCharacterFlush(characterId, () => inTransaction(() => {
+            const character = write('UPDATE characters SET name = ? WHERE id = ?', [name, characterId]);
+            const life = write(`UPDATE bot_life_state SET characterName = ?,
+                statsJson = json_set(COALESCE(statsJson, '{}'), '$.nameGeneratorVersion', ?)
+                WHERE characterId = ?`, [name, version, characterId]);
+            if (character.affectedRows !== 1 || life.affectedRows !== 1) throw new Error(`generated name target missing for ${characterId}`);
+            return { ok: true, characterId, name, version };
+        }, 'bot-life:generated-name'));
+    },
     updateGeneratedBotAppearance(id, sex, appearanceVersion) {
         const characterId = Number(id);
         const normalizedSex = Number(sex) & 1;

@@ -680,6 +680,13 @@ function save(row) {
         return Promise.reject(error);
     }
     preserveVersionedAppearanceForSave(row);
+    const current = cache.get(Number(row.characterId));
+    const incomingStats = parseJson(row.statsJson, {});
+    if (Number(current?.stats?.nameGeneratorVersion || 0) > 0
+        && Number(current.stats.nameGeneratorVersion) >= Number(incomingStats.nameGeneratorVersion || 0)) {
+        row.characterName = current.name;
+        row.statsJson = safeJson({ ...incomingStats, nameGeneratorVersion: current.stats.nameGeneratorVersion });
+    }
     return Database.execute([
         `INSERT INTO ${TABLE} (
             characterId, accountName, characterName, level, exp, sp, adena, homeRegion, currentRegion,
@@ -3580,6 +3587,40 @@ const BotLifeState = {
         return tracked;
     },
 
+    acceptNameMetadata(characterId, name, version) {
+        const id = Number(characterId);
+        if (!cache.has(id)) return Promise.resolve(null);
+        const previous = pendingWrites.get(id) || Promise.resolve();
+        const next = previous.then(() => Database.updateGeneratedBotName(id, name, version)).then(() => {
+            const current = cache.get(id);
+            if (!current) return null;
+            const snapshot = { ...current, name, stats: { ...current.stats, nameGeneratorVersion: version } };
+            cache.set(id, snapshot);
+            const World = invoke('GameServer/World/World');
+            for (const session of World.user?.sessions || []) {
+                if (Number(session.actor?.fetchId?.()) !== id) continue;
+                session.actor.model.name = name;
+                session.name = name;
+                for (const key of ['coldLifeState', 'coldMarketState', 'coldCraftState']) {
+                    if (session[key]) session[key] = { ...session[key], name,
+                        stats: { ...session[key].stats, nameGeneratorVersion: version } };
+                }
+                if (session.actor.fetchIsOnline?.()) {
+                    const Response = invoke('GameServer/Network/Response');
+                    session.dataSendToMe?.(Response.userInfo(session.actor));
+                    session.dataSendToOthers?.(Response.charInfo(session.actor), session.actor);
+                }
+            }
+            invoke('GameServer/Clan/ClanService').renameMember(id, name);
+            if (snapshot.stats?.marketStore) invoke('GameServer/Bot/Economy/MarketOpportunity').indexColdStore(snapshot);
+            notifyColdSnapshot(snapshot, 'generated_name_migration', { critical: true });
+            return snapshot;
+        });
+        const tracked = next.finally(() => { if (pendingWrites.get(id) === tracked) pendingWrites.delete(id); });
+        pendingWrites.set(id, tracked);
+        return tracked;
+    },
+
     acceptAppearanceMetadata(characterId, sex, appearanceVersion) {
         const id = Number(characterId);
         if (!cache.has(id)) return Promise.resolve(null);
@@ -3636,6 +3677,11 @@ const BotLifeState = {
                 leaseUntil: Math.max(0, Number(result.leaseUntil || 0))
             }
         };
+        if (Number(current?.stats?.nameGeneratorVersion || 0) > 0
+            && Number(current.stats.nameGeneratorVersion) >= Number(next.stats?.nameGeneratorVersion || 0)) {
+            next.name = current.name;
+            next.stats = { ...next.stats, nameGeneratorVersion: current.stats.nameGeneratorVersion };
+        }
         cache.set(id, next);
         invoke('GameServer/Clan/ClanService').syncColdMember(next);
         return next;

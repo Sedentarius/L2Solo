@@ -86,6 +86,7 @@ function state(characterId, revision, activity = 'hunting') {
     };
     const queuedBeforeMigration = BotLifeState.upsertState(staleLifecycleState, 'appearance_race_before');
     const queuedMigration = BotLifeState.acceptAppearanceMetadata(characterId, 1, 2);
+    const queuedNameMigration = BotLifeState.acceptNameMetadata(characterId, 'NewOwnerNick', 3);
     const queuedAfterMigration = BotLifeState.upsertState({
         ...staleLifecycleState,
         stats: { ...staleLifecycleState.stats, lifecycleProbe: 'after' }
@@ -93,7 +94,8 @@ function state(characterId, revision, activity = 'hunting') {
     const [, migratedLifecycle, savedAfterMigration] = await Promise.all([
         queuedBeforeMigration,
         queuedMigration,
-        queuedAfterMigration
+        queuedAfterMigration,
+        queuedNameMigration
     ]);
     assert.strictEqual(migratedLifecycle.stats.appearanceVersion, 2,
         'appearance migration must run in the per-character lifecycle write chain');
@@ -101,6 +103,8 @@ function state(characterId, revision, activity = 'hunting') {
         'a stale queued lifecycle state must not erase newer appearance metadata');
     assert.strictEqual(savedAfterMigration.stats.sex, 1,
         'a stale queued lifecycle state must retain the sex paired with the newer appearance version');
+    assert.strictEqual(savedAfterMigration.name, 'NewOwnerNick', 'delayed lifecycle saves retain the migrated name');
+    assert.strictEqual(savedAfterMigration.stats.nameGeneratorVersion, 3);
     assert.strictEqual(savedAfterMigration.stats.lifecycleProbe, 'after',
         'appearance protection must preserve unrelated lifecycle changes');
     const lifecycleStats = JSON.parse((await Database.execute([
@@ -174,6 +178,8 @@ function state(characterId, revision, activity = 'hunting') {
     const committedStats = JSON.parse((await Database.execute([
         'SELECT statsJson FROM bot_life_state WHERE characterId = ?', [characterId]
     ]))[0].statsJson);
+    assert.strictEqual(committedStats.nameGeneratorVersion, 3, 'worker patches must preserve the name migration version');
+    assert.strictEqual(BotLifeState.cachedState(characterId).name, 'NewOwnerNick');
     assert.strictEqual(committedStats.appearanceVersion, 2,
         'a stale cold snapshot must not erase a newer appearance migration version');
     assert.strictEqual(committedStats.sex, 1,
@@ -183,6 +189,7 @@ function state(characterId, revision, activity = 'hunting') {
     assert.strictEqual(BotLifeState.cachedState(characterId).stats.appearanceVersion, 2,
         'the main cache must reflect the protected stats returned by the database gateway');
     const committedCharacter = (await Database.fetchCharacters('owner_probe'))[0];
+    assert.strictEqual(committedCharacter.name, 'NewOwnerNick');
     assert.strictEqual(Number(committedCharacter.sex), 1,
         'the same migration transaction must update the physical character appearance');
 
