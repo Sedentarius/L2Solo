@@ -338,6 +338,7 @@ const tests = [
     'tests/test_bot_travel_realism.js',
     'tests/test_companion_equipment_shopping.js',
     'tests/test_companion_dual_sword_crafting.js',
+    'tests/test_companion_identity.js',
     'tests/test_town_npc_routing.js',
     'tests/test_town_npc_approach.js',
     'tests/test_town_gate_routing.js',

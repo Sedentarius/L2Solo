@@ -790,6 +790,19 @@ CREATE TABLE IF NOT EXISTS bot_interaction_memory (
     updatedAt INTEGER NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS companion_identities (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    identityKey TEXT NOT NULL COLLATE NOCASE UNIQUE,
+    accountName TEXT NOT NULL COLLATE NOCASE UNIQUE REFERENCES accounts(username) ON DELETE CASCADE,
+    displayName TEXT NOT NULL DEFAULT '',
+    coreMember INTEGER NOT NULL DEFAULT 0 CHECK(coreMember IN (0, 1)),
+    profileKey TEXT NOT NULL DEFAULT '',
+    enabled INTEGER NOT NULL DEFAULT 1 CHECK(enabled IN (0, 1)),
+    createdAt INTEGER NOT NULL DEFAULT 0,
+    updatedAt INTEGER NOT NULL DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS companion_identities_core_enabled ON companion_identities(coreMember, enabled);
+
 INSERT OR IGNORE INTO sqlite_sequence(name, seq) VALUES ('characters', 1999999);
 UPDATE sqlite_sequence SET seq = MAX(seq, 1999999) WHERE name = 'characters';
 INSERT OR IGNORE INTO sqlite_sequence(name, seq) VALUES ('clans', 5999999);
