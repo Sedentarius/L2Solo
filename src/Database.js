@@ -4919,9 +4919,12 @@ const Database = {
             const leaseUntil = timestamp + Math.max(1000, Math.floor(Number(leaseMs) || 120000));
             const recovery = write(`UPDATE clan_actions SET status = 'pending', leaseUntil = NULL, updatedAt = ?
                 WHERE status = 'running' AND leaseUntil IS NOT NULL AND leaseUntil <= ?`, [timestamp, timestamp]);
+            // One priority point per ready minute prevents fresh planning work
+            // from indefinitely starving supplies and progression actions.
             const pending = one(`SELECT * FROM clan_actions
                 WHERE status = 'pending' AND availableAt <= ?
-                ORDER BY priority DESC, availableAt ASC, id ASC LIMIT 1`, [timestamp]);
+                ORDER BY priority + CAST(MAX(0, ? - availableAt) / 60000 AS INTEGER) DESC,
+                    availableAt ASC, id ASC LIMIT 1`, [timestamp, timestamp]);
             if (!pending) {
                 return {
                     action: null,

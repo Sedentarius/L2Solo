@@ -407,7 +407,7 @@ function canResumeAffordableMarketPlan(state, timestamp = Date.now()) {
     if (state?.activity !== 'hunting'
         || plan?.status !== 'active'
         || plan?.strategy !== 'market'
-        || (targetSlot !== 7 && !requiredClanPurchase)
+        || (![7, 14].includes(targetSlot) && !requiredClanPurchase)
         || targetId <= 0
         || Number(state.stats?.marketRetryAfter || 0) > timestamp) return false;
 
@@ -703,6 +703,9 @@ async function commitPartyReview(party, members, timestamp) {
 function commitPartyMembership(party, members = [], event = null) {
     const selected = (members || []).filter(Boolean);
     if (!party || !selected.length) return Promise.resolve({ party: null, assigned: [], failed: selected });
+    if (require('./ClanEquipmentPartyPolicy').needsReview(party, selected, Date.now())) {
+        return Promise.resolve({ party: null, assigned: [], failed: selected, reason: 'clan_party_unsafe' });
+    }
 
     // Unit harnesses and startup fall back to the legacy composition API.
     // The live path below is one SQLite queue item and one bounded transaction.
@@ -774,6 +777,11 @@ async function releaseForClanHelp(state) {
 async function createAndCommitBackgroundParty(members = [], objectiveOverride = null) {
     const Capacity = require('./ClanPartyCapacity');
     const objective = objectiveOverride || members.map(partyObjectiveForState).find(Capacity.required);
+    const safety = require('./ClanEquipmentPartyPolicy');
+    if (safety.applies(objective)) {
+        members = members.filter(member => safety.allowed(member, objective));
+        if (members.length < partyLimitsForObjective(objective).minSize) return null;
+    }
     let release = partyAdmission.reserve(BackgroundPartyState.admitted(), Config);
     if (!release && Capacity.required(objective)) {
         const limits = partyLimitsForObjective(objective);
@@ -2512,6 +2520,7 @@ const PopulationService = {
                 const partyObjective = party.stats?.objective || null;
                 const nearby = candidates.filter((state) => (
                     !claimed.has(Number(state.characterId))
+                    && require('./ClanEquipmentPartyPolicy').allowed(state, partyObjective)
                     && (partyObjective
                         ? (partyObjectiveKeyForState(state) === partyObjectiveGroupingKey(partyObjective)
                             || partyObjectivesShareRoute(partyObjective, partyObjectiveForState(state))
@@ -3034,7 +3043,10 @@ const PopulationService = {
                 return dissolveBackgroundParty(party, reason, members.length);
             }
 
-            if (partySessionExpired(party, startedAt)) return commitPartyReview(party, members, startedAt);
+            if (partySessionExpired(party, startedAt)
+                || require('./ClanEquipmentPartyPolicy').needsReview(party, members, startedAt)) {
+                return commitPartyReview(party, members, startedAt);
+            }
 
             if (party.stats?.travel?.reason === 'party_spot_replan') {
                 const arrivalAt = Number(party.stats.travel.arrivalAt || 0);
@@ -3546,6 +3558,18 @@ const PopulationService = {
         const travelEvents = travellingState !== plannedState && travel?.stationId
             ? [CraftTelemetry.stationTravelEvent(plannedState, travel)]
             : [];
+        // Craft availability can change after the worker planned a hunt (for
+        // example, a clan warehouse handoff). Persist this transition directly;
+        // applying the earlier combat/travel result would overwrite the trip.
+        if (travellingState !== routedState) {
+            const craftTravel = { ...travellingState, timing: { ...travellingState.timing,
+                activityStartedAt: startedAt, nextResolveAt: travel.arrivalAt } };
+            return LifeState.upsertState(craftTravel, 'cold_craft_travel').then(async saved => {
+                if (!saved) return { ok: false, reason: 'state_write_rejected', state };
+                await LifeEvents.recordMany(state.characterId, [...planEvents, ...travelEvents]);
+                return { ok: true, state: saved, debug: { activity: 'craft_travel', fights: 0, wins: 0 } };
+            }).finally(() => Metrics.recordResolveDuration(Date.now() - startedAt));
+        }
         const selectedSpot = passiveActivity
             ? null
             : fallbackSpot || SpotProfiles.findForState(travellingState, {
@@ -3560,7 +3584,16 @@ const PopulationService = {
         if (!spot && !passiveActivity && effectiveState.activity !== 'traveling') {
             Metrics.recordSkippedResolve('missing_spot');
             Metrics.recordResolveDuration(Date.now() - startedAt);
-            return Promise.resolve({ ok: false, reason: 'missing_spot', state });
+            const retryAt = startedAt + 30000;
+            const waiting = { ...plannedState, activity: 'resting',
+                timing: { ...plannedState.timing, nextResolveAt: retryAt },
+                stats: { ...plannedState.stats, restUntil: retryAt,
+                    routeRecovery: { reason: 'missing_spot', at: startedAt,
+                        attempts: Number(state.stats?.routeRecovery?.attempts || 0) + 1 } } };
+            return LifeState.upsertState(waiting, 'missing_spot_recovery').then(saved => ({
+                ok: !!saved, reason: saved ? 'missing_spot_recovery' : 'state_write_rejected',
+                state: saved || state, debug: { fights: 0, wins: 0, reason: 'missing_spot' }
+            }));
         }
 
         const result = precomputedResult || BackgroundResolver.resolveSolo({
@@ -3669,9 +3702,22 @@ const PopulationService = {
         });
     },
 
-    executeWorkerLifecycleCommand(state, request = {}) {
+    async executeWorkerLifecycleCommand(state, request = {}) {
         if (!request.precomputedResult) {
             return Promise.resolve({ ok: false, reason: 'worker_result_required', state });
+        }
+        // Worker-owned recovery finishes before the main economy command.
+        // Reconsider a funded weapon purchase before applying another fight,
+        // which could immediately put the buyer back into recovery again.
+        if (!joinedBackgroundParty(state) && !state.stats?.pveEncounter && !state.stats?.pvpEncounter
+            && canResumeAffordableMarketPlan(state)) {
+            const goal = await GoalService.review(state);
+            const travel = GoalExecutor.beginMarketTravel(state, goal?.current);
+            if (travel) {
+                const saved = await LifeState.upsertState(travel, 'goal_market_travel_before_combat');
+                return { ok: !!saved, state: saved || state,
+                    reason: saved ? 'goal_market_travel' : 'state_write_rejected' };
+            }
         }
         return this.resolveColdState(state, request);
     },

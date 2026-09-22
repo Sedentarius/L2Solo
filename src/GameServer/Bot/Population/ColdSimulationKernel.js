@@ -922,7 +922,8 @@ class ColdSimulationKernel {
             }
 
             const rescuing = run.members.some(s => s.vitals?.hp <= 0);
-            if (!rescuing && BackgroundPartyLifecycle.sessionExpired(run.party, startedAt, this.partySession)) {
+            if (!rescuing && (BackgroundPartyLifecycle.sessionExpired(run.party, startedAt, this.partySession)
+                || require('./ClanEquipmentPartyPolicy').needsReview(run.party, run.members, startedAt))) {
                 const review = BackgroundPartyLifecycle.review(run.party, run.members, startedAt, {
                     ...this.partySession,
                     assessRelationship: this.interactionMemory.assess.bind(this.interactionMemory),

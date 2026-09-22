@@ -143,9 +143,12 @@ function workDone(actionType, result = {}) {
 
 function reviewDelayFor(actionType, goal, result = {}, ok = true, productive = workDone(actionType, result)) {
     if (!ok) return Config.actionRetryMs;
+    // Assigning a different item is not acquisition progress. Let the roster
+    // execute the assignment before another plan can replace it.
+    if (actionType === ACTION_TYPES.PLAN && goal?.type === 'equipment') return Config.equipmentReviewMs;
     if (productive) return 0;
     if (actionType === ACTION_TYPES.PLAN) {
-        return goal?.type === 'equipment' ? Config.equipmentReviewMs : Config.goalReviewMs;
+        return Config.goalReviewMs;
     }
     return Config.actionRetryMs;
 }

@@ -189,7 +189,7 @@ function planForMember(member, spots = [], warehouseRows = [], options = {}) {
             if (child) { componentRecipes[material.selfId] = child.recipeId; visit(child, seen); }
         }
     };
-    visit(recipes.resolveByRecipeId(plan.recipeId));
+    visit(Crafting.resolveRecipe(plan.recipeId));
     plan.craftProviders = providers;
     plan.componentRecipes = componentRecipes;
     return { ...plan, warehouseMaterials: Crafting.warehouseMaterials(plan, inventory, warehouseRows),

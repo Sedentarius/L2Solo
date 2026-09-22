@@ -441,8 +441,22 @@ const SpotProfiles = {
         const relocationCandidates = mustRelocate
             ? candidates.filter((profile) => profile.id !== currentSpot.id)
             : candidates;
-        const routeCandidates = (relocationCandidates.length ? relocationCandidates : candidates)
+        let routeCandidates = (relocationCandidates.length ? relocationCandidates : candidates)
             .filter((profile) => hasCapacityForStates(profile, capacityStates, occupancy, reservationOptions));
+        // A weak kit can make every camp near the character's level unsafe.
+        // Search easier ground using the same combat and capacity checks;
+        // otherwise a perfectly healthy bot repeats missing_spot forever.
+        if (!routeCandidates.length && !['party', 'duo'].includes(LevelingRoutes.modeForState(state, options))) {
+            const recoveryState = { ...state, stats: { ...state.stats, equipmentPlan: null } };
+            routeCandidates = profiles.filter(profile => profile.maxLevel >= targetLevel - 16
+                && profile.maxLevel < targetLevel - 4
+                && !excludedSpotIds.has(String(profile.id))
+                && hasCapacityForStates(profile, capacityStates, occupancy, reservationOptions)
+                && LevelingRoutes.isSpotAllowedForState(profile, recoveryState, routeOptions));
+            if (currentSpot && !mustRelocate && routeCandidates.some(profile => profile.id === currentSpot.id)) {
+                return LevelingRoutes.decorateSpot(currentSpot, currentMatch);
+            }
+        }
         const suitable = routeCandidates.filter((profile) => SpotService.isSuitable(profile, targetLevel, options));
         const guided = LevelingRoutes.bestSpot(suitable.length ? suitable : routeCandidates, state, routeOptions);
 

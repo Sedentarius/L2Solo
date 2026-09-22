@@ -69,6 +69,9 @@ function assess(party, members, timestamp, options = {}) {
         // fights already observed over the member's patience window.
         if (!marketPaused && noExperience) reason = 'party_no_experience';
         else if (!marketPaused && !reason && stalled) reason = 'party_no_progress';
+        if (!require('./ClanEquipmentPartyPolicy').allowed(member, party.stats?.objective, timestamp)) {
+            reason = 'clan_party_unsafe';
+        }
         const prior = previous.concerns?.[member.characterId];
         const since = prior?.reason === reason ? Number(prior.since) : timestamp;
         // Suspend a goal/conflict grace period while recovering instead of
@@ -77,7 +80,7 @@ function assess(party, members, timestamp, options = {}) {
             ...prior, since: Number(prior.since) + Math.max(0, timestamp - Number(previous.at || timestamp))
         };
         if (reason) concerns[member.characterId] = { reason, since };
-        const grace = ['party_no_progress', 'party_no_experience'].includes(reason) ? 0 : (2 + commitment * 4) * MINUTE;
+        const grace = ['party_no_progress', 'party_no_experience', 'clan_party_unsafe'].includes(reason) ? 0 : (2 + commitment * 4) * MINUTE;
         const leave = !!reason && timestamp - since >= grace;
         decisions.push({ characterId: member.characterId, leave,
             reason: reason || (paused ? 'party_recovering_or_travelling' : sameTarget || sharedClan ? 'party_shared_goal'

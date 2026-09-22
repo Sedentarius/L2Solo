@@ -210,6 +210,7 @@ const tests = [
     'tests/test_bot_death_respawn.js',
     'tests/test_bot_gear.js',
     'tests/test_bot_equipment_compatibility.js',
+    'tests/test_bot_progression_audit_regressions.js',
     'tests/test_bot_economy_pricing.js',
     'tests/test_static_merchant_pricing.js',
     'tests/test_bot_gear_acquisition.js',

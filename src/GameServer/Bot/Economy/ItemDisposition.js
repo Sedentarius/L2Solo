@@ -177,7 +177,7 @@ function reservedCraftAmounts(state) {
     const plan = state?.stats?.equipmentPlan;
     if (!['active', 'component_ready', 'ready_to_craft'].includes(plan?.status) || plan.strategy !== 'craft') return {};
     if (plan.clanGoal?.clanId && plan.recipeId) return Object.fromEntries(ClanCrafting.requirements(
-        C4RecipeItems.resolveByRecipeId(plan.recipeId), state.inventory, null, 1, plan.craftProviders, plan.componentRecipes));
+        ClanCrafting.resolveRecipe(plan.recipeId), state.inventory, null, 1, plan.craftProviders, plan.componentRecipes));
     const reserved = {};
     const reserve = (materials, multiplier = 1, visited = new Set()) => {
         for (const material of materials || []) {

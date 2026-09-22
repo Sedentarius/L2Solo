@@ -40,7 +40,7 @@ function releaseMember(state, timestamp = Date.now(), reason = 'party_session_ro
     const partyTravel = state.stats?.travel?.reason === 'party_spot_replan';
     const releasedFromObjective = [
         'party_session_rotation', 'clan_priority',
-        'party_min_size',
+        'party_min_size', 'clan_party_unsafe',
         'invalid_party_size',
         'party_membership_mismatch',
         'party_relationship_conflict', 'party_goals_diverged', 'party_no_progress', 'party_no_experience', 'party_review_min_size'
@@ -58,6 +58,7 @@ function releaseMember(state, timestamp = Date.now(), reason = 'party_session_ro
             ...(partyTravel ? { travel: null } : {}),
             backgroundPartyId: null,
             partyBreakReason: reason,
+            ...(reason === 'clan_party_unsafe' ? { clanPartyObjective: null } : {}),
             partyRequest: null
         },
         timing: releasedFromObjective

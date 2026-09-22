@@ -1,6 +1,5 @@
 const Crafting = require('./ClanCraftingPolicy');
 const CraftShops = invoke('GameServer/Bot/Economy/CraftShopService');
-const Recipes = invoke('GameServer/Items/C4RecipeItems');
 const Database = invoke('Database');
 const GearAcquisitionPlanner = invoke('GameServer/Bot/AI/GearAcquisitionPlanner');
 const LifeState = invoke('GameServer/Bot/Population/BotLifeState');
@@ -167,7 +166,10 @@ function planningMemberOrder(members = [], previousMemberId = 0, previousFulfill
 function equipmentRoster(clan, beneficiary, previousGoal = null, plan = null) {
     const beneficiaryId = memberId(beneficiary);
     if (plan && (!plan.next?.spotId || ['ready_to_craft', 'component_ready'].includes(plan.status))) return [beneficiaryId];
-    const memberIds = new Set((clan?.members || []).map(memberId).filter(Boolean));
+    const safety = require('../Bot/Population/ClanEquipmentPartyPolicy');
+    const objective = { ...plan?.next, clanOperation: 'equipment', clanId: clan.id };
+    const eligible = (clan?.members || []).filter(member => safety.allowed(member, objective));
+    const memberIds = new Set(eligible.map(memberId).filter(Boolean));
     const previousBeneficiaryId = number(previousGoal?.target?.memberId);
     const retained = (previousGoal?.assignedMemberIds || []).map(number)
         .filter((id) => memberIds.has(id));
@@ -179,15 +181,15 @@ function equipmentRoster(clan, beneficiary, previousGoal = null, plan = null) {
         && retained.length >= Math.max(2, number(Config.operationMinMembers, 5))
         && (!requiresSpoiler || retainedHasSpoiler)) return retained;
     const maxMembers = Math.max(2, Math.min(9, number(Config.operationMaxMembers, 9)));
-    const selected = GoalPolicy.operationMembers(clan?.members || [], maxMembers);
-    if (beneficiaryId && !selected.includes(beneficiaryId)) {
+    const selected = GoalPolicy.operationMembers(eligible, maxMembers);
+    if (beneficiaryId && memberIds.has(beneficiaryId) && !selected.includes(beneficiaryId)) {
         if (selected.length >= maxMembers) selected.pop();
         selected.unshift(beneficiaryId);
     }
     if (requiresSpoiler && !selected.some((id) => (
         ClanPolicy.rosterRole((clan?.members || []).find((member) => memberId(member) === id)) === 'spoiler'
     ))) {
-        const spoiler = (clan?.members || []).find((member) => (
+        const spoiler = eligible.find((member) => (
             member?.phase === 'cold' && !member?.partyId && ClanPolicy.rosterRole(member) === 'spoiler'
         ));
         const spoilerId = memberId(spoiler);
@@ -382,7 +384,7 @@ async function assignPartyObjective(member, clan, goal, plan, priority = 'prefer
         stats: {
             ...(current.stats || {}),
             clanId: number(clan.id),
-            clanMaterialDemand: Object.fromEntries(Crafting.requirements(Recipes.resolveByRecipeId(plan?.recipeId), {}, null, 1, plan?.craftProviders, plan?.componentRecipes)),
+            clanMaterialDemand: Object.fromEntries(Crafting.requirements(Crafting.resolveRecipe(plan?.recipeId), {}, null, 1, plan?.craftProviders, plan?.componentRecipes)),
             clanPartyObjective: nextObjective,
             partyRequest
         }
@@ -402,7 +404,7 @@ async function assignPlan(member, plan, clan, goal) {
     const handoff = await handoffWarehouseMaterials(current, plan, clan, goal);
     const currentState = handoff.state || current;
     if (handoff.results.some(result => !result.ok)) return { ok: false, code: 'warehouse_handoff_deferred', handoff };
-    plan = { ...plan, clanMaterialDemand: Object.fromEntries(Crafting.requirements(Recipes.resolveByRecipeId(plan.recipeId), {}, null, 1, plan.craftProviders, plan.componentRecipes)) };
+    plan = { ...plan, clanMaterialDemand: Object.fromEntries(Crafting.requirements(Crafting.resolveRecipe(plan.recipeId), {}, null, 1, plan.craftProviders, plan.componentRecipes)) };
 
     const currentPlan = currentState.stats?.equipmentPlan;
     if (currentPlan?.clanGoal?.clanId
