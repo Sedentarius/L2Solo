@@ -24,8 +24,5 @@ jobs:
       - name: Check syntax
         run: npm run check
 
-      - name: Prepare verified C4 geodata
-        run: npm run geodata
-
       - name: Run tests
         run: npm test

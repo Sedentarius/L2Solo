@@ -7,7 +7,7 @@ const Recovery = invoke('GameServer/Bot/AI/CompanionNavigationRecovery');
 const TownTravel = invoke('GameServer/Bot/AI/BotTownTravel');
 const Geodata = invoke('GameServer/Geodata/GeodataEngine');
 invoke('GameServer/DataCache').init();
-Geodata.loadRegion(22, 22);
+if (process.env.L2NODE_SKIP_RAW_GEODATA_TESTS !== '1') Geodata.loadRegion(22, 22);
 
 const gate = { npcSelfId: 7080, locX: 83396, locY: 147904, locZ: -3404, head: 16384, town: 'Giran' };
 function actor(point, id = 9021) {

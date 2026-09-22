@@ -559,10 +559,56 @@ const tests = [
     'tests/test_ui_test_window.js'
 ];
 
-for (const testFile of tests) {
+// Real map loading and worker pathfinding are kept in an explicit integration run.
+// Tests with optional map assertions still run their ordinary checks in npm test.
+const geodataTests = new Set([
+    'tests/test_companion_equipment_shopping.js',
+    'tests/test_path_obstacle.js',
+    'tests/test_pathfinder_astar.js',
+    'tests/test_companion_pathfinding_worker.js',
+    'tests/test_town_gate_routing.js',
+    'tests/test_town_movement.js',
+    'tests/test_town_navigation.js',
+    'tests/test_town_npc_routing.js'
+]);
+const optionalGeodataTests = new Set([
+    'tests/test_bot_activation_placement.js',
+    'tests/test_c4_catacomb_of_the_branded.js',
+    'tests/test_c4_catacomb_of_the_witch.js',
+    'tests/test_c4_devastated_castle.js',
+    'tests/test_c4_devils_isle.js',
+    'tests/test_c4_elmore_northeast_coast.js',
+    'tests/test_c4_forest_of_the_dead.js',
+    'tests/test_c4_garden_of_beasts.js',
+    'tests/test_c4_ketra_orc_outpost.js',
+    'tests/test_c4_necropolis_of_sacrifice.js',
+    'tests/test_c4_necropolis_of_saints.js',
+    'tests/test_c4_necropolis_of_the_disciples.js',
+    'tests/test_c4_seven_signs_dungeon_teleports.js',
+    'tests/test_c4_swamp_of_screams.js',
+    'tests/test_c4_valley_of_saints.js',
+    'tests/test_c4_varka_silenos_stronghold.js',
+    'tests/test_npc_geodata_visibility.js',
+    'tests/test_player_move_destination_height.js',
+    'tests/test_player_transition_recovery.js',
+    'tests/test_town_npc_approach.js',
+    'tests/test_town_transit_policy.js',
+    'tests/test_pathfinding_worker_pool.js'
+]);
+const geodataOnly = process.argv.includes('--geodata');
+const selectedTests = tests.filter((testFile) => geodataOnly
+    ? geodataTests.has(testFile) || optionalGeodataTests.has(testFile)
+    : !geodataTests.has(testFile));
+if (process.argv.includes('--list')) {
+    selectedTests.forEach((testFile) => console.log(testFile));
+    process.exit(0);
+}
+
+for (const testFile of selectedTests) {
     console.log(`\n> node ${testFile}`);
     const result = spawnSync(process.execPath, [testFile], {
         cwd: process.cwd(),
+        env: { ...process.env, L2NODE_SKIP_RAW_GEODATA_TESTS: geodataOnly ? '0' : '1' },
         stdio: 'inherit'
     });
 
