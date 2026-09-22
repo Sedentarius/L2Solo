@@ -1,4 +1,5 @@
 const { spawnSync } = require('child_process');
+const fs = require('fs');
 
 const tests = [
     'tests/test_bot_warehouse_craft_chain.js',
@@ -604,6 +605,7 @@ if (process.argv.includes('--list')) {
     process.exit(0);
 }
 
+fs.mkdirSync('tmp', { recursive: true });
 for (const testFile of selectedTests) {
     console.log(`\n> node ${testFile}`);
     const result = spawnSync(process.execPath, [testFile], {
