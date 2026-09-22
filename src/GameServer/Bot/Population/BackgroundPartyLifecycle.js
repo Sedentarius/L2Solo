@@ -1,3 +1,4 @@
+const AssemblyRecovery = require('./PartyAssemblyRecovery');
 const DEFAULT_SESSION_MAX_MS = 20 * 60 * 1000;
 const DEFAULT_SESSION_JITTER_MS = 5 * 60 * 1000;
 
@@ -24,6 +25,9 @@ function rotationExpiry(partyId, startedAt, options = {}) {
 }
 
 function sessionExpired(party, timestamp = Date.now(), options = {}) {
+    if (AssemblyRecovery.expired(party) && !party?.stats?.travel
+        && Number(party?.stats?.restUntil || 0) <= timestamp
+        && !require('./PartyMarketBreak').pending(party, timestamp).length) return true;
     const reviewAt = Number(party?.stats?.sessionReview?.nextAt || 0);
     if (reviewAt > 0) return timestamp >= reviewAt;
     const sessionExpiresAt = Number(party?.stats?.sessionExpiresAt || 0);
@@ -34,12 +38,12 @@ function sessionExpired(party, timestamp = Date.now(), options = {}) {
     return expiresAt > 0 && Number(timestamp) >= expiresAt;
 }
 
-function releaseMember(state, timestamp = Date.now(), reason = 'party_session_rotation') {
+function releaseMember(state, timestamp = Date.now(), reason = 'party_session_rotation', objective = null) {
     if (!state?.characterId) return state;
 
     const partyTravel = state.stats?.travel?.reason === 'party_spot_replan';
     const releasedFromObjective = [
-        'party_session_rotation', 'clan_priority',
+        AssemblyRecovery.REASON, 'party_session_rotation', 'clan_priority',
         'party_min_size', 'clan_party_unsafe',
         'invalid_party_size',
         'party_membership_mismatch',
@@ -59,7 +63,10 @@ function releaseMember(state, timestamp = Date.now(), reason = 'party_session_ro
             backgroundPartyId: null,
             partyBreakReason: reason,
             ...(reason === 'clan_party_unsafe' ? { clanPartyObjective: null } : {}),
-            partyRequest: null
+            partyRequest: reason === AssemblyRecovery.REASON
+                ? { ...(objective || {}), status: 'deferred', deferReason: reason,
+                    requestedAt: timestamp, deferredUntil: timestamp + AssemblyRecovery.RETRY_MS }
+                : null
         },
         timing: releasedFromObjective
             ? { ...(state.timing || {}), activityStartedAt: timestamp, nextResolveAt: timestamp + 30000 }
@@ -81,13 +88,14 @@ function review(party, members, timestamp, options = {}) {
         || (options.chooseLeader?.(retained) || retained[0])?.characterId || party.leaderId;
     const nextResolveAt = Math.max(timestamp + 1000, Number(party.nextResolveAt || 0));
     const states = members.map(s => leaving.has(s.characterId)
-        ? releaseMember(s, timestamp, leaving.get(s.characterId))
+        ? releaseMember(s, timestamp, leaving.get(s.characterId), party.stats?.objective)
         : { ...s, party: { ...s.party, leaderId }, stats: { ...s.stats, leaderId },
             timing: { ...s.timing, nextResolveAt } });
     const nextParty = { ...party, status: dissolved ? 'dissolved' : party.status || 'active',
         memberIds: retained.map(s => s.characterId), leaderId, nextResolveAt: dissolved ? null : nextResolveAt,
         roleCoverage: options.roleCoverage?.(retained) || party.roleCoverage,
-        stats: { ...party.stats, sessionReview: result.review, memberNames: retained.map(s => s.name),
+        stats: { ...party.stats, ...(result.assemblyRecovered ? { assemblyWait: null } : {}),
+            sessionReview: result.review, memberNames: retained.map(s => s.name),
             ...(dissolved ? { dissolvedAt: timestamp, partyBreakReason: 'party_review_min_size' } : {}) } };
     return { party: nextParty, states, leaving, decisions: result.decisions };
 }

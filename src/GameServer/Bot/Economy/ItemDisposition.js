@@ -72,9 +72,17 @@ function isRecipeItem(item, template = templateFor(item?.selfId)) {
             || String(item?.name || template?.template?.name || '').toLowerCase().startsWith('recipe'));
 }
 
+function isEquipmentItem(item, template) {
+    return [kindFor(item, template), template?.template?.kind || ''].some(value =>
+        value.startsWith('Weapon.') || value.startsWith('Armor.'));
+}
+
 function isSkillBookItem(item, template = templateFor(item?.selfId)) {
     const kind = kindFor(item, template);
     const name = String(item?.name || template?.template?.name || '').toLowerCase();
+    // Caster weapons such as Apprentice's Spellbook are equipment, even
+    // when a legacy inventory summary has lost its kind.
+    if (isEquipmentItem(item, template)) return false;
     return kind.startsWith('Other.Spellbook')
         || name.includes('spellbook')
         || /^amulet\b/.test(name);
@@ -90,6 +98,7 @@ function isBelowCGrade(item) {
 }
 
 function isNpcOnlyItem(item, template = templateFor(item?.selfId)) {
+    if (isEquipmentItem(item, template)) return false;
     const kind = kindFor(item, template);
     return NPC_ONLY_KINDS.some((prefix) => kind.startsWith(prefix))
         || isRecipeItem(item, template)
@@ -128,30 +137,23 @@ function inventorySlotCount(state = {}) {
     }, 0);
 }
 
-function npcOnlySlotCount(state = {}) {
-    return Object.values(state.inventory || {}).reduce((total, item) => {
-        if (!isNpcOnlyItem(item)) return total;
-        const amount = Math.max(0, Number(item?.amount || 0));
-        // NPC liquidation can leave a zero-amount summary entry behind while
-        // its old non-stackable instances are still present in the snapshot.
-        // Those instances are no longer inventory and must not retrigger town
-        // cleanup.
-        if (amount <= 0) return total;
-        if (Array.isArray(item?.instances)) return total + Math.min(amount, item.instances.length);
-        if (item?.stackable === false) return total + amount;
-        return total + 1;
+function liquidationSlotCount(state, predicate) {
+    // Share reservations, equipped-copy protection and trade eligibility with
+    // the sale path: cleanup must describe work the town visit can execute.
+    return saleCandidates(state, { unlimited: true }).reduce((total, item) => {
+        if (!predicate(item)) return total;
+        const source = state.inventory?.[item.selfId];
+        return total + (source?.stackable === false || Array.isArray(source?.instances)
+            ? item.count : 1);
     }, 0);
 }
 
+function npcOnlySlotCount(state = {}) {
+    return liquidationSlotCount(state, isNpcOnlyItem);
+}
+
 function skillBookSlotCount(state = {}) {
-    return Object.values(state.inventory || {}).reduce((total, item) => {
-        if (!isSkillBookItem(item)) return total;
-        const amount = Math.max(0, Number(item?.amount || 0));
-        if (amount <= 0) return total;
-        if (Array.isArray(item?.instances)) return total + Math.min(amount, item.instances.length);
-        if (item?.stackable === false) return total + amount;
-        return total + 1;
-    }, 0);
+    return liquidationSlotCount(state, isSkillBookItem);
 }
 
 function inventoryCleanupNeed(state = {}, options = {}) {

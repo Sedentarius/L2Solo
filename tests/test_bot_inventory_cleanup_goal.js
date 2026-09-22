@@ -12,7 +12,7 @@ const LifeState = invoke('GameServer/Bot/Population/BotLifeState');
 
 DataCache.init();
 
-const spellbook = DataCache.items.find((item) => /spellbook/i.test(item?.template?.name || ''));
+const spellbook = DataCache.items.find((item) => item?.template?.kind === 'Other.Spellbook');
 assert(spellbook, 'the datapack must contain a spellbook fixture');
 const dEnchantScroll = DataCache.items.find((item) => Number(item?.selfId) === 956);
 assert(dEnchantScroll?.template?.kind === 'Other.Scroll', 'the datapack must contain the D-grade armor enchant scroll fixture');
@@ -204,7 +204,8 @@ assert(npcFixtures.length >= 21, 'the datapack must contain enough recipe/spellb
 const skillBooks = DataCache.items.filter((item) => {
     const name = String(item?.template?.name || '').toLowerCase();
     const kind = String(item?.template?.kind || '');
-    return kind.startsWith('Other.Spellbook') || name.includes('spellbook') || /^amulet\b/.test(name);
+    return !kind.startsWith('Weapon.') && !kind.startsWith('Armor.')
+        && (kind.startsWith('Other.Spellbook') || name.includes('spellbook') || /^amulet\b/.test(name));
 });
 assert(skillBooks.length > 100, 'the datapack must expose the full C4 skill-book catalog');
 assert(skillBooks.every((item) => ItemDisposition.isNpcOnlyItem({
@@ -315,3 +316,28 @@ PopulationService.resolveColdState(state).then((rejected) => {
 }).finally(() => {
     LifeState.upsertState = originalUpsertState;
 });
+
+// Apprentice's Spellbook is a caster weapon, not a disposable skill book.
+const bookWeapon = DataCache.items.find(item => item.selfId === 99);
+assert.strictEqual(bookWeapon.template.kind, 'Weapon.Etc');
+for (const kind of ['Weapon.Etc', undefined, 'Other.Spellbook']) {
+    assert.strictEqual(ItemDisposition.isSkillBookItem({ selfId: 99, name: bookWeapon.template.name, kind }), false,
+        'the canonical equipment type must override a missing or stale summary kind');
+}
+const equippedBook = { selfId: 99, name: bookWeapon.template.name, kind: 'Weapon.Etc', amount: 1,
+    equipped: true, equippedCount: 1, equippedSlots: [7], slot: 7, stackable: false,
+    instances: [{ id: 99, equipped: true, slot: 7 }] };
+const bookHunter = { ...state, inventory: { 99: equippedBook }, stats: {
+    ...state.stats, equipment: [{ ...equippedBook, rank: 'none' }], marketSellRetryAfter: now + 60000
+} };
+assert.strictEqual(ItemDisposition.inventoryCleanupNeed(bookHunter, { now }), null);
+assert.deepStrictEqual(ItemDisposition.npcLiquidationCandidates(bookHunter), []);
+assert.strictEqual(NeedsEvaluator.evaluate(bookHunter, { now }).some(goal => goal.type === 'sell_inventory'), false,
+    'an equipped weapon must not interrupt hunting with forced cleanup');
+const spareBook = { ...bookHunter, inventory: { 99: { ...equippedBook, amount: 2,
+    instances: [...equippedBook.instances, { id: 100, equipped: false, slot: 7 }] } } };
+assert.strictEqual(ItemDisposition.skillBookSlotCount(spareBook), 0);
+assert.strictEqual(ItemDisposition.npcLiquidationCandidates(spareBook).find(item => item.selfId === 99)?.count, 1,
+    'a spare low-grade weapon remains ordinary sellable equipment');
+assert.strictEqual(ItemDisposition.isSkillBookItem({ selfId: 999999, name: 'Spellbook: Missing Kind' }), true);
+assert.strictEqual(ItemDisposition.isSkillBookItem({ selfId: 999999, name: 'Amulet: Missing Kind' }), true);

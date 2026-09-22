@@ -1,3 +1,4 @@
+const AssemblyRecovery = require('./PartyAssemblyRecovery');
 const MINUTE = 60000;
 const clamp = n => Math.max(0, Math.min(1, Number(n) || 0));
 const Rewards = require('../../Actor/PartyRewardMath');
@@ -20,6 +21,11 @@ function assess(party, members, timestamp, options = {}) {
     const profitable = (gained || progressAt > 0) && timestamp - noProgressSince < 2 * interval;
     const marketPaused = require('./PartyMarketBreak').pending(party, timestamp).length > 0;
     const paused = marketPaused || party.stats?.travel || Number(party.stats?.restUntil || 0) > timestamp;
+    const assemblyExpired = AssemblyRecovery.expired(party);
+    const understaffed = party.stats?.objective?.clanGoalKey
+        && members.length < Math.max(2, Number(party.stats.objective.minPartySize) || 3);
+    const assemblyRecovered = assemblyExpired && !understaffed
+        && require('./PartyHuntingAssembly').ready(party, members, { id: party.spotId });
     const target = Number(party.stats?.objective?.npcId || party.stats?.acquisitionGoal?.next?.npcId || 0);
     const concerns = {}, decisions = [], experience = {};
     const eligible = new Set(Rewards.validMemberIndexes(members.map(m => Number(m.level || 1))));
@@ -69,6 +75,7 @@ function assess(party, members, timestamp, options = {}) {
         // fights already observed over the member's patience window.
         if (!marketPaused && noExperience) reason = 'party_no_experience';
         else if (!marketPaused && !reason && stalled) reason = 'party_no_progress';
+        if (!paused && assemblyExpired && !assemblyRecovered) reason = AssemblyRecovery.REASON;
         if (!require('./ClanEquipmentPartyPolicy').allowed(member, party.stats?.objective, timestamp)) {
             reason = 'clan_party_unsafe';
         }
@@ -80,13 +87,13 @@ function assess(party, members, timestamp, options = {}) {
             ...prior, since: Number(prior.since) + Math.max(0, timestamp - Number(previous.at || timestamp))
         };
         if (reason) concerns[member.characterId] = { reason, since };
-        const grace = ['party_no_progress', 'party_no_experience', 'clan_party_unsafe'].includes(reason) ? 0 : (2 + commitment * 4) * MINUTE;
+        const grace = [AssemblyRecovery.REASON, 'party_no_progress', 'party_no_experience', 'clan_party_unsafe'].includes(reason) ? 0 : (2 + commitment * 4) * MINUTE;
         const leave = !!reason && timestamp - since >= grace;
         decisions.push({ characterId: member.characterId, leave,
             reason: reason || (paused ? 'party_recovering_or_travelling' : sameTarget || sharedClan ? 'party_shared_goal'
                 : friendly ? 'party_friends' : 'party_observing_progress'), memoryReady });
     }
-    return { decisions, review: { at: timestamp, nextAt, wins, fights, attemptsSinceProgress,
+    return { decisions, assemblyRecovered, review: { at: timestamp, nextAt, wins, fights, attemptsSinceProgress,
         noProgressSince, concerns, experience,
         decisions } };
 }

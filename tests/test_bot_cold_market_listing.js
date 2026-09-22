@@ -18,7 +18,7 @@ DataCache.init();
 const marketItem = DataCache.items.find((item) => (
     item?.etc?.rank === 'c' && item.template?.kind?.startsWith('Weapon.') && Number(item.template?.price || 0) > 1000
 ));
-const spellbook = DataCache.items.find((item) => /spellbook/i.test(item?.template?.name || ''));
+const spellbook = DataCache.items.find((item) => item?.template?.kind === 'Other.Spellbook');
 const equippedItem = DataCache.items.find((item) => (
     item !== marketItem && item?.etc?.rank === 'c' && Number(item.etc?.slot || 0) === Number(marketItem?.etc?.slot || 0)
 ));

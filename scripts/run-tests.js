@@ -53,6 +53,7 @@ const tests = [
     'tests/test_cold_competition_cadence.js',
     'tests/test_party_admission.js',
     'tests/test_party_session_review.js',
+    'tests/test_party_assembly_recovery.js',
     'tests/test_cold_competition_actions.js',
     'tests/test_cold_competition_retreat.js',
     'tests/test_hot_resource_competition.js',

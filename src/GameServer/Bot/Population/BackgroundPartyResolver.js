@@ -231,7 +231,8 @@ const BackgroundPartyResolver = {
                     materialize: { exp: 0, sp: 0, adena: 0, items: [] }, nextResolveAt
                 } })),
                 events: [], nextResolveAt,
-                partyPatch: { stats: { lastResolveAt: timestamp } },
+                partyPatch: { stats: { lastResolveAt: timestamp,
+                    assemblyWait: require('./PartyAssemblyRecovery').record(party, timestamp) } },
                 debug: { reason: understaffed ? 'clan_party_understaffed' : 'party_assembling', fights: 0, wins: 0, spotId: spot.id }
             };
         }
@@ -496,6 +497,7 @@ const BackgroundPartyResolver = {
                 risk: clamp(Number(party.risk || 0.25) + riskDelta, 0.05, 0.95),
                 stats: {
                     pveEncounter: pending,
+                    assemblyWait: null,
                     fightsResolved: Number(party.stats?.fightsResolved || 0) + fights,
                     fightsWon: Number(party.stats?.fightsWon || 0) + wins,
                     lastProgressAt: wins > 0 ? timestamp : Number(party.stats?.lastProgressAt || 0),
