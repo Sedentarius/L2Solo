@@ -128,7 +128,7 @@ const BotAvailability = {
         else if (!options.forceFriend && botSession.plan === 'merchant') reason = 'merchant_duty';
         else if (!options.forceFriend && botSession.partyCompanion === true && botSession.followPlayerSession) reason = 'already_grouped';
         else if (!options.forceFriend && result.memory.trust <= -6) reason = 'low_trust';
-        else if (!options.forceFriend && result.memory.recentlyAbandonedAt && Date.now() - result.memory.recentlyAbandonedAt < RECENT_ABANDON_MS) reason = 'recently_abandoned';
+        else if (!options.forceFriend && result.memory.recentlyAbandonedAt && (options.timestamp ?? Date.now()) - result.memory.recentlyAbandonedAt < RECENT_ABANDON_MS) reason = 'recently_abandoned';
         else if (!options.forceFriend && Math.abs(bot.fetchLevel() - player.fetchLevel()) > MAX_LEVEL_GAP) reason = 'level_gap_too_large';
 
         if (reason === 'available' && !result.clanmate && !options.forceFriend) {
@@ -163,7 +163,7 @@ const BotAvailability = {
         else if (state.activity === 'dead' || Number(state.vitals?.hp || 1) <= 0) reason = 'bot_dead';
         else if (!options.forceFriend && (state.activity === 'merchant' || state.activity === 'crafting')) reason = 'merchant_duty';
         else if (!options.forceFriend && result.memory.trust <= -6) reason = 'low_trust';
-        else if (!options.forceFriend && result.memory.recentlyAbandonedAt && Date.now() - result.memory.recentlyAbandonedAt < RECENT_ABANDON_MS) reason = 'recently_abandoned';
+        else if (!options.forceFriend && result.memory.recentlyAbandonedAt && (options.timestamp ?? Date.now()) - result.memory.recentlyAbandonedAt < RECENT_ABANDON_MS) reason = 'recently_abandoned';
         else if (!options.forceFriend && Math.abs(Number(state.level || 1) - player.fetchLevel()) > MAX_LEVEL_GAP) reason = 'level_gap_too_large';
 
         if (reason === 'available' && !result.clanmate && !options.forceFriend) {
