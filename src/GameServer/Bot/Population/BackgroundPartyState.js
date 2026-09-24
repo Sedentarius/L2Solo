@@ -74,6 +74,12 @@ function normalize(row) {
 }
 
 function rowFromParty(party) {
+    const current = cache.get(String(party.partyId))?.stats;
+    if (Number(current?.clanGoalInvalidationVersion || 0) > Number(party.stats?.clanGoalInvalidationVersion || 0)) {
+        party = { ...party, stats: { ...party.stats, objective: current.objective,
+            acquisitionGoal: current.acquisitionGoal, lastRequirementRefreshAt: current.lastRequirementRefreshAt,
+            clanGoalInvalidationVersion: current.clanGoalInvalidationVersion } };
+    }
     const leader = invoke('GameServer/Bot/Population/BotLifeState').cachedState?.(Number(party.leaderId));
     party = ClanMembershipPolicy.reconcileParty(party, leader?.stats?.clanId);
     const timestamp = now();
@@ -111,7 +117,9 @@ function save(row) {
             roleCoverageJson = excluded.roleCoverageJson,
             statsJson = excluded.statsJson,
             updatedAt = excluded.updatedAt
-        WHERE ${TABLE}.status <> 'hot'`,
+        WHERE ${TABLE}.status <> 'hot'
+          AND COALESCE(json_extract(${TABLE}.statsJson, '$.clanGoalInvalidationVersion'), 0)
+              <= COALESCE(json_extract(excluded.statsJson, '$.clanGoalInvalidationVersion'), 0)`,
         [
             row.partyId,
             row.leaderId,

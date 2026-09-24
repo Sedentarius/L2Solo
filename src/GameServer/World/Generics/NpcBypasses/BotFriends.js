@@ -14,12 +14,18 @@ function requestReasonText(reason) {
     }[reason] || 'the request was declined';
 }
 
-function render(session, mode = 'friends', currentPage = 0, notice = null) {
+function render(session, mode = 'friends', currentPage = 0, notice = null, options = {}) {
     const actor = session.actor;
     if (!actor) return;
+    session.botFriendsView = { mode: mode === 'add' ? 'add' : 'friends', page: Math.max(0, Math.floor(Number(currentPage) || 0)) };
+    if (session.nativeFriendsVersion === 1) {
+        if (options.open) session.nativeFriendsOpen = true;
+        return renderNative(session, options.open === true, notice?.message || '');
+    }
     const isAdd = mode === 'add';
     const loader = isAdd ? BotFriendship.listCandidates(session, currentPage) : BotFriendship.listFriends(session, currentPage);
-    Promise.all([loader, BotFriendship.selectedCount(session)]).then(([bots, selectedCount]) => {
+    return Promise.all([loader, BotFriendship.selectedCount(session)]).then(([bots, selectedCount]) => {
+        if (session.actor !== actor || session.nativeFriendsVersion === 1) return;
         let body = `${Html.font(isAdd ? 'Add Bot Friend' : 'Bot Friends', Html.COLOR.title)}<br1>`;
         body += Html.font(isAdd ? 'Bots who know you, sorted by trust.' : 'Friends can be called from anywhere. Mark up to 8 for your const party.', Html.COLOR.muted) + '<br>';
         if (notice?.message) {
@@ -51,6 +57,36 @@ function render(session, mode = 'friends', currentPage = 0, notice = null) {
     });
 }
 
+async function renderNative(session, open = false, message = '') {
+    if (!session.actor || !session.nativeFriendsOpen || session.nativeFriendsVersion !== 1) return;
+    const actor = session.actor;
+    const revision = session.nativeFriendsRevision = (session.nativeFriendsRevision || 0) + 1;
+    const view = { ...(session.botFriendsView || { mode: 'friends', page: 0 }) };
+    let result, selectedCount;
+    try {
+        [result, selectedCount] = await Promise.all([
+            BotFriendship.listWindowPage(session, view.mode, view.page), BotFriendship.selectedCount(session)
+        ]);
+        if (!result.rows.length && view.page > 0) {
+            view.page--;
+            result = await BotFriendship.listWindowPage(session, view.mode, view.page);
+        }
+    } catch (error) {
+        utils.infoWarn('BotFriends', 'native list failed: %s', error.message);
+        result = { rows: [], hasNext: false }; selectedCount = 0;
+        message = 'Could not load friends. Try Refresh.';
+    }
+    if (session.actor !== actor || !session.nativeFriendsOpen || session.nativeFriendsVersion !== 1 || session.nativeFriendsRevision !== revision) return;
+    session.botFriendsView = view;
+    session.nativeFriendsVisible = result.rows.map((bot) => ({ id: Number(bot.botId), name: bot.name }));
+    session.nativeFriendsHasNext = result.hasNext;
+    const Protocol = invoke('GameServer/World/Generics/NativeFriendsProtocol');
+    session.dataSendToMe(ServerResponse.npcHtml(actor.fetchId(), Protocol.encode({
+        ...view, open, hasNext: result.hasNext, selectedCount, threshold: BotFriendship.FRIEND_TRUST,
+        message
+    }, result.rows)));
+}
+
 function handler(session, parts) {
     const mode = parts[1] || 'friends';
     if (mode === 'request' && parts[2]) {
@@ -73,4 +109,6 @@ function handler(session, parts) {
     render(session, mode, parts[2]);
 }
 handler.render = render;
+handler.renderNative = renderNative;
+handler.requestReasonText = requestReasonText;
 module.exports = handler;

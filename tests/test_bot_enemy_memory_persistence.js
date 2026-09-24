@@ -5,6 +5,7 @@ const path = require('path');
 const { DatabaseSync } = require('node:sqlite');
 require('../src/Global');
 const Database = invoke('Database');
+const originalReconcileClanGoals = Database.reconcileBotClanGoals;
 const Life = invoke('GameServer/Bot/Population/BotLifeState');
 const Memory = invoke('GameServer/Bot/AI/BotEnemyMemory');
 const Owner = invoke('GameServer/Bot/Population/ColdSimulationOwner');
@@ -34,6 +35,7 @@ async function run() {
         Database.updateCharacterLocation = Database.updateCharacterExperience = Database.updateCharacterVitals = async () => {};
         Owner.recoverStartupLeases = async () => ({ affectedRows: 0 });
         Database.reconcileBotClanMembership = async () => ({ repairedMembers: 0, repairedParties: 0 });
+        Database.reconcileBotClanGoals = async () => ({ repairedMembers: 0, repairedParties: 0 });
         Coordinator.markDirty = () => {};
         assert(await Life.init());
         const state = await Life.upsertState({ characterId: 1, name: 'MemoryBot', accountName: 'bot_memory_test',
@@ -74,6 +76,7 @@ async function run() {
         Database.updateCharacterExperience = saved.experience; Database.updateCharacterVitals = saved.vitals;
         Owner.recoverStartupLeases = saved.recover; Coordinator.markDirty = saved.dirty;
         Database.reconcileBotClanMembership = saved.membership;
+        Database.reconcileBotClanGoals = originalReconcileClanGoals;
         db.close(); fs.rmSync(dir, { recursive: true, force: true });
     }
     console.log('Bot enemy memory SQLite persistence checks passed');

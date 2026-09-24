@@ -38,7 +38,7 @@ async function main() {
     };
     const merchant = {
         fetchId: () => 7200,
-        fetchName: () => 'Mira',
+        fetchName: () => 'IslandMats',
         fetchLocX: () => -84168,
         fetchLocY: () => 244729,
         fetchLocZ: () => -3730,
@@ -76,7 +76,7 @@ async function main() {
             workflowId: 'workflow-stock-reject',
             sourceType: 'configured_store',
             sourceId: 7200,
-            sourceName: 'Mira',
+            sourceName: 'IslandMats',
             itemId: 1864,
             amount: 3,
             unitPrice: 10
@@ -90,7 +90,7 @@ async function main() {
             workflowId: 'workflow-stock-ok',
             sourceType: 'configured_store',
             sourceId: 7200,
-            sourceName: 'Mira',
+            sourceName: 'IslandMats',
             itemId: 1864,
             amount: 1,
             unitPrice: 10

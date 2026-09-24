@@ -264,10 +264,11 @@ function suitable(item, state, role, requiredRank = gradeForLevel(state.level)) 
     return JEWEL_SLOTS.has(slot) && kind === 'Armor.Jewel';
 }
 
-// Existing Shamans may still own the previous caster kit. Do not let that
-// kit satisfy or outscore their new melee progression targets.
+// A profession change can leave a sword on a polearm fighter or a dagger on
+// an archer. Such a weapon must neither satisfy nor outscore the new kit.
 function ownedItemFitsBuild(item, role, classId) {
-    return Number(classId) !== 50 || suitable(item, { classId }, role, item.etc?.rank);
+    return !WEAPON_SLOTS.has(Number(item.etc?.slot)) && Number(classId) !== 50
+        || suitable(item, { classId }, role, item.etc?.rank);
 }
 
 function isSlotUpgrade(item, ownedItems, role, classId) {

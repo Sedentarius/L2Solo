@@ -3,6 +3,7 @@ const assert = require('assert');
 require('../src/Global');
 
 const Database = invoke('Database');
+const originalReconcileClanGoals = Database.reconcileBotClanGoals;
 const DataCache = invoke('GameServer/DataCache');
 const ColdSimulationOwner = invoke('GameServer/Bot/Population/ColdSimulationOwner');
 
@@ -71,6 +72,7 @@ Database.execute = ([sql, params]) => {
 Database.syncInventorySummary = () => Promise.resolve();
 ColdSimulationOwner.recoverStartupLeases = () => Promise.resolve({ affectedRows: 0 });
 Database.reconcileBotClanMembership = () => Promise.resolve({ repairedMembers: 0, repairedParties: 0 });
+Database.reconcileBotClanGoals = async () => ({ repairedMembers: 0, repairedParties: 0 });
 
 const BotLifeState = invoke('GameServer/Bot/Population/BotLifeState');
 
@@ -116,6 +118,7 @@ const BotLifeState = invoke('GameServer/Bot/Population/BotLifeState');
         Database.fetchItems = originalFetchItems;
         ColdSimulationOwner.recoverStartupLeases = originalRecoverStartupLeases;
         Database.reconcileBotClanMembership = originalReconcileClanMembership;
+        Database.reconcileBotClanGoals = originalReconcileClanGoals;
     }
 })().catch((error) => {
     console.error(error);

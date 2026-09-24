@@ -114,7 +114,7 @@ const targetId = Number(usefulWeapon.selfId);
 const buyer = {
     characterId: 20,
     name: 'Buyer',
-    adena: 100000,
+    adena: Math.max(100000, MarketListingPolicy.listingFloor(saleItem(usefulWeapon))),
     currentRegion: 'Gludio',
     stats: {
         equipmentPlan: {
@@ -132,6 +132,23 @@ assert.strictEqual(demand.fundedBots, 1);
 const demandedDecision = MarketListingPolicy.classify(seller, saleItem(usefulWeapon, 1, 9000), { states: [buyer], now });
 assert.strictEqual(demandedDecision.action, 'list', 'useful gear with an active buyer must enter WTS');
 assert.strictEqual(demandedDecision.listCount, 1, 'a seller must not list more units than buyers can fund now');
+
+const belowFloor = MarketListingPolicy.classify(seller, saleItem(usefulWeapon, 1, 1), {
+    states: [{ ...buyer, adena: MarketListingPolicy.listingFloor(saleItem(usefulWeapon)) - 1 }], now
+});
+assert.strictEqual(belowFloor.reason, 'unfunded_demand', 'funding must be checked at the actual ask, including its floor');
+
+const competitiveFloor = MarketListingPolicy.listingFloor(saleItem(usefulWeapon));
+const competingPrice = Math.floor(competitiveFloor * 1.25);
+const competingBuyer = { ...buyer, adena: Math.floor(competingPrice * 0.98) };
+const discounted = MarketListingPolicy.classify(seller, saleItem(usefulWeapon, 1, competitiveFloor * 1.5), {
+    states: [competingBuyer, { ...competingBuyer, characterId: 23 }, {
+        characterId: 24, activity: 'merchant', stats: { marketStore: {
+            storeType: 1, items: [{ selfId: targetId, count: 1, price: competingPrice }]
+        } }
+    }], now
+});
+assert.strictEqual(discounted.action, 'list', 'buyers who can fund the competitive ask must count even below the preferred ask');
 
 const unfundedBuyer = { ...buyer, characterId: 21, adena: 100 };
 const unfunded = MarketListingPolicy.classify(seller, saleItem(usefulWeapon, 1, 9000), { states: [unfundedBuyer], now });

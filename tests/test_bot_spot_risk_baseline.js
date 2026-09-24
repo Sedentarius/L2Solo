@@ -11,6 +11,7 @@ DataCache.init();
 
 const originals = {
     reconcileBotClanMembership: Database.reconcileBotClanMembership,
+    reconcileBotClanGoals: Database.reconcileBotClanGoals,
     execute: Database.execute,
     syncInventorySummary: Database.syncInventorySummary,
     updateCharacterLocation: Database.updateCharacterLocation,
@@ -20,6 +21,7 @@ const originals = {
 
 async function run() {
     Database.reconcileBotClanMembership = async () => ({ repairedMembers: 0, repairedParties: 0 });
+    Database.reconcileBotClanGoals = async () => ({ repairedMembers: 0, repairedParties: 0 });
     Database.execute = () => Promise.resolve([]);
     Database.syncInventorySummary = () => Promise.resolve();
     Database.updateCharacterLocation = () => Promise.resolve();

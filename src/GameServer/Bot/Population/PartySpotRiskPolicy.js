@@ -25,6 +25,9 @@ function withBackoff(party, value, timestamp) {
     return { ...party, stats: { ...party.stats, partySpotRisk: memory(party, next.stats) } };
 }
 function record(party, result, timestamp) {
+    if (result?.memberResults) result = { ...result, memberResults: result.memberResults.map(entry => ({
+        ...entry, result: require('./ClanEquipmentPartyPolicy').recordOutcome(entry.state, entry.result, party?.stats?.objective, timestamp)
+    })) };
     const fights = Number(result?.debug?.fights || 0);
     const deaths = Math.max(0, Number(result?.partyPatch?.stats?.deaths || 0) - Number(party?.stats?.deaths || 0));
     if (!party || !fights && !deaths) return result;

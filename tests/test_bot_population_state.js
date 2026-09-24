@@ -4,6 +4,7 @@ const { DatabaseSync } = require('node:sqlite');
 require('../src/Global');
 
 const Database = invoke('Database');
+const originalReconcileClanGoals = Database.reconcileBotClanGoals;
 const DataCache = invoke('GameServer/DataCache');
 const GearPlanner = invoke('GameServer/Bot/AI/GearAcquisitionPlanner');
 const BackgroundResolver = invoke('GameServer/Bot/Population/BackgroundResolver');
@@ -34,6 +35,7 @@ let marketCandidateRows = [];
 try {
     ColdSimulationOwner.recoverStartupLeases = () => Promise.resolve({ affectedRows: 0 });
     Database.reconcileBotClanMembership = () => Promise.resolve({ repairedMembers: 0, repairedParties: 0 });
+    Database.reconcileBotClanGoals = async () => ({ repairedMembers: 0, repairedParties: 0 });
     Database.execute = ([sql, params, queryOptions]) => {
         statements.push({ sql: String(sql), params, queryOptions });
         if (String(sql).startsWith('SELECT id, classId, level, exp, sp FROM characters')) {
@@ -536,6 +538,7 @@ try {
         Database.updateCharacterClassId = originalUpdateCharacterClassId;
         ColdSimulationOwner.recoverStartupLeases = originalRecoverStartupLeases;
         Database.reconcileBotClanMembership = originalReconcileClanMembership;
+        Database.reconcileBotClanGoals = originalReconcileClanGoals;
     });
 } catch (err) {
     Database.execute = originalExecute;
@@ -553,5 +556,6 @@ try {
     Database.updateCharacterClassId = originalUpdateCharacterClassId;
     ColdSimulationOwner.recoverStartupLeases = originalRecoverStartupLeases;
     Database.reconcileBotClanMembership = originalReconcileClanMembership;
+    Database.reconcileBotClanGoals = originalReconcileClanGoals;
     throw err;
 }

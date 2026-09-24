@@ -1,5 +1,6 @@
 // Shared by the planning worker and the runtime. No live-world dependencies.
 const Recipes = invoke('GameServer/Items/C4RecipeItems');
+const DualSwords = invoke('GameServer/Items/C4DualSwordCombinations');
 const DataCache = invoke('GameServer/DataCache');
 const ItemIndex = require('../Item/ItemTemplateIndex');
 
@@ -11,6 +12,7 @@ const RESOURCE_IDS = new Set([
 const isResource = (id) => RESOURCE_IDS.has(Number(id));
 const isSupplement = (id) => /^(Crystal:|Gemstone\s)/i.test(ItemIndex.find(DataCache.items, id)?.template?.name || '');
 const clanIdFor = (state) => Number(state?.clanId ?? state?.stats?.clanId ?? 0);
+const resolveRecipe = (id) => Recipes.resolveByRecipeId(id) || DualSwords.resolveByRecipeId(id);
 const isPersonalCraft = (state, plan = state?.stats?.equipmentPlan) => clanIdFor(state) > 0
     && plan?.strategy === 'craft' && Number(plan.clanGoal?.clanId) !== clanIdFor(state);
 
@@ -60,8 +62,16 @@ function requirements(recipe, inventory = {}, allowedRecipeIds = null, count = 1
 }
 
 function warehouseMaterials(plan, inventory, rows) {
-    const recipe = Recipes.resolveByRecipeId(plan?.recipeId);
-    const combined = stockInventory(inventory, rows);
+    const recipe = resolveRecipe(plan?.recipeId);
+    // Personal storage rows have no kind, and dual recipes also consume weapons.
+    // Count all available stock here; the recipe tree selects relevant items.
+    const combined = { ...inventory };
+    for (const row of rows) {
+        const id = Number(row.selfId);
+        const amount = Math.max(0, Number(row.amount || 0) - Number(row.reservedAmount || 0));
+        combined[id] = { ...(combined[id] || {}), selfId: id,
+            amount: Number(combined[id]?.amount || 0) + amount };
+    }
     const demand = recipe ? requirements(recipe, combined, null, 1, plan.craftProviders, plan.componentRecipes) : new Map((plan?.materials || []).map(m => [Number(m.selfId), Number(m.amount)]));
     const available = new Map();
     for (const row of rows) available.set(Number(row.selfId), (available.get(Number(row.selfId)) || 0)
@@ -71,4 +81,4 @@ function warehouseMaterials(plan, inventory, rows) {
     })).filter(item => item.amount > 0);
 }
 
-module.exports = { RESOURCE_IDS, isResource, isSupplement, clanIdFor, isPersonalCraft, stockInventory, requirements, warehouseMaterials };
+module.exports = { RESOURCE_IDS, isResource, isSupplement, clanIdFor, resolveRecipe, isPersonalCraft, stockInventory, requirements, warehouseMaterials };

@@ -211,6 +211,7 @@ function rankedNameMatches(candidates, query) {
 }
 
 function menu(session, minLevel = 1, maxLevel = 80, classId = null, nameQuery = '') {
+    if (session.nativeArenaVersion === 1) return invoke('GameServer/World/Generics/NpcBypasses/NativeArena').render(session);
     const query = searchText(nameQuery);
     const catalog = candidateCatalog(session, minLevel, maxLevel, classId);
     const candidates = (query ? rankedNameMatches(catalog, query) : catalog).slice(0, 32);
@@ -309,12 +310,12 @@ function canUseManager(session) {
         && managerDistanceSquared(session.actor) <= NPC_INTERACTION_DISTANCE * NPC_INTERACTION_DISTANCE;
 }
 
-function applyBuffMode(session, mode) {
+function applyBuffMode(session, mode, renderResult = true) {
     if (!active || active.playerSession !== session || active.state !== 'PREPARED'
         || active.enteredArena === true || !canUseManager(session)) return false;
     const selected = mode === 'full' ? 'full' : 'self';
     active.buffMode = selected;
-    menu(session);
+    if (renderResult) menu(session);
     return true;
 }
 
@@ -338,7 +339,8 @@ function classes(session) {
     session.dataSendToMe(ServerResponse.actionFailed());
 }
 
-async function select(session, sourceId) {
+async function select(session, sourceId, options = {}) {
+    const player = session.actor;
     // The source arena is one physical combat zone. Do not replace another
     // player's active clone (and leave their session orphaned) when a second
     // player clicks the NPC while the arena is occupied.
@@ -356,7 +358,7 @@ async function select(session, sourceId) {
         if (!source) return false;
         release(session, 'reselected');
         const snapshot = await makeSnapshot(source);
-        if (!snapshot) return false;
+        if (!snapshot || session.actor !== player || (options.validate && !options.validate())) return false;
 
         const botSession = new BotSession(`bot_arena_${session.actor.fetchId()}_${snapshot.sourceId}`);
         botSession.arenaEphemeral = true;
@@ -395,7 +397,7 @@ async function select(session, sourceId) {
         botSession.dataSendToOthers(ServerResponse.charInfo(botSession.actor), botSession.actor);
         botSession.dataSendToOthers(ServerResponse.relationChanged(botSession.actor), botSession.actor);
         ensureMonitor();
-        render(session);
+        if (options.renderResult !== false) render(session);
         return true;
     } finally {
         selectionInFlight = false;
@@ -567,7 +569,10 @@ function duelForActor(actor) {
     )) ? active : null;
 }
 
-function render(session) { menu(session); }
+function render(session) {
+    if (session.nativeArenaVersion === 1) return invoke('GameServer/World/Generics/NpcBypasses/NativeArena').render(session, true);
+    return menu(session);
+}
 
 function handleBypass(session, parts = []) {
     if (Number(session?.activeNpcTalk?.selfId) !== NPC_SELF_ID || !canUseManager(session)) {
@@ -616,5 +621,6 @@ module.exports = {
     duelForActor,
     get active() { return active; },
     isInside: Arena.isInside,
-    candidateCatalog
+    candidateCatalog,
+    canUseManager, applyBuffMode, className, candidateName, rankedNameMatches, searchText
 };

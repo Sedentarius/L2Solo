@@ -70,7 +70,7 @@ function policies(input = {}) {
                 `UPDATE clan_actions
                  SET payloadJson = '{}', resultJson = '{}'
                  WHERE id IN (
-                     SELECT id FROM clan_actions INDEXED BY clan_actions_terminal_retention
+                     SELECT id FROM clan_actions INDEXED BY clan_actions_uncompacted_details
                      WHERE status IN ('succeeded', 'failed', 'cancelled')
                        AND resolvedAt IS NOT NULL AND resolvedAt < ?
                        AND (payloadJson <> '{}' OR resultJson <> '{}')
@@ -85,7 +85,7 @@ function policies(input = {}) {
                 `UPDATE clan_goal_events
                  SET payloadJson = '{}'
                  WHERE id IN (
-                     SELECT id FROM clan_goal_events INDEXED BY clan_goal_events_action_retention
+                     SELECT id FROM clan_goal_events INDEXED BY clan_goal_events_uncompacted_details
                      WHERE eventType IN ('action_succeeded', 'action_failed', 'action_cancelled')
                        AND occurredAt < ? AND payloadJson <> '{}'
                      ORDER BY occurredAt, id LIMIT ?

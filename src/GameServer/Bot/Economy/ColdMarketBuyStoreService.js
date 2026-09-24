@@ -1,6 +1,6 @@
 const ItemTemplateIndex = require('../../Item/ItemTemplateIndex');
 const DataCache = invoke('GameServer/DataCache');
-const BotEconomyPricing = invoke('GameServer/Bot/Economy/BotEconomyPricing');
+const BotMarketPricing = invoke('GameServer/Bot/Economy/BotMarketPricing');
 const ItemDisposition = invoke('GameServer/Bot/Economy/ItemDisposition');
 const LifeState = invoke('GameServer/Bot/Population/BotLifeState');
 const GoalState = invoke('GameServer/Bot/Goals/GoalState');
@@ -31,12 +31,20 @@ function bidFor(state, goal) {
     const adena = Math.max(0, Number(state?.adena || 0));
     if (!selfId || !template || basePrice <= 0 || adena <= 0) return null;
 
-    const reserve = Math.max(100, Math.floor(adena * WALLET_RESERVE_PERCENT / 100));
+    const reserve = Math.max(100, Number(goal.plan?.reserve || 0), Math.floor(adena * WALLET_RESERVE_PERCENT / 100));
     const spendable = Math.max(0, adena - reserve);
-    const fairPrice = BotEconomyPricing.scalePrice(basePrice * 0.85);
-    const requestedPrice = Math.max(0, Number(goal.target.adena || goal.plan?.estimatedCost || 0));
+    const pricingItem = { selfId, basePrice };
+    const fairPrice = BotMarketPricing.priceAt(pricingItem, 0.85);
+    // Older generic equipment goals stored the unscaled template value as
+    // their budget. Revalue those estimates; keep concrete offer limits.
+    const legacyEstimate = goal.type === 'upgrade_gear' && !goal.plan?.priceSource
+        && !goal.plan?.marketTown && Number(goal.target.adena) === basePrice
+        && Number(goal.plan?.estimatedCost) === basePrice;
+    const referenceEstimate = goal.plan?.priceSource === 'reference' || legacyEstimate;
+    const requestedPrice = referenceEstimate ? fairPrice
+        : Math.max(0, Number(goal.target.adena || goal.plan?.estimatedCost || 0));
     const price = Math.floor(Math.min(fairPrice, requestedPrice || fairPrice, spendable));
-    if (price <= 0) return null;
+    if (price < BotMarketPricing.listingFloor(pricingItem)) return null;
 
     const requestedCount = goal.type === 'buy_craft_material'
         ? Math.max(1, Math.floor(Number(goal.target.amount) || 1))

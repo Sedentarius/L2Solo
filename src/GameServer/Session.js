@@ -176,6 +176,7 @@ class Session {
 
     setActor(properties) {
         // The connection survives returning to character selection.
+        invoke('GameServer/World/Generics/NativeUiSession').reset(this);
         this.questStates = new Map();
         this.questStatesLoaded = false;
         this.activeNpcTalk = null;
@@ -306,6 +307,7 @@ class Session {
     }
 
     error(err) {
+        invoke('GameServer/World/Generics/NativeUiSession').reset(this);
         if (err) {
             utils.infoWarn('GameServer', 'exception: ' + (err.stack || err.message || err));
             this.dumpPacketTrace();

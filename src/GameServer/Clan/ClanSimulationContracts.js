@@ -16,6 +16,7 @@ const REASON_CODES = Object.freeze({
     FOUNDER_EXISTING_CLAN: 'founder_existing_clan',
     FOUNDER_CLAN_LIMIT: 'founder_clan_limit',
     FOUNDER_POPULATION_LIMIT: 'founder_population_limit',
+    NAME_POOL_EXHAUSTED: 'name_pool_exhausted',
     JOIN_CLAN_FULL: 'join_clan_full',
     JOIN_POPULATION_LIMIT: 'join_population_limit',
     JOIN_UNSUITABLE: 'join_unsuitable',

@@ -1,7 +1,7 @@
 const DataCache = invoke('GameServer/DataCache');
 const ItemDisposition = invoke('GameServer/Bot/Economy/ItemDisposition');
 const MarketDemandIndex = invoke('GameServer/Bot/Economy/MarketDemandIndex');
-const BotEconomyPricing = invoke('GameServer/Bot/Economy/BotEconomyPricing');
+const BotMarketPricing = invoke('GameServer/Bot/Economy/BotMarketPricing');
 const ProgressionRates = invoke('GameServer/ProgressionRates');
 
 const MARKET_GEAR_MIN_BASE_PRICE = ItemDisposition.NPC_LIQUIDATION_MAX_UNIT_PRICE;
@@ -53,11 +53,16 @@ function classify(state, item, options = {}) {
         return { action: 'npc', reason: 'low_value_gear' };
     }
 
-    const market = MarketDemandIndex.snapshot(item.selfId, {
+    const marketOptions = {
         ...options,
-        unitPrice: Number(item.price || 0),
         excludeCharacterId: state.characterId
-    });
+    };
+    const supply = MarketDemandIndex.supplyFor(item.selfId, marketOptions);
+    const unitPrice = listingPrice(item, { market: { supply } }) ?? listingFloor(item);
+    const market = {
+        supply,
+        demand: MarketDemandIndex.demandFor(item.selfId, { ...marketOptions, unitPrice })
+    };
     if (market.demand.bots <= 0) {
         if (lowGradeGear) return { action: 'npc', reason: 'low_grade_no_funded_demand', market };
         return { action: 'warehouse', reason: 'no_demand', market };
@@ -85,6 +90,10 @@ function classify(state, item, options = {}) {
         && Number(item.basePrice || 0) >= SPECULATIVE_GEAR_MIN_BASE_PRICE
         && market.supply.units < SPECULATIVE_SUPPLY_LIMIT;
     if (speculative) {
+        const failed = state.stats?.marketPricing?.[Number(item.selfId)];
+        if (Number(failed?.speculativeFailedAt || 0) > 0) {
+            return { action: 'warehouse', reason: 'speculative_already_tried', market };
+        }
         return listOrWarehouse(item, {
             action: 'list',
             reason: 'speculative_demand',
@@ -101,13 +110,13 @@ function classify(state, item, options = {}) {
 function listingFloor(item) {
     const basePrice = Math.max(0, Number(item?.basePrice || 0));
     if (basePrice <= 0) return 1;
-    return BotEconomyPricing.scalePrice(basePrice * MIN_LISTING_BASE_PERCENT / 100);
+    return BotMarketPricing.listingFloor(item);
 }
 
 function listingPrice(item, decision) {
     const preferred = Math.max(1, Math.floor(Number(item.price || 0)));
     const minimum = listingFloor(item);
-    const competition = Number(decision?.market?.supply?.minimumPrice || Infinity);
+    const competition = Math.min(Number(decision?.market?.supply?.minimumPrice || Infinity), BotMarketPricing.npcPrice(item));
     if (!Number.isFinite(competition) || competition <= 0) return Math.max(minimum, preferred);
     const competitivePrice = Math.floor(competition * 0.98);
     if (minimum > competitivePrice) return null;

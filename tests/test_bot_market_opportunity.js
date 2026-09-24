@@ -41,14 +41,14 @@ try {
     assert(!MarketOpportunity.findOffers(2, { town: 'Giran' }).some((offer) => offer.sourceType === 'private_store'));
 
     playerStore.items[0].count = 1;
-    World.user.sessions[0].accountId = 'bot_mira';
-    World.user.sessions[0].actor.fetchName = () => 'Mira';
+    World.user.sessions[0].accountId = 'bot_islandmats';
+    World.user.sessions[0].actor.fetchName = () => 'IslandMats';
     assert.strictEqual(
         MarketOpportunity.findOffers(2, { town: 'Giran' }).find((offer) => offer.sourceType === 'private_store').sellerKind,
         'fixed',
         'configured liquidity merchants must not be counted as peer bots'
     );
-    World.user.sessions[0].name = 'Mira';
+    World.user.sessions[0].name = 'IslandMats';
     World.user.sessions[0].actor.fetchName = () => undefined;
     assert.strictEqual(
         MarketOpportunity.findOffers(2, { town: 'Giran' }).find((offer) => offer.sourceType === 'private_store').sellerKind,

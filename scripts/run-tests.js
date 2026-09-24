@@ -1,6 +1,13 @@
 const { spawnSync } = require('child_process');
+const fs = require('fs');
 
 const tests = [
+    'tests/test_bot_warehouse_craft_chain.js',
+    'tests/test_clan_goal_recovery.js',
+    'tests/test_market_store_settlement_history.js',
+    'tests/test_bot_market_destinations.js',
+    'tests/test_market_store_history.js',
+    'tests/test_bot_market_price_alignment.js',
     'tests/test_clan_hall_auctions.js',
     'tests/test_clan_hall_npc.js',
     'tests/test_clan_hall_bot_services.js',
@@ -47,6 +54,7 @@ const tests = [
     'tests/test_cold_competition_cadence.js',
     'tests/test_party_admission.js',
     'tests/test_party_session_review.js',
+    'tests/test_party_assembly_recovery.js',
     'tests/test_cold_competition_actions.js',
     'tests/test_cold_competition_retreat.js',
     'tests/test_hot_resource_competition.js',
@@ -210,6 +218,7 @@ const tests = [
     'tests/test_bot_death_respawn.js',
     'tests/test_bot_gear.js',
     'tests/test_bot_equipment_compatibility.js',
+    'tests/test_bot_progression_audit_regressions.js',
     'tests/test_bot_economy_pricing.js',
     'tests/test_static_merchant_pricing.js',
     'tests/test_bot_gear_acquisition.js',
@@ -219,6 +228,7 @@ const tests = [
     'tests/test_bot_class_progression.js',
     'tests/test_generated_cold_skills.js',
     'tests/test_generated_population_appearance.js',
+    'tests/test_bot_name_migration.js',
     'tests/test_population_seed_planner.js',
     'tests/test_spot_profile_state_priority.js',
     'tests/test_bot_hunting_ground_rules.js',
@@ -361,6 +371,7 @@ const tests = [
     'tests/test_player_managed_clan.js',
     'tests/test_clan_orders.js',
     'tests/test_clan_simulation_slice0.js',
+    'tests/test_clan_names.js',
     'tests/test_clan_simulation_slice1.js',
     'tests/test_clan_simulation_slice2.js',
     'tests/test_clan_simulation_slice3.js',
@@ -468,6 +479,17 @@ const tests = [
     'tests/test_pickup_c4_timing.js',
     'tests/test_npc_reward_non_stackable_amount.js',
     'tests/test_party_hud_throttle.js',
+    'tests/test_native_party_ui.js',
+    'tests/test_native_finder_ui.js',
+    'tests/test_native_friends_ui.js',
+    'tests/test_native_arena_ui.js',
+    'tests/test_native_status_ui.js',
+    'tests/test_native_drop_ui.js',
+    'tests/test_native_items_ui.js',
+    'tests/test_native_item_map.js',
+    'tests/test_native_menu.js',
+    'tests/test_native_item_requests.js',
+    'tests/test_native_ui_character_switch.js',
     'tests/test_party_pull_pause.js',
     'tests/test_party_revival.js',
     'tests/test_bot_status_bypass.js',
@@ -484,7 +506,6 @@ const tests = [
     'tests/test_death_experience_handoff.js',
     'tests/test_progression_review_regressions.js',
     'tests/test_knowledge_base_generator.js',
-
     // C4 level 1-20 quest runtime and content regressions.
     'tests/test_c4_inventory_validation.js',
     'tests/test_c4_declarative_quests.js',
@@ -557,10 +578,57 @@ const tests = [
     'tests/test_ui_test_window.js'
 ];
 
-for (const testFile of tests) {
+// Real map loading and worker pathfinding are kept in an explicit integration run.
+// Tests with optional map assertions still run their ordinary checks in npm test.
+const geodataTests = new Set([
+    'tests/test_companion_equipment_shopping.js',
+    'tests/test_path_obstacle.js',
+    'tests/test_pathfinder_astar.js',
+    'tests/test_companion_pathfinding_worker.js',
+    'tests/test_town_gate_routing.js',
+    'tests/test_town_movement.js',
+    'tests/test_town_navigation.js',
+    'tests/test_town_npc_routing.js'
+]);
+const optionalGeodataTests = new Set([
+    'tests/test_bot_activation_placement.js',
+    'tests/test_c4_catacomb_of_the_branded.js',
+    'tests/test_c4_catacomb_of_the_witch.js',
+    'tests/test_c4_devastated_castle.js',
+    'tests/test_c4_devils_isle.js',
+    'tests/test_c4_elmore_northeast_coast.js',
+    'tests/test_c4_forest_of_the_dead.js',
+    'tests/test_c4_garden_of_beasts.js',
+    'tests/test_c4_ketra_orc_outpost.js',
+    'tests/test_c4_necropolis_of_sacrifice.js',
+    'tests/test_c4_necropolis_of_saints.js',
+    'tests/test_c4_necropolis_of_the_disciples.js',
+    'tests/test_c4_seven_signs_dungeon_teleports.js',
+    'tests/test_c4_swamp_of_screams.js',
+    'tests/test_c4_valley_of_saints.js',
+    'tests/test_c4_varka_silenos_stronghold.js',
+    'tests/test_npc_geodata_visibility.js',
+    'tests/test_player_move_destination_height.js',
+    'tests/test_player_transition_recovery.js',
+    'tests/test_town_npc_approach.js',
+    'tests/test_town_transit_policy.js',
+    'tests/test_pathfinding_worker_pool.js'
+]);
+const geodataOnly = process.argv.includes('--geodata');
+const selectedTests = tests.filter((testFile) => geodataOnly
+    ? geodataTests.has(testFile) || optionalGeodataTests.has(testFile)
+    : !geodataTests.has(testFile));
+if (process.argv.includes('--list')) {
+    selectedTests.forEach((testFile) => console.log(testFile));
+    process.exit(0);
+}
+
+fs.mkdirSync('tmp', { recursive: true });
+for (const testFile of selectedTests) {
     console.log(`\n> node ${testFile}`);
     const result = spawnSync(process.execPath, [testFile], {
         cwd: process.cwd(),
+        env: { ...process.env, L2NODE_SKIP_RAW_GEODATA_TESTS: geodataOnly ? '0' : '1' },
         stdio: 'inherit'
     });
 

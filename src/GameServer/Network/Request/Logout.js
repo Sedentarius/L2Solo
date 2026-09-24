@@ -1,6 +1,7 @@
 const ServerResponse = invoke('GameServer/Network/Response');
 
 async function logout(session, buffer) {
+    invoke('GameServer/World/Generics/NativeUiSession').reset(session, { clearDirection: true });
 
     invoke('GameServer/World/ArenaDuelService').release(session, 'logout');
     await session.persistCharacterStatus?.();

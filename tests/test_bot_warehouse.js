@@ -85,6 +85,30 @@ async function run() {
     assert.strictEqual(result.state.inventory['1870'].amount, 0);
     assert.strictEqual(result.state.inventory['2'].amount, 0);
     assert.strictEqual(result.state.inventory['94'].amount, 0, 'duplicate non-stackable gear must be deposited from separate item rows');
+
+    const previousFetch = Database.fetchItems;
+    const mixed = {
+        ...state, inventory: { 94: {
+            selfId: 94, name: 'Bec de Corbin', kind: 'Weapon.Pole', rank: 'c', amount: 3,
+            equipped: true, equippedCount: 1, equippedSlots: [7], slot: 7,
+            instances: [
+                { id: 81, amount: 1, equipped: true, enchant: 0, slot: 7 },
+                { id: 82, amount: 1, equipped: false, enchant: 3, slot: 0 },
+                { id: 83, amount: 1, equipped: false, enchant: 0, slot: 0 }
+            ]
+        } }, stats: { equipmentPlan: { status: 'active', strategy: 'craft', materials: [{ selfId: 94, amount: 2 }] } }
+    };
+    Database.fetchItems = () => Promise.resolve(mixed.inventory[94].instances.map((item) => ({ ...item, selfId: 94 })));
+    const mixedCandidates = ItemDisposition.warehouseCandidates(mixed);
+    assert.strictEqual(mixedCandidates[0].amount, 1, 'equipped and craft-reserved copies must remain in inventory');
+    const mixedStored = await BotWarehouse.depositCold(mixed);
+    assert.strictEqual(mixedStored.count, 1);
+    assert.strictEqual(calls.at(-1).id, 82, 'only an unequipped physical instance may move');
+    assert.strictEqual(mixedStored.state.inventory[94].amount, 2, 'summary must retain both equipped and reserved copies');
+    assert.strictEqual(mixedStored.state.inventory[94].equipped, true);
+    assert.deepStrictEqual(mixedStored.state.inventory[94].instances.map((item) => item.id), [81, 83]);
+    assert.strictEqual(ItemDisposition.warehouseCandidates(mixedStored.state).length, 0, 'remaining reserved gear must not be deposited twice');
+    Database.fetchItems = previousFetch;
     assert.strictEqual(result.state.inventory['1'].amount, 1, 'low-level trash must remain available for NPC liquidation');
     assert.strictEqual(result.state.stats.lastWarehouseDeposit.items.length, 3);
     assert.strictEqual(BotWarehouse.retentionAmount({ ...usefulGear, amount: 4 }, 0), 2,

@@ -126,12 +126,22 @@ function consume(session, data) {
     }
 
     if (data.kind === 0) { // TODO: Remove, temp solution
+        if (String(data.text || '').trim().toLowerCase() === '.menu') {
+            invoke('GameServer/World/Generics/NpcBypasses/NativeMenu').open(session);
+            return;
+        }
         const ArenaDuelService = invoke('GameServer/World/ArenaDuelService');
         if (String(data.text || '').trim().toLowerCase() === '.go') {
             ArenaDuelService.handleGo(session, data.text);
             return;
         }
         const botCommandText = expandBotCommandAlias(data.text);
+
+        const itemsCommand = /^\.items(?:\s+(.*))?$/i.exec(String(data.text || '').trim());
+        if (itemsCommand) {
+            invoke('GameServer/World/Generics/NpcBypasses/NativeItems').open(session, itemsCommand[1] ?? null);
+            return;
+        }
 
         if (data.text === '.admin') {
             invoke(path.actor).adminPanel(session, session.actor);
@@ -165,7 +175,7 @@ function consume(session, data) {
         }
         if (botCommandText === '.bot' || data.text === '.companion') {
             const CompanionControl = invoke('GameServer/World/Generics/NpcBypasses/CompanionControl');
-            CompanionControl.render(session);
+            CompanionControl.render(session, 0, { open: true });
             return;
         }
         if (botCommandText === '.botparty') {
@@ -181,7 +191,7 @@ function consume(session, data) {
         }
         if (botCommandText === '.botfriends' || botCommandText.startsWith('.botfriends ')) {
             const BotFriends = invoke('GameServer/World/Generics/NpcBypasses/BotFriends');
-            BotFriends.render(session, botCommandText.includes(' add') ? 'add' : 'friends');
+            BotFriends.render(session, botCommandText.includes(' add') ? 'add' : 'friends', 0, null, { open: true });
             return;
         }
         if (/^(\/tell|\.tell|\/w|\.w)\s+/i.test(data.text)) {
@@ -256,4 +266,5 @@ function consume(session, data) {
 }
 
 module.exports = speak;
+module.exports.consume = consume;
 module.exports.expandBotCommandAlias = expandBotCommandAlias;

@@ -314,6 +314,8 @@ async function arenaLifecycleChecks() {
         }];
         Database.fetchSkills = async () => [];
         player.actor.setLocXYZH({ ...Arena.NPC, head: 0 });
+        assert.strictEqual(await ArenaDuelService.select(player, coldCharacterId, { renderResult: false, validate: () => false }), false);
+        assert.strictEqual(ArenaDuelService.active, null, 'expired native NPC authorization must not spawn a loaded clone');
         assert.strictEqual(await ArenaDuelService.select(player, coldCharacterId), true);
         assert(ArenaDuelService.active.bot.backpack.fetchItems().some((item) => (
             Number(item.fetchSelfId()) === Number(weaponDefinition.selfId)
